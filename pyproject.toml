@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "esmoe-toolkit"
+version = "0.0.1.dev0"
+description = "Drop-in ES-MoE module for Ultralytics YOLO: budget-fair, multi-seed vetted, aux-loss aware."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "AGPL-3.0-only" }
+authors = [{ name = "Leo Cheng" }]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3",
+]
+dependencies = ["torch>=1.8", "ultralytics"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"
+
+[tool.setuptools.packages.find]
+where = ["src"]
