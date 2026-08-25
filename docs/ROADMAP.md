@@ -32,3 +32,13 @@
 ## Sources
 
 ES-MoE 模块与 collect_aux_loss 迁自 YOLO-Master 的 #52 工作(本机 fork tencent-yolo-master);实验脚本见 yolomoe-ln/scripts。
+
+## 冲击优秀 实现框架(先 → 后 → 最后)
+
+一句话总纲:先做"可信最小闭环"(忠实 ES-MoE + 外部主干接入 + 非零 aux loss + 3-seed 预算公平复现锚点),再"产品化为三代兼容的一行接入插件"(pip/YAML 注入 + 兼容矩阵 + README/Colab),最后"发 PyPI 独立包 + 中英教程 + CI 复现包"并按社区反馈迭代。
+
+- 先(P0 保底):忠实港 ES-MoE 核心 → 注入外部 Ultralytics 主干 → collect_aux_loss 非零日志 + 路由梯度 → 一预算 3-seed 盲选复现 ES-MoE-N 锚点(2.68M/8.7G/42.7)+ on/off 消融留证。
+- 后(P1 预期):pip 安装 + 配置注入(YAML 直接引用 ESMoE)兼容 YOLOv8/YOLO11/YOLOv12 三代 → 兼容矩阵 + 一行接入 API + README/Colab。
+- 最后(P2 理想):发 PyPI 独立包 + 中英双语教程 + CI/语义化版本 + 冻结可复现包 → 按社区反馈迭代。
+
+差异化(冲优秀):预算公平的多 seed 证据(非单 seed 碰运气)、跨三代兼容矩阵、aux-loss 正确性(非零 + 梯度 + 对齐参照)、干净三函数 API、可复现 checkpoint/Colab、中英教程、AGPL 合规。

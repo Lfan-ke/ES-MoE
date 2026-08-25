@@ -1,3 +1,11 @@
+import torch
+
+from .module import ESMoE
+
+
 def collect_aux_loss(model):
-    # P0: aggregate per-layer router aux loss; the 8.24 gate wants a non-zero log for this.
-    raise NotImplementedError("P0: aggregate per-layer router aux loss")
+    total = None
+    for m in model.modules():
+        if isinstance(m, ESMoE):
+            total = m.aux_loss if total is None else total + m.aux_loss
+    return total if total is not None else torch.zeros(())
