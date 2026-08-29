@@ -4,9 +4,11 @@ Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It
 community "single-seed accuracy bump" into an installable module with budget-fair evidence and an
 auxiliary loss that provably reaches the optimiser.
 
+Docs: https://lfan-ke.github.io/esmoe-toolkit/
+
 ## Install
 
-    pip install -e .
+    pip install esmoe
 
 Requires a stock `ultralytics` install; nothing in the YOLO-Master fork is needed at runtime.
 

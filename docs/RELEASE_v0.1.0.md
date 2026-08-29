@@ -31,4 +31,4 @@ forward. One aux-loss setting per process. Full list in `limitations.md`.
 
 ## Install
 
-    pip install esmoe-toolkit
+    pip install esmoe

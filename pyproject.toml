@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "esmoe-toolkit"
+name = "esmoe"
 version = "0.1.0"
 description = "Drop-in ES-MoE module for Ultralytics YOLO: budget-fair, multi-seed vetted, aux-loss aware."
 readme = "README.md"
@@ -21,7 +21,7 @@ classifiers = [
 dependencies = ["torch>=1.8", "ultralytics"]
 
 [project.optional-dependencies]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff", "mkdocs-material"]
 
 [project.urls]
 Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"

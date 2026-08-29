@@ -1,0 +1,34 @@
+site_name: esmoe
+site_description: Drop-in ES-MoE block for Ultralytics YOLO - installable, budget-fair, aux-loss aware.
+repo_url: https://github.com/Lfan-ke/esmoe-toolkit
+edit_uri: blob/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle: { icon: material/weather-sunny, name: Light mode }
+  features:
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Overview: index.md
+  - Selection: SELECTION.md
+  - Limitations: limitations.md
+  - Baseline and increment: BASELINE.md
+  - Mid-term report: MIDTERM.md
+  - Release 0.1.0: RELEASE_v0.1.0.md
+  - Roadmap: ROADMAP.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: ['.']
