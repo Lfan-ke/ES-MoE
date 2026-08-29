@@ -3,7 +3,7 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ["docs/**", "mkdocs.yml", "limitations.md", ".github/workflows/docs.yml"]
+    paths: ["docs/**", "mkdocs.yml", "limitations.md", "pyproject.toml", ".github/workflows/docs.yml"]
   workflow_dispatch:
 
 permissions:
@@ -20,8 +20,9 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
+      - run: uv sync --group dev
       - name: Deploy to gh-pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          uv run --with mkdocs-material mkdocs gh-deploy --force
+          uv run mkdocs gh-deploy --force

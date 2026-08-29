@@ -16,8 +16,29 @@ theme:
     - navigation.sections
     - content.code.copy
 
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 中文
+          build: true
+          nav_translations:
+            Overview: 概览
+            Tutorial: 教程
+            Selection: 选型
+            Limitations: 已知局限
+            Baseline and increment: 基线与增量
+            Mid-term report: 中期报告
+
 nav:
   - Overview: index.md
+  - Tutorial: tutorial.md
   - Selection: SELECTION.md
   - Limitations: limitations.md
   - Baseline and increment: BASELINE.md
@@ -30,6 +51,15 @@ markdown_extensions:
   - admonition
   - tables
   - toc: { permalink: true }
-  - pymdownx.superfences
   - pymdownx.snippets:
       base_path: ['.']
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

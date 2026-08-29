@@ -10,7 +10,7 @@ Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It
 official `ultralytics` package instead of replacing it with a fork, and it ships budget-fair evidence
 plus an auxiliary loss that provably reaches the optimiser.
 
-Docs: https://lfan-ke.github.io/ES-MoE/ · Quick start in Colab: `notebooks/quickstart.ipynb` · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
+Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: `notebooks/quickstart.ipynb` · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
 
 ## Install
 
