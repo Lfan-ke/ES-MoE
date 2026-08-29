@@ -4,6 +4,9 @@ Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It
 official `ultralytics` package instead of replacing it with a fork, and it ships the evidence needed
 to judge whether the block is worth using.
 
+[Open the quick start in Colab](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
+- install, equip, train and watch the `esmoe_aux` column, all on a free GPU.
+
 ## Install
 
     pip install esmoe

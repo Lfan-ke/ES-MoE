@@ -1,10 +1,16 @@
 # esmoe
 
+[![PyPI](https://img.shields.io/pypi/v/esmoe.svg)](https://pypi.org/project/esmoe/)
+[![Docs](https://img.shields.io/badge/docs-mkdocs--material-blue)](https://lfan-ke.github.io/ES-MoE/)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Lfan-ke/ES-MoE)
+[![License](https://img.shields.io/badge/license-AGPL--3.0--only-green)](LICENSE)
+
 Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It installs beside the
 official `ultralytics` package instead of replacing it with a fork, and it ships budget-fair evidence
 plus an auxiliary loss that provably reaches the optimiser.
 
-Docs: https://lfan-ke.github.io/ES-MoE/
+Docs: https://lfan-ke.github.io/ES-MoE/ · Quick start in Colab: `notebooks/quickstart.ipynb` · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
 
 ## Install
 

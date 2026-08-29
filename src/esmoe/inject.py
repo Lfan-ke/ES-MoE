@@ -23,14 +23,22 @@ def inject_esmoe() -> type[ESMoE]:
 
 
 def equip(base: str = "yolov8n.yaml", *, weight: float = 0.01, out: str | None = None, **graft_kwargs):
-    """Register, graft, build and wire the aux loss in one call - the usual entry point."""
+    """Register, graft, build and wire the aux loss in one call - the usual entry point.
+
+    ``out`` names the grafted config to keep; without it the config still has to reach disk, because
+    a YOLO wrapper loads models by path, so it goes to a temporary directory.
+    """
+    import tempfile
+    from pathlib import Path
+
     from ultralytics import YOLO
 
     from .graft import graft
 
     inject_esmoe()
-    cfg = graft(base, out=out, **graft_kwargs)
-    return attach_aux_loss(YOLO(out or cfg), weight=weight)
+    target = Path(out) if out else Path(tempfile.mkdtemp(prefix="esmoe-")) / f"{Path(base).stem}-esmoe.yaml"
+    graft(base, out=str(target), **graft_kwargs)
+    return attach_aux_loss(YOLO(str(target)), weight=weight)
 
 
 def attach_aux_loss(model, weight: float = 0.01):

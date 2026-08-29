@@ -139,3 +139,8 @@ def test_equip_builds_a_wired_model(tmp_path):
     assert next(blocks(core), None) is not None
     assert core._esmoe_aux_weight == 0.02
     assert out.exists()
+
+
+def test_equip_without_an_output_path_still_builds():
+    core = equip("yolov8n.yaml", at=[4, 6]).model
+    assert len(list(blocks(core))) == 2

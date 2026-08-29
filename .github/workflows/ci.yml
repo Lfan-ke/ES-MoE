@@ -24,3 +24,22 @@ jobs:
           uv run ruff format --check .
       - name: Test
         run: uv run pytest -q
+
+  notebook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync --group dev
+      - name: Execute the quick start on CPU
+        run: |
+          uv run --with nbclient --with ipykernel --with nbformat --with pandas python - <<'PY'
+          import nbformat
+          from nbclient import NotebookClient
+
+          nb = nbformat.read("notebooks/quickstart.ipynb", as_version=4)
+          NotebookClient(nb, timeout=1800, kernel_name="python3").execute()
+          PY

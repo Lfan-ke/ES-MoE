@@ -7,3 +7,5 @@ build/
 dist/
 runs/
 *.pt
+datasets/
+*.ipynb_checkpoints/
