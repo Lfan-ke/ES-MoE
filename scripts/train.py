@@ -22,9 +22,10 @@ import esmoe
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Locked by the E1 task book: acceptance runs against the release tag, research against HEAD.
-YOLO_MASTER_RELEASE = "YOLO-Master-v26.08 @ 43d4011"
-YOLO_MASTER_HEAD = "57b9ea3"
+# Public baseline locked by the 2026-08-23 increment-acceptance rules: main at 2026-08-21
+# 23:59:59 (UTC+8). The v26.08 tag only documents the release the library version comes from.
+YOLO_MASTER_BASE_REF = "acce839c7e895d6b179de7f7093fa879e237cc7b"
+YOLO_MASTER_RELEASE = "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
 
 
 def git_ref():
@@ -116,8 +117,8 @@ def main():
             "toolkit": git_ref(),
             "toolkit_version": esmoe.__version__,
             "ultralytics": ultralytics.__version__,
+            "yolo_master_base_ref": YOLO_MASTER_BASE_REF,
             "yolo_master_release": YOLO_MASTER_RELEASE,
-            "yolo_master_head": YOLO_MASTER_HEAD,
         },
         "config": {
             "model_yaml": cfg,
