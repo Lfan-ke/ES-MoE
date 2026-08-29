@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmoe"
-version = "0.1.0"
+version = "0.1.1"
 description = "Drop-in ES-MoE block for Ultralytics YOLO: installable, budget-fair, aux-loss aware."
 readme = "README.md"
 requires-python = ">=3.10"
