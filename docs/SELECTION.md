@@ -31,6 +31,21 @@ locked baselines.
 | baseline | 0,1,2 | 0.0909 ± 0.0022 | 0.0405 ± 0.0013 | - | - |
 | esmoe-e4k2 | 0,1,2 | 0.0930 ± 0.0022 | 0.0410 ± 0.0013 | +0.0021 mAP50 | 3/3 |
 
+## Confirmation on the full dataset
+
+The selection above was made on a 25% subset. Rerunning the chosen arm against its baseline on the
+**full** VisDrone training set, same 20-epoch budget, three seeds:
+
+| arch | seeds | mAP50 | mAP50-95 | paired mean delta | wins |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| baseline | 0,1,2 | 0.1496 ± 0.0022 | 0.0759 ± 0.0016 | - | - |
+| esmoe-e4k2 | 0,1,2 | 0.1517 ± 0.0011 | 0.0778 ± 0.0005 | +0.0021 mAP50, +0.0019 mAP50-95 | 3/3 |
+
+Per-seed mAP50 deltas are +0.0001, +0.0032, +0.0029. The mean gain is the same as on the subset,
+and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so quadrupling the data
+did not wash the effect out. One seed is effectively a tie, which is the honest bound on how large
+the effect is: small, consistent in sign, not reliable per single run.
+
 ## Decision
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)` is the shipped default.

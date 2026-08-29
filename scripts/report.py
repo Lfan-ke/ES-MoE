@@ -19,10 +19,22 @@ def load():
 
 
 def variant(record):
-    cfg = record["config"]
-    if cfg["arch"] == "baseline":
-        return "baseline"
-    return f"esmoe-e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
+    """Label an arm by everything that has to match for a comparison to be fair.
+
+    Backbone, block config and budget all move the metric, so folding them into one label would
+    silently average across different experiments.
+    """
+    cfg, data, budget = record["config"], record["dataset"], record["budget"]
+    backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
+    block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
+    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}"
+
+
+def arm(record):
+    """The part of the label a baseline shares with the ESMoE arms it is compared against."""
+    cfg, data, budget = record["config"], record["dataset"], record["budget"]
+    backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
+    return backbone, budget["epochs"], data["fraction"], record["seed"]
 
 
 def spread(values):
@@ -39,14 +51,14 @@ def paired(runs, key):
     Mean ± std of two arms hides that both arms move together across seeds; the paired delta is
     what the budget-fair comparison actually licenses with three seeds.
     """
-    base = {r["seed"]: r["metrics"][key] for r in runs if variant(r) == "baseline" and key in r["metrics"]}
+    base = {arm(r): r["metrics"][key] for r in runs if r["config"]["arch"] == "baseline" and key in r["metrics"]}
     rows, deltas = [], defaultdict(list)
     for r in runs:
-        name = variant(r)
-        if name == "baseline" or r["seed"] not in base or key not in r["metrics"]:
+        name, key_arm = variant(r), arm(r)
+        if r["config"]["arch"] == "baseline" or key_arm not in base or key not in r["metrics"]:
             continue
-        delta = r["metrics"][key] - base[r["seed"]]
-        rows.append((name, r["seed"], base[r["seed"]], r["metrics"][key], delta))
+        delta = r["metrics"][key] - base[key_arm]
+        rows.append((name, r["seed"], base[key_arm], r["metrics"][key], delta))
         deltas[name].append(delta)
     return rows, deltas
 

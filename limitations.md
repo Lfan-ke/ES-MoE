@@ -4,7 +4,7 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 ## Benchmark scope
 
-- Numbers come from a **unified small benchmark**: VisDrone2019-DET at `fraction=0.25`, imgsz 640, trained from scratch (no pretrained weights). They are not COCO numbers and must not be read as a reproduction of the ES-MoE-N anchor (2.68M / 8.7 GFLOPs / 42.7 mAP), which is a COCO figure.
+- Numbers come from VisDrone2019-DET at imgsz 640, trained from scratch (no pretrained weights): a 25% subset for candidate selection, the full training set for confirmation. They are not COCO numbers and must not be read as a reproduction of the ES-MoE-N anchor (2.68M / 8.7 GFLOPs / 42.7 mAP), which is a COCO figure.
 - Short budgets (tens of epochs from scratch) sit far from convergence. A gap measured here bounds the ranking of two blocks under equal budget; it does not predict the converged gap.
 - One machine, one RTX 4090 D. No multi-GPU or DDP run has been made, so DDP-specific aux-loss behaviour is untested.
 
@@ -17,4 +17,5 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 ## Reporting
 
-- Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed.
+- Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed. On the full dataset one of the three seeds is effectively a tie (+0.0001 mAP50), so the effect is consistent in sign but not reliable within a single run.
+- The block costs about 5% wall-clock per epoch on top of the parameter increase (829 s against 790 s per full-data run on one RTX 4090 D).

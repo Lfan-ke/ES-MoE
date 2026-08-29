@@ -45,14 +45,21 @@ Established: the plug-in path works without patching Ultralytics; the aux loss r
 optimiser; the ranking of the candidate configurations at this budget; run-to-run determinism (a
 repeated identical run reproduced mAP50 exactly).
 
+Also established after the mid-term run: the gain survives a fourfold increase in training data.
+On the full VisDrone training set at the same 20-epoch budget the paired result is again 3/3 seeds
+and +0.0021 mAP50, with mAP50-95 improving from +0.0005 on the subset to +0.0019.
+
 Not established: whether the gain survives to convergence, on COCO, or at other model scales. The
 per-arm standard deviations overlap, so only the paired comparison carries the claim, and no
-significance test is claimed on three seeds. DDP behaviour of the aux term is untested.
+significance test is claimed on three seeds. One of the three full-data seeds is effectively a tie
+(+0.0001), so the effect is not reliable within a single run. DDP behaviour of the aux term is
+untested.
 
 ## 5. Next stage, risk triggers, collaboration
 
-- Next: Colab quick start; a longer-budget confirmation run; publish 0.1.0 to PyPI (blocked on an
-  API token, see below); English and Chinese tutorials.
+- Done since drafting: Colab quick start, full-dataset confirmation, PyPI releases 0.1.0 and 0.1.1,
+  documentation site, CI including a notebook execution check.
+- Next: English and Chinese tutorials; a longer schedule or a second backbone if GPU time allows.
 - Risk trigger: if a longer budget erases the paired gain, the deliverable stays a correctness and
   tooling contribution (aux-loss plumbing, compatibility matrix, budget-fair harness) and the
   accuracy claim is withdrawn rather than defended.
