@@ -31,7 +31,8 @@ visible in `results.csv` as a back-propagated number rather than a configuration
 | YOLO11 | yes | yes | yes |
 | YOLO12 | yes | yes | yes |
 
-Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132.
+Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, plus a real 1-epoch
+training run per generation logging a non-zero `train/esmoe_aux`.
 
 ## Evidence
 
