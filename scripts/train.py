@@ -7,17 +7,44 @@ written to results/<experiment_id>.json.
 
 import argparse
 import json
+import os
 import platform
+import subprocess
 import time
 from pathlib import Path
 
 import torch
+import ultralytics
 from ultralytics import YOLO
 from ultralytics.utils.torch_utils import get_num_params
 
 import esmoe
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# Locked by the E1 task book: acceptance runs against the release tag, research against HEAD.
+YOLO_MASTER_RELEASE = "YOLO-Master-v26.08 @ 43d4011"
+YOLO_MASTER_HEAD = "57b9ea3"
+
+
+def git_ref():
+    """Identify the exact toolkit revision a record came from.
+
+    A run launched from a copied tree has no git metadata, so the launcher can pass the revision
+    in ESMOE_GIT_REF rather than let the record claim a version it cannot prove.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if out.returncode == 0 and out.stdout.strip():
+            return out.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return os.environ.get("ESMOE_GIT_REF", "unversioned-copy")
 
 
 def build(args):
@@ -85,7 +112,13 @@ def main():
 
     record = {
         "experiment_id": experiment_id,
-        "git_ref": esmoe.__version__,
+        "git_ref": {
+            "toolkit": git_ref(),
+            "toolkit_version": esmoe.__version__,
+            "ultralytics": ultralytics.__version__,
+            "yolo_master_release": YOLO_MASTER_RELEASE,
+            "yolo_master_head": YOLO_MASTER_HEAD,
+        },
         "config": {
             "model_yaml": cfg,
             "arch": arch,

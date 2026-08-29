@@ -4,6 +4,15 @@ Budget: VisDrone2019-DET `fraction=0.25`, imgsz 640, 20 epochs from scratch, bat
 one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
 moves. Raw records are in `results/`, rendered by `scripts/report.py` into `results/summary.md`.
 
+## Provenance
+
+Locked baselines per the task book: acceptance `YOLO-Master-v26.08 @ 43d4011` (2026-08-08),
+research HEAD `57b9ea3` (2026-08-21). Both carry `ultralytics 8.4.101`, which is exactly the stock
+version this toolkit runs against, so the plug-in path is measured on the same library version as
+the acceptance baseline. Records produced before the toolkit started stamping its own revision
+carry `git_ref = "0.1.0"`; every later record stamps the commit, ultralytics version and both
+locked baselines.
+
 ## Candidates at seed 0
 
 | variant | experts | top_k | aux weight | params | mAP50 | delta vs baseline |
