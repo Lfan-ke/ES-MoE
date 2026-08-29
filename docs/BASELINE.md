@@ -10,7 +10,7 @@ take precedence over the task book wherever the two differ on baselines and incr
 | public BASE_REF | `acce839c7e895d6b179de7f7093fa879e237cc7b` (Tencent/YOLO-Master main at 2026-08-21 23:59:59 +0800) |
 | release the library version comes from | `YOLO-Master-v26.08` -> `43d40117c30811204fb9347efeabddce15f11a62` |
 | runtime dependency | stock `ultralytics==8.4.101`, the version both references carry |
-| deliverable | `Lfan-ke/esmoe-toolkit` |
+| deliverable | `Lfan-ke/ES-MoE` |
 | FINAL_REF | set at closing; current head is recorded in every run record under `git_ref.toolkit` |
 
 ## Why the usual diff command does not apply here

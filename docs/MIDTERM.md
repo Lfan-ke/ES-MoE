@@ -9,9 +9,9 @@ correctly wired load-balancing loss improves detection quality by a small but co
 
 ## 2. Commit, data, budget, control, commands
 
-- Toolkit: `Lfan-ke/esmoe-toolkit` @ `bf2ebe2`, version 0.1.0. Baselines locked per task book:
-  YOLO-Master-v26.08 @ 43d4011 (acceptance) and 57b9ea3 (research HEAD); the runtime dependency is
-  stock `ultralytics==8.4.101`.
+- Toolkit: `Lfan-ke/ES-MoE` @ `bf2ebe2`, version 0.1.0. Baselines locked per task book:
+  public BASE_REF `acce839c` (main at 2026-08-21 23:59:59) with release reference
+  `YOLO-Master-v26.08` -> `43d40117c`; the runtime dependency is stock `ultralytics` 8.4.101/8.4.132.
 - Data: VisDrone2019-DET, YOLO layout, `fraction=0.25`, imgsz 640, from scratch.
 - Budget: 20 epochs, batch 32, AMP on, one RTX 4090 D; every arm identical.
 - Control: same-seed baseline without the block; ablation arms differ only in `num_experts`,

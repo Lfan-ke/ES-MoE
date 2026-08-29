@@ -1,6 +1,6 @@
 site_name: esmoe
 site_description: Drop-in ES-MoE block for Ultralytics YOLO - installable, budget-fair, aux-loss aware.
-repo_url: https://github.com/Lfan-ke/esmoe-toolkit
+repo_url: https://github.com/Lfan-ke/ES-MoE
 edit_uri: blob/main/docs/
 
 theme:

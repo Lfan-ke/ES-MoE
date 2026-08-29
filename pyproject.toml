@@ -24,10 +24,10 @@ dependencies = ["torch>=2.0", "ultralytics>=8.3"]
 esmoe = "esmoe.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"
-Documentation = "https://lfan-ke.github.io/esmoe-toolkit/"
-Source = "https://github.com/Lfan-ke/esmoe-toolkit"
-Issues = "https://github.com/Lfan-ke/esmoe-toolkit/issues"
+Homepage = "https://github.com/Lfan-ke/ES-MoE"
+Documentation = "https://lfan-ke.github.io/ES-MoE/"
+Source = "https://github.com/Lfan-ke/ES-MoE"
+Issues = "https://github.com/Lfan-ke/ES-MoE/issues"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.9", "mkdocs-material>=9"]
