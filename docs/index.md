@@ -10,14 +10,15 @@ to judge whether the block is worth using.
 
 ## Use
 
-    from ultralytics import YOLO
     import esmoe
 
-    esmoe.inject_esmoe()                                   # make `ESMoE` resolvable in model.yaml
-    esmoe.graft("yolov8n.yaml", out="yolov8n-esmoe.yaml")  # append the block, renumber the head
-    model = YOLO("yolov8n-esmoe.yaml")
-    esmoe.attach_aux_loss(model, weight=0.01)              # router loss joins the training loss
+    model = esmoe.equip("yolo11n.yaml", weight=0.01)   # register + graft + build + wire
     model.train(data="coco8.yaml", epochs=10)
+
+The steps are also available on their own - `inject_esmoe()`, `graft(base, out=..., at=...)`,
+`attach_aux_loss(model, weight=...)` - and from the shell:
+
+    esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at backbone_end
 
 `attach_aux_loss` adds an `esmoe_aux` column to the trainer's loss table, so the auxiliary term is
 visible in `results.csv` as a back-propagated number rather than a configuration key.
@@ -30,7 +31,7 @@ visible in `results.csv` as a back-propagated number rather than a configuration
 | YOLO11 | yes | yes | yes |
 | YOLO12 | yes | yes | yes |
 
-Verified by `tests/test_ultralytics.py` against `ultralytics==8.4.101`.
+Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132.
 
 ## Evidence
 

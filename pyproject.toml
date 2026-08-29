@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "esmoe"
 version = "0.1.0"
-description = "Drop-in ES-MoE module for Ultralytics YOLO: budget-fair, multi-seed vetted, aux-loss aware."
+description = "Drop-in ES-MoE block for Ultralytics YOLO: installable, budget-fair, aux-loss aware."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
 authors = [{ name = "Leo Cheng" }]
 keywords = ["yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
@@ -18,22 +18,37 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-dependencies = ["torch>=1.8", "ultralytics"]
+dependencies = ["torch>=2.0", "ultralytics>=8.3"]
 
-[project.optional-dependencies]
-dev = ["pytest", "ruff", "mkdocs-material"]
+[project.scripts]
+esmoe = "esmoe.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"
+Documentation = "https://lfan-ke.github.io/esmoe-toolkit/"
 Source = "https://github.com/Lfan-ke/esmoe-toolkit"
 Issues = "https://github.com/Lfan-ke/esmoe-toolkit/issues"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.9", "mkdocs-material>=9"]
+
+# CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
+# installing esmoe never forces anyone onto a CPU build.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = ["E", "F", "I", "UP", "B", "SIM"]
