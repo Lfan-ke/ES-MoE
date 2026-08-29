@@ -30,7 +30,17 @@ Source = "https://github.com/Lfan-ke/ES-MoE"
 Issues = "https://github.com/Lfan-ke/ES-MoE/issues"
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.9", "mkdocs-material>=9", "nbclient>=0.10", "ipykernel>=6", "pandas>=2"]
+dev = [
+    "pytest>=8",
+    "ruff>=0.9",
+    "mkdocs-material>=9",
+    "nbclient>=0.10",
+    "ipykernel>=6",
+    "pandas>=2",
+    # ultralytics pulls torchvision transitively, but only a direct entry lets the CPU index below
+    # apply to it - a PyPI torchvision against a CPU torch loses torchvision::nms on Linux.
+    "torchvision",
+]
 
 # CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
 # installing esmoe never forces anyone onto a CPU build.
