@@ -1,0 +1,11 @@
+{
+  "python": "3.12.3",
+  "platform": "Linux-5.4.0-196-generic-x86_64-with-glibc2.39",
+  "torch": "2.6.0a0+ecf3bae40a.nv25.01",
+  "cuda": "12.8",
+  "cudnn": 90700,
+  "ultralytics": "8.4.101",
+  "gpus": [
+    "NVIDIA GeForce RTX 4090 D"
+  ]
+}

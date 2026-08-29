@@ -4,23 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmoe-toolkit"
-version = "0.0.1.dev0"
+version = "0.1.0"
 description = "Drop-in ES-MoE module for Ultralytics YOLO: budget-fair, multi-seed vetted, aux-loss aware."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "AGPL-3.0-only" }
 authors = [{ name = "Leo Cheng" }]
+keywords = ["yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = ["torch>=1.8", "ultralytics"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "ruff"]
 
 [project.urls]
 Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"
+Source = "https://github.com/Lfan-ke/esmoe-toolkit"
+Issues = "https://github.com/Lfan-ke/esmoe-toolkit/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
