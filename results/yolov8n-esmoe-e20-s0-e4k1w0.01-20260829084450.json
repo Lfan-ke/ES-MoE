@@ -1,0 +1,38 @@
+{
+  "experiment_id": "yolov8n-esmoe-e20-s0-e4k1w0.01-20260829084450",
+  "git_ref": "0.1.0.dev0",
+  "config": {
+    "model_yaml": "/root/esmoe-toolkit/configs/yolov8n-esmoe-e4k1.yaml",
+    "arch": "esmoe",
+    "num_experts": 4,
+    "top_k": 1,
+    "aux_weight": 0.01
+  },
+  "dataset": {
+    "yaml": "/root/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 0.25
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 4090 D",
+    "torch": "2.6.0a0+ecf3bae40a.nv25.01",
+    "python": "3.12.3"
+  },
+  "budget": {
+    "epochs": 20,
+    "batch": 32,
+    "imgsz": 640,
+    "amp": true,
+    "wall_seconds": 391.4
+  },
+  "seed": 0,
+  "metrics": {
+    "metrics/precision(B)": 0.18594969700724645,
+    "metrics/recall(B)": 0.14304187023963535,
+    "metrics/mAP50(B)": 0.09278011264407442,
+    "metrics/mAP50-95(B)": 0.0414895123705448
+  },
+  "params": 3327330,
+  "artifact": "/root/esmoe-toolkit/runs/yolov8n-esmoe-e20-s0-e4k1w0.01/weights/best.pt",
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}

@@ -51,8 +51,24 @@ def paired(runs, key):
     return rows, deltas
 
 
+def dedupe(runs):
+    """Keep one record per (variant, seed) and report repeats as a determinism check.
+
+    Re-running an identical config is evidence about reproducibility, not an extra sample; folding
+    it into the mean would silently weight that seed twice.
+    """
+    kept, repeats = {}, []
+    for r in runs:
+        key = (variant(r), r["seed"])
+        if key in kept:
+            repeats.append((key, kept[key], r))
+        else:
+            kept[key] = r
+    return list(kept.values()), repeats
+
+
 def main():
-    runs = load()
+    runs, repeats = dedupe(load())
     by_variant = defaultdict(lambda: defaultdict(list))
     for r in runs:
         for key in KEYS:
@@ -93,6 +109,18 @@ def main():
         for name, values in deltas.items():
             wins = sum(1 for v in values if v > 0)
             out.append(f"| {name} | {len(values)} | {statistics.mean(values):+.4f} | {wins}/{len(values)} |")
+
+    if repeats:
+        out += [
+            "",
+            "## Determinism (repeated runs of an identical config)",
+            "",
+            "| variant | seed | mAP50 first | mAP50 repeat | identical |",
+            "|:--:|:--:|:--:|:--:|:--:|",
+        ]
+        for (name, seed), first, again in repeats:
+            a, b = first["metrics"].get(KEYS[0], 0), again["metrics"].get(KEYS[0], 0)
+            out.append(f"| {name} | {seed} | {a:.4f} | {b:.4f} | {'yes' if a == b else 'no'} |")
 
     table = "\n".join(out)
     (ROOT / "results" / "summary.md").write_text(table + "\n", encoding="utf-8")

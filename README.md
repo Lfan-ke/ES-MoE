@@ -40,6 +40,12 @@ The block is channel preserving, which is what lets stock `parse_model` size it 
 
 Verified by `tests/test_ultralytics.py` against ultralytics 8.4.101.
 
+## Selected default
+
+`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
+2/4/8-expert and top-1 variants, then confirmed on three seeds (paired win 3/3, +0.0021 mAP50 over
+the same-budget baseline, +10.4% parameters). Reasoning and the full table: `docs/SELECTION.md`.
+
 ## Reproduce the numbers
 
     python scripts/capture_env.py                       # freeze environment into env/
