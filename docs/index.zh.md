@@ -1,6 +1,16 @@
-# esmoe
+<div class="es-hero" markdown>
+<div class="es-hero__eyebrow">4 选 2 专家路由</div>
+<h1 class="es-hero__claim">装得上的 ES-MoE，<em>验得了</em>的证据。</h1>
+<p class="es-hero__lede">面向 Ultralytics YOLO 的即插即用专家稀疏混合模块。它装在官方包旁边，而不是用 fork 顶替它；本站的每一处结论都对应仓库里的一条实验记录。</p>
+<div class="es-router"><span></span><span></span><span></span><span></span></div>
+<div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 
-面向 Ultralytics YOLO 的即插即用 ES-MoE（专家稀疏混合）模块。它**装在官方 `ultralytics` 旁边**，而不是用一个 fork 顶替它；并且随包给出预算公平的证据与一条真正进入优化器的辅助损失。
+<ul class="es-proof">
+<li><strong>装在官方包旁边</strong><span><code>pip install esmoe</code> - 不 fork、不打补丁、可干净卸载。</span></li>
+<li><strong>辅助损失真的进了 backward()</strong><span><code>results.csv</code> 里的 <code>esmoe_aux</code> 列，由单测断言，而不是配置里有个键。</span></li>
+<li><strong>全量 VisDrone 上 3/3 seed</strong><span>配对 +0.0021 mAP50，参数 +10.4%。其中一个 seed 是平局 - 请先读已知局限。</span></li>
+</ul>
+</div>
 
 [在 Colab 里打开快速上手](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
 - 安装、接入、训练，并在日志里看到 `esmoe_aux` 列，全程在免费 GPU 上完成。

@@ -1,8 +1,17 @@
-# esmoe
+<div class="es-hero" markdown>
+<div class="es-hero__eyebrow">top-2 of 4 experts</div>
+<h1 class="es-hero__claim">ES-MoE you can <em>install</em>, with evidence you can check.</h1>
+<p class="es-hero__lede">A drop-in expert-sparse Mixture-of-Experts block for Ultralytics YOLO. It sits beside the official
+package instead of replacing it with a fork, and every claim on this site is backed by a run record in the repository.</p>
+<div class="es-router"><span></span><span></span><span></span><span></span></div>
+<div class="es-router__label">router picks 2 of 4 per image</div>
 
-Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It installs beside the
-official `ultralytics` package instead of replacing it with a fork, and it ships the evidence needed
-to judge whether the block is worth using.
+<ul class="es-proof">
+<li><strong>Installs beside ultralytics</strong><span><code>pip install esmoe</code> - no fork, no patched library, clean uninstall.</span></li>
+<li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
+<li><strong>3 of 3 seeds on full VisDrone</strong><span>+0.0021 mAP50 paired, at +10.4% parameters. One seed is a tie - read the limitations.</span></li>
+</ul>
+</div>
 
 [Open the quick start in Colab](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
 - install, equip, train and watch the `esmoe_aux` column, all on a free GPU.

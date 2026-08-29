@@ -5,6 +5,11 @@ edit_uri: blob/main/docs/
 
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  font:
+    text: Source Sans 3
+    code: JetBrains Mono
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -14,7 +19,13 @@ theme:
       toggle: { icon: material/weather-sunny, name: Light mode }
   features:
     - navigation.sections
+    - navigation.top
+    - toc.follow
     - content.code.copy
+    - search.suggest
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search
@@ -49,6 +60,8 @@ nav:
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - tables
   - toc: { permalink: true }
   - pymdownx.snippets:
@@ -58,8 +71,10 @@ markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
-          class: mermaid
+          class: mermaid-chart
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
+  - javascripts/diagrams.js
