@@ -9,7 +9,8 @@ from esmoe.aux_loss import collect_aux_loss
 def main():
     torch.manual_seed(0)
     net = torch.nn.Sequential(
-        torch.nn.Conv2d(3, 32, 3, 2, 1), torch.nn.SiLU(),
+        torch.nn.Conv2d(3, 32, 3, 2, 1),
+        torch.nn.SiLU(),
         ESMoE(32, 32, num_experts=4, top_k=2),
         torch.nn.Conv2d(32, 16, 1),
     )

@@ -1,0 +1,20 @@
+# Known limitations
+
+Scope of the evidence in `results/`, stated before anyone has to ask.
+
+## Benchmark scope
+
+- Numbers come from a **unified small benchmark**: VisDrone2019-DET at `fraction=0.25`, imgsz 640, trained from scratch (no pretrained weights). They are not COCO numbers and must not be read as a reproduction of the ES-MoE-N anchor (2.68M / 8.7 GFLOPs / 42.7 mAP), which is a COCO figure.
+- Short budgets (tens of epochs from scratch) sit far from convergence. A gap measured here bounds the ranking of two blocks under equal budget; it does not predict the converged gap.
+- One machine, one RTX 4090 D. No multi-GPU or DDP run has been made, so DDP-specific aux-loss behaviour is untested.
+
+## Method scope
+
+- `ESMoE` is channel preserving: it maps `c1 -> c1`. Upstream `ES_MOE` also supports `c1 -> c2`; that path is deliberately not reproduced, because stock `parse_model` assumes `c2 == ch[f]` for third-party modules.
+- Channels are inferred on the first forward. A model that is scripted, exported, or `state_dict`-loaded before any forward has no expert weights to load yet.
+- `attach_aux_loss` patches the task model class and keeps the weight at process scope, because the trainer rebuilds the model and takes the EMA copy before any callback runs. Consequently a process trains one aux-loss setting at a time, and a checkpoint reloaded in a process that never calls `attach_aux_loss` trains without the aux term.
+- The load-balancing term is the Switch-Transformer formulation (`num_experts * sum(importance * load)`). No EMA normalisation of the aux magnitude is applied, unlike YOLO-Master's mixture controller.
+
+## Reporting
+
+- Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed.

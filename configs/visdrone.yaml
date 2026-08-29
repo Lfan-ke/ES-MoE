@@ -1,0 +1,18 @@
+# VisDrone2019-DET, YOLO layout as unpacked from ModelScope aiEngineer484/VisDrone.
+# Override `path` for your machine; everything else is fixed so runs stay comparable.
+path: /data/ds/VisDrone_dataset
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: pedestrian
+  1: people
+  2: bicycle
+  3: car
+  4: van
+  5: truck
+  6: tricycle
+  7: awning-tricycle
+  8: bus
+  9: motor

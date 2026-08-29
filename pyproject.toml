@@ -24,3 +24,10 @@ Homepage = "https://github.com/Lfan-ke/esmoe-toolkit"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
