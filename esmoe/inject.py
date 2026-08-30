@@ -117,7 +117,11 @@ def _loss_with_aux(self, batch, preds=None):
 def _arm(weight: float) -> Callable:
     def on_train_start(trainer) -> None:
         _core(_unwrap(trainer.model))._esmoe_aux_weight = float(weight)
-        if AUX_NAME not in trainer.loss_names:
-            trainer.loss_names = (*trainer.loss_names, AUX_NAME)
+        # Older releases fix the loss names before training and need the extra one appended; newer
+        # ones derive them from the loss dict, and appending to the empty tuple would leave the
+        # progress header claiming the run has a single loss term.
+        names = tuple(getattr(trainer, "loss_names", ()) or ())
+        if names and AUX_NAME not in names:
+            trainer.loss_names = (*names, AUX_NAME)
 
     return on_train_start

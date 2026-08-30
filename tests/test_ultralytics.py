@@ -136,6 +136,20 @@ def test_arm_re_attaches_to_the_rebuilt_trainer_model():
     assert trainer.model._esmoe_aux_weight == 0.05
 
 
+def test_arm_leaves_empty_loss_names_to_the_trainer():
+    from esmoe.inject import _arm
+
+    class Trainer:
+        loss_names = ()
+
+    trainer = Trainer()
+    trainer.model = _model("yolov8n.yaml")
+    _arm(0.01)(trainer)
+    # Releases that name losses from the returned dict start empty; appending here would make the
+    # progress header show one column instead of four.
+    assert trainer.loss_names == ()
+
+
 def test_cli_writes_a_grafted_config(tmp_path):
     from ultralytics.utils import YAML
 
