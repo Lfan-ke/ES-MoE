@@ -26,7 +26,7 @@ theme:
     - search.suggest
 
 hooks:
-  - hooks/zh_alias.py
+  - hooks/urls.py
 
 extra_css:
   - stylesheets/extra.css
