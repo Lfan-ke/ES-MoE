@@ -8,8 +8,8 @@ from esmoe.__main__ import main as cli  # noqa: E402
 from esmoe.inject import AUX_NAME  # noqa: E402
 
 BACKBONES = ["yolov8n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
-# Shipped by newer ultralytics only, and not yet covered by a training run of its own.
-FUTURE_BACKBONES = ["yolo26n.yaml"]
+# Supported, but only shipped by newer ultralytics releases, so the test skips itself elsewhere.
+GUARDED_BACKBONES = ["yolo26n.yaml"]
 
 
 def _model(base, nc=2, **graft_kwargs):
@@ -69,7 +69,7 @@ def test_graft_rejects_impossible_insertion_points():
         graft("yolov8n.yaml", at="middle")
 
 
-@pytest.mark.parametrize("base", FUTURE_BACKBONES)
+@pytest.mark.parametrize("base", GUARDED_BACKBONES)
 def test_newer_backbones_build_when_the_installed_release_ships_them(base):
     from ultralytics.utils import ASSETS  # noqa: F401  - import guard for a usable install
 
@@ -134,6 +134,20 @@ def test_arm_re_attaches_to_the_rebuilt_trainer_model():
     arm(trainer)
     assert trainer.loss_names.count(AUX_NAME) == 1
     assert trainer.model._esmoe_aux_weight == 0.05
+
+
+def test_arm_leaves_empty_loss_names_to_the_trainer():
+    from esmoe.inject import _arm
+
+    class Trainer:
+        loss_names = ()
+
+    trainer = Trainer()
+    trainer.model = _model("yolov8n.yaml")
+    _arm(0.01)(trainer)
+    # Releases that name losses from the returned dict start empty; appending here would make the
+    # progress header show one column instead of four.
+    assert trainer.loss_names == ()
 
 
 def test_cli_writes_a_grafted_config(tmp_path):

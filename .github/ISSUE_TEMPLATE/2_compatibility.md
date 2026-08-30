@@ -25,5 +25,6 @@ assignees: ''
 
 ```python
 import esmoe
+
 model = esmoe.equip("yolo11n.yaml")
 ```

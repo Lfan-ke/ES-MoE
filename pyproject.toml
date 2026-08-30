@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmoe"
-version = "0.1.1"
+version = "0.1.3"
 description = "Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -42,6 +42,9 @@ dev = [
     # ultralytics pulls torchvision transitively, but only a direct entry lets the CPU index below
     # apply to it - a PyPI torchvision against a CPU torch loses torchvision::nms on Linux.
     "torchvision",
+    "onnx>=1.16",
+    # onnxruntime dropped Python 3.10 wheels; the export test skips itself where it is absent.
+    "onnxruntime>=1.17; python_version >= '3.11'",
 ]
 
 # CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
@@ -56,7 +59,7 @@ torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
 
 [tool.setuptools.packages.find]
-where = ["src"]
+include = ["esmoe*"]
 
 [tool.ruff]
 line-length = 120
