@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+
+contact_links:
+  - name: Documentation
+    url: https://lfan-ke.github.io/ES-MoE/
+    about: Tutorial, selection evidence and known limitations, in English and Chinese.
+  - name: Ask about the code
+    url: https://deepwiki.com/Lfan-ke/ES-MoE
+    about: Question-answering over this repository, for "how does X work" before filing an issue.
