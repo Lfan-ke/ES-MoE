@@ -1,8 +1,10 @@
 <h1 align="center">ES-MoE Toolkit</h1>
 
-<div align="right"><sub><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></sub></div><br />
+<div align="right"><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></div>
 
 ---
+
+<br />
 
 <p align="center">
   <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
@@ -12,12 +14,15 @@
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-131A2B?logo=gnu&logoColor=white"></a>
 </p>
 
-It installs beside the official `ultralytics` package instead of replacing it with a fork, and it
-ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.
+<div align=center>
+  <sub>It installs beside the official `ultralytics` package instead of replacing it with a fork, and it ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.</sub>
+</div>
 
 ---
 
-Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
+<sub>Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)</sub>
+
+<br />
 
 ## Install
 
