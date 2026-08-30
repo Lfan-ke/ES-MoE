@@ -1,6 +1,6 @@
 <h1 align="center">ES-MoE Toolkit</h1>
 
-<div align="right"><small><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></small></div><br />
+<div align="right"><sub><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></sub></div><br />
 
 ---
 
