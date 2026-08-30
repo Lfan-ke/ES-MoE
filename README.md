@@ -1,6 +1,8 @@
 <h1 align="center">ES-MoE Toolkit</h1>
 
-<div align="right"><small>Drop-in expert-sparse MoE block for Ultralytics YOLO</small></div>
+<div align="right"><small><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></small></div><br />
+
+---
 
 <p align="center">
   <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
@@ -12,6 +14,8 @@
 
 It installs beside the official `ultralytics` package instead of replacing it with a fork, and it
 ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.
+
+---
 
 Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
 
