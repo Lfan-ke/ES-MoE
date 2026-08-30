@@ -26,10 +26,11 @@
 
 ## Install
 
-    pip install esmoe
+    pip install esmoe          # ESMoE and ESMOE work too; a hyphen or underscore does not
 
-`ESMoE`, `EsMoE` and `ES_MOE` resolve to the same distribution - PyPI names are case-insensitive and
-treat `-`, `_` and `.` as equivalent. The import name is always `esmoe`.
+PyPI ignores capitalisation but not separators: `esmoe`, `ESMoE` and `ESMOE` are one name, while
+`es-moe` and `es_moe` normalise to a different one that is not registered. The import name, the CLI
+and every code reference are always `esmoe`; the project is written ES-MoE in prose.
 
 Requires a stock `ultralytics`; nothing from the YOLO-Master fork is needed at runtime.
 

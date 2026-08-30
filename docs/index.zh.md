@@ -19,7 +19,7 @@
 
     pip install esmoe
 
-`ESMoE`、`EsMoE`、`ES_MOE` 都指向同一个分发包；import 名始终是 `esmoe`。
+大小写随意（`ESMoE`、`ESMOE` 都行），但分隔符不行：`es-moe`、`es_moe` 归一化后是另一个包名，且未注册。import 名始终是 `esmoe`。
 
 ## 使用
 

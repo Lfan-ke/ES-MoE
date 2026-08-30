@@ -1,4 +1,4 @@
-# esmoe 0.1.0
+# ES-MoE 0.1.0
 
 First release. An ES-MoE block that installs next to stock Ultralytics instead of living inside a
 fork, with the evidence needed to judge whether it is worth using.

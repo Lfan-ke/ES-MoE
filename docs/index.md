@@ -20,7 +20,8 @@ package instead of replacing it with a fork, and every claim on this site is bac
 
     pip install esmoe
 
-`ESMoE`, `EsMoE` and `ES_MOE` resolve to the same distribution; the import name is always `esmoe`.
+Capitalisation is free (`ESMoE`, `ESMOE`), separators are not: `es-moe` and `es_moe` are a different
+PyPI name and are not registered. The import name is always `esmoe`.
 
 ## Use
 

@@ -1,4 +1,4 @@
-# esmoe 0.1.1
+# ES-MoE 0.1.1
 
 Bug fix and packaging follow-up to the first release.
 
