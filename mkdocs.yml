@@ -1,5 +1,5 @@
 site_name: esmoe
-site_description: Drop-in ES-MoE block for Ultralytics YOLO - installable, budget-fair, aux-loss aware.
+site_description: Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.
 repo_url: https://github.com/Lfan-ke/ES-MoE
 edit_uri: blob/main/docs/
 

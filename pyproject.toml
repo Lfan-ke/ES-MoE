@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "esmoe"
 version = "0.1.1"
-description = "Drop-in ES-MoE block for Ultralytics YOLO: installable, budget-fair, aux-loss aware."
+description = "Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "AGPL-3.0-only" }
