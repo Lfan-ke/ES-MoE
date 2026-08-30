@@ -17,7 +17,7 @@
   --md-primary-fg-color--dark: #0d1320;
   --md-accent-fg-color: var(--es-route);
   --md-text-font: "Source Sans 3", "Noto Sans SC", system-ui, sans-serif;
-  --md-code-font: "JetBrains Mono", ui-monospace, monospace;
+  --md-code-font: "JetBrains Mono", "Noto Sans Mono", "Noto Sans SC", ui-monospace, monospace;
 }
 
 [data-md-color-scheme="default"] {
@@ -217,4 +217,28 @@
   margin: 1.8rem 0;
   text-align: center;
   overflow-x: auto;
+}
+
+/* Chinese pages: the tracking and small caps that give the English headings their voice turn CJK
+   into loose, unreadable characters, and the Latin-only mono face drops them to a fallback. */
+[lang="zh"] {
+  --md-text-font: "Noto Sans SC", "Source Sans 3", system-ui, sans-serif;
+}
+
+[lang="zh"] .es-hero__eyebrow,
+[lang="zh"] .es-router__label {
+  font-family: var(--md-text-font);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+[lang="zh"] .md-typeset h1,
+[lang="zh"] .md-typeset h2,
+[lang="zh"] .md-typeset h3,
+[lang="zh"] .es-hero__claim {
+  letter-spacing: 0;
+}
+
+[lang="zh"] .md-typeset {
+  line-height: 1.8;
 }
