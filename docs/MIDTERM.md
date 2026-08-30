@@ -53,6 +53,10 @@ And established by the 50-epoch run: **the gain decays as the schedule lengthens
 paired mAP50 mean falls to +0.0013 with one seed slightly negative (2/3), and mAP50-95 to +0.0008
 (3/3). The honest reading is that the block buys earlier convergence rather than a higher ceiling.
 
+Established as a negative result: the gain does not transfer to YOLO11n. Same data, budget and
+seeds, paired mean -0.0009 mAP50 with one seed of three in favour. The compatibility claim therefore
+covers mechanics on four generations; the accuracy claim covers YOLOv8n.
+
 Not established: whether any gain remains at convergence, on COCO, or at other model scales. The
 50-epoch trend points the other way and the experiment was not run to convergence, so no ceiling
 claim is made. The

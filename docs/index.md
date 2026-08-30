@@ -9,7 +9,7 @@ package instead of replacing it with a fork, and every claim on this site is bac
 <ul class="es-proof">
 <li><strong>Installs beside ultralytics</strong><span><code>pip install esmoe</code> - no fork, no patched library, clean uninstall.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>Measured, then re-measured</strong><span>3/3 seeds and +0.0021 mAP50 at 20 epochs; +0.0013 (2/3) at 50. Earlier convergence, not a higher ceiling.</span></li>
+<li><strong>Measured, then re-measured</strong><span>On YOLOv8n: 3/3 seeds, +0.0021 mAP50 at 20 epochs, +0.0013 at 50. On YOLO11n: a wash. The evidence says where it works.</span></li>
 </ul>
 </div>
 

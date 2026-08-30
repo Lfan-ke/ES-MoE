@@ -8,7 +8,7 @@
 <ul class="es-proof">
 <li><strong>装在官方包旁边</strong><span><code>pip install esmoe</code> - 不 fork、不打补丁、可干净卸载。</span></li>
 <li><strong>辅助损失真的进了 backward()</strong><span><code>results.csv</code> 里的 <code>esmoe_aux</code> 列，由单测断言，而不是配置里有个键。</span></li>
-<li><strong>量过，又重量了一遍</strong><span>20 epoch 时 3/3 seed、+0.0021 mAP50；50 epoch 收窄到 +0.0013（2/3）。买到的是更快收敛，不是更高上限。</span></li>
+<li><strong>量过，又重量了一遍</strong><span>YOLOv8n 上 20 epoch 3/3 seed、+0.0021 mAP50，50 epoch +0.0013；YOLO11n 上则打平。证据说明它在哪儿有用。</span></li>
 </ul>
 </div>
 

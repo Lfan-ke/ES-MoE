@@ -61,6 +61,25 @@ straightforward reading is that the block mainly buys **earlier convergence** ra
 ceiling, and this evidence does not support any claim about the converged gap. Cost at this budget
 is +10.4% parameters and +13% wall-clock.
 
+## Across backbones
+
+The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds:
+
+| backbone | baseline mAP50 | esmoe mAP50 | paired deltas | mean | wins |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| YOLOv8n | 0.1496 | 0.1517 | +0.0001, +0.0032, +0.0029 | +0.0021 | 3/3 |
+| YOLO11n | 0.1419 | 0.1410 | +0.0045, -0.0033, -0.0040 | -0.0009 | 1/3 |
+
+**The gain does not transfer.** On YOLO11n the block is a wash at best: one seed gains, two lose, and
+the mean is slightly negative on both mAP50 and mAP50-95. A plausible reading is that YOLO11n
+already carries attention (C2PSA) at the end of its backbone, so a routed mixture inserted at the
+same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
+and it is offered as a hypothesis, not a finding.
+
+What this bounds: the compatibility matrix in the README is a statement about **mechanics** - the
+block builds, trains and back-propagates its auxiliary loss on four generations. It is not a claim
+that the accuracy effect exists on all of them. The accuracy evidence is YOLOv8n only.
+
 ## Decision
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)` is the shipped default.
