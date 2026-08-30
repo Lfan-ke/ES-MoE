@@ -109,9 +109,13 @@ class ESMoE(nn.Module):
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         out = torch.zeros_like(x)
+        # Skipping an unrouted expert saves work at run time, but the decision depends on the data:
+        # a tracer would bake this batch's routing into the graph and the exported model would keep
+        # using these experts for every future input. Under tracing, run all of them.
+        traced = torch.jit.is_tracing() or torch.onnx.is_in_onnx_export()
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)
-            if torch.count_nonzero(share):
+            if traced or torch.count_nonzero(share):
                 out = out + share * expert(x)
         registry.publish(self, self.balance(probs, gate))
         return out

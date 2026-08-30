@@ -16,4 +16,4 @@ __all__ = [
     "odd_kernels",
     "switch_balance",
 ]
-__version__ = "0.1.1"
+__version__ = "0.1.3"

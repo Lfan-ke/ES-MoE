@@ -13,7 +13,8 @@ def load():
     runs = []
     for path in sorted((ROOT / "results").glob("*.json")):
         record = json.loads(path.read_text(encoding="utf-8"))
-        if record["status"] == "success":
+        # results/ also holds verify.json, which is a different kind of evidence entirely.
+        if "experiment_id" in record and record.get("status") == "success":
             runs.append(record)
     return runs
 
