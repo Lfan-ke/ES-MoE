@@ -19,6 +19,8 @@
 
     pip install esmoe
 
+`ESMoE`、`EsMoE`、`ES_MOE` 都指向同一个分发包；import 名始终是 `esmoe`。
+
 ## 使用
 
     import esmoe

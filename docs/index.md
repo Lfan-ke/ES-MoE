@@ -20,6 +20,8 @@ package instead of replacing it with a fork, and every claim on this site is bac
 
     pip install esmoe
 
+`ESMoE`, `EsMoE` and `ES_MOE` resolve to the same distribution; the import name is always `esmoe`.
+
 ## Use
 
     import esmoe

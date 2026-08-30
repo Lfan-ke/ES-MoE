@@ -23,6 +23,9 @@ Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.g
 
     pip install esmoe
 
+`ESMoE`, `EsMoE` and `ES_MOE` resolve to the same distribution - PyPI names are case-insensitive and
+treat `-`, `_` and `.` as equivalent. The import name is always `esmoe`.
+
 Requires a stock `ultralytics`; nothing from the YOLO-Master fork is needed at runtime.
 
 ## Use
