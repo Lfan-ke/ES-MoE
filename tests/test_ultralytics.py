@@ -8,8 +8,8 @@ from esmoe.__main__ import main as cli  # noqa: E402
 from esmoe.inject import AUX_NAME  # noqa: E402
 
 BACKBONES = ["yolov8n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
-# Shipped by newer ultralytics only, and not yet covered by a training run of its own.
-FUTURE_BACKBONES = ["yolo26n.yaml"]
+# Supported, but only shipped by newer ultralytics releases, so the test skips itself elsewhere.
+GUARDED_BACKBONES = ["yolo26n.yaml"]
 
 
 def _model(base, nc=2, **graft_kwargs):
@@ -69,7 +69,7 @@ def test_graft_rejects_impossible_insertion_points():
         graft("yolov8n.yaml", at="middle")
 
 
-@pytest.mark.parametrize("base", FUTURE_BACKBONES)
+@pytest.mark.parametrize("base", GUARDED_BACKBONES)
 def test_newer_backbones_build_when_the_installed_release_ships_them(base):
     from ultralytics.utils import ASSETS  # noqa: F401  - import guard for a usable install
 
