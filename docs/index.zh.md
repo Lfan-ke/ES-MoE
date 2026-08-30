@@ -47,7 +47,7 @@
 | YOLOv8 | 是 | 是 | 是 |
 | YOLO11 | 是 | 是 | 是 |
 | YOLO12 | 是 | 是 | 是 |
-| YOLO26 | - | - | - |
+| YOLO26 | yes | yes | yes |
 
 由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证（两者的 loss items 形态不同，均已处理），另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。
 

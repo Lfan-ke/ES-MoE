@@ -82,11 +82,12 @@ for custom training loops.
 | YOLOv8 | yes | yes | yes |
 | YOLO11 | yes | yes | yes |
 | YOLO12 | yes | yes | yes |
-| YOLO26 | - | - | - |
+| YOLO26 | yes | yes | yes |
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
 in two different shapes; both are handled. The training column is backed by real 1-epoch runs on
-each generation (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
+each generation (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`. YOLO26 is only
+shipped by newer ultralytics releases, so its build test skips itself on older ones.
 
 ## Selected default
 
