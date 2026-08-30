@@ -1,0 +1,244 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;600&display=swap");
+
+/* esmoe docs theme.
+   The site's one visual idea is routing: four experts, two lit. It appears in the logo, the hero,
+   and in place of section rules - everywhere it means "top-2 of 4", never as decoration. */
+
+:root {
+  --es-ink: #131a2b;
+  --es-ink-soft: #223049;
+  --es-paper: #f7f8fa;
+  --es-signal: #e8a33d;
+  --es-route: #3e7c8c;
+  --es-edge: #c9cfda;
+
+  --md-primary-fg-color: var(--es-ink);
+  --md-primary-fg-color--dark: #0d1320;
+  --md-accent-fg-color: var(--es-route);
+  --md-text-font: "Source Sans 3", "Noto Sans SC", system-ui, sans-serif;
+  --md-code-font: "JetBrains Mono", "Noto Sans Mono", "Noto Sans SC", ui-monospace, monospace;
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: var(--es-paper);
+  --md-typeset-a-color: #2f6a79;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: var(--es-ink);
+  --md-default-bg-color--light: var(--es-ink-soft);
+  --md-typeset-a-color: #7ec3d2;
+  --es-edge: #33405a;
+}
+
+.md-header,
+.md-tabs {
+  background-color: var(--es-ink);
+}
+
+/* Display face is used only for headings, so the technical voice stays a punctuation mark rather
+   than a costume. */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-nav__title,
+.es-hero__claim {
+  font-family: "Space Grotesk", var(--md-text-font);
+  letter-spacing: -0.02em;
+}
+
+.md-typeset h1 {
+  font-weight: 600;
+  color: inherit;
+}
+
+.md-typeset h2 {
+  margin-top: 2.4rem;
+  font-weight: 600;
+}
+
+/* Section rule as the routing motif: four slots, the first two carrying signal. */
+.md-typeset hr {
+  border: none;
+  display: flex;
+  gap: 0.3rem;
+  height: 0.35rem;
+  margin: 2.6rem 0;
+}
+
+.md-typeset hr::before,
+.md-typeset hr::after {
+  content: "";
+  height: 100%;
+  border-radius: 999px;
+}
+
+.md-typeset hr::before {
+  width: 3.2rem;
+  background: linear-gradient(90deg, var(--es-signal) 0 46%, transparent 46% 54%, var(--es-signal) 54% 100%);
+}
+
+.md-typeset hr::after {
+  flex: 1;
+  background: linear-gradient(90deg, var(--es-edge) 0 46%, transparent 46% 54%, var(--es-edge) 54% 100%);
+  opacity: 0.55;
+}
+
+/* Hero */
+.es-hero {
+  margin: 0 0 2.6rem;
+  padding: 2.2rem 0 2rem;
+  border-bottom: 1px solid var(--es-edge);
+}
+
+.es-hero__eyebrow {
+  font-family: var(--md-code-font);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--es-route);
+}
+
+.es-hero__claim {
+  font-size: clamp(1.9rem, 1.1rem + 2.4vw, 3.1rem);
+  line-height: 1.08;
+  font-weight: 600;
+  text-wrap: balance;
+  margin: 0.6rem 0 0.9rem;
+  max-width: 22ch;
+}
+
+.es-hero__claim em {
+  font-style: normal;
+  color: var(--es-signal);
+}
+
+.es-hero__lede {
+  max-width: 58ch;
+  font-size: 0.94rem;
+  opacity: 0.86;
+}
+
+/* Router: four experts, two active. Hover walks the active pair one slot to the right, which is
+   exactly what a different input would do. */
+.es-router {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin: 1.4rem 0 0.2rem;
+}
+
+.es-router span {
+  width: 2.6rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--es-edge);
+  transition: background-color 240ms ease;
+}
+
+.es-router span:nth-child(-n + 2) {
+  background: var(--es-signal);
+}
+
+.es-hero:hover .es-router span:nth-child(-n + 2) {
+  background: var(--es-edge);
+}
+
+.es-hero:hover .es-router span:nth-child(n + 3) {
+  background: var(--es-signal);
+}
+
+.es-router__label {
+  font-family: var(--md-code-font);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* Proof strip: three claims, each with the evidence that backs it. */
+.md-typeset ul.es-proof {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+  margin: 1.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.md-typeset ul.es-proof > li {
+  list-style: none;
+  border: 1px solid var(--es-edge);
+  border-left: 3px solid var(--es-signal);
+  border-radius: 0.2rem;
+  padding: 0.9rem 1rem;
+  margin: 0;
+}
+
+.md-typeset ul.es-proof > li::marker {
+  content: "";
+}
+
+.es-proof strong {
+  display: block;
+  font-family: "Space Grotesk", var(--md-text-font);
+  font-size: 0.98rem;
+  line-height: 1.25;
+  text-wrap: balance;
+  margin-bottom: 0.35rem;
+}
+
+.es-proof span {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.md-typeset table:not([class]) {
+  border: 1px solid var(--es-edge);
+  border-radius: 0.2rem;
+  font-size: 0.76rem;
+}
+
+.md-typeset table:not([class]) th {
+  background: color-mix(in srgb, var(--es-route) 12%, transparent);
+  font-weight: 600;
+}
+
+.md-typeset .highlight pre {
+  border-left: 2px solid var(--es-route);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .es-router span {
+    transition: none;
+  }
+}
+
+.mermaid-chart {
+  margin: 1.8rem 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* Chinese pages: the tracking and small caps that give the English headings their voice turn CJK
+   into loose, unreadable characters, and the Latin-only mono face drops them to a fallback. */
+[lang="zh"] {
+  --md-text-font: "Noto Sans SC", "Source Sans 3", system-ui, sans-serif;
+}
+
+[lang="zh"] .es-hero__eyebrow,
+[lang="zh"] .es-router__label {
+  font-family: var(--md-text-font);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+[lang="zh"] .md-typeset h1,
+[lang="zh"] .md-typeset h2,
+[lang="zh"] .md-typeset h3,
+[lang="zh"] .es-hero__claim {
+  letter-spacing: 0;
+}
+
+[lang="zh"] .md-typeset {
+  line-height: 1.8;
+}

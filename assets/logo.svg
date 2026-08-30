@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="esmoe">
+  <rect x="2" y="4" width="20" height="3" rx="1.5" fill="#E8A33D"/>
+  <rect x="2" y="9.5" width="20" height="3" rx="1.5" fill="#E8A33D"/>
+  <rect x="2" y="15" width="20" height="3" rx="1.5" fill="#FFFFFF" opacity="0.35"/>
+  <rect x="2" y="20.5" width="20" height="3" rx="1.5" fill="#FFFFFF" opacity="0.35"/>
+</svg>
