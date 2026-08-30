@@ -25,6 +25,9 @@ theme:
     - content.code.copy
     - search.suggest
 
+hooks:
+  - hooks/zh_alias.py
+
 extra_css:
   - stylesheets/extra.css
 
