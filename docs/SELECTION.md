@@ -46,6 +46,21 @@ and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so q
 did not wash the effect out. One seed is effectively a tie, which is the honest bound on how large
 the effect is: small, consistent in sign, not reliable per single run.
 
+## What a longer schedule does to the gap
+
+Rerunning the same pair at 50 epochs on the full training set, three seeds:
+
+| budget | baseline mAP50 | esmoe mAP50 | paired mean | wins | mAP50-95 paired mean | wins |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 20 epochs | 0.1496 | 0.1517 | +0.0021 | 3/3 | +0.0019 | 3/3 |
+| 50 epochs | 0.2131 | 0.2143 | +0.0013 | 2/3 | +0.0008 | 3/3 |
+
+The gap narrows as the schedule lengthens: the mAP50 mean falls from +0.0021 to +0.0013 and one seed
+turns slightly negative (-0.0003), while mAP50-95 stays positive on all three seeds but halves. The
+straightforward reading is that the block mainly buys **earlier convergence** rather than a higher
+ceiling, and this evidence does not support any claim about the converged gap. Cost at this budget
+is +10.4% parameters and +13% wall-clock.
+
 ## Decision
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)` is the shipped default.

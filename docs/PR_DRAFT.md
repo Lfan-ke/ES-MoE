@@ -44,17 +44,22 @@ on a 25% subset, seed 0:
 | 4 experts, top-2, aux off | 3.33M | 0.0938 | +0.0005 |
 | 8 experts, top-2 | 3.78M | 0.0934 | +0.0000 |
 
-Confirmation of the selected arm on the full training set, 20 epochs, three seeds: baseline
-0.1496 ± 0.0022 mAP50 against 0.1517 ± 0.0011, paired deltas +0.0001 / +0.0032 / +0.0029, 3/3 seeds,
-mean +0.0021 mAP50 and +0.0019 mAP50-95. Repeating an identical configuration at the same seed
-reproduced the metric exactly.
+Confirmation of the selected arm on the full training set, three seeds:
+
+| budget | baseline mAP50 | esmoe mAP50 | paired mean | wins | mAP50-95 paired mean | wins |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 20 epochs | 0.1496 | 0.1517 | +0.0021 | 3/3 | +0.0019 | 3/3 |
+| 50 epochs | 0.2131 | 0.2143 | +0.0013 | 2/3 | +0.0008 | 3/3 |
+
+The gap narrows with the schedule, so the claim is about earlier convergence, not about a higher
+ceiling. Repeating an identical configuration at the same seed reproduced the metric exactly.
 
 ## Known limitations
 
 - Numbers are VisDrone, not COCO, and 20 epochs from scratch is far from convergence. They do not
   reproduce or contest the ES-MoE-N anchor.
-- One of the three confirmation seeds is effectively a tie (+0.0001 mAP50): the effect is consistent
-  in sign, small, and not reliable within a single run.
+- At 20 epochs one confirmation seed is effectively a tie (+0.0001 mAP50); at 50 epochs one seed is
+  slightly negative (-0.0003). The effect is small and not reliable within a single run.
 - Cost: +10.4% parameters and about +5% wall-clock per epoch.
 - The plug-in block is channel preserving; upstream's `c1 -> c2` path is deliberately not
   reproduced, because stock `parse_model` assumes `c2 == ch[f]` for third-party modules.

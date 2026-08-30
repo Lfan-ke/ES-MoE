@@ -6,6 +6,7 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 - Numbers come from VisDrone2019-DET at imgsz 640, trained from scratch (no pretrained weights): a 25% subset for candidate selection, the full training set for confirmation. They are not COCO numbers and must not be read as a reproduction of the ES-MoE-N anchor (2.68M / 8.7 GFLOPs / 42.7 mAP), which is a COCO figure.
 - Short budgets (tens of epochs from scratch) sit far from convergence. A gap measured here bounds the ranking of two blocks under equal budget; it does not predict the converged gap.
+- The measured gain **shrinks with the schedule**: paired mAP50 mean +0.0021 (3/3 seeds) at 20 epochs against +0.0013 (2/3 seeds) at 50 epochs, and mAP50-95 +0.0019 against +0.0008. Read the block as buying earlier convergence, not a higher ceiling.
 - One machine, one RTX 4090 D. No multi-GPU or DDP run has been made, so DDP-specific aux-loss behaviour is untested.
 
 ## Method scope

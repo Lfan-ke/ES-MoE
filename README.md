@@ -76,8 +76,10 @@ each generation (`results/*-compat-*.json`), each logging a non-zero `train/esmo
 ## Selected default
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
-2/4/8-expert and top-1 variants, then confirmed on three seeds (paired win 3/3, +0.0021 mAP50 over
-the same-budget baseline, +10.4% parameters). Reasoning and full table: `docs/SELECTION.md`.
+2/4/8-expert and top-1 variants, then confirmed on three seeds: at 20 epochs on full VisDrone it wins
+3/3 paired (+0.0021 mAP50), at 50 epochs the gap narrows to +0.0013 (2/3) with mAP50-95 +0.0008
+(3/3). It buys earlier convergence rather than a higher ceiling, at +10.4% parameters. Reasoning and
+full tables: `docs/SELECTION.md`.
 
 ## Develop and reproduce
 

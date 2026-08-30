@@ -9,7 +9,7 @@ package instead of replacing it with a fork, and every claim on this site is bac
 <ul class="es-proof">
 <li><strong>Installs beside ultralytics</strong><span><code>pip install esmoe</code> - no fork, no patched library, clean uninstall.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>3 of 3 seeds on full VisDrone</strong><span>+0.0021 mAP50 paired, at +10.4% parameters. One seed is a tie - read the limitations.</span></li>
+<li><strong>Measured, then re-measured</strong><span>3/3 seeds and +0.0021 mAP50 at 20 epochs; +0.0013 (2/3) at 50. Earlier convergence, not a higher ceiling.</span></li>
 </ul>
 </div>
 
