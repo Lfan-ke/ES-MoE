@@ -7,12 +7,12 @@
 <br />
 
 <p align="center">
-  <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/3.10+-3E7C8C?logo=python&logoColor=white"></a>
-  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
-  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-3E7C8C?logo=materialformkdocs&logoColor=white"></a>
-  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-E8A33D?logo=googlecolab&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/3.10+-3776AB?logo=python&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=3776AB&label=&color=FFD43B"></a>
+  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-006DE0?logo=materialformkdocs&logoColor=white"></a>
+  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-F9AB00?logo=googlecolab&logoColor=white"></a>
   <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-131A2B?logo=gnu&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
 </p>
 
 <div align=center>
@@ -21,7 +21,7 @@
 
 ---
 
-<sub>Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)</sub>
+<sub>Docs: [`English`](https://lfan-ke.github.io/ES-MoE/) · [`中文`](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
 
 <br />
 
