@@ -43,7 +43,8 @@ dev = [
     # apply to it - a PyPI torchvision against a CPU torch loses torchvision::nms on Linux.
     "torchvision",
     "onnx>=1.16",
-    "onnxruntime>=1.17",
+    # onnxruntime dropped Python 3.10 wheels; the export test skips itself where it is absent.
+    "onnxruntime>=1.17; python_version >= '3.11'",
 ]
 
 # CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
