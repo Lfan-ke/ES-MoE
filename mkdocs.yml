@@ -43,6 +43,7 @@ plugins:
             Overview: 概览
             Tutorial: 教程
             Selection: 选型
+            Results: 实验结果
             Limitations: 已知局限
             Baseline and increment: 基线与增量
             Mid-term report: 中期报告
@@ -52,6 +53,7 @@ nav:
   - Overview: index.md
   - Tutorial: tutorial.md
   - Selection: SELECTION.md
+  - Results: results.md
   - Limitations: limitations.md
   - Baseline and increment: BASELINE.md
   - Mid-term report: MIDTERM.md
