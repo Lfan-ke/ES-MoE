@@ -7,8 +7,8 @@
 <br />
 
 <p align="center">
-  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
   <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/3.10+-3E7C8C?logo=python&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
   <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-3E7C8C?logo=materialformkdocs&logoColor=white"></a>
   <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-E8A33D?logo=googlecolab&logoColor=white"></a>
   <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
