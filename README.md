@@ -1,18 +1,19 @@
-# esmoe
+<h1 align="center">ES-MoE Toolkit</h1>
+
+<div align="right"><small>Drop-in expert-sparse MoE block for Ultralytics YOLO</small></div>
 
 <p align="center">
-  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe.svg"></a>
-  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/docs-mkdocs--material-blue"></a>
-  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
-  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0--only-green"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
+  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-3E7C8C?logo=materialformkdocs&logoColor=white"></a>
+  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-E8A33D?logo=googlecolab&logoColor=white"></a>
+  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-131A2B?logo=gnu&logoColor=white"></a>
 </p>
 
-Drop-in ES-MoE (expert-sparse Mixture-of-Experts) block for Ultralytics YOLO. It installs beside the
-official `ultralytics` package instead of replacing it with a fork, and it ships budget-fair evidence
-plus an auxiliary loss that provably reaches the optimiser.
+It installs beside the official `ultralytics` package instead of replacing it with a fork, and it
+ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.
 
-Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: `notebooks/quickstart.ipynb` · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
+Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)
 
 ## Install
 
