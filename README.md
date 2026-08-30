@@ -93,10 +93,11 @@ shipped by newer ultralytics releases, so its build test skips itself on older o
 ## Selected default
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
-2/4/8-expert and top-1 variants. On **YOLOv8n** it then wins 3/3 paired seeds at 20 epochs
-(+0.0021 mAP50) and 2/3 at 50 epochs (+0.0013), so it buys earlier convergence rather than a higher
-ceiling, at +10.4% parameters. On **YOLO11n** the same comparison is a wash (1/3 seeds,
--0.0009 mAP50): the accuracy effect does not transfer across backbones, while the mechanics do.
+2/4/8-expert and top-1 variants. On **YOLOv8n** the paired mean is positive at every budget tested - +0.0021 mAP50 at 20 epochs
+(3/3 seeds), +0.0013 at 50 (2/3), +0.0046 at 100 (2/3) - while the spread between seeds widens with
+the schedule, so it is a small average gain rather than a reliable per-run one, at +10.4%
+parameters. On **YOLO11n** the same comparison is a wash (1/3 seeds, -0.0009 mAP50): the accuracy
+effect does not transfer across backbones, while the mechanics do.
 Reasoning and full tables: `docs/SELECTION.md`.
 
 ## Develop and reproduce

@@ -48,18 +48,19 @@ the effect is: small, consistent in sign, not reliable per single run.
 
 ## What a longer schedule does to the gap
 
-Rerunning the same pair at 50 epochs on the full training set, three seeds:
+The same pair at three budgets on the full training set, three seeds each:
 
-| budget | baseline mAP50 | esmoe mAP50 | paired mean | wins | mAP50-95 paired mean | wins |
-|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| 20 epochs | 0.1496 | 0.1517 | +0.0021 | 3/3 | +0.0019 | 3/3 |
-| 50 epochs | 0.2131 | 0.2143 | +0.0013 | 2/3 | +0.0008 | 3/3 |
+| budget | baseline mAP50 | esmoe mAP50 | paired deltas | mean | wins |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| 20 epochs | 0.1496 | 0.1517 | +0.0001, +0.0032, +0.0029 | +0.0021 | 3/3 |
+| 50 epochs | 0.2131 | 0.2143 | -0.0003, +0.0009, +0.0032 | +0.0013 | 2/3 |
+| 100 epochs | 0.3004 | 0.3050 | +0.0104, -0.0011, +0.0044 | +0.0046 | 2/3 |
 
-The gap narrows as the schedule lengthens: the mAP50 mean falls from +0.0021 to +0.0013 and one seed
-turns slightly negative (-0.0003), while mAP50-95 stays positive on all three seeds but halves. The
-straightforward reading is that the block mainly buys **earlier convergence** rather than a higher
-ceiling, and this evidence does not support any claim about the converged gap. Cost at this budget
-is +10.4% parameters and +13% wall-clock.
+The mean is positive at every budget, but it does not move in one direction with the schedule, and
+the spread between seeds widens as the schedule grows: at 100 epochs the three paired deltas span
++0.0104 to -0.0011. Read together, these runs support a small positive mean effect and rule out a
+reliable per-run improvement. They do not support a claim about where the effect goes at
+convergence, in either direction.
 
 ## Across backbones
 

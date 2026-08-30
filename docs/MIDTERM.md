@@ -49,9 +49,10 @@ Also established after the mid-term run: the gain survives a fourfold increase i
 the full VisDrone training set at the same 20-epoch budget the paired result is again 3/3 seeds and
 +0.0021 mAP50, with mAP50-95 improving from +0.0005 on the subset to +0.0019.
 
-And established by the 50-epoch run: **the gain decays as the schedule lengthens**. At 50 epochs the
-paired mAP50 mean falls to +0.0013 with one seed slightly negative (2/3), and mAP50-95 to +0.0008
-(3/3). The honest reading is that the block buys earlier convergence rather than a higher ceiling.
+Three budgets on YOLOv8n give paired mAP50 means of +0.0021 (3/3 seeds), +0.0013 (2/3) and +0.0046
+(2/3) at 20, 50 and 100 epochs. An earlier reading of the first two budgets as "the gain decays with
+the schedule" did not survive the 100-epoch run and has been withdrawn. What the three budgets
+support is a small positive mean with a spread that widens as the schedule grows.
 
 Established as a negative result: the gain does not transfer to YOLO11n. Same data, budget and
 seeds, paired mean -0.0009 mAP50 with one seed of three in favour. The compatibility claim therefore

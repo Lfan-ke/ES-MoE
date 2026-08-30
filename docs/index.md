@@ -8,7 +8,7 @@
 <ul class="es-proof">
 <li><strong>一个调用就装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
 <li><strong>辅助损失真的进了 backward()</strong><span><code>results.csv</code> 里的 <code>esmoe_aux</code> 列，由单测断言，而不是配置里有个键。</span></li>
-<li><strong>量过，又重量了一遍</strong><span>YOLOv8n 上 20 epoch 3/3 seed、+0.0021 mAP50，50 epoch +0.0013；YOLO11n 上则打平。证据说明它在哪儿有用。</span></li>
+<li><strong>量过，又重量了一遍</strong><span>YOLOv8n 上 20/50/100 epoch 分别 +0.0021 / +0.0013 / +0.0046 mAP50；YOLO11n 上打平。证据说明它在哪儿有用。</span></li>
 </ul>
 </div>
 

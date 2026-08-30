@@ -9,7 +9,7 @@ trains, and a run record behind every number on this site.</p>
 <ul class="es-proof">
 <li><strong>One call to add it</strong><span><code>equip</code> grafts the block into a config, renumbers the head and wires the loss.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>Measured, then re-measured</strong><span>On YOLOv8n: 3/3 seeds, +0.0021 mAP50 at 20 epochs, +0.0013 at 50. On YOLO11n: a wash. The evidence says where it works.</span></li>
+<li><strong>Measured, then re-measured</strong><span>YOLOv8n: +0.0021 mAP50 at 20 epochs, +0.0013 at 50, +0.0046 at 100. YOLO11n: a wash. The evidence says where it works.</span></li>
 </ul>
 </div>
 
