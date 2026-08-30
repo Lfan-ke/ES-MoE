@@ -14,6 +14,7 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 - `ESMoE` is channel preserving: it maps `c1 -> c1`. Upstream `ES_MOE` also supports `c1 -> c2`; that path is deliberately not reproduced, because stock `parse_model` assumes `c2 == ch[f]` for third-party modules.
 - Channels are inferred on the first forward. A model that is scripted, exported, or `state_dict`-loaded before any forward has no expert weights to load yet.
 - `attach_aux_loss` patches the task model class and keeps the weight at process scope, because the trainer rebuilds the model and takes the EMA copy before any callback runs. Consequently a process trains one aux-loss setting at a time, and a checkpoint reloaded in a process that never calls `attach_aux_loss` trains without the aux term.
+- Export was verified against ONNX Runtime on inputs that route to different experts (`scripts/verify.py`); releases 0.1.0 to 0.1.2 baked the traced routing into the exported graph and should be re-exported.
 - The load-balancing term is the Switch-Transformer formulation (`num_experts * sum(importance * load)`). No EMA normalisation of the aux magnitude is applied, unlike YOLO-Master's mixture controller.
 
 ## Reporting
