@@ -60,7 +60,6 @@ nav:
   - Upstream PR draft: PR_DRAFT.md
   - Release 0.1.1: RELEASE_v0.1.1.md
   - Release 0.1.0: RELEASE_v0.1.0.md
-  - Roadmap: ROADMAP.md
 
 markdown_extensions:
   - admonition

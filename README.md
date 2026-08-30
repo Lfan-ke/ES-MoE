@@ -109,10 +109,22 @@ metrics, artifact, status, limitation). Read `limitations.md` before quoting any
 
 ## Linked projects
 
-| project | what it is | how this repository relates |
-|:--:|:--:|:--:|
-| [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | The official YOLO framework | `esmoe` installs beside it and uses only its public extension points - no fork, no patch |
-| [Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master) | YOLO-style framework where ES-MoE originates ([paper](https://arxiv.org/abs/2512.23273)) | The block here is an independent implementation of that published design, kept installable on stock ultralytics |
+<p align="center">
+  <a href="https://github.com/ultralytics/ultralytics"><img alt="ultralytics" src="https://img.shields.io/badge/ultralytics-3E7C8C?logo=github&logoColor=white"></a>
+  <a href="https://github.com/Tencent/YOLO-Master"><img alt="Tencent/YOLO-Master" src="https://img.shields.io/badge/YOLO--Master-131A2B?logo=github&logoColor=white"></a>
+  <a href="https://arxiv.org/abs/2512.23273"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2512.23273-A42E2B?logo=arxiv&logoColor=white"></a>
+</p>
+
+<br />
+
+**[ultralytics](https://github.com/ultralytics/ultralytics)** - the official YOLO framework. `esmoe`
+installs beside it and uses only its public extension points: no fork, no patched library.
+
+**[Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master)** - where ES-MoE comes from. The
+block here is an independent implementation of that published design, kept installable on stock
+ultralytics.
+
+<br />
 
 ## License
 
