@@ -8,6 +8,8 @@ from esmoe.__main__ import main as cli  # noqa: E402
 from esmoe.inject import AUX_NAME  # noqa: E402
 
 BACKBONES = ["yolov8n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
+# Shipped by newer ultralytics only, and not yet covered by a training run of its own.
+FUTURE_BACKBONES = ["yolo26n.yaml"]
 
 
 def _model(base, nc=2, **graft_kwargs):
@@ -65,6 +67,17 @@ def test_graft_rejects_impossible_insertion_points():
         graft("yolov8n.yaml", at=999)
     with pytest.raises(ValueError):
         graft("yolov8n.yaml", at="middle")
+
+
+@pytest.mark.parametrize("base", FUTURE_BACKBONES)
+def test_newer_backbones_build_when_the_installed_release_ships_them(base):
+    from ultralytics.utils import ASSETS  # noqa: F401  - import guard for a usable install
+
+    try:
+        model = _model(base)
+    except FileNotFoundError:
+        pytest.skip(f"{base} is not shipped by this ultralytics release")
+    assert model(torch.rand(1, 3, 64, 64)) is not None
 
 
 @pytest.mark.parametrize("base", BACKBONES)
