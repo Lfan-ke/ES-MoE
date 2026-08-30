@@ -1,126 +1,105 @@
-# Tutorial
+# 教程
 
-Install it, add the block to a model, watch its loss reach the optimiser, then measure it properly.
+装上、把块加进模型、看它的损失进入优化器，再把效果量准。
 
-## What this is
+## 这是什么
 
-One block and three calls.
+一个块，三个调用。
 
-The block sends each image to a few of several convolutional experts and sums what they return. The
-experts differ in kernel size, so they differ in receptive field; a small router learns which ones an
-image needs. A load-balancing term keeps the router from collapsing onto one expert, and it is part
-of the loss being optimised.
+块把每张图交给若干卷积专家里的少数几个，再把它们的输出加权求和。专家的核大小不同，感受野也就不同；一个轻量路由器学着判断哪张图该用谁。负载均衡项防止路由坍塌到单个专家，它本身就是被优化的损失的一部分。
 
-The calls: `inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the
-layer references, `attach_aux_loss` wires the router loss into training. `equip` runs all three.
+三个调用：`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把路由损失接进训练。`equip` 一次跑完。
 
-## Install
+## 安装
 
     pip install esmoe
 
-## The block in one picture
+## 一张图看懂这个块
 
 ```mermaid
 flowchart LR
-    X["feature map<br/>(n, c, h, w)"] --> R["router<br/>pool -> linear -> SiLU -> linear"]
-    R --> P["softmax over experts"]
-    P --> T["top-k, renormalised"]
-    X --> E1["expert k=3"]
-    X --> E2["expert k=5"]
-    X --> E3["expert k=7"]
-    X --> E4["expert k=9"]
-    T --> S(("weighted sum"))
+    X["特征图<br/>(n, c, h, w)"] --> R["路由器<br/>池化 -> 线性 -> SiLU -> 线性"]
+    R --> P["按专家 softmax"]
+    P --> T["top-k 并重归一"]
+    X --> E1["专家 k=3"]
+    X --> E2["专家 k=5"]
+    X --> E3["专家 k=7"]
+    X --> E4["专家 k=9"]
+    T --> S(("加权求和"))
     E1 --> S
     E2 --> S
     E3 --> S
     E4 --> S
-    S --> Y["output<br/>(n, c, h, w)"]
-    P -.-> A["load-balancing loss"]
+    S --> Y["输出<br/>(n, c, h, w)"]
+    P -.-> A["负载均衡损失"]
     T -.-> A
-    A -.-> L["training loss"]
+    A -.-> L["训练总损失"]
 ```
 
-Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the
-experts differ in receptive field rather than merely in weights. A lightweight router scores the
-experts per image, the top-k are kept and renormalised, and the block returns their weighted sum.
-The block preserves channel count, which is what lets a stock `parse_model` size it.
+每个专家是一路深度可分离卷积，各自带不同的核大小（3、5、7、9……），所以专家之间的差别在**感受野**而不只是权重。轻量路由器按图给专家打分，取 top-k 后重新归一化，块返回它们的加权和。块保持通道数不变，这正是官方 `parse_model` 能为它定尺寸的前提。
 
-The auxiliary term is the Switch-Transformer load-balancing loss,
+辅助项是 Switch-Transformer 的负载均衡损失：
 
 $$
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
 $$
 
-where $E$ is the expert count, $\bar{p}_i$ the mean routing probability of expert $i$ over the batch
-and $f_i$ the fraction of samples that actually activated it. It is minimised when routing mass and
-realised load are spread evenly, which is what keeps the router from collapsing onto one expert.
+其中 $E$ 是专家数，$\bar{p}_i$ 是专家 $i$ 在该批次上的平均路由概率，$f_i$ 是实际激活它的样本比例。当路由质量与实际负载都摊平时该项最小，这是防止路由坍塌到单个专家的机制。
 
-## Five minutes
+## 五分钟上手
 
     import esmoe
 
     model = esmoe.equip("yolo11n.yaml", weight=0.01)
     model.train(data="coco8.yaml", epochs=3, imgsz=320)
 
-`equip` does four things: registers `ESMoE` so a config can name it, grafts it onto the backbone,
-builds the model, and wires the auxiliary loss into training. Take them apart when you need to:
+`equip` 做四件事：注册 `ESMoE` 让配置能引用它、把它接到主干上、构建模型、把辅助损失接进训练。需要控制细节时可以拆开：
 
     esmoe.inject_esmoe()
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
     model = YOLO("v8-esmoe.yaml")
     esmoe.attach_aux_loss(model, weight=0.01)
 
-or from the shell:
+或者用命令行：
 
     esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
 
-## What grafting has to get right
+## 接入时必须做对的一件事
 
-A YOLO config addresses earlier layers by absolute index:
+YOLO 配置用**绝对层号**引用前面的层：
 
     - [[-1, 12], 1, Concat, [1]]
 
-Insert a layer at position 10 and every reference at or past 10 now points one layer too early. The
-model still builds, still trains, and is quietly wrong. `graft` therefore renumbers every reference
-that sits at or after each insertion point, and a unit test compares the rewritten head against the
-original one reference by reference.
+在第 10 层的位置插一层，所有大于等于 10 的引用就都往前错了一层。模型照样能建、照样能训，但已经悄悄接错。所以 `graft` 会对每个插入点之后的引用统一重编号，并有单测把改写后的 head 与原 head 逐条引用比对。
 
-## Proving the auxiliary loss is real
+## 怎么证明辅助损失是真的
 
-A configuration key named `aux_loss` proves nothing. What proves it:
+配置里有个叫 `aux_loss` 的键什么都证明不了。能证明的是：
 
-1. `results.csv` gains an `esmoe_aux` column, non-zero and moving;
-2. a unit test asserts `total(with aux) == total(without) + aux * batch_size`;
-3. the same test asserts the router receives gradient.
+1. `results.csv` 里多出 `esmoe_aux` 列，非零且在变化；
+2. 单测断言 `总损失(带 aux) == 总损失(不带) + aux × batch_size`；
+3. 同一个测试断言路由器确实拿到梯度。
 
-If you want the number yourself in a custom loop:
+如果你在自定义训练循环里要这个值：
 
     aux = esmoe.collect_aux_loss(model)
     (task_loss + 0.01 * aux).backward()
 
-`collect_aux_loss` only sums values published by the latest forward pass, so calling it twice cannot
-double-count a stale graph.
+`collect_aux_loss` 只汇总最近一次前向发布的值，所以连着调用两次不会把陈旧的计算图重复计入。
 
-## A comparison you can defend
+## 一次站得住的对照实验
 
-    uv run python scripts/capture_env.py             # freeze versions and hardware into env/
+    uv run python scripts/capture_env.py             # 把版本与硬件冻进 env/
     EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
     uv run python scripts/report.py                  # results/summary.md
 
-Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,
-metrics, artifact path, status, limitation. `report.py` groups arms by backbone, block config *and*
-budget - never averaging two different budgets into one row - then prints per-seed paired deltas
-against the baseline of the same seed.
+每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。`report.py` 按主干、块配置**和预算**三者共同分组 - 绝不把两个不同预算平均进同一行 - 然后对同 seed 的基线打印逐 seed 配对差值。
 
-Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
-experiment; what carries the claim is that the same seed, same data and same schedule moved in the
-same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie - a small, consistent effect, not a
-reliable per-run improvement. `limitations.md` states the rest.
+要看的是配对表，不是两个均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，而其中一个 seed 几乎是平局 - 这是一个方向一致但幅度很小的效应，不是单次运行可靠的提升。其余边界写在 `limitations.md`。
 
-## Extending
+## 扩展
 
-Experts and the balancing objective are plain callables:
+专家与均衡目标都是普通的 callable：
 
     class ThinExpert(nn.Sequential):
         def __init__(self, c1, c2, k):
@@ -131,18 +110,11 @@ Experts and the balancing objective are plain callables:
 
     block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
 
-`esmoe.blocks(model)` iterates every block in a model, which is how the collector and the tests find
-them.
+`esmoe.blocks(model)` 遍历模型中的每一个块，汇总器与测试都靠它定位。
 
-## Pitfalls worth knowing
+## 值得知道的几个坑
 
-- **Channels are inferred on the first forward.** Ultralytics runs a forward pass while building the
-  model, so this is invisible in normal use - but a model that is scripted or `state_dict`-loaded
-  before any forward has no expert weights to load into yet.
-- **The trainer rebuilds the model** from the config, and takes the EMA copy before any callback
-  runs. The aux weight therefore lives at process scope as well as on the instance; a process trains
-  one aux setting at a time.
-- **Loss items changed shape across ultralytics releases** - a tensor before 8.4.13x, a named dict
-  after. Both are handled; if you patch the loss yourself, handle both.
-- **A checkpoint reloaded in a process that never calls `attach_aux_loss`** trains without the
-  auxiliary term. The block still runs; only the extra loss is missing.
+- **通道在首次前向时推断。** Ultralytics 在构建模型时就会跑一次前向，所以正常使用中察觉不到；但如果模型在任何前向之前就被 script 或 `state_dict` 加载，此时还没有专家权重可供载入。
+- **trainer 会从配置重建模型**，并且 EMA 副本在任何 callback 之前生成。因此 aux 权重除了挂在实例上还存在进程作用域；一个进程一次只训练一种 aux 设置。
+- **loss items 的形态跨版本变过** - 8.4.13x 之前是 tensor，之后是具名 dict。两种都已处理；如果你自己 patch 损失，也要两种都处理。
+- **在从未调用 `attach_aux_loss` 的进程里重新加载 checkpoint**，训练时不带辅助项。块本身照常运行，只是少了那一项额外损失。
