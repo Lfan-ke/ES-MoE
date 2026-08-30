@@ -16,7 +16,7 @@
 </p>
 
 <div align=center>
-  <sub>It installs beside the official <code>ultralytics</code> package instead of replacing it with a fork, and it ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.</sub>
+  <sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it.</sub>
 </div>
 
 ---
@@ -31,7 +31,7 @@
 
 The distribution, the import and the CLI are all `esmoe`; the project is written ES-MoE in prose.
 
-Requires a stock `ultralytics`; nothing from the YOLO-Master fork is needed at runtime.
+Requires `ultralytics`.
 
 ## Use
 

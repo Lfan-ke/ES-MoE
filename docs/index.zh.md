@@ -1,12 +1,12 @@
 <div class="es-hero" markdown>
 <div class="es-hero__eyebrow">4 选 2 专家路由</div>
 <h1 class="es-hero__claim">装得上的 ES-MoE，<em>验得了</em>的证据。</h1>
-<p class="es-hero__lede">面向 Ultralytics YOLO 的即插即用专家稀疏混合模块。它装在官方包旁边，而不是用 fork 顶替它；本站的每一处结论都对应仓库里的一条实验记录。</p>
+<p class="es-hero__lede">给 Ultralytics YOLO 加一层稀疏专家混合：一行接入，路由的负载均衡损失真正参与反向传播。本站每个数字背后都有一条可查的实验记录。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 
 <ul class="es-proof">
-<li><strong>装在官方包旁边</strong><span><code>pip install esmoe</code> - 不 fork、不打补丁、可干净卸载。</span></li>
+<li><strong>一个调用就装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
 <li><strong>辅助损失真的进了 backward()</strong><span><code>results.csv</code> 里的 <code>esmoe_aux</code> 列，由单测断言，而不是配置里有个键。</span></li>
 <li><strong>量过，又重量了一遍</strong><span>YOLOv8n 上 20 epoch 3/3 seed、+0.0021 mAP50，50 epoch +0.0013；YOLO11n 上则打平。证据说明它在哪儿有用。</span></li>
 </ul>

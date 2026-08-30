@@ -1,19 +1,18 @@
 # Tutorial
 
-This walks through the whole path: install the block, put it into a stock YOLO, prove its auxiliary
-loss actually reaches the optimiser, and run a comparison whose result you can defend.
+Install it, add the block to a model, watch its loss reach the optimiser, then measure it properly.
 
-## Why a plug-in and not a fork
+## What this is
 
-The ES-MoE block comes from [YOLO-Master](https://github.com/Tencent/YOLO-Master), whose package is
-itself named `ultralytics`. Installing it therefore *replaces* the official library rather than
-extending it: one import path, one winner, and every downstream tool now runs on a non-official
-distribution. Extracting the block by hand is no better - upstream `ES_MOE` reaches into a global
-loss registry, a mixture-loss collector and trainer plumbing that a single copied file does not
-bring with it.
+One block and three calls.
 
-`esmoe` takes the other route. It is a separate distribution that depends on `ultralytics`, uses
-only public extension points, and can be uninstalled without a trace.
+The block sends each image to a few of several convolutional experts and sums what they return. The
+experts differ in kernel size, so they differ in receptive field; a small router learns which ones an
+image needs. A load-balancing term keeps the router from collapsing onto one expert, and it is part
+of the loss being optimised.
+
+The calls: `inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the
+layer references, `attach_aux_loss` wires the router loss into training. `equip` runs all three.
 
 ## Install
 

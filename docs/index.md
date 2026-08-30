@@ -1,13 +1,13 @@
 <div class="es-hero" markdown>
 <div class="es-hero__eyebrow">top-2 of 4 experts</div>
 <h1 class="es-hero__claim">ES-MoE you can <em>install</em>, with evidence you can check.</h1>
-<p class="es-hero__lede">A drop-in expert-sparse Mixture-of-Experts block for Ultralytics YOLO. It sits beside the official
-package instead of replacing it with a fork, and every claim on this site is backed by a run record in the repository.</p>
+<p class="es-hero__lede">A sparse mixture of experts for Ultralytics YOLO. One call to add it, a router loss that really
+trains, and a run record behind every number on this site.</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">router picks 2 of 4 per image</div>
 
 <ul class="es-proof">
-<li><strong>Installs beside ultralytics</strong><span><code>pip install esmoe</code> - no fork, no patched library, clean uninstall.</span></li>
+<li><strong>One call to add it</strong><span><code>equip</code> grafts the block into a config, renumbers the head and wires the loss.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
 <li><strong>Measured, then re-measured</strong><span>On YOLOv8n: 3/3 seeds, +0.0021 mAP50 at 20 epochs, +0.0013 at 50. On YOLO11n: a wash. The evidence says where it works.</span></li>
 </ul>
