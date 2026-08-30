@@ -56,7 +56,7 @@ torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
 
 [tool.setuptools.packages.find]
-where = ["src"]
+include = ["esmoe*"]
 
 [tool.ruff]
 line-length = 120
