@@ -7,10 +7,11 @@ FRACTION=${FRACTION:-0.25}
 BATCH=${BATCH:-32}
 SEEDS=${SEEDS:-"0 1 2"}
 TAG=${TAG:-}
+BASE=${BASE:-yolov8n.yaml}
 
 for seed in $SEEDS; do
   for arch in "" "--esmoe"; do
-    timeout 14400 python3 scripts/train.py $arch --epochs "$EPOCHS" --fraction "$FRACTION" \
+    timeout 14400 python3 scripts/train.py $arch --base "$BASE" --epochs "$EPOCHS" --fraction "$FRACTION" \
       --batch "$BATCH" --seed "$seed" --tag="$TAG" || echo "run failed: seed=$seed arch=${arch:-baseline}"
   done
 done
