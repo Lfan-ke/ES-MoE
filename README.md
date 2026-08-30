@@ -7,20 +7,21 @@
 <br />
 
 <p align="center">
-  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=white&label=&color=3E7C8C"></a>
-  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-3E7C8C?logo=materialformkdocs&logoColor=white"></a>
-  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-E8A33D?logo=googlecolab&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/3.10+-3776AB?logo=python&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=3776AB&label=&color=FFD43B"></a>
+  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-006DE0?logo=materialformkdocs&logoColor=white"></a>
+  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-F9AB00?logo=googlecolab&logoColor=white"></a>
   <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-131A2B?logo=gnu&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
 </p>
 
 <div align=center>
-  <sub>It installs beside the official <code>ultralytics</code> package instead of replacing it with a fork, and it ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.</sub>
+  <sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it.</sub>
 </div>
 
 ---
 
-<sub>Docs: [English](https://lfan-ke.github.io/ES-MoE/) · [中文](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [DeepWiki](https://deepwiki.com/Lfan-ke/ES-MoE)</sub>
+<sub>Docs: [`English`](https://lfan-ke.github.io/ES-MoE/) · [`中文`](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
 
 <br />
 
@@ -30,7 +31,7 @@
 
 The distribution, the import and the CLI are all `esmoe`; the project is written ES-MoE in prose.
 
-Requires a stock `ultralytics`; nothing from the YOLO-Master fork is needed at runtime.
+Requires `ultralytics`.
 
 ## Use
 
@@ -82,19 +83,21 @@ for custom training loops.
 | YOLOv8 | yes | yes | yes |
 | YOLO11 | yes | yes | yes |
 | YOLO12 | yes | yes | yes |
-| YOLO26 | - | - | - |
+| YOLO26 | yes | yes | yes |
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
-in two different shapes; both are handled. The training column is backed by real 1-epoch runs on
-each generation (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
+in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
+runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
 
 ## Selected default
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
-2/4/8-expert and top-1 variants, then confirmed on three seeds: at 20 epochs on full VisDrone it wins
-3/3 paired (+0.0021 mAP50), at 50 epochs the gap narrows to +0.0013 (2/3) with mAP50-95 +0.0008
-(3/3). It buys earlier convergence rather than a higher ceiling, at +10.4% parameters. Reasoning and
-full tables: `docs/SELECTION.md`.
+2/4/8-expert and top-1 variants. On **YOLOv8n** the paired mean is positive at every budget tested - +0.0021 mAP50 at 20 epochs
+(3/3 seeds), +0.0013 at 50 (2/3), +0.0046 at 100 (2/3) - while the spread between seeds widens with
+the schedule, so it is a small average gain rather than a reliable per-run one, at +10.4%
+parameters. On **YOLO11n** the same comparison is a wash (1/3 seeds, -0.0009 mAP50): the accuracy
+effect does not transfer across backbones, while the mechanics do.
+Reasoning and full tables: `docs/SELECTION.md`.
 
 ## Develop and reproduce
 

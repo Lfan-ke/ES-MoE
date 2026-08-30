@@ -1,57 +1,63 @@
 <div class="es-hero" markdown>
-<div class="es-hero__eyebrow">top-2 of 4 experts</div>
-<h1 class="es-hero__claim">ES-MoE you can <em>install</em>, with evidence you can check.</h1>
-<p class="es-hero__lede">A drop-in expert-sparse Mixture-of-Experts block for Ultralytics YOLO. It sits beside the official
-package instead of replacing it with a fork, and every claim on this site is backed by a run record in the repository.</p>
+<div class="es-hero__eyebrow">4 选 2 专家路由</div>
+<h1 class="es-hero__claim">装得上的 ES-MoE，<em>验得了</em>的证据。</h1>
+<p class="es-hero__lede">给 Ultralytics YOLO 加一层稀疏专家混合：一行接入，路由的负载均衡损失真正参与反向传播。本站每个数字背后都有一条可查的实验记录。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
-<div class="es-router__label">router picks 2 of 4 per image</div>
+<div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 
 <ul class="es-proof">
-<li><strong>Installs beside ultralytics</strong><span><code>pip install esmoe</code> - no fork, no patched library, clean uninstall.</span></li>
-<li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>Measured, then re-measured</strong><span>3/3 seeds and +0.0021 mAP50 at 20 epochs; +0.0013 (2/3) at 50. Earlier convergence, not a higher ceiling.</span></li>
+<li><strong>一个调用就装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
+<li><strong>辅助损失真的进了 backward()</strong><span><code>results.csv</code> 里的 <code>esmoe_aux</code> 列，由单测断言，而不是配置里有个键。</span></li>
+<li><strong>量过，又重量了一遍</strong><span>YOLOv8n 上 20/50/100 epoch 分别 +0.0021 / +0.0013 / +0.0046 mAP50；YOLO11n 上打平。证据说明它在哪儿有用。</span></li>
 </ul>
 </div>
 
-[Open the quick start in Colab](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
-- install, equip, train and watch the `esmoe_aux` column, all on a free GPU.
+[在 Colab 里打开快速上手](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)
+- 安装、接入、训练，并在日志里看到 `esmoe_aux` 列，全程在免费 GPU 上完成。
 
-## Install
+## 安装
 
     pip install esmoe
 
-The distribution, the import and the CLI are all `esmoe`.
+分发名、import 名与命令行名统一都是 `esmoe`。
 
-## Use
+## 使用
 
     import esmoe
 
-    model = esmoe.equip("yolo11n.yaml", weight=0.01)   # register + graft + build + wire
+    model = esmoe.equip("yolo11n.yaml", weight=0.01)   # 注册 + 接入 + 构建 + 接损失
     model.train(data="coco8.yaml", epochs=10)
 
-The steps are also available on their own - `inject_esmoe()`, `graft(base, out=..., at=...)`,
-`attach_aux_loss(model, weight=...)` - and from the shell:
+各步骤也可单独使用 - `inject_esmoe()`、`graft(base, out=..., at=...)`、`attach_aux_loss(model, weight=...)` - 也可以走命令行：
 
     esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at backbone_end
 
-`attach_aux_loss` adds an `esmoe_aux` column to the trainer's loss table, so the auxiliary term is
-visible in `results.csv` as a back-propagated number rather than a configuration key.
+`attach_aux_loss` 会在 trainer 的损失表里加一项 `esmoe_aux`，于是这项非零、参与反向传播的辅助损失会出现在 `results.csv` 里，而不是只存在于配置中。
 
-## Compatibility
+手写时，接入后的配置层就是一行：
 
-| backbone | build + forward | grafted config | aux loss in training |
+    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+
+模块保持通道数不变，并在首次前向时推断宽度 - 这正是官方 `parse_model` 无需打补丁就能为它定尺寸的原因。
+
+## 兼容性
+
+| 主干 | 构建与前向 | 配置接入 | 训练中的 aux loss |
 |:--:|:--:|:--:|:--:|
-| YOLOv8 | yes | yes | yes |
-| YOLO11 | yes | yes | yes |
-| YOLO12 | yes | yes | yes |
-| YOLO26 | - | - | - |
+| YOLOv8 | 是 | 是 | 是 |
+| YOLO11 | 是 | 是 | 是 |
+| YOLO12 | 是 | 是 | 是 |
+| YOLO26 | yes | yes | yes |
 
-Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, plus a real 1-epoch
-training run per generation logging a non-zero `train/esmoe_aux`.
+由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证（两者的 loss items 形态不同，均已处理），另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。
 
-## Evidence
+## 出厂配置
 
-- [Selection](SELECTION.md) - which configuration ships as the default and why.
-- [Limitations](limitations.md) - what the numbers do not say. Read this before quoting any of them.
-- [Baseline and increment](BASELINE.md) - locked references and what counts as new work.
-- [Mid-term report](MIDTERM.md) - question, budget, evidence, open points.
+`ESMoE(num_experts=4, top_k=2)` 配 `attach_aux_loss(weight=0.01)`。它在统一预算下胜过 2/4/8 专家与 top-1 变体，并在全量 VisDrone 上以三个 seed 确认：配对 3/3 胜，mAP50 +0.0021，参数 +10.4%。论证见[选型](SELECTION.md)。
+
+## 证据与边界
+
+- [教程](tutorial.md) - 从安装到一次站得住的对照实验
+- [选型](SELECTION.md) - 为什么是 4 专家 top-2 与 0.01 的权重
+- [已知局限](limitations.md) - 引用任何数字之前请先读
+- [基线与增量](BASELINE.md) - 锁定的基线与"什么算本轮新增"
