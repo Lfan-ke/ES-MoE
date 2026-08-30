@@ -15,7 +15,7 @@
 </p>
 
 <div align=center>
-  <sub>It installs beside the official `ultralytics` package instead of replacing it with a fork, and it ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.</sub>
+  <sub>It installs beside the official <code>ultralytics</code> package instead of replacing it with a fork, and it ships budget-fair evidence plus an auxiliary loss that provably reaches the optimiser.</sub>
 </div>
 
 ---
@@ -108,6 +108,13 @@ full tables: `docs/SELECTION.md`.
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
 metrics, artifact, status, limitation). Read `limitations.md` before quoting any number.
+
+## Linked projects
+
+| project | what it is | how this repository relates |
+|:--:|:--:|:--:|
+| [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | The official YOLO framework | `esmoe` installs beside it and uses only its public extension points - no fork, no patch |
+| [Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master) | YOLO-style framework where ES-MoE originates ([paper](https://arxiv.org/abs/2512.23273)) | The block here is an independent implementation of that published design, kept installable on stock ultralytics |
 
 ## License
 
