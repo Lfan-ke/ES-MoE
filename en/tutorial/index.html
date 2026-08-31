@@ -379,10 +379,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-this-is" class="md-nav__link">
+  <a href="#what-the-block-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this is
+        What the block does
       
     </span>
   </a>
@@ -390,32 +390,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
+  <a href="#the-three-calls" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-block-in-one-picture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The block in one picture
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#five-minutes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Five minutes
+        The three calls
       
     </span>
   </a>
@@ -467,10 +445,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pitfalls-worth-knowing" class="md-nav__link">
+  <a href="#where-the-edges-are" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pitfalls worth knowing
+        Where the edges are
       
     </span>
   </a>
@@ -701,10 +679,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-this-is" class="md-nav__link">
+  <a href="#what-the-block-does" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What this is
+        What the block does
       
     </span>
   </a>
@@ -712,32 +690,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
+  <a href="#the-three-calls" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-block-in-one-picture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The block in one picture
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#five-minutes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Five minutes
+        The three calls
       
     </span>
   </a>
@@ -789,10 +745,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pitfalls-worth-knowing" class="md-nav__link">
+  <a href="#where-the-edges-are" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pitfalls worth knowing
+        Where the edges are
       
     </span>
   </a>
@@ -820,19 +776,11 @@
 
 
 <h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
-<p>Install it, add the block to a model, watch its loss reach the optimiser, then measure it properly.</p>
-<h2 id="what-this-is">What this is<a class="headerlink" href="#what-this-is" title="Permanent link">&para;</a></h2>
-<p>One block and three calls.</p>
-<p>The block sends each image to a few of several convolutional experts and sums what they return. The
-experts differ in kernel size, so they differ in receptive field; a small router learns which ones an
-image needs. A load-balancing term keeps the router from collapsing onto one expert, and it is part
-of the loss being optimised.</p>
-<p>The calls: <code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the
-layer references, <code>attach_aux_loss</code> wires the router loss into training. <code>equip</code> runs all three.</p>
-<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<p>Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.</p>
 <pre><code>pip install esmoe
 </code></pre>
-<h2 id="the-block-in-one-picture">The block in one picture<a class="headerlink" href="#the-block-in-one-picture" title="Permanent link">&para;</a></h2>
+<h2 id="what-the-block-does">What the block does<a class="headerlink" href="#what-the-block-does" title="Permanent link">&para;</a></h2>
+<p>The block sends each image to a few of several convolutional experts and sums what they return. Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the experts differ in receptive field rather than merely in weights. A lightweight router scores them per image, the top-k are kept and renormalised, and the block returns their weighted sum. The block preserves channel count, which is what lets a stock <code>parse_model</code> size it.</p>
 <pre class="mermaid-chart"><code>flowchart LR
     X["feature map&lt;br/&gt;(n, c, h, w)"] --&gt; R["router&lt;br/&gt;pool -&gt; linear -&gt; SiLU -&gt; linear"]
     R --&gt; P["softmax over experts"]
@@ -850,10 +798,6 @@ layer references, <code>attach_aux_loss</code> wires the router loss into traini
     P -.-&gt; A["load-balancing loss"]
     T -.-&gt; A
     A -.-&gt; L["training loss"]</code></pre>
-<p>Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the
-experts differ in receptive field rather than merely in weights. A lightweight router scores the
-experts per image, the top-k are kept and renormalised, and the block returns their weighted sum.
-The block preserves channel count, which is what lets a stock <code>parse_model</code> size it.</p>
 <p>The auxiliary term is the Switch-Transformer load-balancing loss,</p>
 <div class="arithmatex">\[
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
@@ -861,14 +805,14 @@ The block preserves channel count, which is what lets a stock <code>parse_model<
 <p>where <span class="arithmatex">\(E\)</span> is the expert count, <span class="arithmatex">\(\bar{p}_i\)</span> the mean routing probability of expert <span class="arithmatex">\(i\)</span> over the batch
 and <span class="arithmatex">\(f_i\)</span> the fraction of samples that actually activated it. It is minimised when routing mass and
 realised load are spread evenly, which is what keeps the router from collapsing onto one expert.</p>
-<h2 id="five-minutes">Five minutes<a class="headerlink" href="#five-minutes" title="Permanent link">&para;</a></h2>
+<h2 id="the-three-calls">The three calls<a class="headerlink" href="#the-three-calls" title="Permanent link">&para;</a></h2>
+<p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the router loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
 model.train(data="coco8.yaml", epochs=3, imgsz=320)
 </code></pre>
-<p><code>equip</code> does four things: registers <code>ESMoE</code> so a config can name it, grafts it onto the backbone,
-builds the model, and wires the auxiliary loss into training. Take them apart when you need to:</p>
+<p>Take them apart when you need to:</p>
 <pre><code>esmoe.inject_esmoe()
 esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
 model = YOLO("v8-esmoe.yaml")
@@ -876,6 +820,9 @@ esmoe.attach_aux_loss(model, weight=0.01)
 </code></pre>
 <p>or from the shell:</p>
 <pre><code>esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
+</code></pre>
+<p>Written by hand, the grafted layer is one line:</p>
+<pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 </code></pre>
 <h2 id="what-grafting-has-to-get-right">What grafting has to get right<a class="headerlink" href="#what-grafting-has-to-get-right" title="Permanent link">&para;</a></h2>
 <p>A YOLO config addresses earlier layers by absolute index:</p>
@@ -905,12 +852,12 @@ uv run python scripts/report.py                  # results/summary.md
 </code></pre>
 <p>Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,
 metrics, artifact path, status, limitation. <code>report.py</code> groups arms by backbone, block config <em>and</em>
-budget - never averaging two different budgets into one row - then prints per-seed paired deltas
+budget, never averaging two different budgets into one row, then prints per-seed paired deltas
 against the baseline of the same seed.</p>
 <p>Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
 same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie - a small, consistent effect, not a
+seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
 reliable per-run improvement. <code>limitations.md</code> states the rest.</p>
 <h2 id="extending">Extending<a class="headerlink" href="#extending" title="Permanent link">&para;</a></h2>
 <p>Experts and the balancing objective are plain callables:</p>
@@ -925,19 +872,8 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> iterates every block in a model, which is how the collector and the tests find
 them.</p>
-<h2 id="pitfalls-worth-knowing">Pitfalls worth knowing<a class="headerlink" href="#pitfalls-worth-knowing" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Channels are inferred on the first forward.</strong> Ultralytics runs a forward pass while building the
-  model, so this is invisible in normal use - but a model that is scripted or <code>state_dict</code>-loaded
-  before any forward has no expert weights to load into yet.</li>
-<li><strong>The trainer rebuilds the model</strong> from the config, and takes the EMA copy before any callback
-  runs. The aux weight therefore lives at process scope as well as on the instance; a process trains
-  one aux setting at a time.</li>
-<li><strong>Loss items changed shape across ultralytics releases</strong> - a tensor before 8.4.13x, a named dict
-  after. Both are handled; if you patch the loss yourself, handle both.</li>
-<li><strong>A checkpoint reloaded in a process that never calls <code>attach_aux_loss</code></strong> trains without the
-  auxiliary term. The block still runs; only the extra loss is missing.</li>
-</ul>
+<h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>
+<p>Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and <code>loss_items</code> changed shape across ultralytics releases. Those and the rest are in <a href="../limitations/">Limitations</a>, which is also the page to read before quoting any number.</p>
 
 
 
