@@ -1,24 +1,12 @@
 # Tutorial
 
-Install it, add the block to a model, watch its loss reach the optimiser, then measure it properly.
-
-## What this is
-
-One block and three calls.
-
-The block sends each image to a few of several convolutional experts and sums what they return. The
-experts differ in kernel size, so they differ in receptive field; a small router learns which ones an
-image needs. A load-balancing term keeps the router from collapsing onto one expert, and it is part
-of the loss being optimised.
-
-The calls: `inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the
-layer references, `attach_aux_loss` wires the router loss into training. `equip` runs all three.
-
-## Install
+Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.
 
     pip install esmoe
 
-## The block in one picture
+## What the block does
+
+The block sends each image to a few of several convolutional experts and sums what they return. Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the experts differ in receptive field rather than merely in weights. A lightweight router scores them per image, the top-k are kept and renormalised, and the block returns their weighted sum. The block preserves channel count, which is what lets a stock `parse_model` size it.
 
 ```mermaid
 flowchart LR
@@ -40,11 +28,6 @@ flowchart LR
     A -.-> L["training loss"]
 ```
 
-Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the
-experts differ in receptive field rather than merely in weights. A lightweight router scores the
-experts per image, the top-k are kept and renormalised, and the block returns their weighted sum.
-The block preserves channel count, which is what lets a stock `parse_model` size it.
-
 The auxiliary term is the Switch-Transformer load-balancing loss,
 
 $$
@@ -55,15 +38,16 @@ where $E$ is the expert count, $\bar{p}_i$ the mean routing probability of exper
 and $f_i$ the fraction of samples that actually activated it. It is minimised when routing mass and
 realised load are spread evenly, which is what keeps the router from collapsing onto one expert.
 
-## Five minutes
+## The three calls
+
+`inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the layer references, `attach_aux_loss` wires the router loss into training. `equip` does all four steps at once: register, graft, build, wire.
 
     import esmoe
 
     model = esmoe.equip("yolo11n.yaml", weight=0.01)
     model.train(data="coco8.yaml", epochs=3, imgsz=320)
 
-`equip` does four things: registers `ESMoE` so a config can name it, grafts it onto the backbone,
-builds the model, and wires the auxiliary loss into training. Take them apart when you need to:
+Take them apart when you need to:
 
     esmoe.inject_esmoe()
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
@@ -73,6 +57,10 @@ builds the model, and wires the auxiliary loss into training. Take them apart wh
 or from the shell:
 
     esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
+
+Written by hand, the grafted layer is one line:
+
+    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 
 ## What grafting has to get right
 
@@ -109,13 +97,13 @@ double-count a stale graph.
 
 Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,
 metrics, artifact path, status, limitation. `report.py` groups arms by backbone, block config *and*
-budget - never averaging two different budgets into one row - then prints per-seed paired deltas
+budget, never averaging two different budgets into one row, then prints per-seed paired deltas
 against the baseline of the same seed.
 
 Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
 same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie - a small, consistent effect, not a
+seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
 reliable per-run improvement. `limitations.md` states the rest.
 
 ## Extending
@@ -134,15 +122,6 @@ Experts and the balancing objective are plain callables:
 `esmoe.blocks(model)` iterates every block in a model, which is how the collector and the tests find
 them.
 
-## Pitfalls worth knowing
+## Where the edges are
 
-- **Channels are inferred on the first forward.** Ultralytics runs a forward pass while building the
-  model, so this is invisible in normal use - but a model that is scripted or `state_dict`-loaded
-  before any forward has no expert weights to load into yet.
-- **The trainer rebuilds the model** from the config, and takes the EMA copy before any callback
-  runs. The aux weight therefore lives at process scope as well as on the instance; a process trains
-  one aux setting at a time.
-- **Loss items changed shape across ultralytics releases** - a tensor before 8.4.13x, a named dict
-  after. Both are handled; if you patch the loss yourself, handle both.
-- **A checkpoint reloaded in a process that never calls `attach_aux_loss`** trains without the
-  auxiliary term. The block still runs; only the extra loss is missing.
+Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and `loss_items` changed shape across ultralytics releases. Those and the rest are in [Limitations](limitations.md), which is also the page to read before quoting any number.

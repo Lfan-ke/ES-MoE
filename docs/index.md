@@ -27,17 +27,7 @@
     model = esmoe.equip("yolo11n.yaml", weight=0.01)   # 注册 + 接入 + 构建 + 接损失
     model.train(data="coco8.yaml", epochs=10)
 
-各步骤也可单独调用：`inject_esmoe()`、`graft(base, out=..., at=...)`、`attach_aux_loss(model, weight=...)`。也可以走命令行：
-
-    esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at backbone_end
-
-`attach_aux_loss` 会在 trainer 的损失表里加一项 `esmoe_aux`。这一项非零、参与反向传播，并写进 `results.csv`，而不是只躺在配置里。
-
-手写时，接入后的配置层就是一行：
-
-    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
-
-块保持通道数不变，并在首次前向时推断宽度；官方 `parse_model` 因此无需打补丁就能为它定尺寸。
+分步接入、命令行与手写配置见[教程](tutorial.md)。
 
 ## 兼容性
 
