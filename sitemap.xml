@@ -29,32 +29,11 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/PR_DRAFT/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.0/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/RELEASE/</loc>
         <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.0/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.0/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.1/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.1/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.1/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.2/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.2/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.2/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.3/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.3/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.3/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/SELECTION/</loc>
@@ -113,32 +92,11 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/PR_DRAFT/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.0/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/en/RELEASE/</loc>
         <lastmod>2026-08-31</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.0/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.0/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.1/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.1/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.1/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.2/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.2/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.2/"/>
-    </url>
-    <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.3/</loc>
-        <lastmod>2026-08-31</lastmod>
-        <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE_v0.1.3/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE_v0.1.3/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/RELEASE/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/en/SELECTION/</loc>
