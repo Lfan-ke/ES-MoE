@@ -1,6 +1,6 @@
 <div class="es-hero" markdown>
 <div class="es-hero__eyebrow">4 选 2 专家路由</div>
-<h1 class="es-hero__claim">给 Ultralytics YOLO 装一层<em>稀疏专家混合</em></h1>
+<h1 class="es-hero__claim">给 Ultralytics YOLO 装上<em>稀疏专家混合</em></h1>
 <p class="es-hero__lede">一行接入，路由的负载均衡损失进入反向传播。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">每张图从 4 个专家里选 2 个</div>
