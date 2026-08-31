@@ -51,6 +51,7 @@ plugins:
             已知局限: Limitations
             基线与增量: Baseline and increment
             中期报告: Mid-term report
+            发布说明: Release notes
             上游 PR 草稿: Upstream PR draft
 
 nav:
@@ -62,10 +63,7 @@ nav:
   - 基线与增量: BASELINE.md
   - 中期报告: MIDTERM.md
   - 上游 PR 草稿: PR_DRAFT.md
-  - Release 0.1.3: RELEASE_v0.1.3.md
-  - Release 0.1.2: RELEASE_v0.1.2.md
-  - Release 0.1.1: RELEASE_v0.1.1.md
-  - Release 0.1.0: RELEASE_v0.1.0.md
+  - 发布说明: RELEASE.md
 
 markdown_extensions:
   - admonition

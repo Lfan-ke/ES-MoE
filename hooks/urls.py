@@ -5,6 +5,9 @@ from pathlib import Path
 
 SKIP = {"en", "zh", "assets", "search", "stylesheets", "javascripts"}
 
+# 四份小版本说明并成了一份,老地址继续应答。
+MOVED = {f"RELEASE_v0.1.{patch}": "RELEASE" for patch in range(4)}
+
 ALIAS = """<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
 <title>ES-MoE</title>
@@ -40,6 +43,13 @@ def on_post_build(config) -> None:
         alias = site.joinpath("zh", *parts, "index.html")
         alias.parent.mkdir(parents=True, exist_ok=True)
         alias.write_text(ALIAS.format(target=f"{base}/{'/'.join(parts)}{'/' if parts else ''}"), encoding="utf-8")
+
+    for old, new in MOVED.items():
+        for language in ("", "zh/", "en/"):
+            target = f"{base}/{'en/' if language == 'en/' else ''}{new}/"
+            stub = site / language.rstrip("/") / old / "index.html" if language else site / old / "index.html"
+            stub.parent.mkdir(parents=True, exist_ok=True)
+            stub.write_text(ALIAS.format(target=target), encoding="utf-8")
 
     (site / "en").mkdir(exist_ok=True)
     for pages_of_language in (chinese, english):
