@@ -769,23 +769,23 @@
 
 
 <h1 id="_1">已知局限<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p><code>results/</code> 里那些证据的边界，不等人来问再说。</p>
+<p><code>results/</code> 里这些证据的边界，写在这里。</p>
 <h2 id="_2">基准范围<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
 <li>数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。<strong>这不是 COCO 数字</strong>，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。</li>
-<li>短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定"同预算下两个块的排序"，不预测收敛后的差距。</li>
-<li>单机单卡 RTX 4090 D。没有多卡/DDP 运行，因此 DDP 下辅助损失的行为未经验证。</li>
+<li>短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。</li>
+<li>单机单卡 RTX 4090 D，没有多卡运行，DDP 下辅助损失的行为未经验证。</li>
 </ul>
 <h2 id="_3">方法范围<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>ESMoE</code> 保持通道数：映射 <code>c1 -&gt; c1</code>。上游 <code>ES_MOE</code> 还支持 <code>c1 -&gt; c2</code>，该路径<strong>刻意未复现</strong> - 因为官方 <code>parse_model</code> 对第三方模块假定 <code>c2 == ch[f]</code>。</li>
+<li><code>ESMoE</code> 保持通道数，映射为 <code>c1 -&gt; c1</code>。上游 <code>ES_MOE</code> 还支持 <code>c1 -&gt; c2</code>，该路径<strong>刻意未复现</strong>：官方 <code>parse_model</code> 对第三方模块假定 <code>c2 == ch[f]</code>。</li>
 <li>通道在首次前向时推断。若模型在任何前向之前被 script、导出或 <code>state_dict</code> 加载，此时尚无专家权重可载入。</li>
-<li><code>attach_aux_loss</code> 会 patch 任务模型的类，并把权重同时保存在进程作用域 - 因为 trainer 会重建模型、且 EMA 副本在任何 callback 之前生成。因此一个进程一次只训练一种 aux 设置；在从未调用 <code>attach_aux_loss</code> 的进程里加载 checkpoint，训练时不带辅助项。</li>
-<li>负载均衡项采用 Switch-Transformer 形式（<code>num_experts * sum(importance * load)</code>），<strong>未</strong>做 aux 幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。</li>
+<li><code>attach_aux_loss</code> 会 patch 任务模型的类，并把权重同时保存在进程作用域：trainer 会重建模型，EMA 副本又在所有 callback 之前生成。因此一个进程一次只训练一种辅助损失设置；在从未调用 <code>attach_aux_loss</code> 的进程里加载 checkpoint，训练时不带辅助项。</li>
+<li>负载均衡项采用 Switch-Transformer 形式（<code>num_experts * sum(importance * load)</code>），<strong>未</strong>做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。</li>
 </ul>
 <h2 id="_4">报告口径<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
-<li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎是平局（mAP50 +0.0001），所以该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
+<li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎打平（mAP50 +0.0001），因此该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
 <li>除参数增加外，该块每轮墙钟约多 5%（全量单次运行 829 s 对 790 s，单卡 RTX 4090 D）。</li>
 </ul>
 

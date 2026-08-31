@@ -404,7 +404,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        一张图看懂这个块
+        块的结构
       
     </span>
   </a>
@@ -415,7 +415,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        五分钟上手
+        快速上手
       
     </span>
   </a>
@@ -426,7 +426,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        接入时必须做对的一件事
+        接入时必须重编号
       
     </span>
   </a>
@@ -437,7 +437,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么证明辅助损失是真的
+        怎么证明辅助损失确实生效
       
     </span>
   </a>
@@ -470,7 +470,7 @@
   <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        值得知道的几个坑
+        几处需要注意的地方
       
     </span>
   </a>
@@ -807,7 +807,7 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        一张图看懂这个块
+        块的结构
       
     </span>
   </a>
@@ -818,7 +818,7 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        五分钟上手
+        快速上手
       
     </span>
   </a>
@@ -829,7 +829,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        接入时必须做对的一件事
+        接入时必须重编号
       
     </span>
   </a>
@@ -840,7 +840,7 @@
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么证明辅助损失是真的
+        怎么证明辅助损失确实生效
       
     </span>
   </a>
@@ -873,7 +873,7 @@
   <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        值得知道的几个坑
+        几处需要注意的地方
       
     </span>
   </a>
@@ -901,15 +901,15 @@
 
 
 <h1 id="_1">教程<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>装上、把块加进模型、看它的损失进入优化器，再把效果量准。</p>
+<p>装上、把块加进模型、确认它的损失进入优化器，再把效果量准。</p>
 <h2 id="_2">这是什么<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>一个块，三个调用。</p>
-<p>块把每张图交给若干卷积专家里的少数几个，再把它们的输出加权求和。专家的核大小不同，感受野也就不同；一个轻量路由器学着判断哪张图该用谁。负载均衡项防止路由坍塌到单个专家，它本身就是被优化的损失的一部分。</p>
+<p>块把每张图交给若干卷积专家里的少数几个，再把它们的输出加权求和。专家的核大小不同，感受野也就不同；由一个轻量路由器按图打分，决定用哪几个。负载均衡项防止路由坍塌到单个专家，它本身就是被优化的损失的一部分。</p>
 <p>三个调用：<code>inject_esmoe</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把路由损失接进训练。<code>equip</code> 一次跑完。</p>
 <h2 id="_3">安装<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <pre><code>pip install esmoe
 </code></pre>
-<h2 id="_4">一张图看懂这个块<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_4">块的结构<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <pre class="mermaid-chart"><code>flowchart LR
     X["特征图&lt;br/&gt;(n, c, h, w)"] --&gt; R["路由器&lt;br/&gt;池化 -&gt; 线性 -&gt; SiLU -&gt; 线性"]
     R --&gt; P["按专家 softmax"]
@@ -927,13 +927,13 @@
     P -.-&gt; A["负载均衡损失"]
     T -.-&gt; A
     A -.-&gt; L["训练总损失"]</code></pre>
-<p>每个专家是一路深度可分离卷积，各自带不同的核大小（3、5、7、9……），所以专家之间的差别在<strong>感受野</strong>而不只是权重。轻量路由器按图给专家打分，取 top-k 后重新归一化，块返回它们的加权和。块保持通道数不变，这正是官方 <code>parse_model</code> 能为它定尺寸的前提。</p>
+<p>每个专家是一路深度可分离卷积，各自带不同的核大小（3、5、7、9……），所以专家之间的差别在<strong>感受野</strong>而不只是权重。轻量路由器按图给专家打分，取 top-k 后重新归一化，块返回它们的加权和。块保持通道数不变，官方 <code>parse_model</code> 才能为它定尺寸。</p>
 <p>辅助项是 Switch-Transformer 的负载均衡损失：</p>
 <div class="arithmatex">\[
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
 \]</div>
 <p>其中 <span class="arithmatex">\(E\)</span> 是专家数，<span class="arithmatex">\(\bar{p}_i\)</span> 是专家 <span class="arithmatex">\(i\)</span> 在该批次上的平均路由概率，<span class="arithmatex">\(f_i\)</span> 是实际激活它的样本比例。当路由质量与实际负载都摊平时该项最小，这是防止路由坍塌到单个专家的机制。</p>
-<h2 id="_5">五分钟上手<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_5">快速上手<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
@@ -948,19 +948,19 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>或者用命令行：</p>
 <pre><code>esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
 </code></pre>
-<h2 id="_6">接入时必须做对的一件事<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_6">接入时必须重编号<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>YOLO 配置用<strong>绝对层号</strong>引用前面的层：</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
 </code></pre>
 <p>在第 10 层的位置插一层，所有大于等于 10 的引用就都往前错了一层。模型照样能建、照样能训，但已经悄悄接错。所以 <code>graft</code> 会对每个插入点之后的引用统一重编号，并有单测把改写后的 head 与原 head 逐条引用比对。</p>
-<h2 id="_7">怎么证明辅助损失是真的<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h2 id="_7">怎么证明辅助损失确实生效<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>配置里有个叫 <code>aux_loss</code> 的键什么都证明不了。能证明的是：</p>
 <ol>
 <li><code>results.csv</code> 里多出 <code>esmoe_aux</code> 列，非零且在变化；</li>
 <li>单测断言 <code>总损失(带 aux) == 总损失(不带) + aux × batch_size</code>；</li>
 <li>同一个测试断言路由器确实拿到梯度。</li>
 </ol>
-<p>如果你在自定义训练循环里要这个值：</p>
+<p>在自定义训练循环里取这个值：</p>
 <pre><code>aux = esmoe.collect_aux_loss(model)
 (task_loss + 0.01 * aux).backward()
 </code></pre>
@@ -970,8 +970,8 @@ esmoe.attach_aux_loss(model, weight=0.01)
 EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>
-<p>每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。<code>report.py</code> 按主干、块配置<strong>和预算</strong>三者共同分组 - 绝不把两个不同预算平均进同一行 - 然后对同 seed 的基线打印逐 seed 配对差值。</p>
-<p>要看的是配对表，不是两个均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，而其中一个 seed 几乎是平局 - 这是一个方向一致但幅度很小的效应，不是单次运行可靠的提升。其余边界写在 <code>limitations.md</code>。</p>
+<p>每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。<code>report.py</code> 按主干、块配置与<strong>预算</strong>三者共同分组，两个不同预算不会被平均进同一行；随后对同 seed 的基线打印逐 seed 的配对差值。</p>
+<p>要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，但其中一个 seed 几乎打平；这是一个方向一致而幅度很小的效应，单次运行并不可靠。其余边界写在 <code>limitations.md</code>。</p>
 <h2 id="_9">扩展<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <p>专家与均衡目标都是普通的 callable：</p>
 <pre><code>class ThinExpert(nn.Sequential):
@@ -984,11 +984,11 @@ def entropy_balance(probs, gate):
 block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
-<h2 id="_10">值得知道的几个坑<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h2 id="_10">几处需要注意的地方<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>通道在首次前向时推断。</strong> Ultralytics 在构建模型时就会跑一次前向，所以正常使用中察觉不到；但如果模型在任何前向之前就被 script 或 <code>state_dict</code> 加载，此时还没有专家权重可供载入。</li>
-<li><strong>trainer 会从配置重建模型</strong>，并且 EMA 副本在任何 callback 之前生成。因此 aux 权重除了挂在实例上还存在进程作用域；一个进程一次只训练一种 aux 设置。</li>
-<li><strong>loss items 的形态跨版本变过</strong> - 8.4.13x 之前是 tensor，之后是具名 dict。两种都已处理；如果你自己 patch 损失，也要两种都处理。</li>
+<li><strong>trainer 会从配置重建模型</strong>，并且 EMA 副本在任何 callback 之前生成。因此辅助损失权重除了挂在实例上，还存进程作用域；一个进程一次只训练一种辅助损失设置。</li>
+<li><strong><code>loss_items</code> 的形态跨版本变过</strong>：8.4.13x 之前是 <code>tensor</code>，之后是具名 <code>dict</code>。两种都已处理；自己 patch 损失时，也要两种都处理。</li>
 <li><strong>在从未调用 <code>attach_aux_loss</code> 的进程里重新加载 checkpoint</strong>，训练时不带辅助项。块本身照常运行，只是少了那一项额外损失。</li>
 </ul>
 
