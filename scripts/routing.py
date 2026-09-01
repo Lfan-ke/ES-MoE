@@ -95,15 +95,55 @@ def route(weights: Path, data: Path, args) -> dict:
     }
 
 
+def summarise(records: list[dict]) -> str:
+    """One table per checkpoint plus the reading that survives all of them."""
+    lines = [
+        "# Router behaviour on VisDrone val",
+        "",
+        "Per checkpoint: the share of images on which each expert is the top-1 choice, the share on which it "
+        "is in the top-2, the mean routing probability, and the correlation of that probability with the "
+        "mean object size and the object count of the image.",
+        "",
+    ]
+    for r in records:
+        e = len(r["kernels"])
+        lines += [
+            f"## {r['weights']}",
+            "",
+            f"{r['images']} images, kernels {r['kernels']}, top-{r['top_k']}, "
+            f"dead experts: {r['dead_experts'] or 'none'}, "
+            f"mean entropy {r['prob_entropy_mean']} of {r['prob_entropy_max']}, "
+            f"distinct top-2 pairs seen: {r['unique_top2_sets']} of {e * (e - 1) // 2}.",
+            "",
+            "| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
+        ]
+        for j in range(e):
+            cells = (
+                f"{r['kernels'][j]} | {r['top1_share'][j]:.3f} | {r['usage'][j]:.3f} | {r['mean_prob'][j]:.3f} | "
+                f"{r['prob_vs_scale_corr'][j]:+.2f} | {r['prob_vs_count_corr'][j]:+.2f}"
+            )
+            lines.append(f"| {j} | {cells} |")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("weights", nargs="+", type=Path)
+    parser.add_argument("weights", nargs="*", type=Path)
     parser.add_argument("--data", type=Path, default=ROOT / "configs" / "visdrone.yaml")
     parser.add_argument("--imgsz", type=int, default=800)
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--summarise", action="store_true", help="only rebuild results/routing.md from saved records")
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
+    if args.summarise:
+        records = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*.json"))]
+        target = ROOT / "results" / "routing.md"
+        target.write_text(summarise(records), encoding="utf-8")
+        print(f"{len(records)} records -> {target}")
+        return 0
     for weights in args.weights:
         record = route(weights, args.data, args)
         (OUT / f"{weights.stem}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")

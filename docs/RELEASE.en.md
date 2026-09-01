@@ -1,8 +1,20 @@
 # Release notes
 
-Current version **0.1.3**.
+Current version **0.1.4**.
+
+## Added
+
+- **DDP support.** ultralytics launches multi-GPU workers from a generated file that imports only the trainer's module, so a worker never imported esmoe and failed to build the model with `KeyError: 'ESMoE'`. `attach_aux_loss` now makes `model.train()` pick a trainer subclass that lives in `esmoe.trainer`: importing it registers the block, restores the auxiliary-loss weight from the environment and patches `BaseModel.loss`. `scripts/verify.py` gains two checks: the real worker file trains one epoch in a fresh interpreter, and two gloo ranks each compute their own auxiliary term with router gradients agreeing after all-reduce. Limit: sparse dispatch needs `find_unused_parameters=True`, which `compile=True` switches off; that combination is unsupported.
+- **`graft(..., rewire=True)`.** Renumbering moves references without retargeting them, so a head branch that names the old backbone end by index (YOLOv8's P5 lateral `[-1, 9] Concat`) keeps reading SPPF after the insertion and the block reaches P5 only through the top-down path. `rewire` points every such consumer at the block. Off by default to keep existing records comparable; the two wirings have not yet been compared under one budget.
+- `scripts/train.py --patience` (default 0, early stopping off) and `IMGSZ` / `PATIENCE` / `ARMS` in `sweep.sh`, for runs under the repository protocol (imgsz 800, 120 epochs).
+- `scripts/buckets.py`, COCO-style area buckets at maxDets 500; `scripts/routing.py`, expert usage on the validation set and whether routing follows object scale.
+- Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.
 
 ## Fixed
+
+- `scripts/report.py` now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.
+
+## Earlier: 0.1.3
 
 - **Exported models no longer ignore routing.** The block skips experts whose gate is zero, which is a data-dependent decision: a tracer records the routing of the example input, and the exported graph then uses those same experts for every later input. On a block whose routing follows its input, an ONNX export taken on one input differed from PyTorch by 0.2 on an input that routes elsewhere; it now differs by 1e-7. The block runs all experts while tracing and keeps the shortcut at run time, so nothing outside export gets slower.
 

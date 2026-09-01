@@ -7,3 +7,7 @@
 ## 面积分档
 
 --8<-- "results/buckets.md"
+
+## 路由行为
+
+--8<-- "results/routing.md"

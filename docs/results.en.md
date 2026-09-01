@@ -10,3 +10,7 @@ tables rather than the two means, and read [limitations](limitations.md) before 
 ## Area buckets
 
 --8<-- "results/buckets.md"
+
+## Router behaviour
+
+--8<-- "results/routing.md"

@@ -89,15 +89,23 @@ Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, whic
 in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
 runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
 
+DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
+worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
+`scripts/verify.py` (the real worker file in a fresh interpreter; two gloo ranks with agreeing router gradients).
+Not supported together with `compile=True`, which turns off `find_unused_parameters`.
+
 ## Selected default
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
-2/4/8-expert and top-1 variants. On **YOLOv8n** the paired mean is positive at every budget tested - +0.0021 mAP50 at 20 epochs
-(3/3 seeds), +0.0013 at 50 (2/3), +0.0046 at 100 (2/3) - while the spread between seeds widens with
-the schedule, so it is a small average gain rather than a reliable per-run one, at +10.4%
-parameters. On **YOLO11n** the same comparison is a wash (1/3 seeds, -0.0009 mAP50): the accuracy
-effect does not transfer across backbones, while the mechanics do.
-Reasoning and full tables: `docs/SELECTION.md`.
+2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
+the paired result on **YOLOv8n** is +0.0025 mAP50 (2/3 seeds) and +0.0004 mAP50-95, at +10.4% parameters and
+about 9% more wall-clock per epoch. By COCO-style area bucket, large objects get consistently worse (APl −0.010,
+0/3) and small-object recall consistently better (ARs +0.003, 3/3). On **YOLO11n** the same comparison is a
+wash: the mechanics transfer across backbones, the accuracy effect does not.
+
+The default graft leaves YOLOv8's P5 lateral reading SPPF rather than the block; `graft(..., rewire=True)` changes
+that and is the next comparison to run. Reasoning and full tables: `docs/SELECTION.md`, `results/buckets.md`,
+`results/routing.md`.
 
 ## Develop and reproduce
 
