@@ -28,6 +28,7 @@ def graft(
     at: Spot = "backbone_end",
     num_experts: int = 4,
     top_k: int = 2,
+    rewire: bool = False,
 ) -> dict:
     """Insert ESMoE blocks after the given layers and renumber every later reference.
 
@@ -40,6 +41,9 @@ def graft(
         at: ``"backbone_end"`` (default), a layer index, or several indices.
         num_experts: Experts per block.
         top_k: Experts activated per sample.
+        rewire: Also point every later consumer of an insertion layer at the block that now
+            follows it. Off, a head branch that names the old backbone end by index keeps
+            reading the pre-block feature (YOLOv8's P5 lateral does exactly that).
     """
     from ultralytics.nn.tasks import yaml_model_load
 
@@ -58,7 +62,8 @@ def graft(
             grafted.append([-1, 1, "ESMoE", [num_experts, top_k]])
             backbone_len += index < len(backbone)
 
-    renumbered = [[_shift(layer[0], moved), *layer[1:]] for layer in grafted]
+    targets = moved | {s: moved[s] + 1 for s in spots} if rewire else moved
+    renumbered = [[_shift(layer[0], targets), *layer[1:]] for layer in grafted]
     d["backbone"], d["head"] = renumbered[:backbone_len], renumbered[backbone_len:]
     if out:
         from ultralytics.utils import YAML

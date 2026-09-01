@@ -20,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     graft_cmd.add_argument("-e", "--num-experts", type=int, default=4)
     graft_cmd.add_argument("-k", "--top-k", type=int, default=2)
     graft_cmd.add_argument("--at", type=_at, default="backbone_end", help="'backbone_end', an index, or i,j,k")
+    graft_cmd.add_argument("--rewire", action="store_true", help="point later consumers of the insertion layer at it")
     commands.add_parser("info", help="print the installed esmoe, ultralytics and torch versions")
 
     args = parser.parse_args(argv)
@@ -27,7 +28,8 @@ def main(argv: list[str] | None = None) -> int:
         case "graft":
             from .graft import graft
 
-            graft(args.base, out=args.out, at=args.at, num_experts=args.num_experts, top_k=args.top_k)
+            options = {"num_experts": args.num_experts, "top_k": args.top_k, "rewire": args.rewire}
+            graft(args.base, out=args.out, at=args.at, **options)
             print(args.out)
         case "info":
             import torch

@@ -215,3 +215,28 @@ def _grafted_yaml():
     target = Path(tempfile.mkdtemp(prefix="esmoe-test-")) / "v8-esmoe.yaml"
     graft("yolov8n.yaml", out=str(target))
     return target
+
+
+def test_default_graft_leaves_the_p5_lateral_on_the_old_backbone_end():
+    layers = (g := graft("yolov8n.yaml"))["backbone"] + g["head"]
+    at = next(i for i, layer in enumerate(layers) if layer[2] == "ESMoE")
+    lateral = next(layer for layer in layers[at + 1 :] if layer[2] == "Concat" and at - 1 in layer[0])
+    assert lateral[0] == [-1, at - 1], "the P5 lateral still reads SPPF, so the block only feeds the top-down path"
+
+
+def test_rewire_points_every_consumer_of_the_insertion_layer_at_the_block():
+    for base in BACKBONES:
+        layers = (g := graft(base, rewire=True))["backbone"] + g["head"]
+        at = next(i for i, layer in enumerate(layers) if layer[2] == "ESMoE")
+        later = layers[at + 1 :]
+        stale = [layer for layer in later if (at - 1 in layer[0] if isinstance(layer[0], list) else layer[0] == at - 1)]
+        assert not stale, f"{base}: {stale} still read the layer before the block"
+        by_index = any(isinstance(layer[0], list) and at in layer[0] for layer in later)
+        assert by_index, f"{base}: nobody reads the block by index"
+
+
+def test_rewired_models_build_and_forward():
+    for base in BACKBONES:
+        model = _model(base, rewire=True)
+        out = model(torch.rand(1, 3, 64, 64))
+        assert out is not None and next(blocks(model)).channels == 256

@@ -52,8 +52,9 @@ def build(args):
     if not args.esmoe:
         return YOLO(args.base), args.base
     esmoe.inject_esmoe()
-    cfg = ROOT / "configs" / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}.yaml"
-    esmoe.graft(args.base, out=str(cfg), num_experts=args.num_experts, top_k=args.top_k)
+    wire = "-rewire" if args.rewire else ""
+    cfg = ROOT / "configs" / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}.yaml"
+    esmoe.graft(args.base, out=str(cfg), num_experts=args.num_experts, top_k=args.top_k, rewire=args.rewire)
     model = YOLO(str(cfg))
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
@@ -66,6 +67,7 @@ def main():
     p.add_argument("--esmoe", action="store_true")
     p.add_argument("--num-experts", type=int, default=4)
     p.add_argument("--top-k", type=int, default=2)
+    p.add_argument("--rewire", action="store_true")
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)
@@ -80,7 +82,7 @@ def main():
     args = p.parse_args()
 
     model, cfg = build(args)
-    arch = "esmoe" if args.esmoe else "baseline"
+    arch = ("esmoe-rewire" if args.rewire else "esmoe") if args.esmoe else "baseline"
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
 
@@ -128,6 +130,7 @@ def main():
             "arch": arch,
             "num_experts": args.num_experts,
             "top_k": args.top_k,
+            "rewire": bool(args.rewire and args.esmoe),
             "aux_weight": args.aux_weight if args.esmoe else 0.0,
         },
         "dataset": {"yaml": args.data, "fraction": args.fraction},
