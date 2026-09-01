@@ -715,7 +715,8 @@
 <ul>
 <li>数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。<strong>这不是 COCO 数字</strong>，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。</li>
 <li>短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。</li>
-<li>单机单卡 RTX 4090 D，没有多卡运行，DDP 下辅助损失的行为未经验证。</li>
+<li>全部数字来自单机单卡。DDP 的机制已验证（<code>scripts/verify.py</code>：真实的 worker 文件在干净解释器里跑通；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 一致），但没有多卡训练出的精度数字。</li>
+<li>稀疏分发会把某一批没路由到的专家留在图外，DDP 因此需要 <code>find_unused_parameters=True</code>；ultralytics 默认就这么建，但开 <code>compile=True</code> 时会关掉它，那种组合下不能用本块。</li>
 </ul>
 <h2 id="_3">方法范围<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
