@@ -100,15 +100,63 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
     }
 
 
+def summarise(records: list[dict]) -> str:
+    """Paired table across seeds: baseline vs esmoe of the same seed, per bucket."""
+    import re
+
+    arm = r"(?P<backbone>[a-z0-9]+)-(?P<arch>baseline|esmoe(?:-rewire)?)"
+    pattern = re.compile(arm + r"-e(?P<epochs>\d+)-s(?P<seed>\d+)")
+    by_key = {}
+    for r in records:
+        if m := pattern.match(r["weights"]):
+            by_key[(m["backbone"], m["arch"], m["epochs"], m["seed"])] = r
+    keys = ("AP", "AP50", "AP75", "APs", "APm", "APl", "AR", "ARs", "ARm", "ARl")
+    counts = next(iter(records))["gt_buckets"]
+    lines = [
+        "# Area buckets on VisDrone val",
+        "",
+        "COCO-style buckets (small < 32², medium 32²–96², large ≥ 96²) on ground-truth boxes in the "
+        "original image, maxDets = 500. This is a definition adopted for this project; VisDrone's "
+        "official protocol reports no size split.",
+        "",
+        f"Ground truth: {counts['small']} small, {counts['medium']} medium, {counts['large']} large boxes.",
+        "",
+        "| arm | seed | " + " | ".join(keys) + " |",
+        "|" + ":--:|" * (len(keys) + 2),
+    ]
+    deltas: dict[tuple, list[dict]] = {}
+    for (backbone, arch, epochs, seed), r in sorted(by_key.items()):
+        cells = " | ".join(f"{r['coco'][k]:.4f}" for k in keys)
+        lines.append(f"| {backbone}-{arch}@e{epochs} | {seed} | {cells} |")
+        base = by_key.get((backbone, "baseline", epochs, seed))
+        if arch != "baseline" and base:
+            deltas.setdefault((backbone, arch, epochs), []).append({k: r["coco"][k] - base["coco"][k] for k in keys})
+    for (backbone, arch, epochs), rows in deltas.items():
+        lines += ["", f"## {backbone}-{arch}@e{epochs} minus baseline, per seed", ""]
+        lines += ["| seed | " + " | ".join(keys) + " |", "|" + ":--:|" * (len(keys) + 1)]
+        for i, d in enumerate(rows):
+            lines.append(f"| {i} | " + " | ".join(f"{d[k]:+.4f}" for k in keys) + " |")
+        lines.append("| mean | " + " | ".join(f"{sum(d[k] for d in rows) / len(rows):+.4f}" for k in keys) + " |")
+        lines.append("| wins | " + " | ".join(f"{sum(d[k] > 0 for d in rows)}/{len(rows)}" for k in keys) + " |")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("weights", nargs="+", type=Path)
+    parser.add_argument("weights", nargs="*", type=Path)
     parser.add_argument("--data", type=Path, default=ROOT / "configs" / "visdrone.yaml")
     parser.add_argument("--imgsz", type=int, default=800)
     parser.add_argument("--max-det", type=int, default=500)
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--summarise", action="store_true", help="only rebuild results/buckets.md from saved records")
     args = parser.parse_args()
+    if args.summarise:
+        records = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*-best.json"))]
+        target = ROOT / "results" / "buckets.md"
+        target.write_text(summarise(records), encoding="utf-8")
+        print(f"{len(records)} records -> {target}")
+        return 0
 
     OUT.mkdir(parents=True, exist_ok=True)
     gt, ids = ground_truth(args.data)

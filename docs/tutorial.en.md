@@ -73,6 +73,12 @@ model still builds, still trains, and is quietly wrong. `graft` therefore renumb
 that sits at or after each insertion point, and a unit test compares the rewritten head against the
 original one reference by reference.
 
+Renumbering moves references; it does not retarget them. A head branch that names the old backbone end by index - YOLOv8's P5 lateral `[-1, 9] Concat` does - therefore keeps reading SPPF after the insertion, and the block reaches P5 only through the top-down path. To have the block take over every consumer of the backbone end, pass `rewire=True` (`--rewire` on the CLI):
+
+    esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
+
+It is off by default to keep existing run records comparable; the two wirings have not yet been compared under one budget.
+
 ## Proving the auxiliary loss is real
 
 A configuration key named `aux_loss` proves nothing. What proves it:
