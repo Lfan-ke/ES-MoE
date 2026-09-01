@@ -8,7 +8,7 @@
 <ul class="es-proof">
 <li><strong>One call to add it</strong><span><code>equip</code> grafts the block into a config, renumbers the head and wires the loss.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>Measured at three budgets</strong><span>YOLOv8n: +0.0021 mAP50 at 20 epochs, +0.0013 at 50, +0.0046 at 100. On YOLO11n it does not hold.</span></li>
+<li><strong>Measured under the repository protocol</strong><span>YOLOv8n, imgsz 800, 120 epochs, three seeds: mAP50 +0.0025, mAP50-95 +0.0004; large objects lose, small-object recall gains. On YOLO11n it does not hold.</span></li>
 </ul>
 </div>
 

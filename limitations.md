@@ -21,11 +21,11 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 ## Protocol and evaluation
 
-- Runs use imgsz 640, 20/50/100 epochs, batch 32, AMP on; `patience` was not recorded per run. The repository's established reproduction protocol is imgsz 800, 120 epochs, `patience=0` and the full 548-image validation set, so these numbers do **not** sit under that protocol and support only same-budget comparison and parameter screening.
-- Metrics come from the ultralytics evaluator with its default `max_det` of 300, not the 500 used by the official VisDrone protocol, so these numbers are not directly comparable to the official VisDrone leaderboard.
-- No small / medium / large area breakdown was measured; every conclusion here covers overall mAP50 and mAP50-95 only.
+- The early records (imgsz 640, 20/50/100 epochs) do not sit under the repository's reproduction protocol and serve only same-budget comparison and parameter screening. A protocol-conformant set (imgsz 800, 120 epochs, `patience=0`, the full 548-image validation set) now exists: YOLOv8n paired mAP50 +0.0025 (2/3), mAP50-95 +0.0004. Conclusions are drawn from that set.
+- Metrics in the run records come from the ultralytics evaluator with its default `max_det` of 300; `results/buckets.md` re-evaluates the six protocol-conformant checkpoints under COCO conventions with maxDets = 500. The two sets are not interchangeable, and neither is directly comparable to the official VisDrone leaderboard.
+- The area buckets (small < 32², medium 32²–96², large ≥ 96², on ground-truth boxes in the original image) are the COCO definition adopted by this project, not a VisDrone one. Paired over three seeds: large objects get consistently worse (APl −0.0104, ARl −0.0129, 0/3 wins) and small-object recall consistently better (ARs +0.0026, 3/3 wins), by too little to lift AP.
 
 ## Reporting
 
 - Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed. On the full dataset one of the three seeds is effectively a tie (+0.0001 mAP50), so the effect is consistent in sign but not reliable within a single run.
-- The block costs about 5% wall-clock per epoch on top of the parameter increase (829 s against 790 s per full-data run on one RTX 4090 D).
+- On top of the parameter increase the block costs about 5% wall-clock per epoch at imgsz 640 (829 s against 790 s, RTX 4090 D) and about 9% at imgsz 800 (85 against 78 minutes, RTX 4090).

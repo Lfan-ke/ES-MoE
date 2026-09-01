@@ -8,7 +8,7 @@
 <ul class="es-proof">
 <li><strong>一个调用装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
 <li><strong>辅助损失进入反向传播</strong><span><code>results.csv</code> 中 <code>esmoe_aux</code> 自成一列，由单测断言；配置里写了键不算。</span></li>
-<li><strong>量了三个预算</strong><span>YOLOv8n 上 20 / 50 / 100 epoch 分别 +0.0021、+0.0013、+0.0046 mAP50；YOLO11n 上不成立。</span></li>
+<li><strong>按仓库协议量过</strong><span>YOLOv8n、imgsz 800、120 epoch、三个 seed：mAP50 +0.0025，mAP50-95 +0.0004；大目标变差、小目标召回变好。YOLO11n 上不成立。</span></li>
 </ul>
 </div>
 
