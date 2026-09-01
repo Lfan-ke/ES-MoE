@@ -482,6 +482,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#protocol-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocol and evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reporting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -657,6 +668,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#protocol-and-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocol and evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reporting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -704,6 +726,12 @@
 <li><code>attach_aux_loss</code> patches the task model class and keeps the weight at process scope, because the trainer rebuilds the model and takes the EMA copy before any callback runs. Consequently a process trains one aux-loss setting at a time, and a checkpoint reloaded in a process that never calls <code>attach_aux_loss</code> trains without the aux term.</li>
 <li>Export was verified against ONNX Runtime on inputs that route to different experts (<code>scripts/verify.py</code>); releases 0.1.0 to 0.1.2 baked the traced routing into the exported graph and should be re-exported.</li>
 <li>The load-balancing term is the Switch-Transformer formulation (<code>num_experts * sum(importance * load)</code>). No EMA normalisation of the aux magnitude is applied, unlike YOLO-Master's mixture controller.</li>
+</ul>
+<h2 id="protocol-and-evaluation">Protocol and evaluation<a class="headerlink" href="#protocol-and-evaluation" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Runs use imgsz 640, 20/50/100 epochs, batch 32, AMP on; <code>patience</code> was not recorded per run. The repository's established reproduction protocol is imgsz 800, 120 epochs, <code>patience=0</code> and the full 548-image validation set, so these numbers do <strong>not</strong> sit under that protocol and support only same-budget comparison and parameter screening.</li>
+<li>Metrics come from the ultralytics evaluator with its default <code>max_det</code> of 300, not the 500 used by the official VisDrone protocol, so these numbers are not directly comparable to the official VisDrone leaderboard.</li>
+<li>No small / medium / large area breakdown was measured; every conclusion here covers overall mAP50 and mAP50-95 only.</li>
 </ul>
 <h2 id="reporting">Reporting<a class="headerlink" href="#reporting" title="Permanent link">&para;</a></h2>
 <ul>
