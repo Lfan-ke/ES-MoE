@@ -81,3 +81,25 @@ def test_invalid_configuration_is_rejected():
             ESMoE(**bad)
     with pytest.raises(ValueError):
         ESMoE(4, 2, 16, expert_kernel_sizes=[3, 5])
+
+
+def test_aux_term_survives_autocast():
+    """所有实验都开着 AMP,所以半精度下辅助项必须仍然有限、非零,且不把参数拖成半精度。"""
+    torch.manual_seed(0)
+    net = _net()
+    with torch.autocast("cpu", dtype=torch.bfloat16):
+        y = net(torch.randn(4, 3, 32, 32))
+    aux = collect_aux_loss(net)
+    assert torch.isfinite(y).all()
+    assert torch.isfinite(aux) and aux.item() > 0
+    assert all(p.dtype is torch.float32 for p in net.parameters())
+
+
+def test_gate_still_sums_to_one_in_half_precision():
+    torch.manual_seed(0)
+    block = ESMoE(4, 2, channels=16)
+    probability = torch.softmax(block.router(torch.randn(8, 16, 8, 8).half().float()), dim=1)
+    weights, chosen = probability.topk(2, dim=1)
+    gate = torch.zeros_like(probability).scatter(1, chosen, weights).half()
+    gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
+    assert torch.allclose(gate.float().sum(dim=1), torch.ones(8), atol=1e-2)

@@ -18,6 +18,12 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 - Export was verified against ONNX Runtime on inputs that route to different experts (`scripts/verify.py`); releases 0.1.0 to 0.1.2 baked the traced routing into the exported graph and should be re-exported.
 - The load-balancing term is the Switch-Transformer formulation (`num_experts * sum(importance * load)`). No EMA normalisation of the aux magnitude is applied, unlike YOLO-Master's mixture controller.
 
+## Protocol and evaluation
+
+- Runs use imgsz 640, 20/50/100 epochs, batch 32, AMP on; `patience` was not recorded per run. The repository's established reproduction protocol is imgsz 800, 120 epochs, `patience=0` and the full 548-image validation set, so these numbers do **not** sit under that protocol and support only same-budget comparison and parameter screening.
+- Metrics come from the ultralytics evaluator with its default `max_det` of 300, not the 500 used by the official VisDrone protocol, so these numbers are not directly comparable to the official VisDrone leaderboard.
+- No small / medium / large area breakdown was measured; every conclusion here covers overall mAP50 and mAP50-95 only.
+
 ## Reporting
 
 - Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed. On the full dataset one of the three seeds is effectively a tie (+0.0001 mAP50), so the effect is consistent in sign but not reliable within a single run.
