@@ -25,6 +25,8 @@ jobs:
 
   publish:
     needs: build
+    # Flipped to 'true' once PyPI knows this workflow as a trusted publisher; until then a tag only builds.
+    if: vars.PYPI_TRUSTED == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
