@@ -566,6 +566,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fixed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -577,7 +588,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#earlier-013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earlier: 0.1.3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -644,6 +666,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fixed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -655,7 +688,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#earlier-013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Earlier: 0.1.3
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -708,15 +752,27 @@
 
 
 <h1 id="release-notes">Release notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
-<p>Current version <strong>0.1.3</strong>.</p>
+<p>Current version <strong>0.1.4</strong>.</p>
+<h2 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>DDP support.</strong> ultralytics launches multi-GPU workers from a generated file that imports only the trainer's module, so a worker never imported esmoe and failed to build the model with <code>KeyError: 'ESMoE'</code>. <code>attach_aux_loss</code> now makes <code>model.train()</code> pick a trainer subclass that lives in <code>esmoe.trainer</code>: importing it registers the block, restores the auxiliary-loss weight from the environment and patches <code>BaseModel.loss</code>. <code>scripts/verify.py</code> gains two checks: the real worker file trains one epoch in a fresh interpreter, and two gloo ranks each compute their own auxiliary term with router gradients agreeing after all-reduce. Limit: sparse dispatch needs <code>find_unused_parameters=True</code>, which <code>compile=True</code> switches off; that combination is unsupported.</li>
+<li><strong><code>graft(..., rewire=True)</code>.</strong> Renumbering moves references without retargeting them, so a head branch that names the old backbone end by index (YOLOv8's P5 lateral <code>[-1, 9] Concat</code>) keeps reading SPPF after the insertion and the block reaches P5 only through the top-down path. <code>rewire</code> points every such consumer at the block. Off by default to keep existing records comparable; the two wirings have not yet been compared under one budget.</li>
+<li><code>scripts/train.py --patience</code> (default 0, early stopping off) and <code>IMGSZ</code> / <code>PATIENCE</code> / <code>ARMS</code> in <code>sweep.sh</code>, for runs under the repository protocol (imgsz 800, 120 epochs).</li>
+<li><code>scripts/buckets.py</code>, COCO-style area buckets at maxDets 500; <code>scripts/routing.py</code>, expert usage on the validation set and whether routing follows object scale.</li>
+<li>Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.</li>
+</ul>
 <h2 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>scripts/report.py</code> now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.</li>
+</ul>
+<h2 id="earlier-013">Earlier: 0.1.3<a class="headerlink" href="#earlier-013" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
 <p><strong>Exported models no longer ignore routing.</strong> The block skips experts whose gate is zero, which is a data-dependent decision: a tracer records the routing of the example input, and the exported graph then uses those same experts for every later input. On a block whose routing follows its input, an ONNX export taken on one input differed from PyTorch by 0.2 on an input that routes elsewhere; it now differs by 1e-7. The block runs all experts while tracing and keeps the shortcut at run time, so nothing outside export gets slower.</p>
 <p>Anyone who exported a model with 0.1.0 through 0.1.2 should re-export.</p>
 </li>
 </ul>
-<h2 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h2>
+<h2 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/verify.py</code>: correctness checks that unit tests cannot make — a real training run logging a positive auxiliary term, <code>weight=0</code> leaving the loss table untouched, checkpoint round trip, resume, several blocks training together, <code>val</code> and <code>predict</code>, and ONNX export.</li>
 <li>A regression test that exports a block whose routing follows the sign of its input and compares both branches against PyTorch.</li>
