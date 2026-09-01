@@ -827,6 +827,10 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <pre><code>- [[-1, 12], 1, Concat, [1]]
 </code></pre>
 <p>在第 10 层的位置插一层，所有大于等于 10 的引用就都往前错了一层。模型照样能建、照样能训，但已经悄悄接错。所以 <code>graft</code> 会对每个插入点之后的引用统一重编号，并有单测把改写后的 head 与原 head 逐条引用比对。</p>
+<p>重编号只移动引用，不改变引用对象。于是 head 里按序号点名旧主干末层的分支——YOLOv8 的 P5 侧向 <code>[-1, 9] Concat</code> 就是——插入之后仍读 SPPF 的输出，块只经自顶向下路径间接影响 P5。要让块接管主干末层的全部下游，加 <code>rewire=True</code>（命令行 <code>--rewire</code>）：</p>
+<pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
+</code></pre>
+<p>默认关闭，为的是与已有实验记录保持可比；两种接法的同预算对照尚未完成。</p>
 <h2 id="_5">怎么证明辅助损失确实生效<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>配置里有个叫 <code>aux_loss</code> 的键什么都证明不了。能证明的是：</p>
 <ol>
