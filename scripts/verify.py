@@ -151,6 +151,101 @@ def check_export_is_faithful():
     return worst < 1e-4, f"worst |torch - onnx| across both routing branches: {worst:.2e}"
 
 
+def check_ddp_worker_file_trains():
+    """The file ultralytics hands to torchrun, run in a fresh interpreter that never imported esmoe.
+
+    Whatever that file imports is all a DDP worker knows; it must be enough to build the grafted
+    model and log the auxiliary term. One CPU rank is the same code path minus the collective.
+    """
+    import os
+    import subprocess
+
+    from ultralytics.utils.dist import generate_ddp_file
+
+    model = esmoe.equip("yolo11n.yaml", weight=0.01)
+    overrides = {**model.overrides, "data": "coco8.yaml", "epochs": 1, "project": str(RUNS), "name": "ddp-worker"}
+    trainer = model._smart_load("trainer")(overrides={**overrides, **BUDGET})
+    worker = generate_ddp_file(trainer)
+    try:
+        done = subprocess.run(
+            [sys.executable, worker], capture_output=True, text=True, cwd=ROOT, env=os.environ.copy(), timeout=900
+        )
+    finally:
+        Path(worker).unlink(missing_ok=True)
+    if done.returncode != 0:
+        return False, f"worker exited {done.returncode}: {done.stderr.strip().splitlines()[-1][:160]}"
+    values = aux_column(trainer.save_dir)
+    return bool(values) and all(v > 0 for v in values), f"worker {Path(worker).name} logged aux {values}"
+
+
+def _rank(rank, world, port, cfg, box):
+    import torch.distributed as dist
+    from ultralytics.cfg import get_cfg
+    from ultralytics.nn.tasks import DetectionModel
+    from ultralytics.utils import DEFAULT_CFG
+
+    from esmoe.inject import AUX_NAME, arm_process
+
+    dist.init_process_group("gloo", init_method=f"tcp://127.0.0.1:{port}", rank=rank, world_size=world)
+    torch.manual_seed(0)
+    esmoe.inject_esmoe()
+    arm_process(0.01)
+    model = DetectionModel(cfg, ch=3, nc=2, verbose=False)
+    model.args = get_cfg(DEFAULT_CFG)
+    # Sparse dispatch leaves the experts a batch did not route to out of the graph, so DDP has to be
+    # told to expect unused parameters - which is how ultralytics constructs it as well.
+    ddp = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
+    torch.manual_seed(rank + 1)  # each rank sees different images
+    batch = {
+        "img": torch.rand(2, 3, 64, 64),
+        "cls": torch.zeros(2, 1),
+        "bboxes": torch.tensor([[0.5, 0.5, 0.2, 0.2], [0.4, 0.4, 0.1, 0.1]]),
+        "batch_idx": torch.tensor([0.0, 1.0]),
+    }
+    total, items = ddp(batch)
+    total.sum().backward()
+    router = next(esmoe.blocks(model)).router
+    grads = torch.cat([p.grad.flatten() for p in router.parameters()])
+    gathered = [torch.zeros_like(grads) for _ in range(world)]
+    dist.all_gather(gathered, grads)
+    aux = items[AUX_NAME] if isinstance(items, dict) else items[-1]
+    box[rank] = {
+        "aux": float(aux),
+        "finite": bool(torch.isfinite(total).all()),
+        "grads_agree": all(torch.allclose(gathered[0], g, atol=1e-6) for g in gathered[1:]),
+    }
+    dist.destroy_process_group()
+
+
+def check_two_ranks_share_the_router_gradient():
+    """Two CPU ranks under gloo: each computes its own aux term, DDP averages the router gradient."""
+    import socket
+    import tempfile
+
+    import torch.multiprocessing as mp
+
+    esmoe.inject_esmoe()
+    cfg = str(Path(tempfile.mkdtemp(prefix="esmoe-ddp-")) / "v8-esmoe.yaml")
+    esmoe.graft("yolov8n.yaml", out=cfg)
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    ctx = mp.get_context("spawn")
+    with ctx.Manager() as manager:
+        box = manager.dict()
+        ranks = [ctx.Process(target=_rank, args=(r, 2, port, cfg, box)) for r in range(2)]
+        for p in ranks:
+            p.start()
+        for p in ranks:
+            p.join(600)
+        report = dict(box)
+    if len(report) != 2:
+        return False, f"only {len(report)} rank(s) reported: {report}"
+    ok = all(r["aux"] > 0 and r["finite"] and r["grads_agree"] for r in report.values())
+    aux = ", ".join(f"rank{r} aux {report[r]['aux']:.4f}" for r in sorted(report))
+    return ok, f"{aux}; router grads agree: {report[0]['grads_agree']}"
+
+
 CHECKS = (
     ("training logs a positive aux term", check_training_logs_aux),
     ("weight=0 leaves the loss table untouched", check_aux_weight_zero_disables_the_term),
@@ -160,6 +255,8 @@ CHECKS = (
     ("val and predict", check_val_and_predict),
     ("onnx export", check_onnx_export),
     ("onnx export routes per input", check_export_is_faithful),
+    ("ddp worker file trains in a fresh interpreter", check_ddp_worker_file_trains),
+    ("two ranks share the router gradient", check_two_ranks_share_the_router_gradient),
 )
 
 

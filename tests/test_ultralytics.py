@@ -122,14 +122,14 @@ def test_attach_refuses_a_model_without_blocks():
 
 
 def test_arm_re_attaches_to_the_rebuilt_trainer_model():
-    from esmoe.inject import _arm
+    from esmoe.inject import arm_trainer
 
     class Trainer:
         loss_names = ("box_loss", "cls_loss", "dfl_loss")
 
     trainer = Trainer()
     trainer.model = _model("yolov8n.yaml")
-    arm = _arm(0.05)
+    arm = arm_trainer(0.05)
     arm(trainer)
     arm(trainer)
     assert trainer.loss_names.count(AUX_NAME) == 1
@@ -137,14 +137,14 @@ def test_arm_re_attaches_to_the_rebuilt_trainer_model():
 
 
 def test_arm_leaves_empty_loss_names_to_the_trainer():
-    from esmoe.inject import _arm
+    from esmoe.inject import arm_trainer
 
     class Trainer:
         loss_names = ()
 
     trainer = Trainer()
     trainer.model = _model("yolov8n.yaml")
-    _arm(0.01)(trainer)
+    arm_trainer(0.01)(trainer)
     # Releases that name losses from the returned dict start empty; appending here would make the
     # progress header show one column instead of four.
     assert trainer.loss_names == ()
@@ -171,3 +171,47 @@ def test_equip_builds_a_wired_model(tmp_path):
 def test_equip_without_an_output_path_still_builds():
     core = equip("yolov8n.yaml", at=[4, 6]).model
     assert len(list(blocks(core))) == 2
+
+
+def test_train_routes_to_a_trainer_that_lives_in_esmoe():
+    from ultralytics import YOLO
+
+    model = attach_aux_loss(YOLO(str(_grafted_yaml())), weight=0.02)
+    cls = model._smart_load("trainer")
+    assert cls.__module__ == "esmoe.trainer" and cls.__name__.startswith("ESMoE"), cls
+    assert cls is model._smart_load("trainer"), "wrapping twice must hand back the same class"
+    assert model._smart_load("validator").__module__.startswith("ultralytics"), "only the trainer is rerouted"
+
+
+def test_a_fresh_interpreter_can_import_the_worker_trainer():
+    """A DDP worker runs `from <module> import <Trainer>` in a fresh process; that line alone has to
+    register the block and re-arm the auxiliary loss."""
+    import os
+    import subprocess
+    import sys
+
+    from ultralytics import YOLO
+
+    model = attach_aux_loss(YOLO(str(_grafted_yaml())), weight=0.02)
+    cls = model._smart_load("trainer")
+    probe = (
+        f"from {cls.__module__} import {cls.__name__} as T\n"
+        "import ultralytics.nn.tasks as tasks, esmoe.inject as inject\n"
+        "assert tasks.ESMoE is inject.ESMoE, 'block not registered in the worker'\n"
+        "assert tasks.BaseModel.loss is inject._loss_with_aux, 'loss not patched in the worker'\n"
+        "assert inject.weight() == 0.02, inject.weight()\n"
+        "print(T.__mro__[1].__name__)\n"
+    )
+    done = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, env=os.environ.copy())
+    assert done.returncode == 0, done.stderr[-800:]
+    assert done.stdout.strip().endswith("Trainer")
+
+
+def _grafted_yaml():
+    import tempfile
+    from pathlib import Path
+
+    inject_esmoe()
+    target = Path(tempfile.mkdtemp(prefix="esmoe-test-")) / "v8-esmoe.yaml"
+    graft("yolov8n.yaml", out=str(target))
+    return target

@@ -4,44 +4,9 @@
   "device": "cpu",
   "checks": [
     {
-      "check": "training logs a positive aux term",
+      "check": "ddp worker file trains in a fresh interpreter",
       "passed": true,
-      "detail": "logged aux per epoch: [0.02097, 0.021]"
-    },
-    {
-      "check": "weight=0 leaves the loss table untouched",
-      "passed": true,
-      "detail": "aux column with weight=0: absent, as intended"
-    },
-    {
-      "check": "checkpoint round trip",
-      "passed": true,
-      "detail": "reloaded 1 block(s), parameter count preserved: True, predict ran"
-    },
-    {
-      "check": "resume keeps the aux term",
-      "passed": true,
-      "detail": "epochs logged before resume 2, after 4; all positive: True"
-    },
-    {
-      "check": "several blocks train together",
-      "passed": true,
-      "detail": "2 blocks, aux [0.04411]"
-    },
-    {
-      "check": "val and predict",
-      "passed": true,
-      "detail": "val returned metrics, predict returned 2 results"
-    },
-    {
-      "check": "onnx export",
-      "passed": true,
-      "detail": "exported best.onnx, 11.9 MB"
-    },
-    {
-      "check": "onnx export routes per input",
-      "passed": true,
-      "detail": "worst |torch - onnx| across both routing branches: 1.19e-07"
+      "detail": "worker _temp_sfglphhh1851995919184.py logged aux [0.02097]"
     }
   ]
 }

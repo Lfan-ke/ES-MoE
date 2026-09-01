@@ -1,5 +1,6 @@
 """Runtime injection: make ESMoE resolvable in configs and make its loss reach the optimiser."""
 
+import os
 from collections.abc import Callable
 
 import torch
@@ -9,6 +10,7 @@ from .aux_loss import clear_aux_loss, collect_aux_loss
 from .module import ESMoE, blocks
 
 AUX_NAME = "esmoe_aux"
+ENV_WEIGHT = "ESMOE_AUX_WEIGHT"
 _PATCHED: dict[type, Callable] = {}
 _WEIGHT: float | None = None
 
@@ -47,21 +49,71 @@ def attach_aux_loss(model, weight: float = 0.01):
     Without this the aux term exists but never reaches ``backward``, which is the exact failure the
     task book's red line asks to rule out.
     """
-    global _WEIGHT
     core = _core(model)
     if next(blocks(core), None) is None:
         raise ValueError("model contains no ESMoE block; nothing to attach")
-    cls = type(core)
-    if cls not in _PATCHED:
-        _PATCHED[cls] = cls.loss
-        cls.loss = _loss_with_aux
-    _WEIGHT = float(weight)
+    arm_process(weight)
+    _patch(_owner(type(core)))
     core._esmoe_aux_weight = float(weight)
     if hasattr(model, "add_callback"):
         # The trainer rebuilds the model from yaml, so the weight has to reach the instance it
         # actually trains, not only the one handed to us here.
-        model.add_callback("on_train_start", _arm(weight))
+        model.add_callback("on_train_start", arm_trainer(weight))
+    if hasattr(model, "_smart_load"):
+        _route_trainer(model)
     return model
+
+
+def arm_process(weight: float) -> None:
+    """Remember the weight for every model this process builds and patch the shared loss entry.
+
+    The trainer rebuilds the model and takes the EMA copy before any callback runs, and a DDP worker
+    never sees the instance the caller attached to; process scope is what both of them read.
+    """
+    global _WEIGHT
+    _WEIGHT = float(weight)
+    os.environ[ENV_WEIGHT] = repr(_WEIGHT)
+    import ultralytics.nn.tasks as tasks
+
+    _patch(tasks.BaseModel)
+
+
+def weight() -> float | None:
+    return _WEIGHT
+
+
+def _owner(cls: type) -> type:
+    # Patch where loss() is defined, not the leaf: models that override it (RT-DETR, YOLO-World)
+    # keep their own entry, everything that inherits BaseModel.loss shares one.
+    return next(c for c in cls.__mro__ if "loss" in vars(c))
+
+
+def _patch(cls: type) -> None:
+    if cls.loss is _loss_with_aux:
+        return
+    _PATCHED[cls] = cls.loss
+    cls.loss = _loss_with_aux
+
+
+def _original(model: nn.Module) -> Callable:
+    return next(_PATCHED[c] for c in type(model).__mro__ if c in _PATCHED)
+
+
+def _route_trainer(model) -> None:
+    """Make ``model.train()`` pick a trainer class that lives in ``esmoe.trainer``.
+
+    Ultralytics spawns DDP workers from a generated file that imports only the trainer's module;
+    if that module is ours, the worker registers the block and the aux weight before it builds.
+    """
+    from . import trainer
+
+    load = model._smart_load
+
+    def _smart_load(key: str):
+        loaded = load(key)
+        return trainer.wrap(loaded) if key == "trainer" else loaded
+
+    model._smart_load = _smart_load
 
 
 def _core(model) -> nn.Module:
@@ -96,10 +148,10 @@ def _loss_with_aux(self, batch, preds=None):
     weight = getattr(self, "_esmoe_aux_weight", None)
     weight = _WEIGHT if weight is None else weight
     if not weight or not _uses_esmoe(self):
-        return _PATCHED[type(self)](self, batch, preds)
+        return _original(self)(self, batch, preds)
     if preds is None:
         clear_aux_loss()  # about to forward; drop anything left from an earlier step
-    total, items = _PATCHED[type(self)](self, batch, preds)
+    total, items = _original(self)(self, batch, preds)
     aux = collect_aux_loss(self, device=total.device).to(total.dtype)
     if not torch.isfinite(aux):
         aux = torch.zeros_like(aux)
@@ -114,7 +166,7 @@ def _loss_with_aux(self, batch, preds=None):
     return total, torch.cat([items, aux.detach().to(items.dtype)])
 
 
-def _arm(weight: float) -> Callable:
+def arm_trainer(weight: float) -> Callable:
     def on_train_start(trainer) -> None:
         _core(_unwrap(trainer.model))._esmoe_aux_weight = float(weight)
         # Older releases fix the loss names before training and need the extra one appended; newer

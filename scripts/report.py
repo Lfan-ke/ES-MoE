@@ -23,19 +23,20 @@ def variant(record):
     """Label an arm by everything that has to match for a comparison to be fair.
 
     Backbone, block config and budget all move the metric, so folding them into one label would
-    silently average across different experiments.
+    silently average across different experiments. Image size is part of the budget: 800 and 640
+    runs of the same schedule are different experiments, not repeats of one.
     """
     cfg, data, budget = record["config"], record["dataset"], record["budget"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
     block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
-    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}"
+    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}"
 
 
 def arm(record):
     """The part of the label a baseline shares with the ESMoE arms it is compared against."""
     cfg, data, budget = record["config"], record["dataset"], record["budget"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
-    return backbone, budget["epochs"], data["fraction"], record["seed"]
+    return backbone, budget["epochs"], data["fraction"], budget.get("imgsz"), record["seed"]
 
 
 def spread(values):
