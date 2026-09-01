@@ -74,6 +74,8 @@ def main():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--fraction", type=float, default=1.0)
     p.add_argument("--amp", type=int, default=1)
+    # ultralytics 把 0 读作 "no patience" 并禁用早停，这正是复现协议要的固定周期。
+    p.add_argument("--patience", type=int, default=0)
     p.add_argument("--tag", default="")
     args = p.parse_args()
 
@@ -95,6 +97,7 @@ def main():
             deterministic=True,
             pretrained=False,
             amp=bool(args.amp),
+            patience=args.patience,
             fraction=args.fraction,
             plots=False,
             val=True,
@@ -137,6 +140,7 @@ def main():
             "epochs": args.epochs,
             "batch": args.batch,
             "imgsz": args.imgsz,
+            "patience": args.patience,
             "amp": bool(args.amp),
             "wall_seconds": round(elapsed, 1),
         },
