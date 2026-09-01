@@ -8,7 +8,8 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 - Short budgets (tens of epochs from scratch) sit far from convergence. A gap measured here bounds the ranking of two blocks under equal budget; it does not predict the converged gap.
 - The measured gain is **backbone-specific**: it is present on YOLOv8n (3/3 seeds at 20 epochs) and absent on YOLO11n (1/3 seeds, mean -0.0009 mAP50) under the same data, budget and seeds. Compatibility across four generations is a statement about mechanics, not about accuracy.
 - The measured gain does not follow the schedule in one direction: paired mAP50 means are +0.0021 (3/3 seeds) at 20 epochs, +0.0013 (2/3) at 50 and +0.0046 (2/3) at 100, while the spread between seeds widens with the budget (+0.0104 to -0.0011 at 100 epochs). Treat the effect as small, positive on average and unreliable within a single run.
-- One machine, one RTX 4090 D. No multi-GPU or DDP run has been made, so DDP-specific aux-loss behaviour is untested.
+- Every number comes from one GPU. The DDP mechanics are verified (`scripts/verify.py`: the real worker file trains in a fresh interpreter; two gloo ranks each compute their own auxiliary term and their router gradients agree after all-reduce), but no multi-GPU accuracy figure exists.
+- Sparse dispatch leaves the experts a batch did not route to out of the graph, so DDP needs `find_unused_parameters=True`. ultralytics builds it that way by default but switches it off under `compile=True`; the block cannot be used in that combination.
 
 ## Method scope
 

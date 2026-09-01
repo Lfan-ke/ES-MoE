@@ -45,6 +45,7 @@ dev = [
     "onnx>=1.16",
     # onnxruntime dropped Python 3.10 wheels; the export test skips itself where it is absent.
     "onnxruntime>=1.17; python_version >= '3.11'",
+    "faster-coco-eval>=1.8.0",
 ]
 
 # CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
