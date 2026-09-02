@@ -235,8 +235,11 @@ def test_rewire_points_every_consumer_of_the_insertion_layer_at_the_block():
         assert by_index, f"{base}: nobody reads the block by index"
 
 
-def test_rewired_models_build_and_forward():
-    for base in BACKBONES:
+@pytest.mark.parametrize("base", BACKBONES + GUARDED_BACKBONES)
+def test_rewired_models_build_and_forward(base):
+    try:
         model = _model(base, rewire=True)
-        out = model(torch.rand(1, 3, 64, 64))
-        assert out is not None and next(blocks(model)).channels == 256
+    except FileNotFoundError:
+        pytest.skip(f"{base} is not shipped by this ultralytics release")
+    out = model(torch.rand(1, 3, 64, 64))
+    assert out is not None and next(blocks(model)).channels == 256
