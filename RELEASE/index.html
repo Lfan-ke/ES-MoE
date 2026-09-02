@@ -607,6 +607,17 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
+        反馈与迭代
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         修复
       
     </span>
@@ -626,7 +637,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         新增
@@ -637,7 +648,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         更早的小版本
@@ -648,7 +659,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -707,6 +718,17 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
+        反馈与迭代
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         修复
       
     </span>
@@ -726,7 +748,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         新增
@@ -737,7 +759,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         更早的小版本
@@ -748,7 +770,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -788,7 +810,9 @@
 <li><code>scripts/buckets.py</code>：COCO 式面积分档（maxDets 500）；<code>scripts/routing.py</code>：验证集上的专家使用分布与路由是否随目标尺度变化。</li>
 <li>两项半精度测试：bf16 autocast 下辅助项有限非零、参数不被拖成半精度；半精度门控重归一后仍和为 1。</li>
 </ul>
-<h2 id="_3">修复<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="_3">反馈与迭代<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>0.1.4 的多数条目来自课题社区的首轮反馈：评测口径按导师给出的 COCO 式 32²/96² 分档与 maxDets=500 落地（<code>scripts/buckets.py</code>，口径来源已在文档注明）；<code>--patience</code> 与 <code>IMGSZ</code> 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度有限值测试对应「先检查 FP32/AMP 下损失与梯度是否一致有限」的要求。上游侧的反馈同样闭环：<code>OptimizedMOE</code> 追踪守卫的修复已被 YOLO-Master 合并（#241）。</p>
+<h2 id="_4">修复<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/report.py</code> 的分组键补进 imgsz。此前同 epoch 不同分辨率的记录会被平均进同一行，正是文档承诺不会发生的事。</li>
 </ul>
@@ -799,14 +823,14 @@
 <p>用 0.1.0 至 0.1.2 导出过模型的，请重新导出。</p>
 </li>
 </ul>
-<h2 id="_4">新增<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_5">新增<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/verify.py</code>：单测做不到的正确性检查——真实训练一轮并确认辅助项为正、<code>weight=0</code> 时损失表不变、checkpoint 往返、断点续训、多个块一起训练、<code>val</code> 与 <code>predict</code>，以及 ONNX 导出。</li>
 <li>一项回归测试：导出一个路由随输入符号变化的块，把两条分支都与 PyTorch 对照。</li>
 </ul>
-<h2 id="_5">更早的小版本<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_6">更早的小版本<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>0.1.0 是首个版本，给出 <code>inject_esmoe</code>、<code>graft</code>、<code>attach_aux_loss</code>、<code>collect_aux_loss</code> 四个入口，并附选型与三 seed 证据。0.1.1 修好 <code>equip()</code> 不带 <code>out</code> 时把配置当字典交给 <code>YOLO()</code> 的问题，补上 Colab 快速上手。0.1.2 修好 8.4.13x 之后 <code>loss_names</code> 在 <code>on_train_start</code> 时为空、导致训练日志表头错位的问题，并把包从 <code>src/</code> 移到仓库根目录。</p>
-<h2 id="_6">安装<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_7">安装<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <pre><code>pip install esmoe
 </code></pre>
 
