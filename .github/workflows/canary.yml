@@ -34,10 +34,10 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-      - name: esmoe on YOLO-Master's vendored ultralytics
-        env:
-          UV_TORCH_BACKEND: cpu
-        run: >
-          uv run --no-project --with "git+https://github.com/Tencent/YOLO-Master" --with . --with "numpy<2"
-          --with "torchvision==0.28.0"
-          python scripts/fork_smoke.py
+      # The locked environment carries a torch/torchvision pair the test matrix already proves;
+      # installing the fork with --no-deps swaps only the ultralytics code underneath it.
+      - run: uv sync --group dev
+      - name: Swap in YOLO-Master's vendored ultralytics
+        run: uv pip install --no-deps "git+https://github.com/Tencent/YOLO-Master"
+      - name: esmoe on the fork
+        run: uv run --no-sync python scripts/fork_smoke.py
