@@ -84,10 +84,13 @@ for custom training loops.
 | YOLO11 | yes | yes | yes |
 | YOLO12 | yes | yes | yes |
 | YOLO26 | yes | yes | yes |
+| YOLO-Master (fork) | yes | yes | yes |
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
 in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
 runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
+
+Graft and forward are also exercised on yolov5n, yolov9t and yolov10n in CI. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by

@@ -37,8 +37,9 @@
 | YOLO11 | 是 | 是 | 是 |
 | YOLO12 | 是 | 是 | 是 |
 | YOLO26 | 是 | 是 | 是 |
+| YOLO-Master（fork） | 是 | 是 | 是 |
 
-由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。
+由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。yolov5n / yolov9t / yolov10n 的接入与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：`scripts/fork_smoke.py` 接入其 `yolo-master-n.yaml`、真实训练一轮且 `esmoe_aux` 非零，其自有 `ES_MOE` 配置与本块注册共存。
 
 ## 出厂配置
 

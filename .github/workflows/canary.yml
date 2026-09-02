@@ -25,3 +25,16 @@ jobs:
         run: uv run --no-sync esmoe info
       - name: Run the documented quick start
         run: uv run --no-sync python scripts/check_notebook.py
+
+  fork:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: esmoe on YOLO-Master's vendored ultralytics
+        run: >
+          uv run --no-project --with "git+https://github.com/Tencent/YOLO-Master" --with . --with "numpy<2"
+          python scripts/fork_smoke.py
