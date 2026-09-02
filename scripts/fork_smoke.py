@@ -4,12 +4,15 @@ import csv
 import tempfile
 from pathlib import Path
 
+import torch
 import ultralytics
 from ultralytics import YOLO
 
 import esmoe
 
-print("fork ultralytics", ultralytics.__version__, "| esmoe", esmoe.__version__, flush=True)
+print(
+    "fork ultralytics", ultralytics.__version__, "| esmoe", esmoe.__version__, "| torch", torch.__version__, flush=True
+)
 esmoe.inject_esmoe()
 
 target = Path(tempfile.mkdtemp(prefix="esmoe-fork-")) / "yolo-master-n-esmoe.yaml"
