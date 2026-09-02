@@ -35,10 +35,42 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 | 2 | 7 | 0.381 | 0.876 | 0.293 | -0.45 | +0.49 |
 | 3 | 9 | 0.615 | 0.901 | 0.337 | +0.26 | -0.30 |
 
+## yolov8n-esmoe-rewire-e120-s0-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2849 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.239 | 0.197 | -0.04 | -0.01 |
+| 1 | 5 | 0.038 | 0.402 | 0.204 | +0.02 | -0.08 |
+| 2 | 7 | 0.046 | 0.409 | 0.192 | -0.16 | +0.30 |
+| 3 | 9 | 0.916 | 0.951 | 0.408 | +0.10 | -0.13 |
+
+## yolov8n-esmoe-rewire-e120-s1-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3135 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.015 | 0.173 | 0.214 | -0.06 | +0.20 |
+| 1 | 5 | 0.057 | 0.571 | 0.221 | -0.17 | +0.42 |
+| 2 | 7 | 0.885 | 0.931 | 0.376 | -0.04 | -0.01 |
+| 3 | 9 | 0.044 | 0.325 | 0.190 | +0.21 | -0.41 |
+
+## yolov8n-esmoe-rewire-e120-s2-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.292 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.411 | 0.206 | +0.14 | -0.12 |
+| 1 | 5 | 0.036 | 0.179 | 0.197 | +0.02 | -0.09 |
+| 2 | 7 | 0.100 | 0.473 | 0.206 | -0.19 | +0.26 |
+| 3 | 9 | 0.861 | 0.938 | 0.391 | +0.09 | -0.08 |
+
 ## Reading
 
-- No expert is dead, but routing is dominated by one expert per checkpoint: it is the top-1 choice on 74%, 92% and 62% of images. Which expert dominates differs between seeds (kernel 9, 7, 9), so the specialisation is not a property of the kernel sizes.
-- The smallest kernel (3) is never the top-1 choice in any seed and sits in the top-2 on 5–21% of images.
-- Mean routing probabilities stay near uniform (entropy 91–94% of the maximum) while the realised top-k load is skewed. The Switch-Transformer term multiplies mean probability by load, and load sums to `top_k` by construction, so once mean probabilities are balanced the term is nearly blind to load skew; the logged `esmoe_aux ≈ 0.020` at weight 0.01 is the balanced-importance value `k = 2` almost exactly.
-- Correlations between an expert's probability and the mean object size of the image are weak and change sign across seeds (expert 2: −0.30, +0.11, −0.45). The router has not learnt a scale-based assignment.
-- Read together with the area buckets, the block behaves less like a mixture of receptive fields than like one dominant depthwise branch plus a rotating second one, which is consistent with a small, seed-dependent effect.
+- No expert is dead, but routing is dominated by one expert per checkpoint (top-2 coverage 0.92–0.94 for the leader), and which expert leads differs between seeds. The smallest kernel is never the top-1 choice in the default arm.
+- Mean routing probabilities stay near uniform (entropy 91–95% of the maximum) while the realised top-k load is skewed. The Switch-Transformer term multiplies mean probability by load, and load sums to `top_k` by construction, so once mean probabilities are balanced the term is nearly blind to load skew; the logged `esmoe_aux ≈ 0.020` at weight 0.01 is the balanced-importance value `k = 2` almost exactly.
+- Correlations between an expert's probability and the mean object size of the image are weak and change sign across seeds. The router has not learnt a scale-based assignment.
+- The `rewire` checkpoints route the same way: one dominant expert, no scale specialisation. Rewiring changes where the block's output goes, not how the router behaves — the two findings are separable, and the accuracy gain of `rewire` therefore comes from the wiring, not from better routing.

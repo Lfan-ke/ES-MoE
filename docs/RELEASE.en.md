@@ -10,6 +10,10 @@ Current version **0.1.4**.
 - `scripts/buckets.py`, COCO-style area buckets at maxDets 500; `scripts/routing.py`, expert usage on the validation set and whether routing follows object scale.
 - Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.
 
+## Feedback and iteration
+
+Most of 0.1.4 answers the course community's first round of feedback: the evaluation caliber adopts the mentor's COCO-style 32²/96² buckets at maxDets 500 (`scripts/buckets.py`, source credited in the docs); `--patience` and `IMGSZ` exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the `OptimizedMOE` tracing guard fix was merged into YOLO-Master (#241).
+
 ## Fixed
 
 - `scripts/report.py` now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.
