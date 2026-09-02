@@ -39,4 +39,5 @@ jobs:
           UV_TORCH_BACKEND: cpu
         run: >
           uv run --no-project --with "git+https://github.com/Tencent/YOLO-Master" --with . --with "numpy<2"
+          --with "torchvision==0.28.0"
           python scripts/fork_smoke.py
