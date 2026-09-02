@@ -37,4 +37,5 @@ jobs:
       - name: esmoe on YOLO-Master's vendored ultralytics
         run: >
           uv run --no-project --with "git+https://github.com/Tencent/YOLO-Master" --with . --with "numpy<2"
+          --with "torch==2.6.0" --with "torchvision==0.21.0"
           python scripts/fork_smoke.py
