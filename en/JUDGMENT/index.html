@@ -10,17 +10,17 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/en/tutorial/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/en/JUDGMENT/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../limitations/">
       
       
-        <link rel="next" href="../SELECTION/">
+        <link rel="next" href="../BASELINE/">
       
       
         
-          <link rel="alternate" href="../../tutorial/" hreflang="zh">
+          <link rel="alternate" href="../../JUDGMENT/" hreflang="zh">
         
           <link rel="alternate" href="./" hreflang="en">
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>Tutorial - ES-MoE</title>
+        <title>判读线 - ES-MoE</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial" class="md-skip">
+        <a href="#judgment-lines-pre-registered" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorial
+              判读线
             
           </span>
         </div>
@@ -166,7 +166,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../tutorial/" hreflang="zh" class="md-select__link">
+            <a href="../../JUDGMENT/" hreflang="zh" class="md-select__link">
               中文
             </a>
           </li>
@@ -316,37 +316,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Tutorial
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
         
   
   
@@ -362,103 +335,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-the-block-does" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What the block does
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-three-calls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The three calls
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#what-grafting-has-to-get-right" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What grafting has to get right
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#proving-the-auxiliary-loss-is-real" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Proving the auxiliary loss is real
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-comparison-you-can-defend" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A comparison you can defend
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extending" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Extending
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-the-edges-are" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where the edges are
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -548,10 +424,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../JUDGMENT/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    判读线
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -567,6 +470,70 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#known-and-unknown-at-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known and unknown at declaration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predictions-declared-before-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions (declared before the results)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evidence chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -706,10 +673,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-the-block-does" class="md-nav__link">
+  <a href="#known-and-unknown-at-declaration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What the block does
+        Known and unknown at declaration
       
     </span>
   </a>
@@ -717,10 +684,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-three-calls" class="md-nav__link">
+  <a href="#lines" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The three calls
+        Lines
       
     </span>
   </a>
@@ -728,10 +695,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-grafting-has-to-get-right" class="md-nav__link">
+  <a href="#predictions-declared-before-the-results" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What grafting has to get right
+        Predictions (declared before the results)
       
     </span>
   </a>
@@ -739,43 +706,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#proving-the-auxiliary-loss-is-real" class="md-nav__link">
+  <a href="#evidence-chain" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Proving the auxiliary loss is real
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-comparison-you-can-defend" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A comparison you can defend
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#extending" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Extending
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-the-edges-are" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where the edges are
+        Evidence chain
       
     </span>
   </a>
@@ -802,109 +736,27 @@
   
 
 
-<h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
-<p>Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.</p>
-<pre><code>pip install esmoe
-</code></pre>
-<h2 id="what-the-block-does">What the block does<a class="headerlink" href="#what-the-block-does" title="Permanent link">&para;</a></h2>
-<p>The block sends each image to a few of several convolutional experts and sums what they return. Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the experts differ in receptive field rather than merely in weights. A lightweight router scores them per image, the top-k are kept and renormalised, and the block returns their weighted sum. The block preserves channel count, which is what lets a stock <code>parse_model</code> size it.</p>
-<pre class="mermaid-chart"><code>flowchart LR
-    X["feature map&lt;br/&gt;(n, c, h, w)"] --&gt; R["router&lt;br/&gt;pool -&gt; linear -&gt; SiLU -&gt; linear"]
-    R --&gt; P["softmax over experts"]
-    P --&gt; T["top-k, renormalised"]
-    X --&gt; E1["expert k=3"]
-    X --&gt; E2["expert k=5"]
-    X --&gt; E3["expert k=7"]
-    X --&gt; E4["expert k=9"]
-    T --&gt; S(("weighted sum"))
-    E1 --&gt; S
-    E2 --&gt; S
-    E3 --&gt; S
-    E4 --&gt; S
-    S --&gt; Y["output&lt;br/&gt;(n, c, h, w)"]
-    P -.-&gt; A["load-balancing loss"]
-    T -.-&gt; A
-    A -.-&gt; L["training loss"]</code></pre>
-<p>The auxiliary term is the Switch-Transformer load-balancing loss,</p>
-<div class="arithmatex">\[
-\mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
-\]</div>
-<p>where <span class="arithmatex">\(E\)</span> is the expert count, <span class="arithmatex">\(\bar{p}_i\)</span> the mean routing probability of expert <span class="arithmatex">\(i\)</span> over the batch
-and <span class="arithmatex">\(f_i\)</span> the fraction of samples that actually activated it. It is minimised when routing mass and
-realised load are spread evenly, which is what keeps the router from collapsing onto one expert.</p>
-<h2 id="the-three-calls">The three calls<a class="headerlink" href="#the-three-calls" title="Permanent link">&para;</a></h2>
-<p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the router loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
-<pre><code>import esmoe
-
-model = esmoe.equip("yolo11n.yaml", weight=0.01)
-model.train(data="coco8.yaml", epochs=3, imgsz=320)
-</code></pre>
-<p>Take them apart when you need to:</p>
-<pre><code>esmoe.inject_esmoe()
-esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
-model = YOLO("v8-esmoe.yaml")
-esmoe.attach_aux_loss(model, weight=0.01)
-</code></pre>
-<p>or from the shell:</p>
-<pre><code>esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
-</code></pre>
-<p>Written by hand, the grafted layer is one line:</p>
-<pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
-</code></pre>
-<h2 id="what-grafting-has-to-get-right">What grafting has to get right<a class="headerlink" href="#what-grafting-has-to-get-right" title="Permanent link">&para;</a></h2>
-<p>A YOLO config addresses earlier layers by absolute index:</p>
-<pre><code>- [[-1, 12], 1, Concat, [1]]
-</code></pre>
-<p>Insert a layer at position 10 and every reference at or past 10 now points one layer too early. The
-model still builds, still trains, and is quietly wrong. <code>graft</code> therefore renumbers every reference
-that sits at or after each insertion point, and a unit test compares the rewritten head against the
-original one reference by reference.</p>
-<p>Renumbering moves references; it does not retarget them. A head branch that names the old backbone end by index - YOLOv8's P5 lateral <code>[-1, 9] Concat</code> does - therefore keeps reading SPPF after the insertion, and the block reaches P5 only through the top-down path. To have the block take over every consumer of the backbone end, pass <code>rewire=True</code> (<code>--rewire</code> on the CLI):</p>
-<pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
-</code></pre>
-<p>It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); <code>rewire</code> gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - bypassing the P5 lateral is where the large-object loss came from.</p>
-<h2 id="proving-the-auxiliary-loss-is-real">Proving the auxiliary loss is real<a class="headerlink" href="#proving-the-auxiliary-loss-is-real" title="Permanent link">&para;</a></h2>
-<p>A configuration key named <code>aux_loss</code> proves nothing. What proves it:</p>
+<h1 id="judgment-lines-pre-registered">Judgment lines (pre-registered)<a class="headerlink" href="#judgment-lines-pre-registered" title="Permanent link">&para;</a></h1>
+<p>The task book requires negative results to come with judgment lines defined in advance. This page fixes the criteria and predictions <strong>before</strong> the runs they govern finish; the git commit time of this page is the evidence.</p>
+<h2 id="known-and-unknown-at-declaration">Known and unknown at declaration<a class="headerlink" href="#known-and-unknown-at-declaration" title="Permanent link">&para;</a></h2>
+<p>Known when declared (evening of 2026-09-02, UTC+8): all three YOLOv8n arms (baseline / esmoe / esmoe-rewire), three seeds each, with their area buckets and router analysis; the overall metrics of YOLO11n baseline seed 0. <strong>Unknown</strong>: every YOLO11n esmoe / rewire run and the remaining baseline seeds; every YOLO12n and YOLO26n run. The lines and predictions below bind those unknown results.</p>
+<h2 id="lines">Lines<a class="headerlink" href="#lines" title="Permanent link">&para;</a></h2>
+<p>For each backbone × arm (same budget, data, augmentation and evaluation, three same-seed pairs):</p>
+<ul>
+<li><strong>Effective</strong>: paired mAP50 mean &gt; 0, at least 2/3 seeds positive, and paired mAP50-95 mean ≥ 0.</li>
+<li><strong>Ineffective</strong>: paired mAP50 mean ≤ 0, or at most 1/3 seeds positive.</li>
+<li><strong>Insufficient evidence</strong>: anything else (e.g. positive mean with negative mAP50-95).</li>
+</ul>
+<p>Three seeds support no significance test: even 3/3 wins gives a sign-test p of 0.125, so "effective" is always phrased as a small, direction-consistent improvement, never a reliable per-run one.</p>
+<h2 id="predictions-declared-before-the-results">Predictions (declared before the results)<a class="headerlink" href="#predictions-declared-before-the-results" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>results.csv</code> gains an <code>esmoe_aux</code> column, non-zero and moving;</li>
-<li>a unit test asserts <code>total(with aux) == total(without) + aux * batch_size</code>;</li>
-<li>the same test asserts the router receives gradient.</li>
+<li><strong>The non-transfer of the default wiring is a wiring property, not a backbone property</strong>: on YOLO11n / 12n / 26n the <code>rewire</code> arm's paired mAP50 mean beats the same backbone's default <code>esmoe</code> arm.</li>
+<li><strong>The default wiring hurts large objects on every generation</strong>: the default arms of 12n / 26n show a negative mean APl (the P5 lateral bypass exists in all four structures).</li>
+<li><strong>YOLO11n's default arm stays below "effective" under the protocol budget</strong> (it was negative at 640/20ep; if 800/120ep turns it positive, the earlier "does not transfer" conclusion gets corrected publicly).</li>
 </ol>
-<p>If you want the number yourself in a custom loop:</p>
-<pre><code>aux = esmoe.collect_aux_loss(model)
-(task_loss + 0.01 * aux).backward()
-</code></pre>
-<p><code>collect_aux_loss</code> only sums values published by the latest forward pass, so calling it twice cannot
-double-count a stale graph.</p>
-<h2 id="a-comparison-you-can-defend">A comparison you can defend<a class="headerlink" href="#a-comparison-you-can-defend" title="Permanent link">&para;</a></h2>
-<pre><code>uv run python scripts/capture_env.py             # freeze versions and hardware into env/
-EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
-uv run python scripts/report.py                  # results/summary.md
-</code></pre>
-<p>Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,
-metrics, artifact path, status, limitation. <code>report.py</code> groups arms by backbone, block config <em>and</em>
-budget, never averaging two different budgets into one row, then prints per-seed paired deltas
-against the baseline of the same seed.</p>
-<p>Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
-experiment; what carries the claim is that the same seed, same data and same schedule moved in the
-same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
-reliable per-run improvement. <code>limitations.md</code> states the rest.</p>
-<h2 id="extending">Extending<a class="headerlink" href="#extending" title="Permanent link">&para;</a></h2>
-<p>Experts and the balancing objective are plain callables:</p>
-<pre><code>class ThinExpert(nn.Sequential):
-    def __init__(self, c1, c2, k):
-        super().__init__(nn.Conv2d(c1, c2, k, 1, k // 2, groups=c1), nn.SiLU())
-
-def entropy_balance(probs, gate):
-    return -(probs * probs.clamp_min(1e-9).log()).sum(dim=1).mean()
-
-block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
-</code></pre>
-<p><code>esmoe.blocks(model)</code> iterates every block in a model, which is how the collector and the tests find
-them.</p>
-<h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>
-<p>Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and <code>loss_items</code> changed shape across ultralytics releases. Those and the rest are in <a href="../limitations/">Limitations</a>, which is also the page to read before quoting any number.</p>
+<p>Wrong predictions get recorded as wrong - that is what this page is for.</p>
+<h2 id="evidence-chain">Evidence chain<a class="headerlink" href="#evidence-chain" title="Permanent link">&para;</a></h2>
+<p>One JSON per run (<code>results/</code>, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by <code>scripts/buckets.py</code> / <code>scripts/routing.py</code>.</p>
 
 
 

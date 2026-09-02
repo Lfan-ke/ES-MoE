@@ -15,6 +15,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/BASELINE/"/>
     </url>
     <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/JUDGMENT/</loc>
+        <lastmod>2026-09-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/JUDGMENT/"/>
+    </url>
+    <url>
         <loc>https://lfan-ke.github.io/ES-MoE/MIDTERM/</loc>
         <lastmod>2026-09-02</lastmod>
         <changefreq>daily</changefreq>
@@ -76,6 +83,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/BASELINE/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/BASELINE/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/en/JUDGMENT/</loc>
+        <lastmod>2026-09-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/JUDGMENT/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/en/MIDTERM/</loc>
