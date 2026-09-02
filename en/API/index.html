@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="zh" class="no-js">
+<html lang="en" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -10,35 +10,35 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/limitations/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/en/API/">
       
       
-        <link rel="prev" href="../results/">
+        <link rel="prev" href="../tutorial/">
       
       
-        <link rel="next" href="../JUDGMENT/">
+        <link rel="next" href="../SELECTION/">
       
       
         
-          <link rel="alternate" href="./" hreflang="zh">
+          <link rel="alternate" href="../../API/" hreflang="zh">
         
-          <link rel="alternate" href="../en/limitations/" hreflang="en">
+          <link rel="alternate" href="./" hreflang="en">
         
       
       
-      <link rel="icon" href="../assets/logo.svg">
+      <link rel="icon" href="../../assets/logo.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>已知局限 - ES-MoE</title>
+        <title>API - ES-MoE</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -57,9 +57,9 @@
       
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,8 +84,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
-          跳转至
+        <a href="#api" class="md-skip">
+          Skip to content
         </a>
       
     </div>
@@ -99,10 +99,10 @@
   
 
 <header class="md-header md-header--shadow" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href=".." title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              已知局限
+              API
             
           </span>
         </div>
@@ -159,20 +159,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="选择当前语言">
+    <button class="md-header__button md-icon" aria-label="Select language">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="./" hreflang="zh" class="md-select__link">
+            <a href="../../API/" hreflang="zh" class="md-select__link">
               中文
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="../en/limitations/" hreflang="en" class="md-select__link">
+            <a href="./" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -193,16 +193,16 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="查找">
+      <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -215,7 +215,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            正在初始化搜索引擎
+            Initializing search
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -227,7 +227,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/Lfan-ke/ES-MoE" title="前往仓库" class="md-source" data-md-component="source">
+        <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -261,18 +261,18 @@
 
 
 
-<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+    <a href="../" title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     ES-MoE
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/Lfan-ke/ES-MoE" title="前往仓库" class="md-source" data-md-component="source">
+      <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -292,14 +292,14 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    概览
+    Overview
   
 
     
@@ -326,88 +326,7 @@
   <span class="md-ellipsis">
     
   
-    教程
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../API/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    API
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../SELECTION/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    选型
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../results/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    实验结果
+    Tutorial
   
 
     
@@ -443,7 +362,7 @@
   <span class="md-ellipsis">
     
   
-    已知局限
+    API
   
 
     
@@ -461,7 +380,7 @@
   <span class="md-ellipsis">
     
   
-    已知局限
+    API
   
 
     
@@ -473,7 +392,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -482,15 +401,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#equip" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基准范围
+        equip
       
     </span>
   </a>
@@ -498,10 +417,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#inject_esmoe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        方法范围
+        inject_esmoe
       
     </span>
   </a>
@@ -509,10 +428,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#graft" class="md-nav__link">
     <span class="md-ellipsis">
       
-        协议与评测口径
+        graft
       
     </span>
   </a>
@@ -520,10 +439,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#attach_aux_loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        报告口径
+        attach_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collect_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        collect_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#esmoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESMoE
       
     </span>
   </a>
@@ -534,6 +475,87 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -579,7 +601,7 @@
   <span class="md-ellipsis">
     
   
-    基线与增量
+    Baseline and increment
   
 
     
@@ -606,7 +628,7 @@
   <span class="md-ellipsis">
     
   
-    中期报告
+    Mid-term report
   
 
     
@@ -633,7 +655,7 @@
   <span class="md-ellipsis">
     
   
-    上游 PR 草稿
+    Upstream PR draft
   
 
     
@@ -660,7 +682,7 @@
   <span class="md-ellipsis">
     
   
-    发布说明
+    Release notes
   
 
     
@@ -686,7 +708,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="目录">
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
   
@@ -695,15 +717,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      目录
+      Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#equip" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基准范围
+        equip
       
     </span>
   </a>
@@ -711,10 +733,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#inject_esmoe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        方法范围
+        inject_esmoe
       
     </span>
   </a>
@@ -722,10 +744,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#graft" class="md-nav__link">
     <span class="md-ellipsis">
       
-        协议与评测口径
+        graft
       
     </span>
   </a>
@@ -733,10 +755,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#attach_aux_loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        报告口径
+        attach_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collect_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        collect_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#esmoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESMoE
       
     </span>
   </a>
@@ -763,33 +807,34 @@
   
 
 
-<h1 id="_1">已知局限<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p><code>results/</code> 里这些证据的边界，写在这里。</p>
-<h2 id="_2">基准范围<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<ul>
-<li>数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。<strong>这不是 COCO 数字</strong>，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。</li>
-<li>短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。</li>
-<li>全部数字来自单机单卡。DDP 的机制已验证（<code>scripts/verify.py</code>：真实的 worker 文件在干净解释器里跑通；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 一致），但没有多卡训练出的精度数字。</li>
-<li>稀疏分发会把某一批没路由到的专家留在图外，DDP 因此需要 <code>find_unused_parameters=True</code>；ultralytics 默认就这么建，但开 <code>compile=True</code> 时会关掉它，那种组合下不能用本块。</li>
-</ul>
-<h2 id="_3">方法范围<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>ESMoE</code> 保持通道数，映射为 <code>c1 -&gt; c1</code>。上游 <code>ES_MOE</code> 还支持 <code>c1 -&gt; c2</code>，该路径<strong>刻意未复现</strong>：官方 <code>parse_model</code> 对第三方模块假定 <code>c2 == ch[f]</code>。</li>
-<li>通道在首次前向时推断。若模型在任何前向之前被 script、导出或 <code>state_dict</code> 加载，此时尚无专家权重可载入。</li>
-<li><code>attach_aux_loss</code> 会 patch 任务模型的类，并把权重同时保存在进程作用域：trainer 会重建模型，EMA 副本又在所有 callback 之前生成。因此一个进程一次只训练一种辅助损失设置；在从未调用 <code>attach_aux_loss</code> 的进程里加载 checkpoint，训练时不带辅助项。</li>
-<li>负载均衡项采用 Switch-Transformer 形式（<code>num_experts * sum(importance * load)</code>），<strong>未</strong>做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。</li>
-</ul>
-<h2 id="_4">协议与评测口径<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<ul>
-<li>早期记录（imgsz 640、20/50/100 epoch）不在仓库的复现协议下，只用于同预算的相对比较与参数筛选。协议合规的一组（imgsz 800、120 epoch、<code>patience=0</code>、完整 val 548 张）已补齐：YOLOv8n 配对 mAP50 +0.0025（2/3），mAP50-95 +0.0004；下结论以这一组为准。</li>
-<li>训练记录里的指标由 ultralytics 自带评测器给出，<code>max_det</code> 取其默认值 300；<code>results/buckets.md</code> 另以 COCO 口径、maxDets=500 重评了协议合规的六个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。</li>
-<li>面积分档（small &lt; 32²、medium 32²–96²、large ≥ 96²，按原图 GT 框算）是本项目采用的 COCO 式定义，不是 VisDrone 官方定义。三个 seed 的配对结果：默认接法下大目标一致变差（APl −0.0104，0/3 胜）、小目标召回一致变好（ARs +0.0026，3/3 胜）；<code>rewire=True</code> 把 APl 翻正（+0.0063，2/3）、AP50 全胜（3/3），幅度仍小。</li>
-</ul>
-<h2 id="_5">报告口径<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<ul>
-<li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎打平（mAP50 +0.0001），因此该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
-<li>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</li>
-</ul>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<p>Six entry points, all importable from the top-level <code>esmoe</code>; the package ships <code>py.typed</code>, so the signatures are visible to IDEs and mypy.</p>
+<h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -&gt; YOLO
+</code></pre>
+<p>Register, graft, build and wire in one call. <code>out</code> names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). <code>graft_kwargs</code> pass through to <code>graft</code>.</p>
+<h2 id="inject_esmoe">inject_esmoe<a class="headerlink" href="#inject_esmoe" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.inject_esmoe() -&gt; type[ESMoE]
+</code></pre>
+<p>Exposes <code>ESMoE</code> where <code>parse_model</code> resolves layer names, after which any model.yaml can write <code>[-1, 1, ESMoE, [4, 2]]</code>.</p>
+<h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2, rewire=False) -&gt; dict
+</code></pre>
+<p>Inserts blocks after the layers named by <code>at</code> and renumbers every later reference. <code>at</code> is <code>"backbone_end"</code>, one index or several. With <code>rewire=True</code> every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.</p>
+<h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
+</code></pre>
+<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight on their own.</p>
+<h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
+</code></pre>
+<p>Sums the router losses published by the latest forward pass, for custom training loops. Repeated calls cannot double-count a stale value.</p>
+<h2 id="esmoe">ESMoE<a class="headerlink" href="#esmoe" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, *, reduction=8,
+            max_kernel_size=15, expert_kernel_sizes=None,
+            expert=DWExpert, balance=switch_balance)
+</code></pre>
+<p>The channel-preserving mixture block. <code>channels</code> is inferred on the first forward when omitted. <code>expert</code> is a <code>(c1, c2, k) -&gt; Module</code> factory and <code>balance</code> a <code>(probs, gate) -&gt; scalar</code> objective; both are replaceable. <code>esmoe.blocks(model)</code> iterates every block in a model in module order.</p>
 
 
 
@@ -813,7 +858,7 @@
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  回到页面顶部
+  Back to top
 </button>
         
       </main>
@@ -845,16 +890,16 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
       
-        <script src="../javascripts/diagrams.js"></script>
+        <script src="../../javascripts/diagrams.js"></script>
       
     
   </body>

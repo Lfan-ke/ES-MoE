@@ -8,6 +8,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/"/>
     </url>
     <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/API/</loc>
+        <lastmod>2026-09-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/API/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/API/"/>
+    </url>
+    <url>
         <loc>https://lfan-ke.github.io/ES-MoE/BASELINE/</loc>
         <lastmod>2026-09-02</lastmod>
         <changefreq>daily</changefreq>
@@ -76,6 +83,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/en/API/</loc>
+        <lastmod>2026-09-02</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/en/API/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/API/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/en/BASELINE/</loc>

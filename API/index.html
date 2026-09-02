@@ -10,19 +10,19 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/limitations/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/API/">
       
       
-        <link rel="prev" href="../results/">
+        <link rel="prev" href="../tutorial/">
       
       
-        <link rel="next" href="../JUDGMENT/">
+        <link rel="next" href="../SELECTION/">
       
       
         
           <link rel="alternate" href="./" hreflang="zh">
         
-          <link rel="alternate" href="../en/limitations/" hreflang="en">
+          <link rel="alternate" href="../en/API/" hreflang="en">
         
       
       
@@ -31,7 +31,7 @@
     
     
       
-        <title>已知局限 - ES-MoE</title>
+        <title>API - ES-MoE</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
+        <a href="#api" class="md-skip">
           跳转至
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              已知局限
+              API
             
           </span>
         </div>
@@ -172,7 +172,7 @@
           </li>
         
           <li class="md-select__item">
-            <a href="../en/limitations/" hreflang="en" class="md-select__link">
+            <a href="../en/API/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -343,10 +343,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../API/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -362,6 +389,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#equip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        equip
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inject_esmoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        inject_esmoe
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        graft
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#attach_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        attach_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collect_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        collect_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#esmoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESMoE
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -424,37 +537,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    已知局限
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
         
   
   
@@ -470,70 +556,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        基准范围
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        方法范围
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        协议与评测口径
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        报告口径
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -700,10 +722,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#equip" class="md-nav__link">
     <span class="md-ellipsis">
       
-        基准范围
+        equip
       
     </span>
   </a>
@@ -711,10 +733,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#inject_esmoe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        方法范围
+        inject_esmoe
       
     </span>
   </a>
@@ -722,10 +744,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#graft" class="md-nav__link">
     <span class="md-ellipsis">
       
-        协议与评测口径
+        graft
       
     </span>
   </a>
@@ -733,10 +755,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#attach_aux_loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        报告口径
+        attach_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#collect_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        collect_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#esmoe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ESMoE
       
     </span>
   </a>
@@ -763,33 +807,34 @@
   
 
 
-<h1 id="_1">已知局限<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p><code>results/</code> 里这些证据的边界，写在这里。</p>
-<h2 id="_2">基准范围<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<ul>
-<li>数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。<strong>这不是 COCO 数字</strong>，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。</li>
-<li>短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。</li>
-<li>全部数字来自单机单卡。DDP 的机制已验证（<code>scripts/verify.py</code>：真实的 worker 文件在干净解释器里跑通；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 一致），但没有多卡训练出的精度数字。</li>
-<li>稀疏分发会把某一批没路由到的专家留在图外，DDP 因此需要 <code>find_unused_parameters=True</code>；ultralytics 默认就这么建，但开 <code>compile=True</code> 时会关掉它，那种组合下不能用本块。</li>
-</ul>
-<h2 id="_3">方法范围<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>ESMoE</code> 保持通道数，映射为 <code>c1 -&gt; c1</code>。上游 <code>ES_MOE</code> 还支持 <code>c1 -&gt; c2</code>，该路径<strong>刻意未复现</strong>：官方 <code>parse_model</code> 对第三方模块假定 <code>c2 == ch[f]</code>。</li>
-<li>通道在首次前向时推断。若模型在任何前向之前被 script、导出或 <code>state_dict</code> 加载，此时尚无专家权重可载入。</li>
-<li><code>attach_aux_loss</code> 会 patch 任务模型的类，并把权重同时保存在进程作用域：trainer 会重建模型，EMA 副本又在所有 callback 之前生成。因此一个进程一次只训练一种辅助损失设置；在从未调用 <code>attach_aux_loss</code> 的进程里加载 checkpoint，训练时不带辅助项。</li>
-<li>负载均衡项采用 Switch-Transformer 形式（<code>num_experts * sum(importance * load)</code>），<strong>未</strong>做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。</li>
-</ul>
-<h2 id="_4">协议与评测口径<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<ul>
-<li>早期记录（imgsz 640、20/50/100 epoch）不在仓库的复现协议下，只用于同预算的相对比较与参数筛选。协议合规的一组（imgsz 800、120 epoch、<code>patience=0</code>、完整 val 548 张）已补齐：YOLOv8n 配对 mAP50 +0.0025（2/3），mAP50-95 +0.0004；下结论以这一组为准。</li>
-<li>训练记录里的指标由 ultralytics 自带评测器给出，<code>max_det</code> 取其默认值 300；<code>results/buckets.md</code> 另以 COCO 口径、maxDets=500 重评了协议合规的六个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。</li>
-<li>面积分档（small &lt; 32²、medium 32²–96²、large ≥ 96²，按原图 GT 框算）是本项目采用的 COCO 式定义，不是 VisDrone 官方定义。三个 seed 的配对结果：默认接法下大目标一致变差（APl −0.0104，0/3 胜）、小目标召回一致变好（ARs +0.0026，3/3 胜）；<code>rewire=True</code> 把 APl 翻正（+0.0063，2/3）、AP50 全胜（3/3），幅度仍小。</li>
-</ul>
-<h2 id="_5">报告口径<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<ul>
-<li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎打平（mAP50 +0.0001），因此该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
-<li>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</li>
-</ul>
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<p>六个入口，全部从 <code>esmoe</code> 顶层导入；包内带 <code>py.typed</code>，类型签名对 IDE 与 mypy 可见。</p>
+<h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -&gt; YOLO
+</code></pre>
+<p>注册、接入、构建、接损失一次完成。<code>out</code> 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。<code>graft_kwargs</code> 原样转给 <code>graft</code>。</p>
+<h2 id="inject_esmoe">inject_esmoe<a class="headerlink" href="#inject_esmoe" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.inject_esmoe() -&gt; type[ESMoE]
+</code></pre>
+<p>把 <code>ESMoE</code> 注册到 <code>parse_model</code> 解析层名的位置，此后任何 model.yaml 都能写 <code>[-1, 1, ESMoE, [4, 2]]</code>。</p>
+<h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2, rewire=False) -&gt; dict
+</code></pre>
+<p>在 <code>at</code> 指定的层后插入块并重编号其后的所有引用。<code>at</code> 可为 <code>"backbone_end"</code>、单个层号或多个层号。<code>rewire=True</code> 让引用旧插入层的下游改指块本身——不开时，按序号点名主干末层的 head 分支（如 YOLOv8 的 P5 侧向）读到的仍是插入前的特征。</p>
+<h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
+</code></pre>
+<p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重。</p>
+<h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
+</code></pre>
+<p>汇总最近一次前向发布的路由损失，自定义训练循环用。连续调用不会重复计入陈旧值。</p>
+<h2 id="esmoe">ESMoE<a class="headerlink" href="#esmoe" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, *, reduction=8,
+            max_kernel_size=15, expert_kernel_sizes=None,
+            expert=DWExpert, balance=switch_balance)
+</code></pre>
+<p>通道保持的专家混合块。<code>channels</code> 省略时在首次前向推断。<code>expert</code> 是 <code>(c1, c2, k) -&gt; Module</code> 的工厂，<code>balance</code> 是 <code>(probs, gate) -&gt; scalar</code> 的均衡目标，两者都可替换。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。</p>
 
 
 
