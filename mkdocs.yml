@@ -60,6 +60,7 @@ nav:
   - 选型: SELECTION.md
   - 实验结果: results.md
   - 已知局限: limitations.md
+  - 判读线: JUDGMENT.md
   - 基线与增量: BASELINE.md
   - 中期报告: MIDTERM.md
   - 上游 PR 草稿: PR_DRAFT.md
