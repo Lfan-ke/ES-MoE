@@ -59,6 +59,9 @@ explicit = true
 torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
 
+[tool.setuptools.package-data]
+esmoe = ["py.typed"]
+
 [tool.setuptools.packages.find]
 include = ["esmoe*"]
 
