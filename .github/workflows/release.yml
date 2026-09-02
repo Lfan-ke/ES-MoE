@@ -9,6 +9,24 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        ultralytics: [locked, "8.4.101"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - run: uv sync --group dev
+      - name: Pin ultralytics
+        if: matrix.ultralytics != 'locked'
+        run: uv pip install "ultralytics==${{ matrix.ultralytics }}"
+      - run: uv run --no-sync pytest -q
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +42,7 @@ jobs:
           path: dist/
 
   publish:
-    needs: build
+    needs: [build, test]
     # Flipped to 'true' once PyPI knows this workflow as a trusted publisher; until then a tag only builds.
     if: vars.PYPI_TRUSTED == 'true'
     runs-on: ubuntu-latest
