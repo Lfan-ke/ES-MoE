@@ -57,6 +57,7 @@ plugins:
 nav:
   - 概览: index.md
   - 教程: tutorial.md
+  - API: API.md
   - 选型: SELECTION.md
   - 实验结果: results.md
   - 已知局限: limitations.md
