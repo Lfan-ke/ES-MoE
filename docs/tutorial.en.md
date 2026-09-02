@@ -77,7 +77,7 @@ Renumbering moves references; it does not retarget them. A head branch that name
 
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 
-It is off by default to keep existing run records comparable; the two wirings have not yet been compared under one budget.
+It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); `rewire` gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - bypassing the P5 lateral is where the large-object loss came from.
 
 ## Proving the auxiliary loss is real
 

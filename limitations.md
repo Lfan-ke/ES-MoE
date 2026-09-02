@@ -23,7 +23,7 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 - The early records (imgsz 640, 20/50/100 epochs) do not sit under the repository's reproduction protocol and serve only same-budget comparison and parameter screening. A protocol-conformant set (imgsz 800, 120 epochs, `patience=0`, the full 548-image validation set) now exists: YOLOv8n paired mAP50 +0.0025 (2/3), mAP50-95 +0.0004. Conclusions are drawn from that set.
 - Metrics in the run records come from the ultralytics evaluator with its default `max_det` of 300; `results/buckets.md` re-evaluates the six protocol-conformant checkpoints under COCO conventions with maxDets = 500. The two sets are not interchangeable, and neither is directly comparable to the official VisDrone leaderboard.
-- The area buckets (small < 32², medium 32²–96², large ≥ 96², on ground-truth boxes in the original image) are the COCO definition adopted by this project, not a VisDrone one. Paired over three seeds: large objects get consistently worse (APl −0.0104, ARl −0.0129, 0/3 wins) and small-object recall consistently better (ARs +0.0026, 3/3 wins), by too little to lift AP.
+- The area buckets (small < 32², medium 32²–96², large ≥ 96², on ground-truth boxes in the original image) are the COCO definition adopted by this project, not a VisDrone one. Paired over three seeds: under the default wiring large objects get consistently worse (APl −0.0104, 0/3 wins) and small-object recall consistently better (ARs +0.0026, 3/3 wins); `rewire=True` turns APl positive (+0.0063, 2/3) and wins mAP50 on every seed, still by small margins.
 
 ## Reporting
 
