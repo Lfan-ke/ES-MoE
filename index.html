@@ -842,9 +842,15 @@ model.train(data="coco8.yaml", epochs=10)
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 </tr>
+<tr>
+<td style="text-align: center;">YOLO-Master（fork）</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+</tr>
 </tbody>
 </table>
-<p>由 <code>tests/test_ultralytics.py</code> 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 <code>train/esmoe_aux</code> 非零。</p>
+<p>由 <code>tests/test_ultralytics.py</code> 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 <code>train/esmoe_aux</code> 非零。yolov5n / yolov9t / yolov10n 的接入与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：<code>scripts/fork_smoke.py</code> 接入其 <code>yolo-master-n.yaml</code>、真实训练一轮且 <code>esmoe_aux</code> 非零，其自有 <code>ES_MOE</code> 配置与本块注册共存。</p>
 <h2 id="_4">出厂配置<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p><code>ESMoE(num_experts=4, top_k=2)</code> 配 <code>attach_aux_loss(weight=0.01)</code>。在统一预算下，它胜过 2 / 4 / 8 专家与 top-1 的各个变体，并在全量 VisDrone 上以三个 seed 确认：配对 3/3 胜，mAP50 +0.0021，参数增加 10.4%。论证见<a href="SELECTION/">选型</a>。</p>
 <h2 id="_5">证据与边界<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
