@@ -35,7 +35,8 @@ jobs:
           enable-cache: true
           python-version: "3.12"
       - name: esmoe on YOLO-Master's vendored ultralytics
+        env:
+          UV_TORCH_BACKEND: cpu
         run: >
           uv run --no-project --with "git+https://github.com/Tencent/YOLO-Master" --with . --with "numpy<2"
-          --with "torch==2.14.0" --with "torchvision==0.29.0"
           python scripts/fork_smoke.py
