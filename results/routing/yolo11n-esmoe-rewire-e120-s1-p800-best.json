@@ -1,0 +1,50 @@
+{
+  "weights": "yolo11n-esmoe-rewire-e120-s1-p800-best.pt",
+  "images": 548,
+  "kernels": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "top_k": 2,
+  "usage": [
+    0.1788,
+    0.3157,
+    0.6277,
+    0.8777
+  ],
+  "top1_share": [
+    0.0,
+    0.031,
+    0.3193,
+    0.6496
+  ],
+  "dead_experts": [],
+  "mean_prob": [
+    0.2069,
+    0.211,
+    0.2412,
+    0.3409
+  ],
+  "prob_entropy_mean": 1.3112,
+  "prob_entropy_max": 1.3863,
+  "unique_top2_sets": 6,
+  "scale_of_top1_choice": {
+    "1": 19.8,
+    "2": 30.7,
+    "3": 40.3
+  },
+  "prob_vs_scale_corr": [
+    0.136,
+    0.006,
+    -0.27,
+    0.236
+  ],
+  "prob_vs_count_corr": [
+    -0.366,
+    -0.279,
+    0.475,
+    -0.278
+  ]
+}
