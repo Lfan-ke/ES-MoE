@@ -68,6 +68,39 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 | 2 | 7 | 0.119 | 0.363 | 0.227 | -0.12 | +0.29 |
 | 3 | 9 | 0.075 | 0.226 | 0.162 | -0.32 | +0.21 |
 
+## yolo12n-esmoe-e120-s0-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2869 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.703 | 0.914 | 0.348 | +0.12 | -0.08 |
+| 1 | 5 | 0.100 | 0.297 | 0.221 | -0.23 | +0.29 |
+| 2 | 7 | 0.089 | 0.133 | 0.149 | -0.24 | +0.24 |
+| 3 | 9 | 0.108 | 0.655 | 0.282 | +0.39 | -0.48 |
+
+## yolo12n-esmoe-e120-s1-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.334 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.013 | 0.108 | 0.215 | +0.07 | -0.11 |
+| 1 | 5 | 0.564 | 0.814 | 0.298 | -0.49 | +0.60 |
+| 2 | 7 | 0.042 | 0.161 | 0.184 | +0.38 | -0.50 |
+| 3 | 9 | 0.381 | 0.918 | 0.302 | +0.26 | -0.29 |
+
+## yolo12n-esmoe-e120-s2-p800-best.pt
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2781 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.011 | 0.427 | 0.224 | +0.07 | -0.06 |
+| 1 | 5 | 0.907 | 0.953 | 0.405 | -0.15 | +0.15 |
+| 2 | 7 | 0.038 | 0.529 | 0.227 | +0.59 | -0.42 |
+| 3 | 9 | 0.044 | 0.091 | 0.143 | -0.15 | +0.07 |
+
 ## yolov8n-esmoe-e120-s0-p800-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3023 of 1.3863, distinct top-2 pairs seen: 6 of 6.
@@ -136,7 +169,7 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 
 ## Reading
 
-- The pattern repeats on both backbones and all arms: no dead experts, one dominant expert per checkpoint (top-2 coverage 0.84–0.94 for the leader), and a different leader per seed. The specialisation is not a property of the kernel sizes.
+- The pattern now repeats on three backbones (v8n, 11n, 12n) and all arms: no dead experts, one dominant expert per checkpoint (top-2 coverage 0.81–0.95 for the leader), and a different leader per seed. The specialisation is not a property of the kernel sizes.
 - Mean routing probabilities stay near uniform (entropy 91–97% of the maximum) while the realised top-k load is skewed. The Switch-Transformer term multiplies mean probability by load, and load sums to `top_k` by construction, so once mean probabilities are balanced the term is nearly blind to load skew; the logged `esmoe_aux ≈ 0.020` at weight 0.01 is the balanced-importance value `k = 2` almost exactly.
 - Correlations between an expert's probability and the mean object size of the image are weak and change sign across seeds on every backbone. No checkpoint learnt a scale-based assignment.
-- The `rewire` checkpoints route the same way as the default ones on both backbones. Rewiring changes where the block's output goes, not how the router behaves — so the large, backbone-dependent APl effects of the wiring come from the graph, not from routing.
+- The `rewire` checkpoints route the same way as the default ones on the two backbones that have them so far (v8n, 11n). Rewiring changes where the block's output goes, not how the router behaves — so the large, backbone-dependent APl effects of the wiring come from the graph, not from routing.
