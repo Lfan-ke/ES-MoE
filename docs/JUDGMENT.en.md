@@ -53,3 +53,13 @@ As declared, three seeds support no significance test; every "effective" is a sm
 - **`rewire` pulls 12n and 26n back to near parity** and is the only 3/3 arm on v8n; only on 11n does it trail the default arm. The wiring — whether consumers read the block's output — moves the metric more than the backbone does, but not in one direction everywhere.
 - **Where the damage lands depends on the backbone**: v8n loses large objects, 26n loses small ones, 12n is direction-unstable. No fixed "this block helps/hurts scale X" statement survives the four-generation matrix.
 - **Routing collapses identically on all four generations**: no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation; five of 26n's six checkpoints hand the lead to the `k = 9` expert. Rewiring changes none of it.
+
+## Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)
+
+The four-generation matrix is settled. **Unknown**: all 27 runs of YOLOv5n / YOLOv9t / YOLOv10n (same protocol, three arms, three seeds). The judgment lines above carry over; the predictions:
+
+1. **v5n's default arm has a positive paired mAP50 mean** — its backbone end is SPPF, the same family as v8n; the old end of the "monotonic decay with generation" line should sit above zero.
+2. **v10n's default-arm mean is below v5n's** — v10 ends in an attention block (PSA), and the "newer end fares worse" ordering puts it under v5.
+3. **The routing collapse repeats on all three** — no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation. This is the mechanistic bet: a failure here would carry more information than the other two combined.
+
+Wrong predictions get recorded as wrong.
