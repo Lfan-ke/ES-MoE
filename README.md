@@ -101,14 +101,17 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the paired result on **YOLOv8n** is +0.0025 mAP50 (2/3 seeds) and +0.0004 mAP50-95, at +10.4% parameters and
-about 9% more wall-clock per epoch. By COCO-style area bucket, large objects get consistently worse (APl −0.010,
-0/3) and small-object recall consistently better (ARs +0.003, 3/3). On **YOLO11n** the same comparison is a
-wash: the mechanics transfer across backbones, the accuracy effect does not.
+the full matrix is four backbone generations × three arms × three seeds, 36 runs. The default wiring's paired
+mAP50 decays monotonically with the generation: +0.0025 (v8n, 2/3), +0.0013 (11n, 2/3), −0.0018 (12n, 0/3),
+−0.0034 (26n, 0/3), at +10.4% parameters and about 9% more wall-clock per epoch. Where the damage lands depends
+on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
+direction-unstable.
 
-The default graft leaves YOLOv8's P5 lateral reading SPPF rather than the block; `graft(..., rewire=True)` changes
-that and is the next comparison to run. Reasoning and full tables: `docs/SELECTION.md`, `results/buckets.md`,
-`results/routing.md`.
+The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
+reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n
+(+0.0036) and pulls 12n and 26n back to near parity (+0.0001 and −0.0005); only on 11n does it trail the default.
+Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `docs/SELECTION.md`,
+`results/buckets.md`, `results/routing.md`, `results/report.md`.
 
 ## Develop and reproduce
 
