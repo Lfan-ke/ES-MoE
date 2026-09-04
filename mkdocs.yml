@@ -50,6 +50,7 @@ plugins:
             实验结果: Results
             已知局限: Limitations
             基线与增量: Baseline and increment
+            判读线: Judgment lines
             中期报告: Mid-term report
             发布说明: Release notes
             上游 PR 草稿: Upstream PR draft
