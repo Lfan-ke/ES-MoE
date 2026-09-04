@@ -1,0 +1,51 @@
+{
+  "weights": "yolo26n-esmoe-rewire-e120-s0-p800-best.pt",
+  "images": 548,
+  "kernels": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "top_k": 2,
+  "usage": [
+    0.4909,
+    0.1259,
+    0.4434,
+    0.9398
+  ],
+  "top1_share": [
+    0.0347,
+    0.0639,
+    0.0274,
+    0.8741
+  ],
+  "dead_experts": [],
+  "mean_prob": [
+    0.2389,
+    0.1705,
+    0.2245,
+    0.3661
+  ],
+  "prob_entropy_mean": 1.3129,
+  "prob_entropy_max": 1.3863,
+  "unique_top2_sets": 6,
+  "scale_of_top1_choice": {
+    "0": 38.1,
+    "1": 30.4,
+    "2": 132.4,
+    "3": 34.0
+  },
+  "prob_vs_scale_corr": [
+    0.149,
+    -0.205,
+    0.513,
+    -0.104
+  ],
+  "prob_vs_count_corr": [
+    -0.218,
+    0.149,
+    -0.56,
+    0.213
+  ]
+}

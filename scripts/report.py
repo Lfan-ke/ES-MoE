@@ -29,6 +29,8 @@ def variant(record):
     cfg, data, budget = record["config"], record["dataset"], record["budget"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
     block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
+    if cfg.get("rewire"):
+        block += "-rewire"
     return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}"
 
 
