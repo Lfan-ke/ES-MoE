@@ -861,7 +861,7 @@
 </ol>
 <p>Wrong predictions get recorded as wrong - that is what this page is for.</p>
 <h2 id="evidence-chain">Evidence chain<a class="headerlink" href="#evidence-chain" title="Permanent link">&para;</a></h2>
-<p>One JSON per run (<code>results/</code>, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by <code>scripts/buckets.py</code> / <code>scripts/routing.py</code>.</p>
+<p>One JSON per run (<code>results/</code>, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by <code>scripts/buckets.py</code> / <code>scripts/routing.py</code>. The 36 <code>best.pt</code> files and training arguments live on the <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> branch</a> (Git LFS).</p>
 <h2 id="verdicts-2026-09-04-after-the-full-matrix">Verdicts (2026-09-04, after the full matrix)<a class="headerlink" href="#verdicts-2026-09-04-after-the-full-matrix" title="Permanent link">&para;</a></h2>
 <p>All 36 runs — four backbone generations × three arms × three seeds — completed under the protocol budget (full VisDrone training, 800px, 120 epochs, patience 0, batch 32, same-seed pairing). Cell by cell against the lines above:</p>
 <table>

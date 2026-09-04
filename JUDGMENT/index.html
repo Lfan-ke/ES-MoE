@@ -861,7 +861,7 @@
 </ol>
 <p>预测错了就照实记录——本页的意义正在于让"事后解释"无处遁形。</p>
 <h2 id="_5">证据链<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>每次运行一条 JSON（<code>results/</code>，含 git_ref、环境、预算、seed、指标、产物路径）；分档与路由分析由 <code>scripts/buckets.py</code> / <code>scripts/routing.py</code> 从 checkpoint 重算，均可复现。</p>
+<p>每次运行一条 JSON（<code>results/</code>，含 git_ref、环境、预算、seed、指标、产物路径）；分档与路由分析由 <code>scripts/buckets.py</code> / <code>scripts/routing.py</code> 从 checkpoint 重算，均可复现。36 轮的 <code>best.pt</code> 与训练参数在 <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> 分支</a>（Git LFS）。</p>
 <h2 id="2026-09-04">判定（2026-09-04，全矩阵产出后）<a class="headerlink" href="#2026-09-04" title="Permanent link">&para;</a></h2>
 <p>四代主干 × 三臂 × 三 seed 共 36 轮全部按协议预算（VisDrone 全量训练、800px、120 epoch、patience 0、batch 32、同 seed 配对）跑完。按上文判读线逐格判定：</p>
 <table>
