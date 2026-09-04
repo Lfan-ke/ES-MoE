@@ -9,3 +9,4 @@ site/
 runs/
 datasets/
 *.pt
+CONTRIB_TASKS.md
