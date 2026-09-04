@@ -26,7 +26,7 @@ Wrong predictions get recorded as wrong - that is what this page is for.
 
 ## Evidence chain
 
-One JSON per run (`results/`, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by `scripts/buckets.py` / `scripts/routing.py`.
+One JSON per run (`results/`, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by `scripts/buckets.py` / `scripts/routing.py`. The 36 `best.pt` files and training arguments live on the [`checkpoints` branch](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints) (Git LFS).
 
 ## Verdicts (2026-09-04, after the full matrix)
 

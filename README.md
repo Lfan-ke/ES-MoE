@@ -122,7 +122,9 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). Read `limitations.md` before quoting any number.
+metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 36
+protocol-matrix checkpoints live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
+branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
 
 ## Linked projects
 

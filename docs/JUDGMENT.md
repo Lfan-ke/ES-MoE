@@ -26,7 +26,7 @@
 
 ## 证据链
 
-每次运行一条 JSON（`results/`，含 git_ref、环境、预算、seed、指标、产物路径）；分档与路由分析由 `scripts/buckets.py` / `scripts/routing.py` 从 checkpoint 重算，均可复现。
+每次运行一条 JSON（`results/`，含 git_ref、环境、预算、seed、指标、产物路径）；分档与路由分析由 `scripts/buckets.py` / `scripts/routing.py` 从 checkpoint 重算，均可复现。36 轮的 `best.pt` 与训练参数在 [`checkpoints` 分支](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)（Git LFS）。
 
 ## 判定（2026-09-04，全矩阵产出后）
 
