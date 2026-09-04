@@ -1,0 +1,50 @@
+{
+  "weights": "yolo26n-esmoe-e120-s2-p800-best.pt",
+  "images": 548,
+  "kernels": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "top_k": 2,
+  "usage": [
+    0.188,
+    0.6131,
+    0.2847,
+    0.9142
+  ],
+  "top1_share": [
+    0.0,
+    0.1661,
+    0.0146,
+    0.8193
+  ],
+  "dead_experts": [],
+  "mean_prob": [
+    0.2218,
+    0.2339,
+    0.2058,
+    0.3385
+  ],
+  "prob_entropy_mean": 1.3395,
+  "prob_entropy_max": 1.3863,
+  "unique_top2_sets": 5,
+  "scale_of_top1_choice": {
+    "1": 30.4,
+    "2": 113.6,
+    "3": 36.5
+  },
+  "prob_vs_scale_corr": [
+    0.112,
+    -0.34,
+    0.46,
+    0.037
+  ],
+  "prob_vs_count_corr": [
+    -0.064,
+    0.438,
+    -0.498,
+    -0.127
+  ]
+}

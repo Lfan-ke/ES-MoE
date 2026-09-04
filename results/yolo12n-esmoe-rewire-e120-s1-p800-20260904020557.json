@@ -1,0 +1,46 @@
+{
+  "experiment_id": "yolo12n-esmoe-rewire-e120-s1-p800-20260904020557",
+  "git_ref": {
+    "toolkit": "d9b0fe2",
+    "toolkit_version": "0.1.4",
+    "ultralytics": "8.4.101",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
+  },
+  "config": {
+    "model_yaml": "/data/esmoe-toolkit/configs/yolo12n-esmoe-e4k2-rewire.yaml",
+    "arch": "esmoe-rewire",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": true,
+    "aux_weight": 0.01
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 1.0
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "torch": "2.6.0a0+ecf3bae40a.nv25.01",
+    "python": "3.12.3"
+  },
+  "budget": {
+    "epochs": 120,
+    "batch": 32,
+    "imgsz": 800,
+    "patience": 0,
+    "amp": true,
+    "wall_seconds": 8035.2
+  },
+  "seed": 1,
+  "metrics": {
+    "metrics/precision(B)": 0.47602730706081015,
+    "metrics/recall(B)": 0.3756336958309975,
+    "metrics/mAP50(B)": 0.3540823658165363,
+    "metrics/mAP50-95(B)": 0.2046680357637696
+  },
+  "params": 2884530,
+  "artifact": "/data/esmoe-toolkit/runs/yolo12n-esmoe-rewire-e120-s1-p800/weights/best.pt",
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}
