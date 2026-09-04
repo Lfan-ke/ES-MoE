@@ -596,6 +596,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -821,6 +832,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -909,6 +931,14 @@
 <li><strong>Where the damage lands depends on the backbone</strong>: v8n loses large objects, 26n loses small ones, 12n is direction-unstable. No fixed "this block helps/hurts scale X" statement survives the four-generation matrix.</li>
 <li><strong>Routing collapses identically on all four generations</strong>: no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation; five of 26n's six checkpoints hand the lead to the <code>k = 9</code> expert. Rewiring changes none of it.</li>
 </ul>
+<h2 id="second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result">Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)<a class="headerlink" href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" title="Permanent link">&para;</a></h2>
+<p>The four-generation matrix is settled. <strong>Unknown</strong>: all 27 runs of YOLOv5n / YOLOv9t / YOLOv10n (same protocol, three arms, three seeds). The judgment lines above carry over; the predictions:</p>
+<ol>
+<li><strong>v5n's default arm has a positive paired mAP50 mean</strong> — its backbone end is SPPF, the same family as v8n; the old end of the "monotonic decay with generation" line should sit above zero.</li>
+<li><strong>v10n's default-arm mean is below v5n's</strong> — v10 ends in an attention block (PSA), and the "newer end fares worse" ordering puts it under v5.</li>
+<li><strong>The routing collapse repeats on all three</strong> — no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation. This is the mechanistic bet: a failure here would carry more information than the other two combined.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
 
 
 

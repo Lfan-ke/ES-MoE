@@ -596,6 +596,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2026-09-05-yolov5-v9-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二轮预登记（2026-09-05，声明于 YOLOv5 / v9 / v10 结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -821,6 +832,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2026-09-05-yolov5-v9-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二轮预登记（2026-09-05，声明于 YOLOv5 / v9 / v10 结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -909,6 +931,14 @@
 <li><strong>分档伤害的位置随主干变</strong>：v8n 伤大目标、26n 伤小目标、12n 方向不稳。任何「该块对某尺度有利/有害」的固定表述都过不了四代矩阵。</li>
 <li><strong>路由四代同构塌缩</strong>：无死专家、单主导专家、平均概率近均匀、无尺度分工；26n 六个 checkpoint 有五个把主导权给了 <code>k = 9</code> 专家。改接线不改路由。</li>
 </ul>
+<h2 id="2026-09-05-yolov5-v9-v10">第二轮预登记（2026-09-05，声明于 YOLOv5 / v9 / v10 结果之前）<a class="headerlink" href="#2026-09-05-yolov5-v9-v10" title="Permanent link">&para;</a></h2>
+<p>四代矩阵已判定完毕。<strong>未知</strong>：YOLOv5n / YOLOv9t / YOLOv10n 的全部 27 轮（同协议、三臂、三 seed）。判读线沿用上文，预测如下：</p>
+<ol>
+<li><strong>v5n 默认臂配对 mAP50 均值 &gt; 0</strong>——其主干末端是 SPPF，与 v8n 同族；「效应随主干代际单调衰减」的旧端应当为正。</li>
+<li><strong>v10n 默认臂均值 &lt; v5n 默认臂均值</strong>——v10 的末端是注意力块（PSA），按「末端越新默认接法越吃亏」的排序，它应落在 v5 之下。</li>
+<li><strong>路由塌缩在三代上继续成立</strong>——无死专家、单主导专家、平均概率近均匀、无尺度分工。这条是机制预测：若在任何一代上不成立，其信息量比前两条加起来都大。</li>
+</ol>
+<p>预测错了照实记录。</p>
 
 
 
