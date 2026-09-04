@@ -884,7 +884,7 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>重编号只移动引用，不改变引用对象。于是 head 里按序号点名旧主干末层的分支——YOLOv8 的 P5 侧向 <code>[-1, 9] Concat</code> 就是——插入之后仍读 SPPF 的输出，块只经自顶向下路径间接影响 P5。要让块接管主干末层的全部下游，加 <code>rewire=True</code>（命令行 <code>--rewire</code>）：</p>
 <pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 </code></pre>
-<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——绕过 P5 侧向正是大目标受损的主要来源。</p>
+<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，绕过 P5 侧向正是大目标受损的主要来源。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；<code>rewire</code> 在 12n、26n 把默认接法的一致损失拉回持平，仅在 11n 略低于默认接法。四代判定见<a href="../JUDGMENT/">判读线</a>。</p>
 <h2 id="_5">怎么证明辅助损失确实生效<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>配置里有个叫 <code>aux_loss</code> 的键什么都证明不了。能证明的是：</p>
 <ol>
