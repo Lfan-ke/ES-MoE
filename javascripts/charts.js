@@ -10,9 +10,9 @@
   // The site is bilingual; the chart follows the page rather than staying English throughout.
   const ZH = (document.documentElement.lang || "").toLowerCase().startsWith("zh");
   const T = ZH
-    ? { "default graft": "默认接法", rewire: "rewire", axis: "配对差值", seed: "seed ",
+    ? { "default graft": "ES-MoE 默认", rewire: "ES-MoE 改接", axis: "配对差值", seed: "seed ",
         mean: "均值，共 ", wins: "胜", seeds: "逐 seed", png: "存为 PNG" }
-    : { "default graft": "default graft", rewire: "rewire", axis: "paired delta", seed: "seed ",
+    : { "default graft": "ES-MoE default", rewire: "ES-MoE rewired", axis: "paired delta", seed: "seed ",
         mean: "mean of ", wins: "wins", seeds: "seeds", png: "PNG" };
   const SYSTEM = window.matchMedia("(prefers-color-scheme: dark)");
   const SEEDS = 3; // the protocol's seed count; fewer means the arm is still running
