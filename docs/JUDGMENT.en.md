@@ -1,6 +1,6 @@
 # Judgment lines (pre-registered)
 
-The task book requires negative results to come with judgment lines defined in advance. This page fixes the criteria and predictions **before** the runs they govern finish; the git commit time of this page is the evidence.
+A negative result only counts when the judgment line predates it. This page fixes the criteria and predictions **before** the runs they govern finish; the git commit time is the evidence.
 
 ## Known and unknown at declaration
 

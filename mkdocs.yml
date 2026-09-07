@@ -50,11 +50,8 @@ plugins:
             实验结果: Results
             效果图: Effect chart
             已知局限: Limitations
-            基线与增量: Baseline and increment
             判读线: Judgment lines
-            中期报告: Mid-term report
             发布说明: Release notes
-            上游 PR 草稿: Upstream PR draft
 
 nav:
   - 概览: index.md
@@ -65,9 +62,6 @@ nav:
   - 效果图: charts.md
   - 已知局限: limitations.md
   - 判读线: JUDGMENT.md
-  - 基线与增量: BASELINE.md
-  - 中期报告: MIDTERM.md
-  - 上游 PR 草稿: PR_DRAFT.md
   - 发布说明: RELEASE.md
 
 markdown_extensions:

@@ -1,4 +1,4 @@
-# P0 selection: which ES-MoE configuration ships as the default
+# Selection: which ES-MoE configuration ships as the default
 
 Budget: VisDrone2019-DET `fraction=0.25`, imgsz 640, 20 epochs from scratch, batch 32, YOLOv8n,
 one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
@@ -9,7 +9,7 @@ moves. Raw records are in `results/`, rendered by `scripts/report.py` into `resu
 Public baseline `acce839c7e895d6b179de7f7093fa879e237cc7b` (YOLO-Master main at 2026-08-21
 23:59:59 +0800), release reference `YOLO-Master-v26.08` -> `43d40117c...`; both carry
 `ultralytics 8.4.101`, which is exactly the stock version this toolkit runs against, so the plug-in
-path is measured on the same library version as the baseline. Full statement in `docs/BASELINE.md`. Records produced before the toolkit started stamping its own revision
+path is measured on the same library version as the baseline. Records produced before the toolkit started stamping its own revision
 carry `git_ref = "0.1.0"`; every later record stamps the commit, ultralytics version and both
 locked baselines.
 

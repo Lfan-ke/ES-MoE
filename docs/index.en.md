@@ -46,4 +46,3 @@ Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, plus
 - [Tutorial](tutorial.md): from install to a comparison you can defend.
 - [Selection](SELECTION.md): which configuration ships as the default, and why.
 - [Limitations](limitations.md): what the numbers do not say. Read this before quoting any of them.
-- [Baseline and increment](BASELINE.md): locked references and what counts as new work.

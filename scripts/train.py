@@ -1,8 +1,8 @@
 """Budget-fair ESMoE on/off runner.
 
 One process = one experiment record. Baseline and ESMoE runs differ only in the grafted block,
-so any metric gap is attributable; every field the task book's experiment record asks for is
-written to results/<experiment_id>.json.
+so any metric gap is attributable; version, environment, budget, seed, metrics and artifact path
+all land in results/<experiment_id>.json.
 """
 
 import argparse

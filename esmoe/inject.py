@@ -46,8 +46,8 @@ def equip(base: str = "yolov8n.yaml", *, weight: float = 0.01, out: str | None =
 def attach_aux_loss(model, weight: float = 0.01):
     """Make the router load-balancing loss part of the optimised training loss.
 
-    Without this the aux term exists but never reaches ``backward``, which is the exact failure the
-    task book's red line asks to rule out.
+    Without this the aux term exists but never reaches ``backward``: a config key and a printed
+    number prove nothing on their own.
     """
     core = _core(model)
     if next(blocks(core), None) is None:
