@@ -59,9 +59,9 @@
 <circle cx="561.0" cy="145.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
 <text x="610" y="46" class="ink" font-weight="600">臂</text>
 <line x1="610" y1="68" x2="632" y2="68" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
-<text x="638" y="72" class="ink">默认接法</text>
+<text x="638" y="72" class="ink">ES-MoE 默认</text>
 <line x1="610" y1="88" x2="632" y2="88" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
-<text x="638" y="92" class="ink">rewire</text>
+<text x="638" y="92" class="ink">ES-MoE 改接</text>
 <text x="610" y="124" class="faint">散点 = 单个 seed</text>
 <text x="610" y="140" class="faint">横杠 = 三 seed 均值</text>
 <text x="610" y="156" class="faint">无横杠 = 不足三个 seed</text>

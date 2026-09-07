@@ -34,7 +34,7 @@ TEXT = {
     "en": {
         "title": "Paired mAP50 delta against the same-seed baseline",
         "arm": "arm",
-        "arms": ("default graft", "rewire"),
+        "arms": ("ES-MoE default", "ES-MoE rewired"),
         "notes": ("dot = one seed", "bar = mean of three", "no bar = under 3 seeds",
                   "800px, 120 epochs,", "full VisDrone"),
         "font": "system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif",
@@ -42,7 +42,7 @@ TEXT = {
     "zh": {
         "title": "同 seed 配对的 mAP50 差值",
         "arm": "臂",
-        "arms": ("默认接法", "rewire"),
+        "arms": ("ES-MoE 默认", "ES-MoE 改接"),
         "notes": ("散点 = 单个 seed", "横杠 = 三 seed 均值", "无横杠 = 不足三个 seed",
                   "800px、120 epoch、", "VisDrone 全量"),
         "font": "Noto Sans SC,Source Sans 3,Microsoft YaHei,system-ui,sans-serif",

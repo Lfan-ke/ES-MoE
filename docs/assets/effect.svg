@@ -59,9 +59,9 @@
 <circle cx="561.0" cy="145.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
 <text x="610" y="46" class="ink" font-weight="600">arm</text>
 <line x1="610" y1="68" x2="632" y2="68" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
-<text x="638" y="72" class="ink">default graft</text>
+<text x="638" y="72" class="ink">ES-MoE default</text>
 <line x1="610" y1="88" x2="632" y2="88" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
-<text x="638" y="92" class="ink">rewire</text>
+<text x="638" y="92" class="ink">ES-MoE rewired</text>
 <text x="610" y="124" class="faint">dot = one seed</text>
 <text x="610" y="140" class="faint">bar = mean of three</text>
 <text x="610" y="156" class="faint">no bar = under 3 seeds</text>
