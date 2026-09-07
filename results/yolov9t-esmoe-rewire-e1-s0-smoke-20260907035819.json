@@ -1,0 +1,46 @@
+{
+  "experiment_id": "yolov9t-esmoe-rewire-e1-s0-smoke-20260907035819",
+  "git_ref": {
+    "toolkit": "82ca8af",
+    "toolkit_version": "0.1.4",
+    "ultralytics": "8.4.101",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
+  },
+  "config": {
+    "model_yaml": "/data/esmoe-toolkit/configs/yolov9t-esmoe-e4k2-rewire.yaml",
+    "arch": "esmoe-rewire",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": true,
+    "aux_weight": 0.01
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 0.02
+  },
+  "hardware": {
+    "gpu": "MetaX C500",
+    "torch": "2.8.0+metax3.3.0.2",
+    "python": "3.10.10"
+  },
+  "budget": {
+    "epochs": 1,
+    "batch": 8,
+    "imgsz": 640,
+    "patience": 0,
+    "amp": true,
+    "wall_seconds": 58.0
+  },
+  "seed": 0,
+  "metrics": {
+    "metrics/precision(B)": 0.0,
+    "metrics/recall(B)": 0.0,
+    "metrics/mAP50(B)": 0.0,
+    "metrics/mAP50-95(B)": 0.0
+  },
+  "params": 2097042,
+  "artifact": "/data/esmoe-toolkit/runs/yolov9t-esmoe-rewire-e1-s0-smoke/weights/best.pt",
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}

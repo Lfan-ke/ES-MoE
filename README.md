@@ -78,19 +78,25 @@ for custom training loops.
 
 ## Compatibility
 
-| backbone | build + forward | grafted config | aux loss in training |
-|:--:|:--:|:--:|:--:|
-| YOLOv8 | yes | yes | yes |
-| YOLO11 | yes | yes | yes |
-| YOLO12 | yes | yes | yes |
-| YOLO26 | yes | yes | yes |
-| YOLO-Master (fork) | yes | yes | yes |
+| backbone | build + forward | grafted config | aux loss in training | protocol runs |
+|:--:|:--:|:--:|:--:|:--:|
+| YOLOv5 | yes | yes | yes | yes |
+| YOLOv8 | yes | yes | yes | yes |
+| YOLOv9 | yes | yes | yes | in progress |
+| YOLOv10 | yes | yes | yes | in progress |
+| YOLO11 | yes | yes | yes | yes |
+| YOLO12 | yes | yes | yes | yes |
+| YOLO26 | yes | yes | yes | yes |
+| YOLO-Master (fork) | yes | yes | yes | no |
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
 in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
 runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
 
-Graft and forward are also exercised on yolov5n, yolov9t and yolov10n in CI. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
+Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
+"we ran the full budget-fair protocol on it": YOLOv9 and YOLOv10 are training as of this commit, and their
+1-epoch records on MetaX C500 (`results/*-smoke-*.json`) already log a non-zero `train/esmoe_aux` for both the
+default and the rewired arm. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
@@ -101,9 +107,17 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the full matrix is four backbone generations × three arms × three seeds, 36 runs. The default wiring's paired
-mAP50 decays monotonically with the generation: +0.0025 (v8n, 2/3), +0.0013 (11n, 2/3), −0.0018 (12n, 0/3),
-−0.0034 (26n, 0/3), at +10.4% parameters and about 9% more wall-clock per epoch. Where the damage lands depends
+the settled matrix is four backbone generations × three arms × three seeds, 36 runs, with YOLOv5n measured
+separately on another accelerator. The default wiring's paired mAP50 decays monotonically with the generation:
++0.0041 (v5n, 3/3), +0.0025 (v8n, 2/3), +0.0013 (11n, 2/3), −0.0018 (12n, 0/3), −0.0034 (26n, 0/3), at +10.4%
+parameters and about 9% more wall-clock per epoch.
+
+<p align="center"><img alt="Paired mAP50 delta by backbone generation" src="docs/assets/effect.svg" width="720"></p>
+
+Each dot is one seed, each bar the mean of three. The seeds routinely straddle zero even where the mean does
+not, which is the honest reading of a three-seed protocol: an
+[interactive version](https://lfan-ke.github.io/ES-MoE/charts/) carries the per-seed values and the second
+metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
 direction-unstable.
 
