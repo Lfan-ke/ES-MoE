@@ -1,6 +1,7 @@
 """Aggregate results/*.json into a seed-aware comparison table."""
 
 import json
+import re
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -19,26 +20,41 @@ def load():
     return runs
 
 
+def stack(record):
+    """The accelerator and runtime build a run was measured on.
+
+    Our own protocol pairs seeds within one card, so two arms measured on different hardware are
+    not a fair pair. Keeping the stack in the key makes a cross-host repeat a separate group to be
+    compared deliberately, rather than a silent extra sample folded into someone else's mean.
+    """
+    hw = record.get("hardware", {})
+    gpu = hw.get("gpu", "?").replace("NVIDIA GeForce ", "").replace("RTX ", "").replace(" ", "").lower()
+    torch_version = hw.get("torch", "?")
+    build = re.match(r"([A-Za-z]+)(\d+\.\d+)", torch_version.partition("+")[2])
+    runtime = f"{build[1].lower()}{build[2]}" if build else "torch" + ".".join(torch_version.split(".")[:2])
+    return f"{gpu}/{runtime}"
+
+
 def variant(record):
     """Label an arm by everything that has to match for a comparison to be fair.
 
-    Backbone, block config and budget all move the metric, so folding them into one label would
-    silently average across different experiments. Image size is part of the budget: 800 and 640
-    runs of the same schedule are different experiments, not repeats of one.
+    Backbone, block config, budget and hardware all move the metric, so folding them into one
+    label would silently average across different experiments. Image size is part of the budget:
+    800 and 640 runs of the same schedule are different experiments, not repeats of one.
     """
     cfg, data, budget = record["config"], record["dataset"], record["budget"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
     block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
     if cfg.get("rewire"):
         block += "-rewire"
-    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}"
+    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}[{stack(record)}]"
 
 
 def arm(record):
     """The part of the label a baseline shares with the ESMoE arms it is compared against."""
     cfg, data, budget = record["config"], record["dataset"], record["budget"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
-    return backbone, budget["epochs"], data["fraction"], budget.get("imgsz"), record["seed"]
+    return backbone, budget["epochs"], data["fraction"], budget.get("imgsz"), stack(record), record["seed"]
 
 
 def spread(values):
