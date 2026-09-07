@@ -15,8 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from report import KEYS, dedupe, load, paired  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg",
-           "zh": ROOT / "docs" / "assets" / "effect.zh.svg"}
+SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg", "zh": ROOT / "docs" / "assets" / "effect.zh.svg"}
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
@@ -35,16 +34,26 @@ TEXT = {
         "title": "Paired mAP50 delta against the same-seed baseline",
         "arm": "arm",
         "arms": ("ES-MoE default", "ES-MoE rewired"),
-        "notes": ("dot = one seed", "bar = mean of three", "no bar = under 3 seeds",
-                  "800px, 120 epochs,", "full VisDrone"),
+        "notes": (
+            "dot = one seed",
+            "bar = mean of three",
+            "no bar = under 3 seeds",
+            "800px, 120 epochs,",
+            "full VisDrone",
+        ),
         "font": "system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif",
     },
     "zh": {
         "title": "同 seed 配对的 mAP50 差值",
         "arm": "臂",
         "arms": ("ES-MoE 默认", "ES-MoE 改接"),
-        "notes": ("散点 = 单个 seed", "横杠 = 三 seed 均值", "无横杠 = 不足三个 seed",
-                  "800px、120 epoch、", "VisDrone 全量"),
+        "notes": (
+            "散点 = 单个 seed",
+            "横杠 = 三 seed 均值",
+            "无横杠 = 不足三个 seed",
+            "800px、120 epoch、",
+            "VisDrone 全量",
+        ),
         "font": "Noto Sans SC,Source Sans 3,Microsoft YaHei,system-ui,sans-serif",
     },
 }
@@ -90,8 +99,7 @@ def svg(table, lang="en"):
         "  @media (prefers-color-scheme:dark){",
         "    .ink{fill:#c9ced8}.rule{stroke:#454b57}.zero{stroke:#7e8797}.faint{fill:#98a0af}}",
         "</style>",
-        f'<text x="{PAD["l"]}" y="22" class="ink" font-size="13" font-weight="600">'
-        f'{words["title"]}</text>',
+        f'<text x="{PAD["l"]}" y="22" class="ink" font-size="13" font-weight="600">{words["title"]}</text>',
     ]
 
     for tick in (-1, -0.5, 0, 0.5, 1):
@@ -99,15 +107,15 @@ def svg(table, lang="en"):
         yy = y(value)
         cls = "zero" if tick == 0 else "rule"
         dash = "" if tick == 0 else ' stroke-dasharray="3 4"'
-        parts.append(f'<line x1="{PAD["l"]}" y1="{yy:.1f}" x2="{W - PAD["r"]}" y2="{yy:.1f}" '
-                     f'class="{cls}"{dash} stroke-width="1"/>')
-        parts.append(f'<text x="{PAD["l"] - 10}" y="{yy + 4:.1f}" class="faint" '
-                     f'text-anchor="end">{value:+.4f}</text>')
+        parts.append(
+            f'<line x1="{PAD["l"]}" y1="{yy:.1f}" x2="{W - PAD["r"]}" y2="{yy:.1f}" '
+            f'class="{cls}"{dash} stroke-width="1"/>'
+        )
+        parts.append(f'<text x="{PAD["l"] - 10}" y="{yy + 4:.1f}" class="faint" text-anchor="end">{value:+.4f}</text>')
 
     for index, backbone in enumerate(present):
         cx = PAD["l"] + step * (index + 0.5)
-        parts.append(f'<text x="{cx:.1f}" y="{H - PAD["b"] + 24}" class="ink" '
-                     f'text-anchor="middle">{backbone}</text>')
+        parts.append(f'<text x="{cx:.1f}" y="{H - PAD["b"] + 24}" class="ink" text-anchor="middle">{backbone}</text>')
         for offset, (block, _, colour) in zip((-14, 14), ARMS, strict=True):
             series = table.get((backbone, block))
             if not series:
@@ -116,21 +124,25 @@ def svg(table, lang="en"):
             # No mean below three seeds, so an unfinished arm cannot read as settled.
             if len(series) >= 3:
                 mean = statistics.mean(series)
-                parts.append(f'<line x1="{x - 11}" y1="{y(mean):.1f}" x2="{x + 11}" '
-                             f'y2="{y(mean):.1f}" stroke="{colour}" stroke-width="2.5" '
-                             f'stroke-linecap="round"/>')
+                parts.append(
+                    f'<line x1="{x - 11}" y1="{y(mean):.1f}" x2="{x + 11}" '
+                    f'y2="{y(mean):.1f}" stroke="{colour}" stroke-width="2.5" '
+                    f'stroke-linecap="round"/>'
+                )
             for seed, value in enumerate(series):
                 jitter = (seed - (len(series) - 1) / 2) * 5
-                parts.append(f'<circle cx="{x + jitter:.1f}" cy="{y(value):.1f}" r="2.6" '
-                             f'fill="{colour}" fill-opacity="0.5"/>')
+                parts.append(
+                    f'<circle cx="{x + jitter:.1f}" cy="{y(value):.1f}" r="2.6" fill="{colour}" fill-opacity="0.5"/>'
+                )
 
     legend_x = W - PAD["r"] + 16
-    parts.append(f'<text x="{legend_x}" y="{PAD["t"] + 6}" class="ink" '
-                 f'font-weight="600">{words["arm"]}</text>')
+    parts.append(f'<text x="{legend_x}" y="{PAD["t"] + 6}" class="ink" font-weight="600">{words["arm"]}</text>')
     for row, ((_, _, colour), name) in enumerate(zip(ARMS, words["arms"], strict=True)):
         yy = PAD["t"] + 28 + row * 20
-        parts.append(f'<line x1="{legend_x}" y1="{yy}" x2="{legend_x + 22}" y2="{yy}" '
-                     f'stroke="{colour}" stroke-width="2.5" stroke-linecap="round"/>')
+        parts.append(
+            f'<line x1="{legend_x}" y1="{yy}" x2="{legend_x + 22}" y2="{yy}" '
+            f'stroke="{colour}" stroke-width="2.5" stroke-linecap="round"/>'
+        )
         parts.append(f'<text x="{legend_x + 28}" y="{yy + 4}" class="ink">{name}</text>')
     note_y = PAD["t"] + 84
     for row, line in enumerate(words["notes"]):
@@ -157,8 +169,7 @@ def data_js(tables):
                     continue
                 seeds = ", ".join(f"{value:.4f}" for value in series)
                 wins = sum(1 for value in series if value > 0)
-                cells.append(f'"{metric}": {{mean: {statistics.mean(series):.4f}, '
-                             f"seeds: [{seeds}], wins: {wins}}}")
+                cells.append(f'"{metric}": {{mean: {statistics.mean(series):.4f}, seeds: [{seeds}], wins: {wins}}}')
             if cells:
                 joined = ", ".join(cells)
                 rows.append(f'    {{backbone: "{backbone}", arm: "{name}", {joined}}}')
@@ -183,8 +194,7 @@ def main():
         path.write_text(svg(table, lang), encoding="utf-8")
     DATA_OUT.parent.mkdir(parents=True, exist_ok=True)
     DATA_OUT.write_text(data_js(tables), encoding="utf-8")
-    print(f"wrote {len(SVG_OUT)} figures and {DATA_OUT.relative_to(ROOT)} "
-          f"covering {len(table)} arms")
+    print(f"wrote {len(SVG_OUT)} figures and {DATA_OUT.relative_to(ROOT)} covering {len(table)} arms")
     for (backbone, block), values in sorted(table.items()):
         print(f"  {backbone:<9} {block:<20} {statistics.mean(values):+.4f}  n={len(values)}")
 
