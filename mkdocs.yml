@@ -48,7 +48,7 @@ plugins:
             教程: Tutorial
             选型: Selection
             实验结果: Results
-            效应图: Effect chart
+            效果图: Effect chart
             已知局限: Limitations
             基线与增量: Baseline and increment
             判读线: Judgment lines
@@ -62,7 +62,7 @@ nav:
   - API: API.md
   - 选型: SELECTION.md
   - 实验结果: results.md
-  - 效应图: charts.md
+  - 效果图: charts.md
   - 已知局限: limitations.md
   - 判读线: JUDGMENT.md
   - 基线与增量: BASELINE.md
