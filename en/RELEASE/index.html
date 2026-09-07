@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/en/RELEASE/">
       
       
-        <link rel="prev" href="../PR_DRAFT/">
+        <link rel="prev" href="../JUDGMENT/">
       
       
       
@@ -503,87 +503,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../BASELINE/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Baseline and increment
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../MIDTERM/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Mid-term report
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../PR_DRAFT/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Upstream PR draft
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -865,7 +784,7 @@
 <li>Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.</li>
 </ul>
 <h2 id="feedback-and-iteration">Feedback and iteration<a class="headerlink" href="#feedback-and-iteration" title="Permanent link">&para;</a></h2>
-<p>Most of 0.1.4 answers the course community's first round of feedback: the evaluation caliber adopts the mentor's COCO-style 32²/96² buckets at maxDets 500 (<code>scripts/buckets.py</code>, source credited in the docs); <code>--patience</code> and <code>IMGSZ</code> exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the <code>OptimizedMOE</code> tracing guard fix was merged into YOLO-Master (#241).</p>
+<p>Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (<code>scripts/buckets.py</code>, source credited in the docs); <code>--patience</code> and <code>IMGSZ</code> exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the <code>OptimizedMOE</code> tracing guard fix was merged into YOLO-Master (#241).</p>
 <h2 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/report.py</code> now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.</li>
