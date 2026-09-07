@@ -9,8 +9,7 @@
   const SYSTEM = window.matchMedia("(prefers-color-scheme: dark)");
   const SEEDS = 3; // the protocol's seed count; fewer means the arm is still running
 
-  // Three states, not two: the palette follows the system until the reader flips the toggle, and
-  // the attribute is absent before Material applies a choice.
+  // Three states: explicit light, explicit dark, or whatever the system says.
   function dark() {
     const scheme =
       document.body.getAttribute("data-md-color-scheme") ||
@@ -46,8 +45,7 @@
       const mine = rows.filter((r) => r.arm === arm);
       const nudge = (armIndex - (arms.length - 1) / 2) * 0.16;
 
-      // The min-max whisker carries the honest message: with three seeds the spread routinely
-      // dwarfs the mean, so drawing the mean alone would overstate what the runs support.
+      // Min-max whisker: with three seeds the spread usually dwarfs the mean.
       series.push({
         name: arm,
         type: "custom",
@@ -95,8 +93,7 @@
         lineStyle: { width: 1.5, type: "dotted", opacity: 0.5, color: ARMS[arm] },
         itemStyle: { color: ARMS[arm] },
         emphasis: { focus: "series", scale: 1.2 },
-        // An arm with fewer than three seeds shows its seeds but no mean, so an unfinished cell
-        // cannot be mistaken for a settled one.
+        // No mean below three seeds, so an unfinished cell cannot read as settled.
         data: axis.map((b) => {
           const row = mine.find((r) => r.backbone === b);
           return row && row[metric].seeds.length >= SEEDS ? row[metric].mean : null;
@@ -176,7 +173,7 @@
       },
       series: series.concat([
         {
-          // The zero line is the claim: above it the graft beat the same-seed baseline.
+          // Above zero the graft beat its same-seed baseline.
           type: "line",
           data: axis.map(() => 0),
           symbol: "none",
@@ -213,7 +210,7 @@
     const data = window.ESMOE_EFFECT;
     if (!host || !window.echarts || !data || !data.rows || !data.rows.length) return;
 
-    // SVG keeps the figure crisp at any zoom and sidesteps canvas sizing on a cold load.
+    // SVG stays crisp at any zoom and avoids canvas sizing on a cold load.
     const existing = window.echarts.getInstanceByDom(host);
     const chart =
       existing && !existing.isDisposed()
@@ -230,8 +227,7 @@
         metric = picked;
         paint();
       });
-      // A chart initialised before its stylesheet has been applied measures zero and stays blank
-      // until the next reload; re-measuring after layout settles removes that failure.
+      // Init before the stylesheet lands measures zero; re-measure once layout settles.
       requestAnimationFrame(() => chart.resize());
       setTimeout(() => chart.resize(), 120);
       window.addEventListener("resize", () => chart.resize());
@@ -239,7 +235,7 @@
         attributes: true,
         attributeFilter: ["data-md-color-scheme"],
       });
-      // While the reader is still on the system setting, an OS theme change has to repaint too.
+      // Still on the system setting: an OS theme change must repaint too.
       SYSTEM.addEventListener("change", paint);
     }
   }

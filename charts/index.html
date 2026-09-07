@@ -490,7 +490,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么读这张图
+        读法
       
     </span>
   </a>
@@ -708,7 +708,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么读这张图
+        读法
       
     </span>
   </a>
@@ -747,22 +747,22 @@
 
 
 <h1 id="_1">效应图<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>下图把 <code>results/</code> 里每条协议运行的配对结果画出来：横轴是主干，纵轴是同 seed 配对下的差值，零线以上表示该 seed 上嫁接块占优。方块是三个 seed 的均值，竖线是三个 seed 的极差，散点是逐个 seed 的取值。图上方可切换 mAP50 与 mAP50-95，悬停可看该格的均值、胜数与逐 seed 取值，右上角可另存为 PNG。</p>
+<p>横轴主干，纵轴同 seed 配对的差值。零线以上表示嫁接块在该 seed 上占优。</p>
 <div id="esmoe-effect" class="esmoe-chart"></div>
 
-<p>数据由 <code>scripts/charts.py</code> 从 <code>results/*.json</code> 重算并写进 <code>docs/javascripts/data.js</code>，与<a href="../results/">实验结果</a>、<a href="../JUDGMENT/">判读线</a>两页的表格同源，图表不会与表格对不上。</p>
-<h2 id="_2">怎么读这张图<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>方块是三个 seed 的均值，竖线是极差，散点是逐个 seed。上方可切 mAP50 与 mAP50-95，悬停看该格明细，右上角另存 PNG。</p>
+<h2 id="_2">读法<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>竖线比方块更值得看</strong>。三个 seed 的极差常常横跨零线，即使均值为正；画上极差正是为了不让均值单独说话。判读线声明过：三个 seed 不支持显著性检验，即使 3/3 胜，符号检验 p = 0.125。</li>
-<li><strong>均值连线的走向是本项目的主要结论</strong>：默认接法的效应随主干代际单调衰减，从 YOLOv5n 的正值一路降到 YOLO26n 的负值。</li>
-<li><strong>未跑满三个 seed 的臂不画均值</strong>，只留散点，避免与已判定的格子混为一谈。</li>
-<li><strong>两臂的差距是接线造成的，不是主干造成的</strong>。<code>rewire</code> 与默认臂参数量完全相同（3,327,330），差别只在消费者是否读到块的输出。</li>
+<li>看竖线，不只看方块。三个 seed 常横跨零线，均值为正也如此。</li>
+<li>均值走向是主要结论：默认接法的效应随主干代际单调衰减。</li>
+<li>不满三个 seed 的臂不画均值，只留散点。</li>
+<li>两臂参数量相同（3,327,330），差别只在接线。</li>
 </ul>
 <h2 id="_3">重算<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<pre><code>uv run python scripts/report.py    # 先重建配对表
-uv run python scripts/charts.py    # 再重画图与数据模块
+<pre><code>uv run python scripts/report.py   # 配对表
+uv run python scripts/charts.py   # 图与数据
 </code></pre>
-<p>同一份脚本还会写出 <code>docs/assets/effect.svg</code>。README 与 wiki 用的是这张静态图——GitHub 在那两处会去掉脚本，交互图渲染不出来。</p>
+<p>数据源同<a href="../results/">实验结果</a>与<a href="../JUDGMENT/">判读线</a>。同一脚本另写 <code>docs/assets/effect.svg</code>，供 README 与 wiki 用。</p>
 
 
 
