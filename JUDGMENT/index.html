@@ -427,6 +427,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    效应图
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../limitations/" class="md-nav__link">
         
   
@@ -604,6 +631,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="第二轮预登记（2026-09-05，声明于 YOLOv5 / v9 / v10 结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-07-v5v9v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充声明（2026-09-07，仍在任何 v5/v9/v10 结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -841,6 +885,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="第二轮预登记（2026-09-05，声明于 YOLOv5 / v9 / v10 结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-07-v5v9v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充声明（2026-09-07，仍在任何 v5/v9/v10 结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -939,6 +1000,12 @@
 <li><strong>路由塌缩在三代上继续成立</strong>——无死专家、单主导专家、平均概率近均匀、无尺度分工。这条是机制预测：若在任何一代上不成立，其信息量比前两条加起来都大。</li>
 </ol>
 <p>预测错了照实记录。</p>
+<h3 id="2026-09-07-v5v9v10">补充声明（2026-09-07，仍在任何 v5/v9/v10 结果之前）<a class="headerlink" href="#2026-09-07-v5v9v10" title="Permanent link">&para;</a></h3>
+<p>两台曦云 C500 到位后，排产为 v9t 九轮、v10n 九轮、v5n 九轮。两点需要提前写明：</p>
+<ol>
+<li><strong>v5n 整代重跑</strong>。原 v5n 六轮跑在另一台曦云上（<code>metax3.7.0.7</code> / Python 3.12），新盒是 <code>metax3.3.0.2</code> / Python 3.10。跨软件栈配对不合本项目「同一主干同一张卡」的纪律，因此 v5n 在新盒重跑九轮：既补齐缺的 <code>rewire</code> 臂，也得到一份同配置换主机的复现对照。<code>scripts/report.py</code> 的分组键已加入硬件栈，两台主机的同名配置不再被折进同一格。</li>
+<li><strong>v10n 加跑 seed 3、4</strong>。box b 的排队比 box a 短，空出的机时用于把 v10n 的三条臂<strong>同时</strong>扩到五个 seed。三臂一起扩、且在任何 v10n 结果产出之前决定，避免"看到结果再决定给哪个格子加样本"。判读线不变；五个 seed 的符号检验 p 最低为 0.031，仍不足以支撑单次运行的可靠性表述。</li>
+</ol>
 
 
 
@@ -998,6 +1065,12 @@
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+      
+        <script src="../javascripts/data.js"></script>
+      
+        <script src="../javascripts/charts.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
