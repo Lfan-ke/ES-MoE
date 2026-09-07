@@ -8,7 +8,7 @@ SKIP = {"en", "zh", "assets", "search", "stylesheets", "javascripts"}
 # 四份小版本说明并成了一份,老地址继续应答。
 MOVED = {f"RELEASE_v0.1.{patch}": "RELEASE" for patch in range(4)}
 # Retired pages keep their address and land on the page that carries the content now.
-MOVED.update({"MIDTERM": "results", "BASELINE": "SELECTION", "PR_DRAFT": "index"})
+MOVED.update({"MIDTERM": "results", "BASELINE": "SELECTION", "PR_DRAFT": "RELEASE"})
 
 ALIAS = """<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">
