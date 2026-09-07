@@ -15,7 +15,7 @@ The chart below plots every protocol run in `results/`: backbone on the x axis, 
 
 ## Recompute
 
-    uv run python scripts/report.py    # rebuild the paired tables first
-    uv run python scripts/charts.py    # then redraw the figure and the data module
+    uv run python scripts/report.py   # paired tables
+    uv run python scripts/charts.py   # figure and data
 
 The same script also writes `docs/assets/effect.svg`. README and the wiki use that static figure, because GitHub strips scripts in both places and an interactive chart would not render.

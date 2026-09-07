@@ -18,8 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SVG_OUT = ROOT / "docs" / "assets" / "effect.svg"
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 
-# Backbone end, oldest to newest: the axis is the claim, so its order is fixed here rather than
-# sorted alphabetically.
+# Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
 ORDER = ("yolov5n", "yolov8n", "yolov9t", "yolov10n", "yolo11n", "yolo12n", "yolo26n")
 PROTOCOL = "@e120f1i800"
 METRICS = (("mAP50", KEYS[0]), ("mAP50-95", KEYS[1]))
@@ -91,8 +90,7 @@ def svg(table):
             if not series:
                 continue
             x = cx + offset
-            # A mean drawn over fewer than three seeds would read like the three-seed means beside
-            # it; an unfinished arm shows its seeds and no summary mark.
+            # No mean below three seeds, so an unfinished arm cannot read as settled.
             if len(series) >= 3:
                 mean = statistics.mean(series)
                 parts.append(f'<line x1="{x - 11}" y1="{y(mean):.1f}" x2="{x + 11}" '

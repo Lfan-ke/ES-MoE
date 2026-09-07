@@ -1,21 +1,21 @@
 # 效应图
 
-下图把 `results/` 里每条协议运行的配对结果画出来：横轴是主干，纵轴是同 seed 配对下的差值，零线以上表示该 seed 上嫁接块占优。方块是三个 seed 的均值，竖线是三个 seed 的极差，散点是逐个 seed 的取值。图上方可切换 mAP50 与 mAP50-95，悬停可看该格的均值、胜数与逐 seed 取值，右上角可另存为 PNG。
+横轴主干，纵轴同 seed 配对的差值。零线以上表示嫁接块在该 seed 上占优。
 
 <div id="esmoe-effect" class="esmoe-chart"></div>
 
-数据由 `scripts/charts.py` 从 `results/*.json` 重算并写进 `docs/javascripts/data.js`，与[实验结果](results.md)、[判读线](JUDGMENT.md)两页的表格同源，图表不会与表格对不上。
+方块是三个 seed 的均值，竖线是极差，散点是逐个 seed。上方可切 mAP50 与 mAP50-95，悬停看该格明细，右上角另存 PNG。
 
-## 怎么读这张图
+## 读法
 
-- **竖线比方块更值得看**。三个 seed 的极差常常横跨零线，即使均值为正；画上极差正是为了不让均值单独说话。判读线声明过：三个 seed 不支持显著性检验，即使 3/3 胜，符号检验 p = 0.125。
-- **均值连线的走向是本项目的主要结论**：默认接法的效应随主干代际单调衰减，从 YOLOv5n 的正值一路降到 YOLO26n 的负值。
-- **未跑满三个 seed 的臂不画均值**，只留散点，避免与已判定的格子混为一谈。
-- **两臂的差距是接线造成的，不是主干造成的**。`rewire` 与默认臂参数量完全相同（3,327,330），差别只在消费者是否读到块的输出。
+- 看竖线，不只看方块。三个 seed 常横跨零线，均值为正也如此。
+- 均值走向是主要结论：默认接法的效应随主干代际单调衰减。
+- 不满三个 seed 的臂不画均值，只留散点。
+- 两臂参数量相同（3,327,330），差别只在接线。
 
 ## 重算
 
-    uv run python scripts/report.py    # 先重建配对表
-    uv run python scripts/charts.py    # 再重画图与数据模块
+    uv run python scripts/report.py   # 配对表
+    uv run python scripts/charts.py   # 图与数据
 
-同一份脚本还会写出 `docs/assets/effect.svg`。README 与 wiki 用的是这张静态图——GitHub 在那两处会去掉脚本，交互图渲染不出来。
+数据源同[实验结果](results.md)与[判读线](JUDGMENT.md)。同一脚本另写 `docs/assets/effect.svg`，供 README 与 wiki 用。
