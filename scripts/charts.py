@@ -24,7 +24,7 @@ PROTOCOL = "@e120f1i800"
 METRICS = (("mAP50", KEYS[0]), ("mAP50-95", KEYS[1]))
 
 W, H = 760, 380
-PAD = {"l": 74, "r": 148, "t": 40, "b": 58}
+PAD = {"l": 74, "r": 166, "t": 40, "b": 58}
 ARMS = (("e4k2w0.01", "default graft", "#2f6f9f"), ("e4k2w0.01-rewire", "rewire", "#c2662d"))
 
 
@@ -110,7 +110,7 @@ def svg(table):
         parts.append(f'<text x="{legend_x + 28}" y="{yy + 4}" class="ink">{name}</text>')
     note_y = PAD["t"] + 84
     for row, line in enumerate(("dot = one seed", "bar = mean of three",
-                                "(no bar = arm unfinished)",
+                                "no bar = under 3 seeds",
                                 "800px, 120 epochs,", "full VisDrone")):
         parts.append(f'<text x="{legend_x}" y="{note_y + row * 16}" class="faint">{line}</text>')
 
