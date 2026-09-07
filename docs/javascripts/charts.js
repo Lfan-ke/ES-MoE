@@ -6,6 +6,14 @@
     rewire: "#c2662d",
   };
   const ORDER = ["yolov5n", "yolov8n", "yolov9t", "yolov10n", "yolo11n", "yolo12n", "yolo26n"];
+
+  // The site is bilingual; the chart follows the page rather than staying English throughout.
+  const ZH = (document.documentElement.lang || "").toLowerCase().startsWith("zh");
+  const T = ZH
+    ? { "default graft": "默认接法", rewire: "rewire", axis: "配对差值", seed: "seed ",
+        mean: "均值，共 ", wins: "胜", seeds: "逐 seed", png: "存为 PNG" }
+    : { "default graft": "default graft", rewire: "rewire", axis: "paired delta", seed: "seed ",
+        mean: "mean of ", wins: "wins", seeds: "seeds", png: "PNG" };
   const SYSTEM = window.matchMedia("(prefers-color-scheme: dark)");
   const SEEDS = 3; // the protocol's seed count; fewer means the arm is still running
 
@@ -110,6 +118,7 @@
       grid: { left: 78, right: 26, top: 52, bottom: 46 },
       legend: {
         data: arms,
+        formatter: (name) => T[name] || name,
         top: 8,
         itemGap: 24,
         icon: "roundRect",
@@ -121,7 +130,7 @@
         top: 4,
         iconStyle: { borderColor: c.faint },
         emphasis: { iconStyle: { borderColor: c.ink } },
-        feature: { saveAsImage: { title: "PNG", pixelRatio: 2, backgroundColor: c.panel } },
+        feature: { saveAsImage: { title: T.png, pixelRatio: 2, backgroundColor: c.panel } },
       },
       tooltip: {
         trigger: "item",
@@ -139,18 +148,18 @@
           if (p.seriesType === "scatter") {
             const d = p.data;
             return (
-              dot + "<b>" + d.backbone + "</b> " + d.arm +
-              "<br>" + grey + "seed " + d.seed + "</span> <b>" + fmt(d.value[1]) + "</b>"
+              dot + "<b>" + d.backbone + "</b> " + (T[d.arm] || d.arm) +
+              "<br>" + grey + T.seed + d.seed + "</span> <b>" + fmt(d.value[1]) + "</b>"
             );
           }
           const row = rows.find((r) => r.backbone === axis[p.dataIndex] && r.arm === p.seriesName);
           if (!row) return "";
           const cell = row[metric];
           return (
-            dot + "<b>" + row.backbone + "</b> " + row.arm +
-            "<br>" + grey + "mean of " + cell.seeds.length + "</span> <b>" + fmt(cell.mean) +
-            "</b><br>" + grey + "wins</span> " + cell.wins + "/" + cell.seeds.length +
-            "<br>" + grey + "seeds</span> " + cell.seeds.map(fmt).join(", ")
+            dot + "<b>" + row.backbone + "</b> " + (T[row.arm] || row.arm) +
+            "<br>" + grey + T.mean + cell.seeds.length + "</span> <b>" + fmt(cell.mean) +
+            "</b><br>" + grey + T.wins + "</span> " + cell.wins + "/" + cell.seeds.length +
+            "<br>" + grey + T.seeds + "</span> " + cell.seeds.map(fmt).join(", ")
           );
         },
       },
@@ -164,7 +173,7 @@
       },
       yAxis: {
         type: "value",
-        name: "paired " + metric + " delta",
+        name: ZH ? metric + " " + T.axis : "paired " + metric + " delta",
         nameLocation: "end",
         nameTextStyle: { color: c.faint, align: "left", padding: [0, 0, 6, -66] },
         axisLine: { show: false },

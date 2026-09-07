@@ -15,7 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from report import KEYS, dedupe, load, paired  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-SVG_OUT = ROOT / "docs" / "assets" / "effect.svg"
+SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg",
+           "zh": ROOT / "docs" / "assets" / "effect.zh.svg"}
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
@@ -26,6 +27,27 @@ METRICS = (("mAP50", KEYS[0]), ("mAP50-95", KEYS[1]))
 W, H = 760, 380
 PAD = {"l": 74, "r": 166, "t": 40, "b": 58}
 ARMS = (("e4k2w0.01", "default graft", "#2f6f9f"), ("e4k2w0.01-rewire", "rewire", "#c2662d"))
+
+# The figure ships in both languages: an English report should not carry Chinese axis labels,
+# and a Chinese one should not carry English.
+TEXT = {
+    "en": {
+        "title": "Paired mAP50 delta against the same-seed baseline",
+        "arm": "arm",
+        "arms": ("default graft", "rewire"),
+        "notes": ("dot = one seed", "bar = mean of three", "no bar = under 3 seeds",
+                  "800px, 120 epochs,", "full VisDrone"),
+        "font": "system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif",
+    },
+    "zh": {
+        "title": "同 seed 配对的 mAP50 差值",
+        "arm": "臂",
+        "arms": ("默认接法", "rewire"),
+        "notes": ("散点 = 单个 seed", "横杠 = 三 seed 均值", "无横杠 = 不足三个 seed",
+                  "800px、120 epoch、", "VisDrone 全量"),
+        "font": "Noto Sans SC,Source Sans 3,Microsoft YaHei,system-ui,sans-serif",
+    },
+}
 
 
 def collect(key):
@@ -52,23 +74,24 @@ def scale(lo, hi):
     return y, span
 
 
-def svg(table):
+def svg(table, lang="en"):
     present = [b for b in ORDER if any((b, a) in table for a, _, _ in ARMS)]
     values = [v for key in table for v in table[key]]
     y, span = scale(min(values), max(values))
     plot_w = W - PAD["l"] - PAD["r"]
     step = plot_w / max(len(present), 1)
 
+    words = TEXT[lang]
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
-        f'font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12">',
+        f'font-family="{words["font"]}" font-size="12">',
         "<style>",
         "  .ink{fill:#3d4451}.rule{stroke:#c9ced8}.zero{stroke:#8b93a3}.faint{fill:#78808f}",
         "  @media (prefers-color-scheme:dark){",
         "    .ink{fill:#c9ced8}.rule{stroke:#454b57}.zero{stroke:#7e8797}.faint{fill:#98a0af}}",
         "</style>",
         f'<text x="{PAD["l"]}" y="22" class="ink" font-size="13" font-weight="600">'
-        "Paired mAP50 delta against the same-seed baseline</text>",
+        f'{words["title"]}</text>',
     ]
 
     for tick in (-1, -0.5, 0, 0.5, 1):
@@ -102,16 +125,15 @@ def svg(table):
                              f'fill="{colour}" fill-opacity="0.5"/>')
 
     legend_x = W - PAD["r"] + 16
-    parts.append(f'<text x="{legend_x}" y="{PAD["t"] + 6}" class="ink" font-weight="600">arm</text>')
-    for row, (_, name, colour) in enumerate(ARMS):
+    parts.append(f'<text x="{legend_x}" y="{PAD["t"] + 6}" class="ink" '
+                 f'font-weight="600">{words["arm"]}</text>')
+    for row, ((_, _, colour), name) in enumerate(zip(ARMS, words["arms"], strict=True)):
         yy = PAD["t"] + 28 + row * 20
         parts.append(f'<line x1="{legend_x}" y1="{yy}" x2="{legend_x + 22}" y2="{yy}" '
                      f'stroke="{colour}" stroke-width="2.5" stroke-linecap="round"/>')
         parts.append(f'<text x="{legend_x + 28}" y="{yy + 4}" class="ink">{name}</text>')
     note_y = PAD["t"] + 84
-    for row, line in enumerate(("dot = one seed", "bar = mean of three",
-                                "no bar = under 3 seeds",
-                                "800px, 120 epochs,", "full VisDrone")):
+    for row, line in enumerate(words["notes"]):
         parts.append(f'<text x="{legend_x}" y="{note_y + row * 16}" class="faint">{line}</text>')
 
     parts.append("</svg>")
@@ -156,11 +178,12 @@ def main():
     table = tables["mAP50"]
     if not table:
         raise SystemExit("no protocol runs found in results/")
-    SVG_OUT.parent.mkdir(parents=True, exist_ok=True)
-    SVG_OUT.write_text(svg(table), encoding="utf-8")
+    for lang, path in SVG_OUT.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(svg(table, lang), encoding="utf-8")
     DATA_OUT.parent.mkdir(parents=True, exist_ok=True)
     DATA_OUT.write_text(data_js(tables), encoding="utf-8")
-    print(f"wrote {SVG_OUT.relative_to(ROOT)} and {DATA_OUT.relative_to(ROOT)} "
+    print(f"wrote {len(SVG_OUT)} figures and {DATA_OUT.relative_to(ROOT)} "
           f"covering {len(table)} arms")
     for (backbone, block), values in sorted(table.items()):
         print(f"  {backbone:<9} {block:<20} {statistics.mean(values):+.4f}  n={len(values)}")

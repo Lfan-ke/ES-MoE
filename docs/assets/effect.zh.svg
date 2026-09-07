@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 380" width="760" height="380" font-family="Noto Sans SC,Source Sans 3,Microsoft YaHei,system-ui,sans-serif" font-size="12">
+<style>
+  .ink{fill:#3d4451}.rule{stroke:#c9ced8}.zero{stroke:#8b93a3}.faint{fill:#78808f}
+  @media (prefers-color-scheme:dark){
+    .ink{fill:#c9ced8}.rule{stroke:#454b57}.zero{stroke:#7e8797}.faint{fill:#98a0af}}
+</style>
+<text x="74" y="22" class="ink" font-size="13" font-weight="600">同 seed 配对的 mAP50 差值</text>
+<line x1="74" y1="322.0" x2="594" y2="322.0" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="64" y="326.0" class="faint" text-anchor="end">-0.0104</text>
+<line x1="74" y1="251.5" x2="594" y2="251.5" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="64" y="255.5" class="faint" text-anchor="end">-0.0052</text>
+<line x1="74" y1="181.0" x2="594" y2="181.0" class="zero" stroke-width="1"/>
+<text x="64" y="185.0" class="faint" text-anchor="end">+0.0000</text>
+<line x1="74" y1="110.5" x2="594" y2="110.5" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="64" y="114.5" class="faint" text-anchor="end">+0.0052</text>
+<line x1="74" y1="40.0" x2="594" y2="40.0" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="64" y="44.0" class="faint" text-anchor="end">+0.0104</text>
+<text x="126.0" y="346" class="ink" text-anchor="middle">yolov5n</text>
+<line x1="101.0" y1="125.6" x2="123.0" y2="125.6" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="107.0" cy="72.1" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="112.0" cy="143.7" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="117.0" cy="160.9" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="140.0" cy="80.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<text x="230.0" y="346" class="ink" text-anchor="middle">yolov8n</text>
+<line x1="205.0" y1="146.5" x2="227.0" y2="146.5" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="211.0" cy="140.3" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="216.0" cy="208.1" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="221.0" cy="91.1" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<line x1="233.0" y1="131.6" x2="255.0" y2="131.6" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="239.0" cy="58.4" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="244.0" cy="164.7" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="249.0" cy="171.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<text x="334.0" y="346" class="ink" text-anchor="middle">yolo11n</text>
+<line x1="309.0" y1="163.0" x2="331.0" y2="163.0" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="315.0" cy="143.2" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="320.0" cy="143.9" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="325.0" cy="201.9" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<line x1="337.0" y1="175.3" x2="359.0" y2="175.3" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="343.0" cy="170.5" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="348.0" cy="278.2" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="353.0" cy="77.2" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<text x="438.0" y="346" class="ink" text-anchor="middle">yolo12n</text>
+<line x1="413.0" y1="205.9" x2="435.0" y2="205.9" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="419.0" cy="210.7" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="424.0" cy="216.9" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="429.0" cy="190.0" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<line x1="441.0" y1="179.9" x2="463.0" y2="179.9" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="447.0" cy="165.0" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="452.0" cy="219.6" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="457.0" cy="155.1" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<text x="542.0" y="346" class="ink" text-anchor="middle">yolo26n</text>
+<line x1="517.0" y1="227.3" x2="539.0" y2="227.3" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="523.0" cy="259.1" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="528.0" cy="228.2" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<circle cx="533.0" cy="194.6" r="2.6" fill="#2f6f9f" fill-opacity="0.5"/>
+<line x1="545.0" y1="187.9" x2="567.0" y2="187.9" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="551.0" cy="226.1" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="556.0" cy="191.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<circle cx="561.0" cy="145.8" r="2.6" fill="#c2662d" fill-opacity="0.5"/>
+<text x="610" y="46" class="ink" font-weight="600">臂</text>
+<line x1="610" y1="68" x2="632" y2="68" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<text x="638" y="72" class="ink">默认接法</text>
+<line x1="610" y1="88" x2="632" y2="88" stroke="#c2662d" stroke-width="2.5" stroke-linecap="round"/>
+<text x="638" y="92" class="ink">rewire</text>
+<text x="610" y="124" class="faint">散点 = 单个 seed</text>
+<text x="610" y="140" class="faint">横杠 = 三 seed 均值</text>
+<text x="610" y="156" class="faint">无横杠 = 不足三个 seed</text>
+<text x="610" y="172" class="faint">800px、120 epoch、</text>
+<text x="610" y="188" class="faint">VisDrone 全量</text>
+</svg>
