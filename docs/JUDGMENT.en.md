@@ -63,3 +63,11 @@ The four-generation matrix is settled. **Unknown**: all 27 runs of YOLOv5n / YOL
 3. **The routing collapse repeats on all three** — no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation. This is the mechanistic bet: a failure here would carry more information than the other two combined.
 
 Wrong predictions get recorded as wrong.
+
+### Addendum (2026-09-07, still before any v5 / v9 / v10 result)
+
+With two MetaX C500 boxes available the queue is v9t nine runs, v10n nine runs, v5n nine runs. Two points belong on the record in advance:
+
+1. **v5n is rerun as a whole generation.** The original six v5n runs were measured on a different C500 (`metax3.7.0.7`, Python 3.12); the new boxes are `metax3.3.0.2`, Python 3.10. Pairing across software stacks breaks this project's own "one backbone, one card" rule, so v5n is rerun in full: it completes the missing `rewire` arm and yields a same-configuration replication on another host. `scripts/report.py` now carries the hardware stack in its grouping key, so two hosts no longer fold into one cell.
+2. **v10n gains seeds 3 and 4.** Box b's queue is shorter than box a's, and the spare hours extend **all three** v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.
+
