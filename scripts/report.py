@@ -23,9 +23,8 @@ def load():
 def stack(record):
     """The accelerator and runtime build a run was measured on.
 
-    The protocol pairs seeds within one card, so arms measured on different hardware are not a
-    fair pair. In the key, a cross-host repeat becomes its own group instead of a silent extra
-    sample folded into someone else's mean.
+    Each cell pairs its seeds on one card. Keeping the stack in the key means a rerun on another
+    host forms its own group rather than a silent extra sample in someone else's mean.
     """
     hw = record.get("hardware", {})
     gpu = hw.get("gpu", "?").replace("NVIDIA GeForce ", "").replace("RTX ", "").replace(" ", "").lower()
