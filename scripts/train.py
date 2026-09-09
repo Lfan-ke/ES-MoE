@@ -138,6 +138,10 @@ def architecture(args) -> str:
         arch = f"{arch}-norm"
     if args.dense_training:
         arch = f"{arch}-dense"
+    if args.dense_inference:
+        arch = f"{arch}-denseval"
+    if args.dynamic_threshold:
+        arch = f"{arch}-t{args.dynamic_threshold:g}"
     if args.aux_weight != 0.01:
         arch = f"{arch}-w{args.aux_weight:g}"
     return arch

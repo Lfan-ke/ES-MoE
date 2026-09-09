@@ -54,6 +54,10 @@ def variant(record):
         block += "-norm"
     if cfg.get("dense_training"):
         block += "-dense"
+    if cfg.get("sparse_inference") is False:
+        block += "-denseval"
+    if cfg.get("dynamic_threshold"):
+        block += f"-t{cfg['dynamic_threshold']:g}"
     if cfg.get("blocks", 1) not in (0, 1):
         block += f"-x{cfg['blocks']}"
     return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}[{stack(record)}]"
