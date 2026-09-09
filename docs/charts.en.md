@@ -9,7 +9,7 @@ The chart below plots every protocol run in `results/`: backbone on the x axis, 
 ## How to read it
 
 - **The range bar matters more than the mean.** Three seeds routinely straddle the zero line even where the mean is positive, which is exactly why the range is drawn. The judgment lines said it up front: three seeds support no significance test, and even 3/3 gives a sign-test p of 0.125.
-- **The trend of the means is the project's main finding**: the default graft's effect decays monotonically with backbone generation, from positive on YOLOv5n to negative on YOLO26n.
+- **The trend of the means is the project's main finding**: the default graft is positive on SPPF-ended backbones (v5n/v8n/v9t), sits on zero once the backbone ends in attention (v10n/11n), and turns negative on area attention and the E2E head (12n/26n).
 - **An arm with fewer than three seeds gets no mean**, only its dots, so an unfinished cell cannot be read as a settled one.
 - **The gap between the arms is wiring, not backbone.** `rewire` has exactly the same parameter count as the default arm (3,327,330); only whether consumers read the block's output differs.
 

@@ -49,7 +49,7 @@ As declared, three seeds support no significance test; every "effective" is a sm
 
 ### What the full matrix does support
 
-- **The default wiring's effect decays monotonically with backbone generation**: +0.0025 (v8n) → +0.0013 (11n) → −0.0018 (12n) → −0.0034 (26n). The newer the backbone end (SPPF → C2PSA → A2C2f → E2E head), the worse the same graft point fares.
+- **The default wiring's effect decays monotonically with backbone generation**: +0.0025 (v8n) → +0.0013 (11n) → −0.0018 (12n) → −0.0034 (26n). The newer the backbone end (SPPF → C2PSA → A2C2f → E2E head), the worse the same graft point fares. **Withdrawn at the second-round verdicts below**: with seven generations the order no longer holds by version number, and the grouping is by what the backbone ends in.
 - **`rewire` pulls 12n and 26n back to near parity** and is the only 3/3 arm on v8n; only on 11n does it trail the default arm. The wiring — whether consumers read the block's output — moves the metric more than the backbone does, but not in one direction everywhere.
 - **Where the damage lands depends on the backbone**: v8n loses large objects, 26n loses small ones, 12n is direction-unstable. No fixed "this block helps/hurts scale X" statement survives the four-generation matrix.
 - **Routing collapses identically on all four generations**: no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation; five of 26n's six checkpoints hand the lead to the `k = 9` expert. Rewiring changes none of it.
