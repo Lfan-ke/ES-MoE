@@ -69,6 +69,17 @@ def dataset_facts(data: str) -> dict:
     return {"name": base.name or str(base), "classes": len(spec.get("names", {})), "splits": splits}
 
 
+def requested(args) -> dict:
+    """The block settings this run asks for, in the names `esmoe.SETTINGS` uses."""
+    return {
+        "balance": args.balance,
+        "out_norm": args.out_norm,
+        "dense_training": args.dense_training,
+        "sparse_inference": not args.dense_inference,
+        "dynamic_threshold": args.dynamic_threshold,
+    }
+
+
 def block_facts(model) -> dict:
     """The block settings the trained model actually has, read off it rather than off the flags.
 
@@ -77,14 +88,8 @@ def block_facts(model) -> dict:
     """
     found = list(esmoe.blocks(model.model))
     if not found:
-        return {"balance": "none", "out_norm": False, "dense_training": False, "blocks": 0}
-    first = found[0]
-    return {
-        "balance": first.balance.__name__.removesuffix("_balance"),
-        "out_norm": bool(first.out_norm),
-        "dense_training": bool(first.dense_training),
-        "blocks": len(found),
-    }
+        return {"balance": "none", "blocks": 0}
+    return found[0].spec() | {"blocks": len(found)}
 
 
 def build(args):
@@ -108,9 +113,7 @@ def build(args):
         # In the config, not on the built blocks: the trainer rebuilds the model from this file and
         # drops whatever was set on the instance. Runs that set them afterwards trained the
         # defaults while their records claimed otherwise.
-        balance=args.balance,
-        out_norm=args.out_norm,
-        dense_training=args.dense_training,
+        **requested(args),
     )
     model = YOLO(str(cfg))
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
@@ -152,6 +155,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--at", default="backbone_end", help="graft point: backbone_end or backbone_stages")
     p.add_argument("--out-norm", action="store_true", help="normalise the mixed output, as upstream does")
     p.add_argument("--dense-training", action="store_true", help="run every expert while training")
+    p.add_argument("--dense-inference", action="store_true", help="run every expert outside training too")
+    p.add_argument("--dynamic-threshold", type=float, default=0.0, help="upstream's inference pruning; 0.4 there")
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)
@@ -172,12 +177,8 @@ def main():
     model, cfg = build(args)
     facts = block_facts(model)
     # Fail before burning a card rather than record an arm the model does not have.
-    if args.esmoe and (facts["balance"], facts["out_norm"], facts["dense_training"]) != (
-        args.balance,
-        args.out_norm,
-        args.dense_training,
-    ):
-        raise SystemExit(f"block settings did not reach the model: asked {vars(args)}, got {facts}")
+    if args.esmoe and any(facts[key] != value for key, value in requested(args).items()):
+        raise SystemExit(f"block settings did not reach the model: asked {requested(args)}, got {facts}")
     arch = architecture(args)
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"

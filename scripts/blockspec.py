@@ -22,15 +22,14 @@ def spec(path: Path) -> dict:
     model = torch.load(path, map_location="cpu", weights_only=False)["model"]
     found = list(esmoe.blocks(model))
     if not found:
-        return {"balance": "none", "out_norm": False, "dense_training": False, "blocks": 0}
+        return {"balance": "none", "blocks": 0}
     first = found[0]
-    return {
-        "balance": first.balance.__name__.removesuffix("_balance"),
-        # Absent on a block pickled before the setting existed, which means it was off.
-        "out_norm": bool(getattr(first, "out_norm", False)),
-        "dense_training": bool(getattr(first, "dense_training", False)),
-        "blocks": len(found),
-    }
+    # A block pickled before a setting existed carries no attribute for it, and that absence is
+    # the answer: it ran with whatever the default was then, which is what `SETTINGS` still holds.
+    for key, default in esmoe.SETTINGS.items():
+        if not hasattr(first, key):
+            setattr(first, key, default)
+    return first.spec() | {"blocks": len(found)}
 
 
 def main() -> int:

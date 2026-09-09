@@ -296,3 +296,88 @@ def test_top_k_equal_to_num_experts_is_dense_and_balanced():
     esmoe.clear_aux_loss()
     block(torch.randn(4, 16, 8, 8))
     assert collect_aux_loss(nn.Sequential(block)).item() >= 0
+
+
+def test_top_k_none_activates_every_expert():
+    """Upstream reads `top_k=None` as "use all experts"; a community config will pass it."""
+    assert ESMoE(4, None, channels=16).top_k == 4
+
+
+def test_out_channels_changes_the_block_width():
+    """Upstream's ES_MOE takes `out_channels`. A block that is not channel-preserving cannot be
+    grafted into a stock yaml, since `parse_model` assumes `c2 == c1`, but it can be wired by hand.
+    """
+    block = ESMoE(4, 2, channels=16, out_channels=32)
+    assert block(torch.randn(2, 16, 8, 8)).shape == (2, 32, 8, 8)
+
+
+@pytest.mark.parametrize(
+    "given,cap,expected",
+    [([4, 20, 7], 9, [3, 9, 7]), ([3, 5, 7], 15, [3, 5, 7]), ([16, 16, 16], 15, [15, 15, 15])],
+)
+def test_explicit_kernels_step_down_to_odd_and_cap(given, cap, expected):
+    """Upstream lowers an even kernel by one and caps it, so a pruned checkpoint's kernels reload."""
+    assert ESMoE(3, 2, channels=16, expert_kernel_sizes=given, max_kernel_size=cap).expert_kernel_sizes == expected
+
+
+def test_an_even_kernel_cap_is_lowered_not_raised():
+    assert ESMoE(2, 1, channels=16, max_kernel_size=16).expert_kernel_sizes == [3, 5]
+
+
+@pytest.mark.parametrize(
+    "kwargs,message",
+    [
+        ({"num_experts": 0}, "num_experts"),
+        ({"reduction": 0}, "reduction"),
+        ({"dynamic_threshold": 1.5}, "dynamic_threshold"),
+        ({"max_kernel_size": 2}, "max_kernel_size"),
+        ({"top_k": 9}, "top_k"),
+        ({"nonsense": True}, "unknown ESMoE options"),
+    ],
+)
+def test_invalid_settings_are_refused_with_a_reason(kwargs, message):
+    """The same guards upstream applies, so a bad community config fails at construction."""
+    with pytest.raises(ValueError, match=message):
+        ESMoE(channels=16, **kwargs)
+
+
+def test_dynamic_threshold_prunes_outside_training_and_keeps_the_leader():
+    """Upstream's inference pruning: below the threshold an expert goes, except the leading one."""
+    block = ESMoE(4, 4, channels=16, dynamic_threshold=0.9).eval()
+    seen = []
+    for expert in block.experts:
+        expert.register_forward_hook(lambda m, i, o, seen=seen: seen.append(m))
+    with torch.no_grad():
+        block(torch.randn(3, 16, 8, 8))
+    # One expert can clear a 0.9 share at most, so only the leader survives on each sample.
+    assert 1 <= len(seen) <= 4
+
+
+def test_dynamic_threshold_is_inert_while_training():
+    block = ESMoE(4, 4, channels=16, dynamic_threshold=0.9).train()
+    plain = ESMoE(4, 4, channels=16).train()
+    plain.load_state_dict(block.state_dict())
+    x = torch.randn(3, 16, 8, 8)
+    assert torch.allclose(block(x), plain(x), atol=1e-6)
+
+
+def test_sparse_inference_off_runs_every_expert():
+    block = ESMoE(4, 1, channels=16, sparse_inference=False).eval()
+    seen = []
+    for expert in block.experts:
+        expert.register_forward_hook(lambda m, i, o, seen=seen: seen.append(m))
+    with torch.no_grad():
+        block(torch.randn(2, 16, 8, 8))
+    assert len(seen) == 4
+
+
+def test_spec_reports_every_setting_a_config_can_carry():
+    block = ESMoE(4, 2, channels=16, balance="master", out_norm=True, dynamic_threshold=0.4)
+    assert block.spec() == {
+        "balance": "master",
+        "out_norm": True,
+        "dense_training": False,
+        "sparse_inference": True,
+        "dynamic_threshold": 0.4,
+    }
+    assert set(block.spec()) == set(esmoe.SETTINGS)

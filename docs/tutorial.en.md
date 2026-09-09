@@ -163,6 +163,10 @@ Upstream's `ES_MOE` and the paper differ from this package's defaults in three p
 | blocks | one per backbone stage, four in all | one, at the backbone end | `at="backbone_stages"` |
 | output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `out_norm=True` |
 | training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `dense_training=True` |
+| inference pruning | `dynamic_threshold=0.4` drops low-share experts, keeps the leader, renormalises | `0.0`, nothing dropped | `dynamic_threshold=0.4` |
+| sparse inference | `use_sparse_inference=True` | same | `sparse_inference=False` runs all |
+
+The block matches upstream's remaining parameters too: `out_channels` (the input's width by default), `top_k=None` meaning every expert, even kernels stepped down to odd and capped at `max_kernel_size` so a pruned checkpoint's kernels reload, and the same validation of `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel_size` -- refused at construction rather than halfway through a run.
 
 The last two are off by default so the runs already in `results/` still reproduce; each has its own arm on the [judgment lines](JUDGMENT.md) page. On the command line: `--at`, `--out-norm`, `--dense-training`.
 

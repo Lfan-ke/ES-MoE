@@ -149,6 +149,10 @@ YOLO 配置用**绝对层号**引用前面的层：
 | 块数 | 主干每 stage 一块，共四块 | 一块（主干末端） | `at="backbone_stages"` |
 | 输出归一化 | `BatchNorm + SiLU`（论文式 2 的 `Norm`） | 无 | `out_norm=True` |
 | 训练期前向 | 跑满专家，未选的权重为 0 | 跳过未选专家 | `dense_training=True` |
+| 推理期剪枝 | `dynamic_threshold=0.4`，剪掉低置信专家、首位无条件保留、余下重归一 | `0.0`（不剪） | `dynamic_threshold=0.4` |
+| 推理期稀疏 | `use_sparse_inference=True` | 同 | `sparse_inference=False` 则跑满 |
+
+块本身还对齐了上游的其余参数：`out_channels`（默认与输入同宽）、`top_k=None`（等于用全部专家）、偶数核逐一降为奇数再按 `max_kernel_size` 截断（剪枝过的 checkpoint 才装得回去）、以及 `num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 的取值校验——构造时就报错，不留到训练中途。
 
 后两项默认关着，是为了让 `results/` 里既有的运行仍能原样复现；它们各自的对照实验见[判读线](JUDGMENT.md)。命令行对应 `--at`、`--out-norm`、`--dense-training`。
 

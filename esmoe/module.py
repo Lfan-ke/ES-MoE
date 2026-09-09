@@ -87,14 +87,22 @@ def gshard_probs_balance(probs: Tensor, gate: Tensor) -> Tensor:
     return probs.shape[1] * (usage * usage).sum()
 
 
-# The block settings a model.yaml can carry, in the order the constructor takes them.
-SETTINGS = ("balance", "out_norm", "dense_training")
-
 BALANCES: dict[str, BalanceFn] = {
     "switch": switch_balance,
     "gshard": gshard_balance,
     "master": master_balance,
     "gshard_probs": gshard_probs_balance,
+}
+
+# What a model.yaml can carry, with the defaults it carries them against. The trainer rebuilds the
+# model from that yaml, so a setting applied to the instance afterwards is discarded; only these
+# survive. Upstream's own defaults are noted where they differ.
+SETTINGS = {
+    "balance": gshard_balance,
+    "out_norm": False,  # upstream: always on
+    "dense_training": False,  # upstream: always on
+    "sparse_inference": True,
+    "dynamic_threshold": 0.0,  # upstream: 0.4
 }
 
 
@@ -107,11 +115,16 @@ class ESMoE(nn.Module):
 
     Args:
         num_experts: Number of expert branches.
-        top_k: Experts activated per sample.
+        top_k: Experts activated per sample; ``None`` activates all of them.
         channels: Channel count; inferred on first forward when omitted.
+        out_channels: Output channels, defaulting to the input's. Anything else makes the block
+            no longer channel-preserving, so `parse_model` cannot infer its output width and the
+            block has to be wired by hand rather than grafted into a stock yaml.
         reduction: Router bottleneck ratio.
-        max_kernel_size: Cap for the generated odd kernels.
-        expert_kernel_sizes: Explicit per-expert kernels, overriding the generated ones.
+        max_kernel_size: Cap for the generated odd kernels; an even cap is lowered to odd.
+        expert_kernel_sizes: Explicit per-expert kernels, overriding the generated ones. Even
+            sizes are lowered to odd and capped, as upstream does, so a pruned checkpoint's
+            kernels reload rather than failing on a shape mismatch.
         expert: Factory ``(c1, c2, k) -> Module`` for a custom expert branch.
         balance: Auxiliary loss ``(probs, gate) -> scalar``, or a name from `BALANCES`. Defaults
             to the objective YOLO-Master's released ES_MOE optimises; `master_balance` is the
@@ -121,6 +134,11 @@ class ESMoE(nn.Module):
         dense_training: Run every expert while training, weighting the unrouted ones by zero.
             That is what upstream does, and it keeps an unrouted expert's normalisation
             statistics moving. Off by default for the same reason.
+        sparse_inference: Skip unrouted experts outside training. Off runs all of them, which
+            costs more but keeps the graph independent of the batch.
+        dynamic_threshold: Outside training, drop a routed expert whose share falls below this,
+            keeping the top one whatever its share, and renormalise what remains. Upstream
+            defaults to 0.4; 0 here leaves evaluation as every recorded run measured it.
         options: The same settings as a mapping, which is how a model.yaml carries them. The
             trainer rebuilds the model from that yaml, so a setting applied to the instance
             afterwards is discarded; one written into the config survives every rebuild.
@@ -129,33 +147,49 @@ class ESMoE(nn.Module):
     def __init__(
         self,
         num_experts: int = 4,
-        top_k: int = 2,
+        top_k: int | None = 2,
         channels: int | None = None,
         options: dict | None = None,
         *,
+        out_channels: int | None = None,
         reduction: int = 8,
         max_kernel_size: int = 15,
         expert_kernel_sizes: Sequence[int] | None = None,
         expert: ExpertFactory = DWExpert,
-        balance: BalanceFn | str = gshard_balance,
-        out_norm: bool = False,
-        dense_training: bool = False,
+        **settings,
     ):
         super().__init__()
-        if unknown := set(options or {}) - set(SETTINGS):
-            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {SETTINGS}")
-        settings = dict(zip(SETTINGS, (balance, out_norm, dense_training), strict=True)) | (options or {})
-        balance, out_norm, dense_training = (settings[key] for key in SETTINGS)
+        if unknown := (set(settings) | set(options or {})) - set(SETTINGS):
+            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(SETTINGS)}")
+        chosen = SETTINGS | settings | (options or {})
+        if num_experts < 1:
+            raise ValueError(f"num_experts must be positive, got {num_experts}")
+        if reduction < 1:
+            raise ValueError(f"reduction must be positive, got {reduction}")
+        if not 0.0 <= chosen["dynamic_threshold"] <= 1.0:
+            raise ValueError(f"dynamic_threshold must be in [0, 1], got {chosen['dynamic_threshold']}")
+        if max_kernel_size < 3:
+            raise ValueError(f"max_kernel_size must be at least 3, got {max_kernel_size}")
+        max_kernel_size = int(max_kernel_size) - 1 + int(max_kernel_size) % 2
+        top_k = num_experts if top_k is None else top_k
         if not 1 <= top_k <= num_experts:
-            raise ValueError(f"top_k must be in [1, {num_experts}], got {top_k}")
-        kernels = list(expert_kernel_sizes) if expert_kernel_sizes else odd_kernels(num_experts, max_kernel_size)
-        if len(kernels) != num_experts:
-            raise ValueError(f"expert_kernel_sizes needs {num_experts} entries, got {len(kernels)}")
+            raise ValueError(f"top_k must be in [1, {num_experts}] or None, got {top_k}")
+        if expert_kernel_sizes and len(expert_kernel_sizes) != num_experts:
+            raise ValueError(f"expert_kernel_sizes needs {num_experts} entries, got {len(expert_kernel_sizes)}")
+        kernels = (
+            [min(int(k) - 1 + int(k) % 2, max_kernel_size) for k in expert_kernel_sizes]
+            if expert_kernel_sizes
+            else odd_kernels(num_experts, max_kernel_size)
+        )
         self.num_experts, self.top_k, self.expert_kernel_sizes = num_experts, top_k, kernels
-        self.reduction, self.channels = reduction, None
+        self.reduction, self.channels, self.out_channels = reduction, None, out_channels
         self.expert_factory = expert
+        balance = chosen["balance"]
         self.balance = BALANCES[balance] if isinstance(balance, str) else balance
-        self.out_norm, self.dense_training = out_norm, dense_training
+        self.out_norm = chosen["out_norm"]
+        self.dense_training = chosen["dense_training"]
+        self.sparse_inference = chosen["sparse_inference"]
+        self.dynamic_threshold = chosen["dynamic_threshold"]
         self.experts, self.router = nn.ModuleList(), nn.Sequential()
         self.norm: nn.Module = nn.Identity()
         if channels:
@@ -165,7 +199,8 @@ class ESMoE(nn.Module):
         if self.channels is not None:
             return
         hidden = max(channels // self.reduction, 8)
-        self.experts = nn.ModuleList(self.expert_factory(channels, channels, k) for k in self.expert_kernel_sizes)
+        width = self.out_channels or channels
+        self.experts = nn.ModuleList(self.expert_factory(channels, width, k) for k in self.expert_kernel_sizes)
         self.router = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
@@ -174,8 +209,8 @@ class ESMoE(nn.Module):
             nn.Linear(hidden, self.num_experts),
         )
         if self.out_norm:
-            self.norm = nn.Sequential(nn.BatchNorm2d(channels), nn.SiLU())
-        self.channels = channels
+            self.norm = nn.Sequential(nn.BatchNorm2d(width), nn.SiLU())
+        self.channels, self.out_channels = channels, width
 
     def forward(self, x: Tensor) -> Tensor:
         if self.channels is None:
@@ -186,14 +221,26 @@ class ESMoE(nn.Module):
         probs = F.softmax(self.router(x).float().clamp(-30.0, 30.0), dim=1).type_as(x)
         weights, chosen = probs.topk(self.top_k, dim=1)
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
+        if self.dynamic_threshold and not self.training:
+            # Upstream's inference-time pruning: below the threshold an expert is dropped, except
+            # the leading one, and the survivors are renormalised so the mixture still sums to one.
+            keep = gate >= self.dynamic_threshold
+            keep.scatter_(1, chosen[:, :1], True)
+            gate = gate * keep
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
-        out = torch.zeros_like(x)
+        out = x.new_zeros(x.shape[0], self.out_channels or x.shape[1], *x.shape[2:])
         # Skipping an unrouted expert saves work at run time, but the decision depends on the data:
         # a tracer would bake this batch's routing into the graph and the exported model would keep
         # using these experts for every future input. Under tracing, run all of them. `dense_training`
         # extends that to training, where upstream runs every expert so that an unrouted one keeps
-        # its normalisation statistics moving instead of freezing.
-        every = torch.jit.is_tracing() or torch.onnx.is_in_onnx_export() or (self.dense_training and self.training)
+        # its normalisation statistics moving instead of freezing; clearing `sparse_inference`
+        # extends it to inference, where upstream leaves the choice to `use_sparse_inference`.
+        every = (
+            torch.jit.is_tracing()
+            or torch.onnx.is_in_onnx_export()
+            or (self.dense_training and self.training)
+            or not (self.sparse_inference or self.training)
+        )
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)
             if every or torch.count_nonzero(share):
@@ -201,20 +248,26 @@ class ESMoE(nn.Module):
         registry.publish(self, self.balance(probs, gate))
         return self.norm(out)
 
-    def configure(self, *, out_norm: bool | None = None, dense_training: bool | None = None) -> "ESMoE":
-        """Set the upstream-alignment switches after the block exists.
+    def configure(self, **settings) -> "ESMoE":
+        """Set the alignment switches on a block that already exists.
 
-        ``out_norm`` builds a module, so a YAML-constructed block cannot receive it through the
-        positional args ``parse_model`` forwards; this is how a caller turns it on afterwards.
+        For paths that never reach a trainer -- inference, export, a unit test. A trainer rebuilds
+        the model from its yaml and discards anything set here, so a training run has to put them
+        in the config instead: `graft(..., out_norm=True)` or `equip(..., out_norm=True)`.
         """
-        if dense_training is not None:
-            self.dense_training = dense_training
+        if unknown := set(settings) - set(SETTINGS):
+            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(SETTINGS)}")
+        if (balance := settings.pop("balance", None)) is not None:
+            self.balance = BALANCES[balance] if isinstance(balance, str) else balance
+        out_norm = settings.pop("out_norm", None)
+        for key, value in settings.items():
+            setattr(self, key, value)
         if out_norm is not None and out_norm != self.out_norm:
             self.out_norm = out_norm
             if not out_norm:
                 self.norm = nn.Identity()
             elif self.channels is not None:
-                self.norm = nn.Sequential(nn.BatchNorm2d(self.channels), nn.SiLU())
+                self.norm = nn.Sequential(nn.BatchNorm2d(self.out_channels or self.channels), nn.SiLU())
         return self
 
     @property
@@ -222,12 +275,20 @@ class ESMoE(nn.Module):
         value = registry.take(self)
         return registry.zeros() if value is None else value
 
+    def spec(self) -> dict:
+        """The settings this block is holding, in the form a config and a record carry them."""
+        return {"balance": self.balance.__name__.removesuffix("_balance")} | {
+            key: getattr(self, key) for key in SETTINGS if key != "balance"
+        }
+
     def extra_repr(self) -> str:
+        shape = f"channels={self.channels}"
+        if self.out_channels not in (None, self.channels):
+            shape += f", out_channels={self.out_channels}"
+        settings = ", ".join(f"{key}={value}" for key, value in self.spec().items())
         return (
-            f"channels={self.channels}, num_experts={self.num_experts}, "
-            f"top_k={self.top_k}, kernels={self.expert_kernel_sizes}, "
-            f"balance={self.balance.__name__}, out_norm={self.out_norm}, "
-            f"dense_training={self.dense_training}"
+            f"{shape}, num_experts={self.num_experts}, top_k={self.top_k}, "
+            f"kernels={self.expert_kernel_sizes}, {settings}"
         )
 
 

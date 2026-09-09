@@ -2,6 +2,8 @@ from .aux_loss import clear_aux_loss, collect_aux_loss
 from .graft import graft
 from .inject import attach_aux_loss, equip, inject_esmoe
 from .module import (
+    BALANCES,
+    SETTINGS,
     DWExpert,
     ESMoE,
     blocks,
@@ -13,6 +15,8 @@ from .module import (
 )
 
 __all__ = [
+    "BALANCES",
+    "SETTINGS",
     "DWExpert",
     "ESMoE",
     "attach_aux_loss",
