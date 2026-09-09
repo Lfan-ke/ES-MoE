@@ -724,6 +724,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth pre-registration (2026-09-09, declared before any master result)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -974,6 +985,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth pre-registration (2026-09-09, declared before any master result)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1195,6 +1217,49 @@
 <ol>
 <li><strong>Raising the weight to upstream's 1.0 moves the routing</strong>: under <code>--aux-weight 1.0</code> the dominant expert's top-1 share falls relative to 0.01, and by more than switching the objective does. If raising the weight moves nothing either, the balancing term is not the culprit and the router is.</li>
 </ol>
+<h3 id="fourth-pre-registration-2026-09-09-declared-before-any-master-result">Fourth pre-registration (2026-09-09, declared before any <code>master</code> result)<a class="headerlink" href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" title="Permanent link">&para;</a></h3>
+<p>Reading the paper itself (arXiv 2512.23273, section 3.5) shows that <strong>the balancing term the paper specifies is not the one the released code implements</strong>. Paper equation (13):</p>
+<div class="arithmatex">\[ \mathcal{L}_{LB} = 
+rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - 
+rac{1}{E}
+ight)^2 \]</div>
+<p>where μᵢ averages <strong>Ω_train</strong> - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's <code>ES_MOE</code> instead applies the GShard form <code>N·Σusage²</code> to the <strong>raw router probabilities</strong>. On one pair of inputs:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">balanced dispatch</th>
+<th style="text-align: center;">collapsed dispatch</th>
+<th style="text-align: center;">separates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code> (this package's default)</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code> (upstream code)</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code> (paper eq. 13)</td>
+<td style="text-align: center;">0.00000</td>
+<td style="text-align: center;">0.00383</td>
+<td style="text-align: center;"><strong>yes</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Both inputs carry uniform mean probabilities and differ only in whether the top-k dispatch collapses onto one expert. The first two read the probabilities and cannot tell them apart; the paper's reads the gated weights and can. <strong>The collapse measured across seven generations sits inside the blind spot of the first two.</strong></p>
+<p><code>master_balance</code> is implemented and <code>--balance master</code> selects it. <strong>Unknown</strong>: the <code>master</code> arms of v5n and v10n, two seeds each. The prediction:</p>
+<ol>
+<li><strong>The paper's term measurably lowers the dominant expert's top-1 share</strong>: the <code>master</code> arm's dominant share falls below the same backbone's <code>switch</code> arm, and by more than the <code>gshard</code> arm does. This is the strongest mechanistic bet of the four - if this one does not move either, the collapse is independent of the balancing term's form and the router or the graft point is responsible, and the explanations offered in the first three rounds give way.</li>
+</ol>
+<p>The paper states only λ_LB &gt; 0 without a value, so the <code>master</code> arm keeps this package's default weight of 0.01 and stays separate from the coefficient comparison.</p>
 
 
 

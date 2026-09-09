@@ -724,6 +724,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-09-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第四轮预登记（2026-09-09，声明于任何 master 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -974,6 +985,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-09-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第四轮预登记（2026-09-09，声明于任何 master 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1195,6 +1217,49 @@
 <ol>
 <li><strong>把权重抬到上游的 1.0 会明显改变路由</strong>：<code>--aux-weight 1.0</code> 下主导专家 top-1 份额较 0.01 时下降，且降幅大于换目标（switch → gshard）带来的降幅。若抬权重也不动，问题就不在平衡项，而在路由器本身。</li>
 </ol>
+<h3 id="2026-09-09-master">第四轮预登记（2026-09-09，声明于任何 <code>master</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-master" title="Permanent link">&para;</a></h3>
+<p>读原论文正文（arXiv 2512.23273 第 3.5 节）后发现，<strong>论文指定的平衡项与上游代码实现的不是同一个</strong>。论文式 (13)：</p>
+<div class="arithmatex">\[ \mathcal{L}_{LB} = 
+rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - 
+rac{1}{E}
+ight)^2 \]</div>
+<p>其中 μᵢ 由 <strong>Ω_train</strong>——即 top-K 掩码并重归一之后的权重（论文式 8）——在批与空间位置上取平均得到。上游 <code>ES_MOE</code> 则把 GShard 式 <code>N·Σusage²</code> 用在<strong>原始 router 概率</strong>上。三者在同一对输入上的表现：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">目标</th>
+<th style="text-align: center;">均衡分派</th>
+<th style="text-align: center;">塌缩分派</th>
+<th style="text-align: center;">能否分辨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code>（本包默认）</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">否</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code>（上游代码）</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">否</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code>（论文式 13）</td>
+<td style="text-align: center;">0.00000</td>
+<td style="text-align: center;">0.00383</td>
+<td style="text-align: center;"><strong>能</strong></td>
+</tr>
+</tbody>
+</table>
+<p>两组输入的平均概率都均匀，区别只在 top-k 分派是否塌到单个专家。前两者只读概率，读不出差别；论文那条读的是门控后的权重，读得出。<strong>我们此前七代实测的塌缩，正落在前两者的盲区内。</strong></p>
+<p><code>master_balance</code> 已实现并可用 <code>--balance master</code> 选择。<strong>未知</strong>：v5n 与 v10n 的 <code>master</code> 臂各两个 seed。预测：</p>
+<ol>
+<li><strong>换成论文指定的平衡项会明显降低主导专家的 top-1 份额</strong>：<code>master</code> 臂的主导份额低于同主干 <code>switch</code> 臂，且降幅大于 <code>gshard</code> 臂相对 <code>switch</code> 臂的降幅。这是本轮最强的机制预测——若它也不动，那么塌缩就与平衡项的形式无关，责任在路由器或嫁接点，前三轮的解释都要让位。</li>
+</ol>
+<p>注：论文只写 λ_LB &gt; 0，未给具体值，故 <code>master</code> 臂沿用本包默认权重 0.01，不与系数对照混淆。</p>
 
 
 
