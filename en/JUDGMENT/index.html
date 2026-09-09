@@ -652,6 +652,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#second-round-verdicts-2026-09-09-after-33-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second-round verdicts (2026-09-09, after 33 runs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second-round verdicts (2026-09-09, after 33 runs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replication-on-another-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replication on another host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seven-generations-retire-the-earlier-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seven generations retire the earlier wording
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -835,6 +885,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#second-round-verdicts-2026-09-09-after-33-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second-round verdicts (2026-09-09, after 33 runs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second-round verdicts (2026-09-09, after 33 runs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replication-on-another-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replication on another host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seven-generations-retire-the-earlier-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seven generations retire the earlier wording
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -947,6 +1047,83 @@
 <li><strong>v5n is rerun as a whole generation</strong>, completing the missing <code>rewire</code> arm and yielding a same-configuration replication on another host. <code>scripts/report.py</code> carries the hardware stack in its grouping key, so two hosts form two groups rather than folding into one cell as repeats.</li>
 <li><strong>v10n gains seeds 3 and 4.</strong> Box b's queue is shorter than box a's, and the spare hours extend <strong>all three</strong> v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.</li>
 </ol>
+<h2 id="second-round-verdicts-2026-09-09-after-33-runs">Second-round verdicts (2026-09-09, after 33 runs)<a class="headerlink" href="#second-round-verdicts-2026-09-09-after-33-runs" title="Permanent link">&para;</a></h2>
+<p>YOLOv5n, v9t and v10n all finished under the protocol. v5n was rerun as a whole generation on the new hardware stack, and every v10n arm was extended to five seeds. Cell by cell:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">backbone</th>
+<th style="text-align: center;">default <code>esmoe</code></th>
+<th style="text-align: center;"><code>rewire</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">YOLOv5n (<code>metax3.3</code>)</td>
+<td style="text-align: center;">effective (+0.0055, 3/3; mAP50-95 +0.0038)</td>
+<td style="text-align: center;">effective (+0.0024, 2/3; +0.0018)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv5n (<code>metax3.7</code>)</td>
+<td style="text-align: center;">effective (+0.0041, 3/3; +0.0026)</td>
+<td style="text-align: center;">one seed only, not judged</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv9t</td>
+<td style="text-align: center;">effective (+0.0025, 2/3; +0.0009)</td>
+<td style="text-align: center;">ineffective (−0.0013, 1/3; −0.0021)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv10n (5 seeds)</td>
+<td style="text-align: center;">ineffective (−0.0002, 3/5; −0.0003)</td>
+<td style="text-align: center;">ineffective (−0.0031, 1/5; −0.0016)</td>
+</tr>
+</tbody>
+</table>
+<p>YOLOv10n's default arm sits on zero with 3 of 5 seeds positive; the line calls that ineffective, and parity is the fairer reading.</p>
+<h3 id="predictions-settled_1">Predictions, settled<a class="headerlink" href="#predictions-settled_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Right.</strong> v5n's default arm is positive on both stacks: +0.0055 (3/3) and +0.0041 (3/3).</li>
+<li><strong>Right.</strong> v10n's default arm (−0.0002) sits below v5n's (+0.0055).</li>
+<li><strong>Right.</strong> The collapse repeats across 22 checkpoints: no dead experts, a dominant expert holding 0.491–0.921 of the top-1 (0.71–0.82 by generation), mean-probability entropy at 89.8%–97.2% of its maximum, the leader changing with the seed, and the k = 3 expert never leading.</li>
+</ol>
+<h3 id="replication-on-another-host">Replication on another host<a class="headerlink" href="#replication-on-another-host" title="Permanent link">&para;</a></h3>
+<p>The same v5n configuration ran nine times on each of two C500 hosts: +0.0041 (<code>metax3.7</code>) against +0.0055 (<code>metax3.3</code>), agreeing in sign, wins and magnitude. The paired delta reproduces.</p>
+<p>One self-check worth recording: v5n's <code>rewire</code> arm read +0.0074 on a single seed and +0.0024 once all three were in. "No mean below three seeds" exists for exactly that.</p>
+<h3 id="seven-generations-retire-the-earlier-wording">Seven generations retire the earlier wording<a class="headerlink" href="#seven-generations-retire-the-earlier-wording" title="Permanent link">&para;</a></h3>
+<p>At four generations this page said the effect "decays monotonically with backbone generation". With seven it no longer does by version number - v10n (−0.0002) falls below 11n (+0.0013). Grouped by what the backbone ends in, it is orderly:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">backbone end</th>
+<th style="text-align: center;">backbones</th>
+<th style="text-align: center;">default-arm mean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">SPPF family</td>
+<td style="text-align: center;">v5n / v8n / v9t</td>
+<td style="text-align: center;">+0.0055 / +0.0025 / +0.0025</td>
+</tr>
+<tr>
+<td style="text-align: center;">attention</td>
+<td style="text-align: center;">v10n (PSA) / 11n (C2PSA)</td>
+<td style="text-align: center;">−0.0002 / +0.0013</td>
+</tr>
+<tr>
+<td style="text-align: center;">area attention</td>
+<td style="text-align: center;">12n (A2C2f)</td>
+<td style="text-align: center;">−0.0018</td>
+</tr>
+<tr>
+<td style="text-align: center;">E2E head</td>
+<td style="text-align: center;">26n</td>
+<td style="text-align: center;">−0.0034</td>
+</tr>
+</tbody>
+</table>
+<p>The sign changes when the backbone end becomes an attention block, not as release numbers rise. The "monotonic with generation" wording is withdrawn.</p>
 <h2 id="third-pre-registration-2026-09-09-declared-before-any-gshard-result">Third pre-registration (2026-09-09, declared before any <code>gshard</code> result)<a class="headerlink" href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" title="Permanent link">&para;</a></h2>
 <p>Reading YOLO-Master's own <code>ES_MOE</code> shows it optimises a different balancing term from this toolkit's default:</p>
 <table>

@@ -652,6 +652,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-09-0933" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二轮判定（2026-09-09，33 轮产出后）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="第二轮判定（2026-09-09，33 轮产出后）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        预测对账
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        换主机复现
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        七代之后，原表述需要改
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#2026-09-09-gshard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -835,6 +885,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-09-0933" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第二轮判定（2026-09-09，33 轮产出后）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="第二轮判定（2026-09-09，33 轮产出后）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        预测对账
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        换主机复现
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        七代之后，原表述需要改
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#2026-09-09-gshard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -947,6 +1047,83 @@
 <li><strong>v5n 整代重跑</strong>，补齐缺的 <code>rewire</code> 臂，同时得到一份同配置换主机的复现记录。<code>scripts/report.py</code> 的分组键加入硬件栈，两台主机的同名配置各成一组，不被当作重复样本折进同一格。</li>
 <li><strong>v10n 加跑 seed 3、4</strong>。box b 的排队比 box a 短，空出的机时用于把 v10n 的三条臂<strong>同时</strong>扩到五个 seed。三臂一起扩、且在任何 v10n 结果产出之前决定，避免"看到结果再决定给哪个格子加样本"。判读线不变；五个 seed 的符号检验 p 最低为 0.031，仍不足以支撑单次运行的可靠性表述。</li>
 </ol>
+<h2 id="2026-09-0933">第二轮判定（2026-09-09，33 轮产出后）<a class="headerlink" href="#2026-09-0933" title="Permanent link">&para;</a></h2>
+<p>YOLOv5n / v9t / v10n 全部按协议跑完。v5n 在新硬件栈上整代重跑，v10n 三臂各扩到五个 seed。逐格判定：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">主干</th>
+<th style="text-align: center;">默认 <code>esmoe</code></th>
+<th style="text-align: center;"><code>rewire</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">YOLOv5n（<code>metax3.3</code>）</td>
+<td style="text-align: center;">有效（+0.0055，3/3；mAP50-95 +0.0038）</td>
+<td style="text-align: center;">有效（+0.0024，2/3；+0.0018）</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv5n（<code>metax3.7</code>）</td>
+<td style="text-align: center;">有效（+0.0041，3/3；+0.0026）</td>
+<td style="text-align: center;">仅 seed 0，不判定</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv9t</td>
+<td style="text-align: center;">有效（+0.0025，2/3；+0.0009）</td>
+<td style="text-align: center;">无效（−0.0013，1/3；−0.0021）</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv10n（5 seed）</td>
+<td style="text-align: center;">无效（−0.0002，3/5；−0.0003）</td>
+<td style="text-align: center;">无效（−0.0031，1/5；−0.0016）</td>
+</tr>
+</tbody>
+</table>
+<p>YOLOv10n 默认臂的均值压在零上、5 个 seed 里 3 个为正，按判读线归入无效，读作持平更准确。</p>
+<h3 id="_8">预测对账<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>成立</strong>。v5n 默认臂两套硬件栈上都为正：+0.0055（3/3）与 +0.0041（3/3）。</li>
+<li><strong>成立</strong>。v10n 默认臂（−0.0002）低于 v5n 默认臂（+0.0055）。</li>
+<li><strong>成立</strong>。22 个 checkpoint 上路由塌缩照旧：死专家 0，主导专家 top-1 份额 0.491–0.921（三代均值 0.71–0.82），平均概率熵为最大值的 89.8%–97.2%，主导者随 seed 变，核 3 从未当过主导。</li>
+</ol>
+<h3 id="_9">换主机复现<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>同一套 v5n 配置在两台曦云上各跑九轮：默认臂 +0.0041（<code>metax3.7</code>）对 +0.0055（<code>metax3.3</code>），符号、胜负与量级一致。配对差值是可复现的量。</p>
+<p>顺带一个自证：v5n 的 <code>rewire</code> 臂在只有一个 seed 时是 +0.0074，补满三个 seed 后是 +0.0024。图上「不满三个 seed 不画均值」防的正是这种读法。</p>
+<h3 id="_10">七代之后，原表述需要改<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>四代时写的是「效应随主干代际单调衰减」。七代凑齐后按版本号排不再单调——v10n（−0.0002）低于 11n（+0.0013）。按主干末端的结构分组则是齐的：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">末端</th>
+<th style="text-align: center;">主干</th>
+<th style="text-align: center;">默认臂均值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">SPPF 系</td>
+<td style="text-align: center;">v5n / v8n / v9t</td>
+<td style="text-align: center;">+0.0055 / +0.0025 / +0.0025</td>
+</tr>
+<tr>
+<td style="text-align: center;">注意力</td>
+<td style="text-align: center;">v10n（PSA）/ 11n（C2PSA）</td>
+<td style="text-align: center;">−0.0002 / +0.0013</td>
+</tr>
+<tr>
+<td style="text-align: center;">区域注意力</td>
+<td style="text-align: center;">12n（A2C2f）</td>
+<td style="text-align: center;">−0.0018</td>
+</tr>
+<tr>
+<td style="text-align: center;">E2E 头</td>
+<td style="text-align: center;">26n</td>
+<td style="text-align: center;">−0.0034</td>
+</tr>
+</tbody>
+</table>
+<p>分界在末端换成注意力块这一步，不在发布顺序。原「按代际单调衰减」的说法撤回。</p>
 <h2 id="2026-09-09-gshard">第三轮预登记（2026-09-09，声明于任何 <code>gshard</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-gshard" title="Permanent link">&para;</a></h2>
 <p>核对 YOLO-Master 的 <code>ES_MOE</code> 源码后发现，它优化的负载均衡项与本工具包默认的不是同一个：</p>
 <table>
