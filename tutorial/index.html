@@ -449,7 +449,7 @@
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        三个内置的均衡目标
+        四个内置的均衡目标
       
     </span>
   </a>
@@ -777,7 +777,7 @@
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        三个内置的均衡目标
+        四个内置的均衡目标
       
     </span>
   </a>
@@ -918,8 +918,8 @@ def entropy_balance(probs, gate):
 block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
-<h3 id="_8">三个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p>包里带了三个，<strong>默认是上游 <code>ES_MOE</code> 实际用的那个</strong>（<code>gshard_balance</code>）：</p>
+<h3 id="_8">四个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p><strong>默认是上游 <code>ES_MOE</code> 实际用的那个</strong>（<code>gshard_balance</code>）：</p>
 <table>
 <thead>
 <tr>
@@ -942,7 +942,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <tr>
 <td style="text-align: center;"><code>master_balance</code></td>
 <td style="text-align: center;"><code>(1/E) · Σ(μᵢ − 1/E)²</code></td>
-<td style="text-align: center;">门控权重（论文式 13；与上一行只差仿射）</td>
+<td style="text-align: center;">门控权重（论文式 13；与第一行只差仿射）</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>gshard_probs_balance</code></td>
@@ -951,15 +951,18 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tr>
 </tbody>
 </table>
-<p>三者的差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——前两者取到同一个值，分辨不出；只有 <code>master_balance</code> 读的是门控后的权重，能分辨。选法：</p>
-<pre><code>esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
+<p>差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（<code>switch</code>、<code>gshard_probs</code>）取到同一个值，分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。选法：</p>
+<pre><code>esmoe.equip("yolo11n.yaml", balance="master")
 </code></pre>
-<p>上游代码与论文在这一点上是一致的——两者都读门控，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
+<p>传函数也行（<code>balance=esmoe.master_balance</code>），但只限包里这四个：配置文件存的是名字，自定义目标进不去，只能设在块上，因而挺不过训练器的重建。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
 <h3 id="_9">对齐上游的完整配置<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<p>上游 <code>ES_MOE</code> 与论文的默认不止是平衡项。四处一起打开才是完整复刻：</p>
-<pre><code>model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # 每个 stage 后一块，共四块
-for block in esmoe.blocks(model.model):
-    block.configure(out_norm=True, dense_training=True)      # 输出归一化；训练期跑满专家
+<p>上游 <code>ES_MOE</code> 与论文的默认不止是平衡项。三处一起打开才是完整复刻，<strong>都从 <code>equip</code> 传进去</strong>：</p>
+<pre><code>model = esmoe.equip(
+    "yolo11n.yaml",
+    at="backbone_stages",     # 每个 stage 后一块，共四块
+    out_norm=True,            # 加权求和后的 BatchNorm + SiLU
+    dense_training=True,      # 训练期跑满专家
+)
 </code></pre>
 <table>
 <thead>
@@ -987,17 +990,18 @@ for block in esmoe.blocks(model.model):
 <td style="text-align: center;">输出归一化</td>
 <td style="text-align: center;"><code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
 <td style="text-align: center;">无</td>
-<td style="text-align: center;"><code>configure(out_norm=True)</code></td>
+<td style="text-align: center;"><code>out_norm=True</code></td>
 </tr>
 <tr>
 <td style="text-align: center;">训练期前向</td>
 <td style="text-align: center;">跑满专家，未选的权重为 0</td>
 <td style="text-align: center;">跳过未选专家</td>
-<td style="text-align: center;"><code>configure(dense_training=True)</code></td>
+<td style="text-align: center;"><code>dense_training=True</code></td>
 </tr>
 </tbody>
 </table>
 <p>后两项默认关着，是为了让 <code>results/</code> 里既有的运行仍能原样复现；它们各自的对照实验见<a href="../JUDGMENT/">判读线</a>。命令行对应 <code>--at</code>、<code>--out-norm</code>、<code>--dense-training</code>。</p>
+<p><strong>这些设置必须走配置文件，不能事后设在块上。</strong> 训练器照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。<code>equip</code> 与 <code>graft</code> 把它们写进配置，因此重建多少次都在；<code>ESMoE.configure(...)</code> 只适合不经训练器的场合（推理、导出、单元测试）。从任一 checkpoint 读回当时真正生效的设置：<code>uv run python scripts/blockspec.py</code>。</p>
 <h2 id="_10">使用中的边界<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <p>通道在首次前向时推断、一个进程一次只训练一种辅助损失设置、<code>loss_items</code> 的形态跨版本变过——这些都写在<a href="../limitations/">已知局限</a>里，引用任何数字之前也先读它。</p>
 
