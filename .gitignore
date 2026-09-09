@@ -10,3 +10,4 @@ runs/
 datasets/
 *.pt
 CONTRIB_TASKS.md
+scratch-*.md
