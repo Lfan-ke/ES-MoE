@@ -389,11 +389,13 @@ def test_a_block_from_an_older_checkpoint_still_runs():
     default of the day rather than raising halfway through an evaluation.
     """
     block = ESMoE(4, 2, channels=16)
-    state = {
-        k: v for k, v in block.__dict__.items() if k not in ("dynamic_threshold", "sparse_inference", "out_channels")
-    }
+    gone = ("dynamic_threshold", "sparse_inference", "out_channels")
+    state = {k: v for k, v in block.__dict__.items() if k not in gone}
+    # `norm` is a submodule, so an older checkpoint is missing it from `_modules`, not `__dict__`.
+    state["_modules"] = {k: v for k, v in state["_modules"].items() if k != "norm"}
     revived = ESMoE.__new__(ESMoE)
     revived.__setstate__(state)
+    assert isinstance(revived.norm, nn.Identity)
 
     assert revived.spec() == dict(esmoe.SETTINGS) | {"balance": "gshard"}
     assert revived.out_channels == 16

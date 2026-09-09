@@ -29,7 +29,23 @@ def spec(path: Path) -> dict:
     for key, default in esmoe.SETTINGS.items():
         if not hasattr(first, key):
             setattr(first, key, default)
-    return first.spec() | {"blocks": len(found)}
+    return first.spec() | {"blocks": len(found), "runs": forwards(first)}
+
+
+def forwards(block) -> bool:
+    """Whether the block still runs. An archive nobody can execute is not evidence of anything."""
+    if block.channels is None:
+        return False
+    block.eval()
+    # A checkpoint is saved in half, so the probe has to match it rather than the other way round.
+    dtype = next(block.parameters()).dtype
+    try:
+        with torch.no_grad():
+            block(torch.zeros(1, block.channels, 32, 32, dtype=dtype))
+    except Exception as exc:
+        print(f"  forward failed: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
+        return False
+    return True
 
 
 def main() -> int:

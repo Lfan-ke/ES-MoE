@@ -293,6 +293,10 @@ class ESMoE(nn.Module):
                 setattr(self, key, default)
         if not hasattr(self, "out_channels"):
             self.out_channels = self.channels
+        if not hasattr(self, "norm"):
+            # A submodule, so it is missing from `_modules` rather than from `__dict__`; assigning
+            # it here is what puts it back where the forward pass looks.
+            self.norm = nn.Identity()
 
     def spec(self) -> dict:
         """The settings this block is holding, in the form a config and a record carry them."""
