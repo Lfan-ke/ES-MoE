@@ -37,6 +37,39 @@ def per_image_scale(data: Path) -> dict[str, dict[str, float]]:
     return stats
 
 
+def behaviour(block, logits: torch.Tensor, scales: torch.Tensor, counts: torch.Tensor) -> dict:
+    """Usage, concentration and what the choice correlates with, for one block's captured logits."""
+    probs = logits.softmax(dim=1)
+    chosen = probs.topk(block.top_k, dim=1).indices
+    n, e = probs.shape
+    usage = torch.zeros(e)
+    for k in range(block.top_k):
+        usage += torch.bincount(chosen[:, k], minlength=e).float()
+    usage /= n
+    by_expert = defaultdict(list)
+    for i in range(n):
+        by_expert[int(chosen[i, 0])].append(float(scales[i]))
+
+    def correlate(other: torch.Tensor) -> list[float]:
+        return [round(float(torch.corrcoef(torch.stack([probs[:, j], other]))[0, 1]), 3) for j in range(e)]
+
+    return {
+        "channels": block.channels,
+        "kernels": block.expert_kernel_sizes,
+        "top_k": block.top_k,
+        "usage": [round(float(u), 4) for u in usage],
+        "top1_share": [round(float(u), 4) for u in torch.bincount(chosen[:, 0], minlength=e).float() / n],
+        "dead_experts": [j for j in range(e) if usage[j] < 0.01],
+        "mean_prob": [round(float(p), 4) for p in probs.mean(dim=0)],
+        "prob_entropy_mean": round(float(-(probs * probs.clamp_min(1e-9).log()).sum(dim=1).mean()), 4),
+        "prob_entropy_max": round(float(torch.log(torch.tensor(float(e)))), 4),
+        "unique_top2_sets": len({tuple(sorted(row.tolist())) for row in chosen}),
+        "scale_of_top1_choice": {str(j): round(sum(v) / len(v), 1) for j, v in sorted(by_expert.items()) if v},
+        "prob_vs_scale_corr": correlate(scales),
+        "prob_vs_count_corr": correlate(counts),
+    }
+
+
 def route(weights: Path, data: Path, args) -> dict:
     from ultralytics import YOLO
 
@@ -44,9 +77,16 @@ def route(weights: Path, data: Path, args) -> dict:
 
     esmoe.inject_esmoe()
     model = YOLO(str(weights))
-    block = next(esmoe.blocks(model.model))
-    captured: list[torch.Tensor] = []
-    handle = block.router.register_forward_hook(lambda _m, _i, out: captured.append(out.detach().cpu()))
+    # Every block, not just the first: the upstream layout puts one after each backbone stage, and
+    # they see different resolutions, so one block's usage says nothing about the others'.
+    blocks = list(esmoe.blocks(model.model))
+    captured: list[list[torch.Tensor]] = [[] for _ in blocks]
+    handles = [
+        block.router.register_forward_hook(
+            lambda _m, _i, out, seen=seen: seen.append(out.detach().cpu()),
+        )
+        for block, seen in zip(blocks, captured, strict=True)
+    ]
 
     spec = yaml.safe_load(data.read_text(encoding="utf-8"))
     images = sorted((Path(spec["path"]) / spec["val"]).glob("*.jpg"))
@@ -55,52 +95,35 @@ def route(weights: Path, data: Path, args) -> dict:
         chunk = images[start : start + args.batch]
         model.predict([str(p) for p in chunk], imgsz=args.imgsz, device=args.device, verbose=False, conf=0.25)
         stems += [p.stem for p in chunk]
-    handle.remove()
-
-    logits = torch.cat(captured)
-    # On an accelerator ultralytics warms the model up with a dummy forward before the first real
-    # batch. The hook sees that row too, and it belongs to no image.
-    if logits.shape[0] > len(stems):
-        logits = logits[-len(stems) :]
-    probs = logits.softmax(dim=1)
-    chosen = probs.topk(block.top_k, dim=1).indices
-    n, e = probs.shape
-    usage = torch.zeros(e)
-    for k in range(block.top_k):
-        usage += torch.bincount(chosen[:, k], minlength=e).float()
-    usage /= n
-    top1 = torch.bincount(chosen[:, 0], minlength=e).float() / n
+    for handle in handles:
+        handle.remove()
 
     scale = per_image_scale(data)
     scales = torch.tensor([scale[s]["scale"] for s in stems])
     counts = torch.tensor([float(scale[s]["boxes"]) for s in stems])
-    by_expert = defaultdict(list)
-    for i in range(n):
-        by_expert[int(chosen[i, 0])].append(float(scales[i]))
-    corr = [float(torch.corrcoef(torch.stack([probs[:, j], scales]))[0, 1]) for j in range(e)]
+    per_block = []
+    for index, (block, seen) in enumerate(zip(blocks, captured, strict=True)):
+        logits = torch.cat(seen)
+        # On an accelerator ultralytics warms the model up with a dummy forward before the first
+        # real batch. The hook sees that row too, and it belongs to no image.
+        if logits.shape[0] > len(stems):
+            logits = logits[-len(stems) :]
+        per_block.append({"block": index} | behaviour(block, logits, scales, counts))
 
-    return {
-        "weights": weights.name,
-        "images": n,
-        "kernels": block.expert_kernel_sizes,
-        "top_k": block.top_k,
-        "usage": [round(float(u), 4) for u in usage],
-        "top1_share": [round(float(u), 4) for u in top1],
-        "dead_experts": [j for j in range(e) if usage[j] < 0.01],
-        "mean_prob": [round(float(p), 4) for p in probs.mean(dim=0)],
-        "prob_entropy_mean": round(float(-(probs * probs.clamp_min(1e-9).log()).sum(dim=1).mean()), 4),
-        "prob_entropy_max": round(float(torch.log(torch.tensor(float(e)))), 4),
-        "unique_top2_sets": len({tuple(sorted(row.tolist())) for row in chosen}),
-        "scale_of_top1_choice": {str(j): round(sum(v) / len(v), 1) for j, v in sorted(by_expert.items()) if v},
-        "prob_vs_scale_corr": [round(c, 3) for c in corr],
-        "prob_vs_count_corr": [
-            round(float(torch.corrcoef(torch.stack([probs[:, j], counts]))[0, 1]), 3) for j in range(e)
-        ],
-    }
+    return {"weights": weights.name, "images": len(stems), "blocks": per_block}
+
+
+def normalise(record: dict) -> dict:
+    """Records written before the multi-block pass describe a single block at the top level."""
+    if "blocks" in record:
+        return record
+    single = {k: v for k, v in record.items() if k not in ("weights", "images")}
+    return {"weights": record["weights"], "images": record["images"], "blocks": [{"block": 0, **single}]}
 
 
 def summarise(records: list[dict]) -> str:
-    """One table per checkpoint plus the reading that survives all of them."""
+    """One table per block of each checkpoint, plus the reading that survives all of them."""
+    records = [normalise(r) for r in records]
     lines = [
         "# Router behaviour on VisDrone val",
         "",
@@ -110,25 +133,27 @@ def summarise(records: list[dict]) -> str:
         "",
     ]
     for r in records:
-        e = len(r["kernels"])
-        lines += [
-            f"## {r['weights']}",
-            "",
-            f"{r['images']} images, kernels {r['kernels']}, top-{r['top_k']}, "
-            f"dead experts: {r['dead_experts'] or 'none'}, "
-            f"mean entropy {r['prob_entropy_mean']} of {r['prob_entropy_max']}, "
-            f"distinct top-2 pairs seen: {r['unique_top2_sets']} of {e * (e - 1) // 2}.",
-            "",
-            "| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |",
-            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
-        ]
-        for j in range(e):
-            cells = (
-                f"{r['kernels'][j]} | {r['top1_share'][j]:.3f} | {r['usage'][j]:.3f} | {r['mean_prob'][j]:.3f} | "
-                f"{r['prob_vs_scale_corr'][j]:+.2f} | {r['prob_vs_count_corr'][j]:+.2f}"
-            )
-            lines.append(f"| {j} | {cells} |")
-        lines.append("")
+        lines += [f"## {r['weights']}", ""]
+        for b in r["blocks"]:
+            e = len(b["kernels"])
+            where = f" through block {b['block']} ({b['channels']} channels)" if len(r["blocks"]) > 1 else ""
+            lines += [
+                f"{r['images']} images{where}, kernels {b['kernels']}, top-{b['top_k']}, "
+                f"dead experts: {b['dead_experts'] or 'none'}, "
+                f"mean entropy {b['prob_entropy_mean']} of {b['prob_entropy_max']}, "
+                f"distinct top-2 pairs seen: {b['unique_top2_sets']} of {e * (e - 1) // 2}.",
+                "",
+                "| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |",
+                "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
+            ]
+            for j in range(e):
+                cells = (
+                    f"{b['kernels'][j]} | {b['top1_share'][j]:.3f} | {b['usage'][j]:.3f} | "
+                    f"{b['mean_prob'][j]:.3f} | "
+                    f"{b['prob_vs_scale_corr'][j]:+.2f} | {b['prob_vs_count_corr'][j]:+.2f}"
+                )
+                lines.append(f"| {j} | {cells} |")
+            lines.append("")
     return "\n".join(lines) + "\n"
 
 
@@ -151,12 +176,13 @@ def main() -> int:
     for weights in args.weights:
         record = route(weights, args.data, args)
         (OUT / f"{weights.stem}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
-        print(
-            f"{weights.stem}: usage {record['usage']} dead {record['dead_experts']} "
-            f"entropy {record['prob_entropy_mean']}/{record['prob_entropy_max']} "
-            f"top-2 sets {record['unique_top2_sets']} scale-corr {record['prob_vs_scale_corr']}",
-            flush=True,
-        )
+        for b in record["blocks"]:
+            print(
+                f"{weights.stem} block {b['block']}: usage {b['usage']} dead {b['dead_experts']} "
+                f"entropy {b['prob_entropy_mean']}/{b['prob_entropy_max']} "
+                f"top-2 sets {b['unique_top2_sets']} scale-corr {b['prob_vs_scale_corr']}",
+                flush=True,
+            )
     return 0
 
 
