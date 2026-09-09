@@ -442,6 +442,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Extending">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-balancing-objectives-ship-with-the-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three balancing objectives ship with the block
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -742,6 +759,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Extending">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#three-balancing-objectives-ship-with-the-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Three balancing objectives ship with the block
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -876,6 +910,38 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> iterates every block in a model, which is how the collector and the tests find
 them.</p>
+<h3 id="three-balancing-objectives-ship-with-the-block">Three balancing objectives ship with the block<a class="headerlink" href="#three-balancing-objectives-ship-with-the-block" title="Permanent link">&para;</a></h3>
+<p>Three are built in, the first being the default:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">formula</th>
+<th style="text-align: center;">reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code></td>
+<td style="text-align: center;"><code>E * sum(p_i f_i)</code></td>
+<td style="text-align: center;">mean probabilities x realised load</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;"><code>N * sum(usage_i^2)</code></td>
+<td style="text-align: center;">mean probabilities (what upstream's <code>ES_MOE</code> uses)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code></td>
+<td style="text-align: center;"><code>(1/E) * sum((mu_i - 1/E)^2)</code></td>
+<td style="text-align: center;">the gated weights (what the paper's eq. 13 uses)</td>
+</tr>
+</tbody>
+</table>
+<p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only <code>master_balance</code>, reading the gated weights, can. To pick one:</p>
+<pre><code>esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
+</code></pre>
+<p>Upstream's code and its own paper disagree here; the trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
 <h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>
 <p>Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and <code>loss_items</code> changed shape across ultralytics releases. Those and the rest are in <a href="../limitations/">Limitations</a>, which is also the page to read before quoting any number.</p>
 

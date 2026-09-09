@@ -442,10 +442,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="扩展">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三个内置的均衡目标
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用中的边界
@@ -742,10 +759,27 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="扩展">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三个内置的均衡目标
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用中的边界
@@ -862,7 +896,39 @@ def entropy_balance(probs, gate):
 block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
-<h2 id="_8">使用中的边界<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_8">三个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>包里带了三个，默认是第一个：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">目标</th>
+<th style="text-align: center;">公式</th>
+<th style="text-align: center;">读什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code></td>
+<td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code></td>
+<td style="text-align: center;">平均概率 × 实际负载</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
+<td style="text-align: center;">平均概率（上游 <code>ES_MOE</code> 用的）</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code></td>
+<td style="text-align: center;"><code>(1/E) · Σ(μᵢ − 1/E)²</code></td>
+<td style="text-align: center;">门控后的权重（论文式 13 用的）</td>
+</tr>
+</tbody>
+</table>
+<p>三者的差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——前两者取到同一个值，分辨不出；只有 <code>master_balance</code> 读的是门控后的权重，能分辨。选法：</p>
+<pre><code>esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
+</code></pre>
+<p>上游代码与其论文在这一点上不一致，取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
+<h2 id="_9">使用中的边界<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <p>通道在首次前向时推断、一个进程一次只训练一种辅助损失设置、<code>loss_items</code> 的形态跨版本变过——这些都写在<a href="../limitations/">已知局限</a>里，引用任何数字之前也先读它。</p>
 
 
