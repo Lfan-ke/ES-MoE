@@ -568,6 +568,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#against-the-papers-own-claims" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against the paper's own claims
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -711,6 +722,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#against-the-papers-own-claims" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against the paper's own claims
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -777,6 +799,51 @@
 <p><strong>Two differences inside the block, both switchable here.</strong> Upstream applies a <code>BatchNorm2d + SiLU</code> after the weighted sum (the <code>Norm(·)</code> of the paper's equation 2); this package has none by default, and <code>out_norm=True</code> adds it. Upstream runs every expert while training -- an unrouted one is weighted zero but its normalisation statistics keep moving -- while this package skips unrouted experts, freezing those statistics; <code>dense_training=True</code> matches upstream. Neither is the default: each could change the conclusion about routing collapse, and settling them before there is a controlled comparison would be argument standing in for data.</p>
 <p><strong>Block settings live in the config, not on the instance.</strong> The trainer rebuilds the model from <code>model.yaml</code>, so an objective or a switch set on the blocks after <code>YOLO(cfg)</code> returns disappears with the instance that is discarded -- with no error and no trace. <code>graft()</code> therefore writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping, resolving an objective by name. The block configuration <code>scripts/train.py</code> records is read off the trained model rather than repeated from the command line, and the run refuses to start when the two disagree. <code>scripts/blockspec.py</code> reads back what was in force from any checkpoint.</p>
 <p>Checked and identical: the default heterogeneous kernels for four experts are <code>[3, 5, 7, 9]</code> in both; both routers are a two-layer bottleneck after global pooling (<code>reduction = 8</code>, floored at 8 channels); both clamp logits to <code>[-30, 30]</code> before the softmax; and the paper's Soft Top-K (equation 8) matches this package's gating term for term.</p>
+<h2 id="against-the-papers-own-claims">Against the paper's own claims<a class="headerlink" href="#against-the-papers-own-claims" title="Permanent link">&para;</a></h2>
+<p>The section above compares this package with upstream's source. The paper's text makes further claims that can be checked, and this is what was measured against each. <strong>Every line below holds only within this project's scope</strong>: VisDrone, nano backbones, 120 epochs from scratch, one card. The paper's numbers come from five benchmarks and a full training recipe. So this is not "failed to reproduce"; it is "under these conditions, the mechanism is not visible".</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">the paper's claim</th>
+<th style="text-align: left;">what was measured here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">The routing network guides expert specialisation, with 3x3 / 5x5 / 7x7 capturing distinct multi-scale patterns</td>
+<td style="text-align: left;">Across 48 block analyses the correlation between routing probability and object size runs from −0.49 to +0.59, 110 positive against 82 negative, and <strong>changes sign across seeds</strong>. The dominant expert's kernel is any of the four (kernel 3 twice, 5 nine times, 7 fifteen, 9 twenty-two) and moves with the seed. No stable division by scale.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Simple regions activate fewer experts; complex regions reach more capacity</td>
+<td style="text-align: left;">The number activated in training is <strong>always k</strong>, independent of the input — that is what top-k means. The only input-dependent count is inference-time pruning by <code>dynamic_threshold</code> (0.4 upstream). So "capacity by complexity" does not hold during training, and at inference it rests on one threshold.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Load-balancing supervision prevents expert collapse and keeps utilisation uniform</td>
+<td style="text-align: left;">Across 48 checkpoints the leading expert takes 0.49 to 0.92 of the top-1 choices, and the top two take 1.27 to 1.90 of 2.0. Switching to the objective that reads the gate — the tensor the paper's eq. 12 takes — did not relieve it; the dispatch came out more concentrated and produced the first dead expert here. <strong>Under these conditions the term did not keep utilisation uniform.</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">The block goes into both backbone and neck (section 3.1)</td>
+<td style="text-align: left;">The paper's own Table 5 makes backbone-only the default (62.1 against 54.9 for Both). This package agrees with that default.</td>
+</tr>
+<tr>
+<td style="text-align: left;">One block after each backbone stage, four in all (upstream's yaml)</td>
+<td style="text-align: left;">Reproducing that layout with <code>at="backbone_stages"</code> gives a paired mAP50 of <strong>−0.0084</strong> on v10n (0/2) and mAP50-95 of <strong>−0.0061</strong> with an interval that excludes zero. The direction agrees with the paper's own Table 5, where Both costs 5.9 points: <strong>more ES-MoE is worse, not better.</strong> The confound: four blocks sum four auxiliary terms, so at one weight the aux goes from 0.020 to 0.080, exactly fourfold.</td>
+</tr>
+<tr>
+<td style="text-align: left;">An objective encouraging complementary expertise (abstract)</td>
+<td style="text-align: left;">Upstream's <code>diversity_loss_coeff</code> belongs to a different block family, defaults to <code>0.0</code>, and <code>ES_MOE</code> never references it. Nothing in the default configuration pushes experts apart, which is consistent with the row above.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Soft Top-K (eq. 8) in training, hard Top-K (eq. 9) at inference</td>
+<td style="text-align: left;">Mathematically identical, and verified: a softmax over the top-K subset equals a full softmax masked and renormalised. This package matches eq. 8 term for term.</td>
+</tr>
+<tr>
+<td style="text-align: left;">+2.1 mAP over YOLOv13-N on VisDrone</td>
+<td style="text-align: left;"><strong>Not tested here.</strong> This project measures one block on and off within a backbone, not one architecture against another. Neither result bears on the other.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this section is for</strong>: it separates what the paper claims from what an independent implementation can observe under controlled conditions. The rows that come up empty point at how observable the mechanism is — routing collapse, no division by scale, more blocks doing worse — not at a refutation of the authors' conclusions. Refuting those would mean reproducing at their scale, which is beyond this project's compute and scope and is recorded in <a href="./">limitations</a>.</p>
 
 
 

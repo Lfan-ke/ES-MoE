@@ -568,6 +568,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与论文正文的逐条对照
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -711,6 +722,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与论文正文的逐条对照
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -778,6 +800,51 @@
 <p><strong>块内还有两处结构差异，本包做成开关。</strong> 上游在加权求和之后有一层 <code>BatchNorm2d + SiLU</code>（论文式 2 的 <code>Norm(·)</code>），本包默认没有，<code>out_norm=True</code> 打开。上游训练期跑满全部专家，未被选中的权重为 0 但其归一化统计量仍在更新；本包默认跳过未选专家，那些统计量因此冻结，<code>dense_training=True</code> 对齐。两处都不设为默认值：它们各自都可能改变路由塌缩的结论，在有对照数据之前把它们定下来，等于用论证代替数据。</p>
 <p><strong>块的设置写在配置文件里，不写在实例上。</strong> 训练器会照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的目标函数与开关会随那个被丢弃的实例一起消失，既不报错也不留痕。<code>graft()</code> 因此把设置写进配置（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数。<code>scripts/train.py</code> 记录的块配置是从训练完的模型上读的，不是复述命令行；请求与实际不符时它在开跑前退出。<code>scripts/blockspec.py</code> 可从任一 checkpoint 读回当时真正生效的设置。</p>
 <p>同一处已核对一致：四专家的默认异构核都是 <code>[3, 5, 7, 9]</code>；路由器都是全局池化后的两层瓶颈（<code>reduction = 8</code>，下限 8 通道），softmax 前都把 logits 夹到 <code>[-30, 30]</code>；论文的 Soft Top-K（式 8）与本包的门控实现逐字一致。</p>
+<h2 id="_7">与论文正文的逐条对照<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>上文对照的是上游源码。论文正文另有几条可检验的主张，本节逐条给出本项目量到的东西。<strong>下面每一条都只在本项目的口径内成立</strong>：VisDrone、nano 量级主干、从零训练 120 epoch、单卡；论文的数字来自 COCO 等五个基准与完整训练配方。因此这里不是「复现失败」，是「在这个口径下，这条主张的机制看不到」。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">论文的主张</th>
+<th style="text-align: left;">本项目量到的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">「路由网络引导专家分化」，3×3/5×5/7×7 各自捕捉不同尺度的模式</td>
+<td style="text-align: left;">48 次块分析里，路由概率与目标尺寸的相关落在 −0.49 到 +0.59 之间，110 正 82 负，<strong>跨 seed 变号</strong>；主导专家的核在四种里都出现过（3 核 2 次、5 核 9 次、7 核 15 次、9 核 22 次），随 seed 变。没看到稳定的尺度分工。</td>
+</tr>
+<tr>
+<td style="text-align: left;">「简单区域激活更少专家，复杂区域拿到更多容量」</td>
+<td style="text-align: left;">训练期激活数<strong>恒为 k</strong>，与输入无关——这是 top-k 的定义。真正随输入变的只有推理期的 <code>dynamic_threshold</code> 剪枝（上游默认 0.4）。所以「按复杂度分配算力」这一条，在训练期不成立，在推理期取决于一个默认阈值。</td>
+</tr>
+<tr>
+<td style="text-align: left;">「负载均衡监督防止专家塌缩、维持均匀利用」</td>
+<td style="text-align: left;">48 个 checkpoint 里主导专家吃下 0.49–0.92 的 top-1；前两名专家占掉 1.27–1.90（满分 2.0）。换成读门控的目标（论文式 12 取的那个张量）也没解除，反而更集中，并出现本课题第一个死专家。<strong>在本口径下，这一项没有维持住均匀利用。</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">「同时放进 Backbone 与 Neck」（§3.1）</td>
+<td style="text-align: left;">论文自己的 Table 5 把 backbone-only 定为默认（62.1 对 Both 的 54.9）。本包与该默认一致。</td>
+</tr>
+<tr>
+<td style="text-align: left;">主干每 stage 一块、共四块（上游 YAML）</td>
+<td style="text-align: left;">本包 <code>at="backbone_stages"</code> 复刻该布局后，v10n 上配对 mAP50 <strong>−0.0084</strong>（0/2），mAP50-95 <strong>−0.0061</strong>，区间不跨零。方向与论文 Table 5「Both 掉 5.9 点」一致：<strong>ES-MoE 放得越多越差</strong>。混淆项：四块把辅助项按块求和，同权重下 aux 从 0.020 涨到 0.080，正好四倍。</td>
+</tr>
+<tr>
+<td style="text-align: left;">「鼓励专家互补的目标」（摘要）</td>
+<td style="text-align: left;">上游代码里 <code>diversity_loss_coeff</code> 属于别的块族、默认 <code>0.0</code>，<code>ES_MOE</code> 一次都没引用。默认配置里没有任何一项在推动分化——与上一行的观测自洽。</td>
+</tr>
+<tr>
+<td style="text-align: left;">soft Top-K（式 8）训练 / hard Top-K（式 9）推理</td>
+<td style="text-align: left;">数学等价，已验：对 top-K 子集做 softmax ≡ 全体 softmax 后掩码重归一。本包实现与式 8 逐字一致。</td>
+</tr>
+<tr>
+<td style="text-align: left;">VisDrone 上较 YOLOv13-N 高 2.1 mAP</td>
+<td style="text-align: left;"><strong>本项目没有测这件事。</strong> 我们测的是同一主干上「加不加这个块」，不是两个架构之争；两者不可互相印证也不可互相否证。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>这一节的用处</strong>：它把「论文说了什么」与「一个独立实现在一个受控口径下能看到什么」分开摆。看不到的那几条，指向的是机制的可观测性——路由塌缩、无尺度分工、块越多越差——而不是对作者结论的反驳。要反驳需要在论文的口径上复现，那超出本课题的算力与范围，已写进<a href="./">已知局限</a>。</p>
 
 
 
