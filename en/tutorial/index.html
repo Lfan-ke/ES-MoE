@@ -456,6 +456,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-configuration-that-matches-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The configuration that matches upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -773,6 +784,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-configuration-that-matches-upstream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The configuration that matches upstream
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -924,7 +946,7 @@ them.</p>
 <tr>
 <td style="text-align: center;"><code>gshard_balance</code> (default)</td>
 <td style="text-align: center;"><code>N * sum(usage_i^2)</code></td>
-<td style="text-align: center;">mean probabilities (what upstream's <code>ES_MOE</code> uses)</td>
+<td style="text-align: center;"><strong>the gated weights</strong> (what upstream's <code>ES_MOE</code> reads)</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>switch_balance</code></td>
@@ -934,14 +956,62 @@ them.</p>
 <tr>
 <td style="text-align: center;"><code>master_balance</code></td>
 <td style="text-align: center;"><code>(1/E) * sum((mu_i - 1/E)^2)</code></td>
-<td style="text-align: center;">the gated weights (what the paper's eq. 13 uses)</td>
+<td style="text-align: center;">the gated weights (the paper's eq. 13; an affine map of the row above)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_probs_balance</code></td>
+<td style="text-align: center;"><code>N * sum(usage_i^2)</code></td>
+<td style="text-align: center;">the raw probabilities, to isolate which tensor is read</td>
 </tr>
 </tbody>
 </table>
 <p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only <code>master_balance</code>, reading the gated weights, can. To pick one:</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
 </code></pre>
-<p>Upstream's code and its own paper disagree here; the trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
+<p>Upstream's code and its paper agree here -- both read the gate, and differ only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>). The trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
+<h3 id="the-configuration-that-matches-upstream">The configuration that matches upstream<a class="headerlink" href="#the-configuration-that-matches-upstream" title="Permanent link">&para;</a></h3>
+<p>Upstream's <code>ES_MOE</code> and the paper differ from this package's defaults in four places, not one. Turning all four on is the faithful reproduction:</p>
+<pre><code>model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # one block per stage, four in all
+for block in esmoe.blocks(model.model):
+    block.configure(out_norm=True, dense_training=True)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">item</th>
+<th style="text-align: center;">upstream / paper</th>
+<th style="text-align: center;">this package's default</th>
+<th style="text-align: center;">how to turn it on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">balancing term</td>
+<td style="text-align: center;"><code>N*sum(u^2)</code> on the gate</td>
+<td style="text-align: center;">same (<code>gshard_balance</code>)</td>
+<td style="text-align: center;">already the default</td>
+</tr>
+<tr>
+<td style="text-align: center;">blocks</td>
+<td style="text-align: center;">one per backbone stage, four in all</td>
+<td style="text-align: center;">one, at the backbone end</td>
+<td style="text-align: center;"><code>at="backbone_stages"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">output norm</td>
+<td style="text-align: center;"><code>BatchNorm + SiLU</code> (the paper's eq. 2 <code>Norm</code>)</td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;"><code>configure(out_norm=True)</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">training forward</td>
+<td style="text-align: center;">every expert runs, unrouted ones weighted zero</td>
+<td style="text-align: center;">unrouted experts skipped</td>
+<td style="text-align: center;"><code>configure(dense_training=True)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The last two are off by default so the runs already in <code>results/</code> still reproduce; each has its own arm on the <a href="../JUDGMENT/">judgment lines</a> page. On the command line: <code>--at</code>, <code>--out-norm</code>, <code>--dense-training</code>.</p>
 <h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>
 <p>Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and <code>loss_items</code> changed shape across ultralytics releases. Those and the rest are in <a href="../limitations/">Limitations</a>, which is also the page to read before quoting any number.</p>
 

@@ -456,13 +456,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        对齐上游的完整配置
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用中的边界
@@ -773,13 +784,24 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        对齐上游的完整配置
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用中的边界
@@ -910,7 +932,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <tr>
 <td style="text-align: center;"><code>gshard_balance</code>（默认）</td>
 <td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
-<td style="text-align: center;">平均概率（上游 <code>ES_MOE</code> 用的）</td>
+<td style="text-align: center;"><strong>门控权重</strong>（上游 <code>ES_MOE</code> 用的）</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>switch_balance</code></td>
@@ -920,15 +942,63 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <tr>
 <td style="text-align: center;"><code>master_balance</code></td>
 <td style="text-align: center;"><code>(1/E) · Σ(μᵢ − 1/E)²</code></td>
-<td style="text-align: center;">门控后的权重（论文式 13 用的）</td>
+<td style="text-align: center;">门控权重（论文式 13；与上一行只差仿射）</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_probs_balance</code></td>
+<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
+<td style="text-align: center;">原始概率（用来隔离「读哪个张量」这一个变量）</td>
 </tr>
 </tbody>
 </table>
 <p>三者的差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——前两者取到同一个值，分辨不出；只有 <code>master_balance</code> 读的是门控后的权重，能分辨。选法：</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
 </code></pre>
-<p>上游代码与其论文在这一点上不一致，取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
-<h2 id="_9">使用中的边界<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<p>上游代码与论文在这一点上是一致的——两者都读门控，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
+<h3 id="_9">对齐上游的完整配置<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>上游 <code>ES_MOE</code> 与论文的默认不止是平衡项。四处一起打开才是完整复刻：</p>
+<pre><code>model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # 每个 stage 后一块，共四块
+for block in esmoe.blocks(model.model):
+    block.configure(out_norm=True, dense_training=True)      # 输出归一化；训练期跑满专家
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">项</th>
+<th style="text-align: center;">上游 / 论文</th>
+<th style="text-align: center;">本包默认</th>
+<th style="text-align: center;">打开方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">平衡项</td>
+<td style="text-align: center;"><code>N·Σu²</code> 读门控</td>
+<td style="text-align: center;">同（<code>gshard_balance</code>）</td>
+<td style="text-align: center;">默认即是</td>
+</tr>
+<tr>
+<td style="text-align: center;">块数</td>
+<td style="text-align: center;">主干每 stage 一块，共四块</td>
+<td style="text-align: center;">一块（主干末端）</td>
+<td style="text-align: center;"><code>at="backbone_stages"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">输出归一化</td>
+<td style="text-align: center;"><code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
+<td style="text-align: center;">无</td>
+<td style="text-align: center;"><code>configure(out_norm=True)</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">训练期前向</td>
+<td style="text-align: center;">跑满专家，未选的权重为 0</td>
+<td style="text-align: center;">跳过未选专家</td>
+<td style="text-align: center;"><code>configure(dense_training=True)</code></td>
+</tr>
+</tbody>
+</table>
+<p>后两项默认关着，是为了让 <code>results/</code> 里既有的运行仍能原样复现；它们各自的对照实验见<a href="../JUDGMENT/">判读线</a>。命令行对应 <code>--at</code>、<code>--out-norm</code>、<code>--dense-training</code>。</p>
+<h2 id="_10">使用中的边界<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <p>通道在首次前向时推断、一个进程一次只训练一种辅助损失设置、<code>loss_items</code> 的形态跨版本变过——这些都写在<a href="../limitations/">已知局限</a>里，引用任何数字之前也先读它。</p>
 
 
