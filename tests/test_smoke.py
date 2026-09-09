@@ -199,3 +199,9 @@ def test_only_the_paper_objective_sees_a_collapsed_dispatch():
 def test_master_balance_is_zero_at_uniform_use():
     uniform = torch.full((5, 4), 0.25)
     assert esmoe.master_balance(uniform, uniform).item() == pytest.approx(0.0, abs=1e-9)
+
+
+def test_the_default_objective_is_the_one_upstream_ships():
+    """Changing this default changes what every future run optimises, so it is pinned by a test."""
+    block = ESMoE(4, 2, channels=16)
+    assert block.balance is esmoe.gshard_balance

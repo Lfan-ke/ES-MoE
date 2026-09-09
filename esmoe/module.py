@@ -88,7 +88,9 @@ class ESMoE(nn.Module):
         max_kernel_size: Cap for the generated odd kernels.
         expert_kernel_sizes: Explicit per-expert kernels, overriding the generated ones.
         expert: Factory ``(c1, c2, k) -> Module`` for a custom expert branch.
-        balance: Auxiliary loss ``(probs, gate) -> scalar``.
+        balance: Auxiliary loss ``(probs, gate) -> scalar``. Defaults to the objective
+            YOLO-Master's released ES_MOE optimises; `master_balance` is the one its
+            paper specifies, and `switch_balance` the Switch-Transformer form.
     """
 
     def __init__(
@@ -101,7 +103,7 @@ class ESMoE(nn.Module):
         max_kernel_size: int = 15,
         expert_kernel_sizes: Sequence[int] | None = None,
         expert: ExpertFactory = DWExpert,
-        balance: BalanceFn = switch_balance,
+        balance: BalanceFn = gshard_balance,
     ):
         super().__init__()
         if not 1 <= top_k <= num_experts:

@@ -130,12 +130,12 @@ them.
 
 ### Three balancing objectives ship with the block
 
-Three are built in, the first being the default:
+Three are built in, and the default is **the one upstream's `ES_MOE` actually optimises** (`gshard_balance`):
 
 | objective | formula | reads |
 |:--:|:--:|:--:|
+| `gshard_balance` (default) | `N * sum(usage_i^2)` | mean probabilities (what upstream's `ES_MOE` uses) |
 | `switch_balance` | `E * sum(p_i f_i)` | mean probabilities x realised load |
-| `gshard_balance` | `N * sum(usage_i^2)` | mean probabilities (what upstream's `ES_MOE` uses) |
 | `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (what the paper's eq. 13 uses) |
 
 What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only `master_balance`, reading the gated weights, can. To pick one:

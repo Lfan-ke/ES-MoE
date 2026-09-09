@@ -64,10 +64,15 @@ def build(args):
     model = YOLO(str(cfg))
     # The objective is a callable, so it cannot travel through the YAML args; set it on the built
     # blocks instead. `gshard` is the objective YOLO-Master's own ES_MOE optimises.
-    if args.balance != "switch":
-        objective = {"gshard": esmoe.gshard_balance, "master": esmoe.master_balance}[args.balance]
-        for block in esmoe.blocks(model.model):
-            block.balance = objective
+    # Set on every run, not only the non-default ones: the 75 records already in results/ were
+    # measured with the Switch term, and they stay reproducible only if the arm is stated outright.
+    objective = {
+        "switch": esmoe.switch_balance,
+        "gshard": esmoe.gshard_balance,
+        "master": esmoe.master_balance,
+    }[args.balance]
+    for block in esmoe.blocks(model.model):
+        block.balance = objective
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
 
