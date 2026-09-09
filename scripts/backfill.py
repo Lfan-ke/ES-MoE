@@ -6,6 +6,7 @@ absent rather than guessed.
 
     uv run python scripts/backfill.py --check
     uv run python scripts/backfill.py --splits train=6471,val=548,test=1610 --hashes host-a.txt
+    uv run python scripts/backfill.py --settings settings-a.txt   # reconcile against the checkpoints
 """
 
 import argparse
@@ -74,6 +75,34 @@ def facts(spec: str | None) -> dict | None:
     return {"name": Path(config["path"]).name, "classes": len(config["names"]), "splits": counts}
 
 
+def settings(listings: list[str] | None) -> dict[str, dict]:
+    """Run name -> the block settings its checkpoint actually holds, from `scripts/blockspec.py`."""
+    found: dict[str, dict] = {}
+    for listing in listings or ():
+        for line in Path(listing).read_text(encoding="utf-8").splitlines():
+            name, _, spec = line.partition("	")
+            if spec.startswith("{"):
+                found.setdefault(name, json.loads(spec))
+    return found
+
+
+def reconcile(record: dict, spec: dict) -> list[str]:
+    """Replace stated block settings with the ones the checkpoint holds, and say which changed.
+
+    A record repeats what its run was asked for. Where the request never reached the model -- the
+    trainer rebuilds from the config and dropped anything set afterwards -- the record has to move
+    to what trained, or every table built on it names the wrong arm.
+    """
+    config, changed = record["config"], []
+    for key, value in spec.items():
+        if key in config and config[key] != value:
+            changed.append(f"{key}: {config[key]} -> {value}")
+            config[key] = value
+    if changed:
+        config["corrected"] = "block settings read from the checkpoint: " + "; ".join(changed)
+    return changed
+
+
 def missing(record: dict) -> list[str]:
     absent = []
     for field in REQUIRED:
@@ -127,6 +156,7 @@ def main() -> int:
     p.add_argument("--splits", help="e.g. train=6471,val=548,test=1610, when the images are elsewhere")
     p.add_argument("--hashes", action="append", help="a `sha256sum runs/*/weights/best.pt` listing from a host")
     p.add_argument("--unavailable", default="", help="why a checkpoint cannot be hashed, for the ones left over")
+    p.add_argument("--settings", action="append", help="a `scripts/blockspec.py` listing from a host")
     args = p.parse_args()
 
     records = [path for path in sorted(RESULTS.glob("*.json")) if "experiment_id" in json.loads(path.read_text())]
@@ -140,13 +170,21 @@ def main() -> int:
             print(f"  {field:<20} missing in {gaps.get(field, 0)}")
         return 1 if gaps else 0
 
-    dataset, weights, written = facts(args.splits), checkpoints(args.hashes), 0
+    dataset, weights = facts(args.splits), checkpoints(args.hashes)
+    specs, written, corrected = settings(args.settings), 0, []
     for path in records:
         record = json.loads(path.read_text(encoding="utf-8"))
-        if fill(record, dataset, weights, args.unavailable):
+        artifact = record.get("artifact", "")
+        run = PurePosixPath(artifact["path"] if isinstance(artifact, dict) else artifact).parts
+        changed = reconcile(record, specs[run[-3]]) if len(run) > 2 and run[-3] in specs else []
+        if fill(record, dataset, weights, args.unavailable) or changed:
             path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
             written += 1
+        if changed:
+            corrected.append(f"  {record['experiment_id']}: {'; '.join(changed)}")
     print(f"filled {written} records from {len(weights)} checkpoints" + ("" if dataset else "; no split sizes"))
+    print(f"checked {len(specs)} against their checkpoints, corrected {len(corrected)}")
+    print("\n".join(corrected))
     return 0
 
 
