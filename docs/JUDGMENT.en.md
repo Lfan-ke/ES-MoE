@@ -234,9 +234,18 @@ Both checkpoints sit in the upper half of the Switch range or above it, and seed
 
 The paired accuracy is +0.0018 over two seeds (1/2 wins), inside the run-to-run spread and therefore not evidence of anything.
 
-**The confound has to be stated.** At the same `weight=0.01` the two terms are not the same size: at uniform dispatch Switch sits at 2.0 and GShard at 1.0, so this arm carried roughly half the balancing pressure of the arm it is compared against. What this round supports is "**at weight 0.01, reading the gate did not relieve the collapse**", not "an objective that reads the gate cannot". Separating those needs a weight matched to the term's scale, and that run was not made.
+**The confound was stated backwards here, and this corrects it.** The first version read: the two terms differ in scale at one weight, so this arm carried about half the pressure. That compares the terms' **values** at their optimum, which says nothing about pressure. What decides how much a weight buys is the **gradient** the term puts on the router's logits. Measured at the mean routing probabilities each checkpoint actually converged to (`scripts/pressure.py`, output in `results/pressure.md`):
 
-**The fourth prediction is not borne out, and is recorded as such.** The follow-up is a pressure-matched comparison, not another objective.
+| objective | gradient relative to Switch, across the v5n checkpoints |
+|:--:|:--:|
+| `gshard`, reading the gate | 0.59x – 1.48x |
+| `master`, the paper's eq. 13 | about 1/11 to 1/134, which is the `1/E^2` factor |
+
+**At the same `weight=0.01` the gate-reading term pushes as hard as the arm it is compared against**, not half as hard. The "it had less pressure" escape therefore does not hold, and the verdict is firmer for it: **under comparable balancing pressure, reading the gate did not relieve the collapse and the dispatch came out more concentrated.**
+
+What does remain is the sample: two seeds against forty-six, one backbone against seven.
+
+**The fourth prediction is not borne out, and is recorded as such.** `master` genuinely does sit an order of magnitude lower, so answering "is the paper's scale enough" needs its weight raised by `1/E^2` and a run of its own, which was not made.
 
 ## Run-to-run spread at one configuration (2026-09-09, not planned)
 
