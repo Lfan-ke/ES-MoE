@@ -897,7 +897,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
 <h3 id="_8">三个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p>包里带了三个，默认是第一个：</p>
+<p>包里带了三个，<strong>默认是上游 <code>ES_MOE</code> 实际用的那个</strong>（<code>gshard_balance</code>）：</p>
 <table>
 <thead>
 <tr>
@@ -908,14 +908,14 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </thead>
 <tbody>
 <tr>
+<td style="text-align: center;"><code>gshard_balance</code>（默认）</td>
+<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
+<td style="text-align: center;">平均概率（上游 <code>ES_MOE</code> 用的）</td>
+</tr>
+<tr>
 <td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code></td>
 <td style="text-align: center;">平均概率 × 实际负载</td>
-</tr>
-<tr>
-<td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
-<td style="text-align: center;">平均概率（上游 <code>ES_MOE</code> 用的）</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>master_balance</code></td>
