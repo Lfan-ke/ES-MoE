@@ -1,19 +1,3 @@
-# API
-
-六个入口，全部从 `esmoe` 顶层导入；包内带 `py.typed`，类型签名对 IDE 与 mypy 可见。
-
-## equip
-
-    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -> YOLO
-
-注册、接入、构建、接损失一次完成。`out` 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。`graft_kwargs` 原样转给 `graft`。
-
-## inject_esmoe
-
-    esmoe.inject_esmoe() -> type[ESMoE]
-
-把 `ESMoE` 注册到 `parse_model` 解析层名的位置，此后任何 model.yaml 都能写 `[-1, 1, ESMoE, [4, 2]]`。
-
 ## graft
 
     esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
