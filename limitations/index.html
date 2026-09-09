@@ -557,6 +557,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与上游和原论文的差异
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -689,6 +700,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        与上游和原论文的差异
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -736,6 +758,12 @@
 <li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎打平（mAP50 +0.0001），因此该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
 <li>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</li>
 </ul>
+<h2 id="_6">与上游和原论文的差异<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p>本包按 YOLO-Master 的 <code>ES_MOE</code> 结构复刻，逐项核对后有三处需要写明。</p>
+<p><strong>平衡项不是同一个。</strong> 上游 <code>ES_MOE</code> 优化 GShard 式 <code>N · Σ usage²</code>，<code>balance_loss_coeff = 1.0</code>，经 <code>moe_gain = 1.0</code> 直接加进总损失；本包默认 Switch 式 <code>E · Σ p̄ᵢfᵢ</code>，<code>weight = 0.01</code>。在一条真实路由记录上，前者对平均概率的平衡梯度是后者的 31 倍。两者现在都可选（<code>balance=esmoe.gshard_balance</code>），对照实验的判读线见<a href="../JUDGMENT/">判读线</a>。</p>
+<p><strong>原论文写了多样性目标，上游的块没有用它。</strong> 论文（arXiv 2512.23273）称训练含一个鼓励专家互补的目标；上游代码里确有 <code>diversity_loss_coeff</code>，但它属于另一族块、默认值为 <code>0.0</code>，而 <code>ES_MOE</code> 自身一次都没引用它。也就是说，默认配置里没有任何一项在推动专家分工——这与本包七代实测「路由未学到按尺度分工」是一致的，不是本包独有的现象。</p>
+<p><strong>推理期的稀疏化程度不同。</strong> 上游有 <code>dynamic_threshold</code>（默认 0.4），推理时进一步剪掉低置信专家；本包只跳过 top-k 之外的专家，不按阈值再剪。训练语义相同，导出与实测时延会有差别。</p>
+<p>同一处已核对一致：四专家的默认异构核都是 <code>[3, 5, 7, 9]</code>；路由器都是全局池化后的两层瓶颈（<code>reduction = 8</code>，下限 8 通道），softmax 前都把 logits 夹到 <code>[-30, 30]</code>。</p>
 
 
 

@@ -557,6 +557,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#divergence-from-upstream-and-from-the-paper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Divergence from upstream and from the paper
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -689,6 +700,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#divergence-from-upstream-and-from-the-paper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Divergence from upstream and from the paper
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -739,6 +761,12 @@
 <li>Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed. On the full dataset one of the three seeds is effectively a tie (+0.0001 mAP50), so the effect is consistent in sign but not reliable within a single run.</li>
 <li>On top of the parameter increase the block costs about 5% wall-clock per epoch at imgsz 640 (829 s against 790 s, RTX 4090 D) and about 9% at imgsz 800 (85 against 78 minutes, RTX 4090).</li>
 </ul>
+<h2 id="divergence-from-upstream-and-from-the-paper">Divergence from upstream and from the paper<a class="headerlink" href="#divergence-from-upstream-and-from-the-paper" title="Permanent link">&para;</a></h2>
+<p>This package reimplements the structure of YOLO-Master's <code>ES_MOE</code>. Three differences are worth stating after a line-by-line comparison.</p>
+<p><strong>The balancing term is not the same one.</strong> Upstream's <code>ES_MOE</code> optimises the GShard form <code>N * sum(usage^2)</code> at <code>balance_loss_coeff = 1.0</code>, which reaches the total loss through <code>moe_gain = 1.0</code>; this package defaults to the Switch form <code>E * sum(p_i f_i)</code> at <code>weight = 0.01</code>. On a real routing record the former puts 31x more balancing gradient on the mean probabilities. Both are selectable (<code>balance=esmoe.gshard_balance</code>), and the comparison's criteria are on the <a href="../JUDGMENT/">judgment lines</a> page.</p>
+<p><strong>The paper describes a diversity objective that the shipped block does not apply.</strong> The paper (arXiv 2512.23273) says training carries an objective encouraging complementary expertise. Upstream does define <code>diversity_loss_coeff</code>, but it belongs to a different family of blocks, defaults to <code>0.0</code>, and <code>ES_MOE</code> never references it. Nothing in the default configuration pushes the experts apart - which is consistent with the absence of scale specialisation measured here across seven generations, and is not particular to this package.</p>
+<p><strong>Inference sparsifies to a different degree.</strong> Upstream carries a <code>dynamic_threshold</code> (0.4 by default) that prunes low-confidence experts at inference; this package only skips the experts outside top-k. Training semantics match; exported graphs and measured latency will not.</p>
+<p>Checked and identical: the default heterogeneous kernels for four experts are <code>[3, 5, 7, 9]</code> in both; both routers are a two-layer bottleneck after global pooling (<code>reduction = 8</code>, floored at 8 channels); both clamp logits to <code>[-30, 30]</code> before the softmax.</p>
 
 
 
