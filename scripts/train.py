@@ -106,7 +106,30 @@ def build(args):
     return model, str(cfg)
 
 
-def main():
+def architecture(args) -> str:
+    """The arm's name, spelling out every switch that makes it a different model.
+
+    `scripts/queue.sh` rebuilds this string to find the directory a resumed run left behind, so
+    the two have to agree; `tests/test_queue.py` holds them to it. The auxiliary weight trails
+    the structural suffixes because the queue appends it last.
+    """
+    if not args.esmoe:
+        return "baseline"
+    arch = "esmoe-rewire" if args.rewire else "esmoe"
+    if args.balance != "switch":
+        arch = f"{arch}-{args.balance}"
+    if args.at != "backbone_end":
+        arch = f"{arch}-{args.at.replace('backbone_', '')}"
+    if args.out_norm:
+        arch = f"{arch}-norm"
+    if args.dense_training:
+        arch = f"{arch}-dense"
+    if args.aux_weight != 0.01:
+        arch = f"{arch}-w{args.aux_weight:g}"
+    return arch
+
+
+def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser()
     p.add_argument("--base", default="yolov8n.yaml")
     p.add_argument("--data", default=str(ROOT / "configs" / "visdrone.yaml"))
@@ -129,20 +152,14 @@ def main():
     # ultralytics 把 0 读作 "no patience" 并禁用早停，这正是复现协议要的固定周期。
     p.add_argument("--patience", type=int, default=0)
     p.add_argument("--tag", default="")
-    args = p.parse_args()
+    return p
+
+
+def main():
+    args = build_parser().parse_args()
 
     model, cfg = build(args)
-    arch = ("esmoe-rewire" if args.rewire else "esmoe") if args.esmoe else "baseline"
-    if args.esmoe and args.balance != "switch":
-        arch = f"{arch}-{args.balance}"
-    if args.esmoe and args.aux_weight != 0.01:
-        arch = f"{arch}-w{args.aux_weight:g}"
-    if args.esmoe and args.at != "backbone_end":
-        arch = f"{arch}-{args.at.replace('backbone_', '')}"
-    if args.esmoe and args.out_norm:
-        arch = f"{arch}-norm"
-    if args.esmoe and args.dense_training:
-        arch = f"{arch}-dense"
+    arch = architecture(args)
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
 
