@@ -6,6 +6,7 @@ on ground-truth boxes in the original image. maxDets is 500, the VisDrone figure
 """
 
 import argparse
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -67,6 +68,11 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
 
     esmoe.inject_esmoe()
     model = YOLO(str(weights))
+    # val() fuses conv+bn inside an inference-mode context, and some accelerator builds refuse to
+    # view an inference tensor. Fusing here leaves nothing for that path to do; the arithmetic is
+    # unchanged either way.
+    with contextlib.suppress(Exception):
+        model.model.fuse()
     metrics = model.val(
         data=str(data),
         imgsz=args.imgsz,

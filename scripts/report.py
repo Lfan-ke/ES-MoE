@@ -46,6 +46,8 @@ def variant(record):
     block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
     if cfg.get("rewire"):
         block += "-rewire"
+    if cfg.get("balance", "switch") not in ("switch", "none"):
+        block += f"-{cfg['balance']}"
     return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}[{stack(record)}]"
 
 

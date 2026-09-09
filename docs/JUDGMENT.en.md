@@ -71,3 +71,21 @@ With two MetaX C500 boxes available the queue is v9t nine runs, v10n nine runs, 
 1. **v5n is rerun as a whole generation**, completing the missing `rewire` arm and yielding a same-configuration replication on another host. `scripts/report.py` carries the hardware stack in its grouping key, so two hosts form two groups rather than folding into one cell as repeats.
 2. **v10n gains seeds 3 and 4.** Box b's queue is shorter than box a's, and the spare hours extend **all three** v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.
 
+## Third pre-registration (2026-09-09, declared before any `gshard` result)
+
+Reading YOLO-Master's own `ES_MOE` shows it optimises a different balancing term from this toolkit's default:
+
+| | formula | reads |
+|:--:|:--:|:--:|
+| upstream `ES_MOE` | `N · Σ usage²` (GShard) | mean routing probabilities |
+| default `switch_balance` | `E · Σ p̄ᵢfᵢ` (Switch) | mean probabilities × realised load |
+
+Both sit at their minimum in exactly the collapse we measured: with mean probabilities near uniform and one expert taking 62%–92% of the top-1, the Switch term is fixed at `k` and the GShard term at 1.0, and moving the top-k dispatch does not shift either. They separate only when the probability mass itself concentrates, where both rise.
+
+`gshard_balance` is implemented and exported, and `scripts/train.py --balance gshard` selects it. **Unknown**: the `gshard` arms of v5n and v10n, three seeds each. The predictions:
+
+1. **Switching to the upstream GShard objective will not undo the routing collapse**: the `gshard` arms still show a dominant expert above 0.6 top-1 share, mean-probability entropy above 90% of its maximum, and no dead experts. This is the mechanistic bet - if the collapse does lift, the choice of objective was the cause and this package's default should change.
+2. **Accuracy will not move materially**: paired mAP50 means of the `gshard` arms sit within ±0.003 of their `switch` counterparts on v5n and v10n, the scale of the seed spread.
+
+Wrong predictions get recorded as wrong.
+

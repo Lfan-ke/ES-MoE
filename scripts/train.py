@@ -56,6 +56,11 @@ def build(args):
     cfg = ROOT / "configs" / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}.yaml"
     esmoe.graft(args.base, out=str(cfg), num_experts=args.num_experts, top_k=args.top_k, rewire=args.rewire)
     model = YOLO(str(cfg))
+    # The objective is a callable, so it cannot travel through the YAML args; set it on the built
+    # blocks instead. `gshard` is the objective YOLO-Master's own ES_MOE optimises.
+    if args.balance == "gshard":
+        for block in esmoe.blocks(model.model):
+            block.balance = esmoe.gshard_balance
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
 
@@ -68,6 +73,7 @@ def main():
     p.add_argument("--num-experts", type=int, default=4)
     p.add_argument("--top-k", type=int, default=2)
     p.add_argument("--rewire", action="store_true")
+    p.add_argument("--balance", choices=("switch", "gshard"), default="switch")
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)
@@ -83,6 +89,8 @@ def main():
 
     model, cfg = build(args)
     arch = ("esmoe-rewire" if args.rewire else "esmoe") if args.esmoe else "baseline"
+    if args.esmoe and args.balance != "switch":
+        arch = f"{arch}-{args.balance}"
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
 
@@ -132,6 +140,7 @@ def main():
             "top_k": args.top_k,
             "rewire": bool(args.rewire and args.esmoe),
             "aux_weight": args.aux_weight if args.esmoe else 0.0,
+            "balance": args.balance if args.esmoe else "none",
         },
         "dataset": {"yaml": args.data, "fraction": args.fraction},
         "hardware": {

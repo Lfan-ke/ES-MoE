@@ -37,10 +37,26 @@ class DWExpert(nn.Module):
 
 
 def switch_balance(probs: Tensor, gate: Tensor) -> Tensor:
-    """Switch-Transformer load balancing: routing mass times realised load, summed over experts."""
+    """Switch-Transformer load balancing: routing mass times realised load, summed over experts.
+
+    Under top-k the realised loads sum to k whatever the skew, so once the mean probabilities are
+    near uniform this term sits at k and stops reporting concentration. `gshard_balance` reads the
+    distribution itself and does not share that blind spot.
+    """
     importance = probs.mean(dim=0)
     load = (gate > 0).float().mean(dim=0)
     return probs.shape[1] * (importance * load).sum()
+
+
+def gshard_balance(probs: Tensor, gate: Tensor) -> Tensor:
+    """GShard-style balance: ``N * sum(usage^2)`` over normalised mean routing mass.
+
+    This is the objective YOLO-Master's own ES_MOE optimises. It is 1.0 at uniform usage and rises
+    as mass concentrates, so unlike `switch_balance` it keeps pushing once one expert takes over.
+    """
+    usage = probs.mean(dim=0)
+    usage = usage / usage.sum().clamp_min(1e-6)
+    return probs.shape[1] * (usage * usage).sum()
 
 
 class ESMoE(nn.Module):
