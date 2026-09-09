@@ -1012,8 +1012,21 @@ them.</p>
 <td style="text-align: center;">unrouted experts skipped</td>
 <td style="text-align: center;"><code>dense_training=True</code></td>
 </tr>
+<tr>
+<td style="text-align: center;">inference pruning</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code> drops low-share experts, keeps the leader, renormalises</td>
+<td style="text-align: center;"><code>0.0</code>, nothing dropped</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">sparse inference</td>
+<td style="text-align: center;"><code>use_sparse_inference=True</code></td>
+<td style="text-align: center;">same</td>
+<td style="text-align: center;"><code>sparse_inference=False</code> runs all</td>
+</tr>
 </tbody>
 </table>
+<p>The block matches upstream's remaining parameters too: <code>out_channels</code> (the input's width by default), <code>top_k=None</code> meaning every expert, even kernels stepped down to odd and capped at <code>max_kernel_size</code> so a pruned checkpoint's kernels reload, and the same validation of <code>num_experts</code>, <code>reduction</code>, <code>dynamic_threshold</code> and <code>max_kernel_size</code> -- refused at construction rather than halfway through a run.</p>
 <p>The last two are off by default so the runs already in <code>results/</code> still reproduce; each has its own arm on the <a href="../JUDGMENT/">judgment lines</a> page. On the command line: <code>--at</code>, <code>--out-norm</code>, <code>--dense-training</code>.</p>
 <p><strong>These settings have to travel in the config; setting them on the blocks afterwards does not work.</strong> The trainer rebuilds the model from <code>model.yaml</code>, and anything set after <code>YOLO(cfg)</code> returns disappears with the instance that is discarded -- no error, no trace. <code>equip</code> and <code>graft</code> write them into the config, so a rebuild keeps them; <code>ESMoE.configure(...)</code> is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: <code>uv run python scripts/blockspec.py</code>.</p>
 <h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>

@@ -998,8 +998,21 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <td style="text-align: center;">跳过未选专家</td>
 <td style="text-align: center;"><code>dense_training=True</code></td>
 </tr>
+<tr>
+<td style="text-align: center;">推理期剪枝</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code>，剪掉低置信专家、首位无条件保留、余下重归一</td>
+<td style="text-align: center;"><code>0.0</code>（不剪）</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">推理期稀疏</td>
+<td style="text-align: center;"><code>use_sparse_inference=True</code></td>
+<td style="text-align: center;">同</td>
+<td style="text-align: center;"><code>sparse_inference=False</code> 则跑满</td>
+</tr>
 </tbody>
 </table>
+<p>块本身还对齐了上游的其余参数：<code>out_channels</code>（默认与输入同宽）、<code>top_k=None</code>（等于用全部专家）、偶数核逐一降为奇数再按 <code>max_kernel_size</code> 截断（剪枝过的 checkpoint 才装得回去）、以及 <code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel_size</code> 的取值校验——构造时就报错，不留到训练中途。</p>
 <p>后两项默认关着，是为了让 <code>results/</code> 里既有的运行仍能原样复现；它们各自的对照实验见<a href="../JUDGMENT/">判读线</a>。命令行对应 <code>--at</code>、<code>--out-norm</code>、<code>--dense-training</code>。</p>
 <p><strong>这些设置必须走配置文件，不能事后设在块上。</strong> 训练器照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。<code>equip</code> 与 <code>graft</code> 把它们写进配置，因此重建多少次都在；<code>ESMoE.configure(...)</code> 只适合不经训练器的场合（推理、导出、单元测试）。从任一 checkpoint 读回当时真正生效的设置：<code>uv run python scripts/blockspec.py</code>。</p>
 <h2 id="_10">使用中的边界<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
