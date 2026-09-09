@@ -8,7 +8,7 @@
 <ul class="es-proof">
 <li><strong>One call to add it</strong><span><code>equip</code> grafts the block into a config, renumbers the head and wires the loss.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in <code>results.csv</code>, asserted by unit tests rather than by a config key.</span></li>
-<li><strong>Measured under the repository protocol</strong><span>Seven backbone generations × three arms × three seeds, 75 runs: the default wiring is positive on SPPF-ended backbones (v5n +0.0055, v8n +0.0025, v9t +0.0025), sits on zero once the backbone ends in attention (v10n −0.0002, 11n +0.0013), and turns negative on 12n and 26n; <code>rewire</code> pulls 12n and 26n back to parity. Full verdicts on the <a href="JUDGMENT/">judgment lines</a> page.</span></li>
+<li><strong>Measured under the repository protocol</strong><span>Seven backbone generations × three arms × three seeds, 77 runs: the default wiring is positive on SPPF-ended backbones (v5n +0.0055, v8n +0.0025, v9t +0.0025), sits on zero once the backbone ends in attention (v10n −0.0002, 11n +0.0013), and turns negative on 12n and 26n; <code>rewire</code> pulls 12n and 26n back to parity. Full verdicts on the <a href="JUDGMENT/">judgment lines</a> page.</span></li>
 </ul>
 </div>
 

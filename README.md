@@ -105,7 +105,7 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms × three seeds, 75 runs. What separates a positive
+the matrix runs to seven backbone generations × three arms × three seeds, 77 runs. What separates a positive
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block

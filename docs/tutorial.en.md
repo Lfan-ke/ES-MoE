@@ -128,40 +128,45 @@ Experts and the balancing objective are plain callables:
 `esmoe.blocks(model)` iterates every block in a model, which is how the collector and the tests find
 them.
 
-### Three balancing objectives ship with the block
+### Four balancing objectives ship with the block
 
-Three are built in, and the default is **the one upstream's `ES_MOE` actually optimises** (`gshard_balance`):
+The default is **the one upstream's `ES_MOE` actually optimises** (`gshard_balance`):
 
 | objective | formula | reads |
 |:--:|:--:|:--:|
 | `gshard_balance` (default) | `N * sum(usage_i^2)` | **the gated weights** (what upstream's `ES_MOE` reads) |
 | `switch_balance` | `E * sum(p_i f_i)` | mean probabilities x realised load |
-| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the row above) |
+| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the first row) |
 | `gshard_probs_balance` | `N * sum(usage_i^2)` | the raw probabilities, to isolate which tensor is read |
 
-What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only `master_balance`, reading the gated weights, can. To pick one:
+What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (`switch`, `gshard_probs`) evaluate identically and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`). To pick one:
 
-    esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
+    esmoe.equip("yolo11n.yaml", balance="master")
 
-Upstream's code and its paper agree here -- both read the gate, and differ only by an affine map (`L_paper = (L_upstream - 1) / E^2`). The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+A function works too (`balance=esmoe.master_balance`), but only for the four that ship: a config holds names, so a custom objective can only be set on the blocks and will not survive the trainer rebuilding the model. The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
 
 
 ### The configuration that matches upstream
 
-Upstream's `ES_MOE` and the paper differ from this package's defaults in four places, not one. Turning all four on is the faithful reproduction:
+Upstream's `ES_MOE` and the paper differ from this package's defaults in three places besides the objective. Turning all three on is the faithful reproduction, and **they all go through `equip`**:
 
-    model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # one block per stage, four in all
-    for block in esmoe.blocks(model.model):
-        block.configure(out_norm=True, dense_training=True)
+    model = esmoe.equip(
+        "yolo11n.yaml",
+        at="backbone_stages",     # one block per stage, four in all
+        out_norm=True,            # BatchNorm + SiLU after the weighted sum
+        dense_training=True,      # every expert runs while training
+    )
 
 | item | upstream / paper | this package's default | how to turn it on |
 |:--:|:--:|:--:|:--:|
 | balancing term | `N*sum(u^2)` on the gate | same (`gshard_balance`) | already the default |
 | blocks | one per backbone stage, four in all | one, at the backbone end | `at="backbone_stages"` |
-| output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `configure(out_norm=True)` |
-| training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `configure(dense_training=True)` |
+| output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `out_norm=True` |
+| training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `dense_training=True` |
 
 The last two are off by default so the runs already in `results/` still reproduce; each has its own arm on the [judgment lines](JUDGMENT.md) page. On the command line: `--at`, `--out-norm`, `--dense-training`.
+
+**These settings have to travel in the config; setting them on the blocks afterwards does not work.** The trainer rebuilds the model from `model.yaml`, and anything set after `YOLO(cfg)` returns disappears with the instance that is discarded -- no error, no trace. `equip` and `graft` write them into the config, so a rebuild keeps them; `ESMoE.configure(...)` is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: `uv run python scripts/blockspec.py`.
 
 
 ## Where the edges are

@@ -82,11 +82,19 @@ def graft(
     """
     from ultralytics.nn.tasks import yaml_model_load
 
-    from .module import SETTINGS
+    from .module import BALANCES, SETTINGS
 
     if unknown := set(options) - set(SETTINGS):
         raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {SETTINGS}")
-    args = [num_experts, top_k] + ([None, dict(options)] if options else [])
+    options = dict(options)
+    if callable(balance := options.get("balance")):
+        # A config holds names, not functions. The shipped objectives have names; a custom one has
+        # to be set on the blocks, and cannot survive the trainer rebuilding the model from here.
+        named = {fn: name for name, fn in BALANCES.items()}
+        if balance not in named:
+            raise ValueError(f"{balance.__name__} is not a named objective; pass one of {sorted(BALANCES)}")
+        options["balance"] = named[balance]
+    args = [num_experts, top_k] + ([None, options] if options else [])
     d = dict(yaml_model_load(base))
     d.pop("yaml_file", None)
     backbone, head = list(d["backbone"]), list(d["head"])
