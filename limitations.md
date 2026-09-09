@@ -29,3 +29,5 @@ Scope of the evidence in `results/`, stated before anyone has to ask.
 
 - Seeds are reported individually and as mean ± sample standard deviation. With three seeds, the standard deviation is a coarse estimate; no significance test is claimed. On the full dataset one of the three seeds is effectively a tie (+0.0001 mAP50), so the effect is consistent in sign but not reliable within a single run.
 - On top of the parameter increase the block costs about 5% wall-clock per epoch at imgsz 640 (829 s against 790 s, RTX 4090 D) and about 9% at imgsz 800 (85 against 78 minutes, RTX 4090).
+- The metrics in a record come from the final re-validation of `best.pt`, not from the last row of `results.csv`, which is the last epoch. The two differ by 0.001 to 0.005, always in the same direction, because the best epoch is rarely the last one. Baseline and ESMoE arms take the same path, so paired deltas are unaffected.
+- Paired deltas carry a 95% confidence interval as well as a mean. Three seeds leave two degrees of freedom and the interval is correspondingly wide: outside the shortest budget, **every interval straddles zero**. That is the precision three seeds support.
