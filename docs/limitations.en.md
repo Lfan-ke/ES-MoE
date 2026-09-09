@@ -10,4 +10,6 @@ This package reimplements the structure of YOLO-Master's `ES_MOE`. Three differe
 
 **Inference sparsifies to a different degree.** Upstream carries a `dynamic_threshold` (0.4 by default) that prunes low-confidence experts at inference; this package only skips the experts outside top-k. Training semantics match; exported graphs and measured latency will not.
 
-Checked and identical: the default heterogeneous kernels for four experts are `[3, 5, 7, 9]` in both; both routers are a two-layer bottleneck after global pooling (`reduction = 8`, floored at 8 channels); both clamp logits to `[-30, 30]` before the softmax.
+**The graft points differ in coverage.** The paper places the block in both the backbone and the neck; the seven-generation experiments here take the backbone end alone. Multi-point grafting works (`graft(at=(...))`, and `tests/test_ultralytics.py` grafts into the backbone end and the neck together and trains), but no neck placement entered this protocol matrix.
+
+Checked and identical: the default heterogeneous kernels for four experts are `[3, 5, 7, 9]` in both; both routers are a two-layer bottleneck after global pooling (`reduction = 8`, floored at 8 channels); both clamp logits to `[-30, 30]` before the softmax; and the paper's Soft Top-K (equation 8) matches this package's gating term for term.

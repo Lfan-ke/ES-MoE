@@ -244,3 +244,30 @@ def test_rewired_models_build_and_forward(base):
     out = model(torch.rand(1, 3, 64, 64))
     # Backbone-end width differs per generation (256 on v8/11/12/26, 128 on v9t); built is what matters.
     assert out is not None and next(blocks(model)).channels
+
+
+def test_grafting_into_backbone_and_neck_together():
+    """The paper places ES-MoE in both the backbone and the neck, so both must graft at once.
+
+    Two insertions shift every later layer reference twice; if the renumbering were off by one the
+    model would still build and only the features would be wrong, so this asserts the block count,
+    the channel widths it lands on, and a live auxiliary loss.
+    """
+    from ultralytics.nn.tasks import DetectionModel, yaml_model_load
+
+    from esmoe import collect_aux_loss
+
+    inject_esmoe()
+    base = yaml_model_load("yolov8n.yaml")
+    backbone_end = len(base["backbone"]) - 1
+    cfg = graft("yolov8n.yaml", at=(backbone_end, backbone_end + 3), num_experts=4, top_k=2)
+    cfg["nc"] = 10
+    model = DetectionModel(cfg, ch=3, nc=10, verbose=False)
+
+    grafted = list(blocks(model))
+    assert len(grafted) == 2
+    attach_aux_loss(model, weight=0.01)
+    model.train()
+    model(torch.randn(1, 3, 128, 128))
+    assert collect_aux_loss(model).item() > 0
+    assert [b.channels for b in grafted] == [256, 128]
