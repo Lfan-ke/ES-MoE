@@ -577,6 +577,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#feedback-and-iteration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -588,7 +599,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -688,6 +699,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#feedback-and-iteration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -699,7 +721,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -774,18 +796,21 @@
 
 
 <h1 id="release-notes">Release notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
-<p>Current version <strong>0.1.4</strong>.</p>
+<p>Current version <strong>0.1.5</strong>.</p>
 <h2 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>DDP support.</strong> ultralytics launches multi-GPU workers from a generated file that imports only the trainer's module, so a worker never imported esmoe and failed to build the model with <code>KeyError: 'ESMoE'</code>. <code>attach_aux_loss</code> now makes <code>model.train()</code> pick a trainer subclass that lives in <code>esmoe.trainer</code>: importing it registers the block, restores the auxiliary-loss weight from the environment and patches <code>BaseModel.loss</code>. <code>scripts/verify.py</code> gains two checks: the real worker file trains one epoch in a fresh interpreter, and two gloo ranks each compute their own auxiliary term with router gradients agreeing after all-reduce. Limit: sparse dispatch needs <code>find_unused_parameters=True</code>, which <code>compile=True</code> switches off; that combination is unsupported.</li>
-<li><strong><code>graft(..., rewire=True)</code>.</strong> Renumbering moves references without retargeting them, so a head branch that names the old backbone end by index (YOLOv8's P5 lateral <code>[-1, 9] Concat</code>) keeps reading SPPF after the insertion and the block reaches P5 only through the top-down path. <code>rewire</code> points every such consumer at the block. Off by default to keep existing records comparable; the two wirings have not yet been compared under one budget.</li>
-<li><code>scripts/train.py --patience</code> (default 0, early stopping off) and <code>IMGSZ</code> / <code>PATIENCE</code> / <code>ARMS</code> in <code>sweep.sh</code>, for runs under the repository protocol (imgsz 800, 120 epochs).</li>
-<li><code>scripts/buckets.py</code>, COCO-style area buckets at maxDets 500; <code>scripts/routing.py</code>, expert usage on the validation set and whether routing follows object scale.</li>
-<li>Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.</li>
+<li><strong><code>gshard_balance</code>, the term upstream's <code>ES_MOE</code> actually optimises.</strong> YOLO-Master's <code>ES_MOE</code> uses the GShard form <code>N * sum(usage^2)</code> at <code>balance_loss_coeff = 1.0</code>; this package defaults to the Switch form <code>E * sum(p_i f_i)</code> at <code>weight = 0.01</code>. Both are now selectable: <code>ESMoE(..., balance=esmoe.gshard_balance)</code>, or <code>scripts/train.py --balance gshard</code>. On a real routing record the upstream pairing puts 31x more balancing gradient on the mean probabilities than this package's default - a larger difference than the choice of formula, and the comparison's criteria are registered on the judgment-lines page ahead of the results.</li>
+</ul>
+<h2 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>The routing statistics counted a warmup forward.</strong> On an accelerator ultralytics runs one dummy forward before the first real batch, and the router hook captured that row too: 549 rows against 548 images. It never fired on CPU, which is why it went unseen.</li>
+<li><strong>Two runs of one arm truncated each other's config.</strong> The grafted <code>configs/*.yaml</code> carried no seed, so two lanes training the same arm wrote one file; one truncated it while the other was reading, and the reader died on <code>KeyError: 'backbone'</code>. Earlier batches escaped it only because concurrent lanes always happened to run different arms.</li>
+<li><strong><code>report.py</code> folded hardware together.</strong> The grouping key ignored hardware, so the same configuration measured on two machines counted as repeats of one cell. The stack is now part of the key and a rerun on another host forms its own group.</li>
+<li><strong><code>buckets.py</code> could not evaluate on some accelerators.</strong> <code>val()</code> fuses conv+bn inside an inference-mode context and some builds refuse to view an inference tensor. Fusing beforehand leaves that path nothing to do; the arithmetic is unchanged.</li>
 </ul>
 <h2 id="feedback-and-iteration">Feedback and iteration<a class="headerlink" href="#feedback-and-iteration" title="Permanent link">&para;</a></h2>
 <p>Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (<code>scripts/buckets.py</code>, source credited in the docs); <code>--patience</code> and <code>IMGSZ</code> exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the <code>OptimizedMOE</code> tracing guard fix was merged into YOLO-Master (#241).</p>
-<h2 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h2>
+<h2 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/report.py</code> now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.</li>
 </ul>

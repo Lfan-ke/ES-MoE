@@ -580,7 +580,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        反馈与迭代
+        修复
       
     </span>
   </a>
@@ -589,6 +589,17 @@
       
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        反馈与迭代
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         修复
@@ -610,7 +621,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         新增
@@ -621,7 +632,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         更早的小版本
@@ -632,7 +643,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -691,7 +702,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        反馈与迭代
+        修复
       
     </span>
   </a>
@@ -700,6 +711,17 @@
       
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        反馈与迭代
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         修复
@@ -721,7 +743,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         新增
@@ -732,7 +754,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         更早的小版本
@@ -743,7 +765,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -774,18 +796,21 @@
 
 
 <h1 id="_1">发布说明<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>当前版本 <strong>0.1.4</strong>。</p>
+<p>当前版本 <strong>0.1.5</strong>。</p>
 <h2 id="_2">新增<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>支持 DDP。</strong> ultralytics 用一份生成的文件启动多卡 worker，文件里只导入训练器所在的模块，worker 进程从未导入 esmoe，建模时报 <code>KeyError: 'ESMoE'</code>。现在 <code>attach_aux_loss</code> 让 <code>model.train()</code> 选用一个住在 <code>esmoe.trainer</code> 里的训练器子类：worker 一导入它就注册块、从环境变量恢复辅助损失权重、给 <code>BaseModel.loss</code> 打补丁。<code>scripts/verify.py</code> 新增两项检查：真实的 worker 文件在干净解释器里训一轮；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 后一致。边界：稀疏分发需要 <code>find_unused_parameters=True</code>，<code>compile=True</code> 会把它关掉，该组合不可用。</li>
-<li><strong><code>graft(..., rewire=True)</code>。</strong> 重编号只移动引用，不改变引用对象，因此 head 里按序号点名旧主干末层的分支（YOLOv8 的 P5 侧向 <code>[-1, 9] Concat</code>）插入之后仍读 SPPF，块只经自顶向下路径间接影响 P5。<code>rewire</code> 让所有下游改指块。默认关闭，保持既有记录可比；两种接法的同预算对照尚未完成。</li>
-<li><code>scripts/train.py --patience</code>（默认 0，禁用早停）与 <code>sweep.sh</code> 的 <code>IMGSZ</code> / <code>PATIENCE</code> / <code>ARMS</code>，用于按仓库复现协议跑（imgsz 800、120 epoch）。</li>
-<li><code>scripts/buckets.py</code>：COCO 式面积分档（maxDets 500）；<code>scripts/routing.py</code>：验证集上的专家使用分布与路由是否随目标尺度变化。</li>
-<li>两项半精度测试：bf16 autocast 下辅助项有限非零、参数不被拖成半精度；半精度门控重归一后仍和为 1。</li>
+<li><strong><code>gshard_balance</code>：上游 <code>ES_MOE</code> 优化的那个平衡项。</strong> YOLO-Master 的 <code>ES_MOE</code> 用的是 GShard 式 <code>N · Σ usage²</code>（<code>balance_loss_coeff = 1.0</code>），本包默认是 Switch 式 <code>E · Σ p̄ᵢfᵢ</code>（<code>weight = 0.01</code>）。两者现在都可选：<code>ESMoE(..., balance=esmoe.gshard_balance)</code>，或 <code>scripts/train.py --balance gshard</code>。在一条真实路由记录上，上游那套对平均概率的平衡梯度是本包默认的 31 倍——这个差距比公式之别更能解释观察到的路由行为，对照实验的判据已先于结果登记在判读线页。</li>
 </ul>
-<h2 id="_3">反馈与迭代<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="_3">修复<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>路由统计混入了 warmup 前向。</strong> 在加速卡上 ultralytics 会在第一个真实批次前跑一次空前向，路由钩子把那一行也收了进去——549 行对 548 张图。CPU 上不触发，所以此前一直没暴露。</li>
+<li><strong>同臂并行训练互相截断配置。</strong> 嫁接出的 <code>configs/*.yaml</code> 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 <code>KeyError: 'backbone'</code>。此前没遇到，只是因为并行的两条车道恰好总是不同臂。</li>
+<li><strong><code>report.py</code> 跨硬件折算。</strong> 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈进入键，换机重跑各成一组。</li>
+<li><strong><code>buckets.py</code> 在部分加速卡上无法评测。</strong> <code>val()</code> 在推理模式里融合 conv+bn，有的构建拒绝对 inference tensor 取 view。现在提前融合，数值不变。</li>
+</ul>
+<h2 id="_4">反馈与迭代<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>0.1.4 的多数条目来自首轮使用反馈：评测口径改用 COCO 式 32²/96² 分档与 maxDets=500（<code>scripts/buckets.py</code>，口径来源已在文档注明）；<code>--patience</code> 与 <code>IMGSZ</code> 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度有限值测试对应「先检查 FP32/AMP 下损失与梯度是否一致有限」的要求。上游侧的反馈同样闭环：<code>OptimizedMOE</code> 追踪守卫的修复已被 YOLO-Master 合并（#241）。</p>
-<h2 id="_4">修复<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h2 id="_5">修复<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/report.py</code> 的分组键补进 imgsz。此前同 epoch 不同分辨率的记录会被平均进同一行，正是文档承诺不会发生的事。</li>
 </ul>
@@ -796,14 +821,14 @@
 <p>用 0.1.0 至 0.1.2 导出过模型的，请重新导出。</p>
 </li>
 </ul>
-<h2 id="_5">新增<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_6">新增<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>scripts/verify.py</code>：单测做不到的正确性检查——真实训练一轮并确认辅助项为正、<code>weight=0</code> 时损失表不变、checkpoint 往返、断点续训、多个块一起训练、<code>val</code> 与 <code>predict</code>，以及 ONNX 导出。</li>
 <li>一项回归测试：导出一个路由随输入符号变化的块，把两条分支都与 PyTorch 对照。</li>
 </ul>
-<h2 id="_6">更早的小版本<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h2 id="_7">更早的小版本<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>0.1.0 是首个版本，给出 <code>inject_esmoe</code>、<code>graft</code>、<code>attach_aux_loss</code>、<code>collect_aux_loss</code> 四个入口，并附选型与三 seed 证据。0.1.1 修好 <code>equip()</code> 不带 <code>out</code> 时把配置当字典交给 <code>YOLO()</code> 的问题，补上 Colab 快速上手。0.1.2 修好 8.4.13x 之后 <code>loss_names</code> 在 <code>on_train_start</code> 时为空、导致训练日志表头错位的问题，并把包从 <code>src/</code> 移到仓库根目录。</p>
-<h2 id="_7">安装<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h2 id="_8">安装<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <pre><code>pip install esmoe
 </code></pre>
 
