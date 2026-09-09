@@ -136,3 +136,25 @@ The real gap is the coefficient. Upstream's `ES_MOE` carries `balance_loss_coeff
 The two predictions keep their content but change their reason: the collapse is unlikely to lift on a change of objective because this package applies the balancing term at one hundredth of upstream's weight, not because both objectives are blind. **A third prediction follows**:
 
 3. **Raising the weight to upstream's 1.0 moves the routing**: under `--aux-weight 1.0` the dominant expert's top-1 share falls relative to 0.01, and by more than switching the objective does. If raising the weight moves nothing either, the balancing term is not the culprit and the router is.
+
+### Fourth pre-registration (2026-09-09, declared before any `master` result)
+
+Reading the paper itself (arXiv 2512.23273, section 3.5) shows that **the balancing term the paper specifies is not the one the released code implements**. Paper equation (13):
+
+$$ \mathcal{L}_{LB} = rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - rac{1}{E}ight)^2 $$
+
+where μᵢ averages **Ω_train** - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's `ES_MOE` instead applies the GShard form `N·Σusage²` to the **raw router probabilities**. On one pair of inputs:
+
+| objective | balanced dispatch | collapsed dispatch | separates |
+|:--:|:--:|:--:|:--:|
+| `switch_balance` (this package's default) | 2.00000 | 2.00000 | no |
+| `gshard_balance` (upstream code) | 1.00000 | 1.00000 | no |
+| `master_balance` (paper eq. 13) | 0.00000 | 0.00383 | **yes** |
+
+Both inputs carry uniform mean probabilities and differ only in whether the top-k dispatch collapses onto one expert. The first two read the probabilities and cannot tell them apart; the paper's reads the gated weights and can. **The collapse measured across seven generations sits inside the blind spot of the first two.**
+
+`master_balance` is implemented and `--balance master` selects it. **Unknown**: the `master` arms of v5n and v10n, two seeds each. The prediction:
+
+4. **The paper's term measurably lowers the dominant expert's top-1 share**: the `master` arm's dominant share falls below the same backbone's `switch` arm, and by more than the `gshard` arm does. This is the strongest mechanistic bet of the four - if this one does not move either, the collapse is independent of the balancing term's form and the router or the graft point is responsible, and the explanations offered in the first three rounds give way.
+
+The paper states only λ_LB > 0 without a value, so the `master` arm keeps this package's default weight of 0.01 and stays separate from the coefficient comparison.
