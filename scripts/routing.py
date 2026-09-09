@@ -110,7 +110,18 @@ def route(weights: Path, data: Path, args) -> dict:
             logits = logits[-len(stems) :]
         per_block.append({"block": index} | behaviour(block, logits, scales, counts))
 
-    return {"weights": weights.name, "images": len(stems), "blocks": per_block}
+    return {"weights": run_name(weights), "images": len(stems), "blocks": per_block}
+
+
+def run_name(weights: Path) -> str:
+    """Name a checkpoint by the run it came from.
+
+    Inside a run directory every checkpoint is called `best.pt`, so the file stem names them all
+    the same and one analysis overwrites the next. The directory two levels up is the run.
+    """
+    if weights.stem in ("best", "last") and len(weights.parts) > 2:
+        return f"{weights.parts[-3]}-{weights.stem}"
+    return weights.stem
 
 
 def normalise(record: dict) -> dict:
@@ -175,10 +186,10 @@ def main() -> int:
         return 0
     for weights in args.weights:
         record = route(weights, args.data, args)
-        (OUT / f"{weights.stem}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+        (OUT / f"{run_name(weights)}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
         for b in record["blocks"]:
             print(
-                f"{weights.stem} block {b['block']}: usage {b['usage']} dead {b['dead_experts']} "
+                f"{run_name(weights)} block {b['block']}: usage {b['usage']} dead {b['dead_experts']} "
                 f"entropy {b['prob_entropy_mean']}/{b['prob_entropy_max']} "
                 f"top-2 sets {b['unique_top2_sets']} scale-corr {b['prob_vs_scale_corr']}",
                 flush=True,
