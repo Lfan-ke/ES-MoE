@@ -18,6 +18,7 @@ window.ESMOE_EFFECT = {
     {backbone: "yolo26n", arm: "rewire", "mAP50": {mean: -0.0005, seeds: [-0.0033, -0.0008, 0.0026], wins: 1}, "mAP50-95": {mean: 0.0008, seeds: [0.0006, -0.0001, 0.0019], wins: 2}}
   ],
   alignment: [
-    {backbone: "yolov5n", arm: "e4k2w0.01-gshard", mean: 0.0018, ci: "[-0.0409, +0.0445]", seeds: [0.0051, -0.0016], wins: 1}
+    {backbone: "yolov5n", arm: "e4k2w0.01-gshard", mean: 0.0018, ci: "[-0.0409, +0.0445]", seeds: [0.0051, -0.0016], wins: 1},
+    {backbone: "yolov5n", arm: "e4k2w0.01-norm", mean: 0.0027, ci: "[-0.0235, +0.0288]", seeds: [0.0006, 0.0047], wins: 2}
   ]
 };
