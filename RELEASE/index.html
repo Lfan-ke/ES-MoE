@@ -799,14 +799,21 @@
 <p>当前版本 <strong>0.1.5</strong>。</p>
 <h2 id="_2">新增<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>gshard_balance</code>：上游 <code>ES_MOE</code> 优化的那个平衡项。</strong> YOLO-Master 的 <code>ES_MOE</code> 用的是 GShard 式 <code>N · Σ usage²</code>（<code>balance_loss_coeff = 1.0</code>），本包默认是 Switch 式 <code>E · Σ p̄ᵢfᵢ</code>（<code>weight = 0.01</code>）。两者现在都可选：<code>ESMoE(..., balance=esmoe.gshard_balance)</code>，或 <code>scripts/train.py --balance gshard</code>。在一条真实路由记录上，上游那套对平均概率的平衡梯度是本包默认的 31 倍——这个差距比公式之别更能解释观察到的路由行为，对照实验的判据已先于结果登记在判读线页。</li>
+<li><strong>与上游 <code>ES_MOE</code> 的参数对齐。</strong> 块现在接上游构造函数的全部参数：<code>out_channels</code>、<code>top_k=None</code>（等于用全部专家）、<code>sparse_inference</code>（上游的 <code>use_sparse_inference</code>）、<code>dynamic_threshold</code>（上游 0.4，本包默认 0.0 不剪——<code>results/</code> 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 <code>max_kernel_size</code> 截断，剪枝过的 checkpoint 因此装得回去；<code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel_size</code> 在构造时就按同样的边界校验。</li>
+<li><strong>四个平衡目标。</strong> <code>gshard_balance</code>（默认，对齐上游：读 top-k 掩码重归一后的门控）、<code>switch_balance</code>、<code>master_balance</code>（论文式 13，与前者只差仿射 <code>(L−1)/E²</code>）、<code>gshard_probs_balance</code>（读原始概率，用来隔离「读哪个张量」这一个变量）。命令行 <code>--balance {switch,gshard,master,gshard_probs}</code>。</li>
+<li><strong>上游的块布局与块内结构。</strong> <code>graft(at="backbone_stages")</code> 在主干每个 stage 后各放一块，七代主干均得四块（stage 边界由下采样层反推）；<code>out_norm</code> 补上加权求和后的 <code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）；<code>dense_training</code> 让训练期跑满专家，未选的权重为 0 但归一化统计量继续更新。三者默认关着，以保 <code>results/</code> 里既有的运行可原样复现。</li>
+<li><strong><code>scripts/blockspec.py</code></strong>：从任一 checkpoint 读回当时真正生效的块设置。<strong><code>scripts/backfill.py</code></strong>：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，<code>--settings</code> 按权重改写记录并把改动写进记录本身。<strong><code>scripts/queue.sh</code></strong> 入库，与 <code>scripts/train.py</code> 的运行命名由测试对表。</li>
+<li><code>scripts/report.py</code> 的配对差值附 95% 置信区间；<code>scripts/routing.py</code> 逐块分析而非只看第一块。</li>
 </ul>
 <h2 id="_3">修复<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
+<li><strong>块设置进不了训练的那个模型。</strong> 训练器照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的目标函数与开关随那个被丢弃的实例一起消失，不报错也不留痕——<code>--balance</code>、<code>--out-norm</code>、<code>--dense-training</code> 因此全部失效，而记录照命令行写。现在 <code>graft()</code> / <code>equip()</code> 把设置写进配置，<code>ESMoE</code> 接受 options 映射并按名解析目标函数；<code>scripts/train.py</code> 记录的块配置从训练完的模型上读，请求与实际不符即在开跑前退出。<strong>用 0.1.4 的 <code>equip()</code> + <code>configure()</code> 设过这些开关的，训练出来的是构造函数默认值，请按 <code>scripts/blockspec.py</code> 复核。</strong></li>
+<li><strong><code>dynamic_threshold</code> 无法追踪。</strong> 掩码原先用 <code>scatter_</code> 塞一个 Python 布尔量，追踪器没有对应的算子，<code>torch.jit.trace</code> 与建立在它之上的导出全部失败。改成张量运算，逐输入重算。</li>
 <li><strong>路由统计混入了 warmup 前向。</strong> 在加速卡上 ultralytics 会在第一个真实批次前跑一次空前向，路由钩子把那一行也收了进去——549 行对 548 张图。CPU 上不触发，所以此前一直没暴露。</li>
-<li><strong>同臂并行训练互相截断配置。</strong> 嫁接出的 <code>configs/*.yaml</code> 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 <code>KeyError: 'backbone'</code>。此前没遇到，只是因为并行的两条车道恰好总是不同臂。</li>
-<li><strong><code>report.py</code> 跨硬件折算。</strong> 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈进入键，换机重跑各成一组。</li>
+<li><strong>同臂并行训练互相截断配置。</strong> 嫁接出的 <code>configs/*.yaml</code> 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 <code>KeyError: 'backbone'</code>。</li>
+<li><strong><code>report.py</code> 跨硬件折算。</strong> 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈与块配置都进入键。</li>
 <li><strong><code>buckets.py</code> 在部分加速卡上无法评测。</strong> <code>val()</code> 在推理模式里融合 conv+bn，有的构建拒绝对 inference tensor 取 view。现在提前融合，数值不变。</li>
+<li><strong>路由器 logits 未钳位。</strong> 混合精度下跑飞的 logit 到 softmax 已是 inf，整个门控变 NaN。现按上游做法夹到 <code>[-30, 30]</code> 后走 fp32 softmax。</li>
 </ul>
 <h2 id="_4">反馈与迭代<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>0.1.4 的多数条目来自首轮使用反馈：评测口径改用 COCO 式 32²/96² 分档与 maxDets=500（<code>scripts/buckets.py</code>，口径来源已在文档注明）；<code>--patience</code> 与 <code>IMGSZ</code> 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度有限值测试对应「先检查 FP32/AMP 下损失与梯度是否一致有限」的要求。上游侧的反馈同样闭环：<code>OptimizedMOE</code> 追踪守卫的修复已被 YOLO-Master 合并（#241）。</p>
