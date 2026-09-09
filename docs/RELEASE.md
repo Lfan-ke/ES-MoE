@@ -4,14 +4,21 @@
 
 ## 新增
 
-- **`gshard_balance`：上游 `ES_MOE` 优化的那个平衡项。** YOLO-Master 的 `ES_MOE` 用的是 GShard 式 `N · Σ usage²`（`balance_loss_coeff = 1.0`），本包默认是 Switch 式 `E · Σ p̄ᵢfᵢ`（`weight = 0.01`）。两者现在都可选：`ESMoE(..., balance=esmoe.gshard_balance)`，或 `scripts/train.py --balance gshard`。在一条真实路由记录上，上游那套对平均概率的平衡梯度是本包默认的 31 倍——这个差距比公式之别更能解释观察到的路由行为，对照实验的判据已先于结果登记在判读线页。
+- **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的 checkpoint 因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。
+- **四个平衡目标。** `gshard_balance`（默认，对齐上游：读 top-k 掩码重归一后的门控）、`switch_balance`、`master_balance`（论文式 13，与前者只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
+- **上游的块布局与块内结构。** `graft(at="backbone_stages")` 在主干每个 stage 后各放一块，七代主干均得四块（stage 边界由下采样层反推）；`out_norm` 补上加权求和后的 `BatchNorm + SiLU`（论文式 2 的 `Norm`）；`dense_training` 让训练期跑满专家，未选的权重为 0 但归一化统计量继续更新。三者默认关着，以保 `results/` 里既有的运行可原样复现。
+- **`scripts/blockspec.py`**：从任一 checkpoint 读回当时真正生效的块设置。**`scripts/backfill.py`**：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，`--settings` 按权重改写记录并把改动写进记录本身。**`scripts/queue.sh`** 入库，与 `scripts/train.py` 的运行命名由测试对表。
+- `scripts/report.py` 的配对差值附 95% 置信区间；`scripts/routing.py` 逐块分析而非只看第一块。
 
 ## 修复
 
+- **块设置进不了训练的那个模型。** 训练器照 `model.yaml` 重建模型，`YOLO(cfg)` 之后设到块上的目标函数与开关随那个被丢弃的实例一起消失，不报错也不留痕——`--balance`、`--out-norm`、`--dense-training` 因此全部失效，而记录照命令行写。现在 `graft()` / `equip()` 把设置写进配置，`ESMoE` 接受 options 映射并按名解析目标函数；`scripts/train.py` 记录的块配置从训练完的模型上读，请求与实际不符即在开跑前退出。**用 0.1.4 的 `equip()` + `configure()` 设过这些开关的，训练出来的是构造函数默认值，请按 `scripts/blockspec.py` 复核。**
+- **`dynamic_threshold` 无法追踪。** 掩码原先用 `scatter_` 塞一个 Python 布尔量，追踪器没有对应的算子，`torch.jit.trace` 与建立在它之上的导出全部失败。改成张量运算，逐输入重算。
 - **路由统计混入了 warmup 前向。** 在加速卡上 ultralytics 会在第一个真实批次前跑一次空前向，路由钩子把那一行也收了进去——549 行对 548 张图。CPU 上不触发，所以此前一直没暴露。
-- **同臂并行训练互相截断配置。** 嫁接出的 `configs/*.yaml` 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 `KeyError: 'backbone'`。此前没遇到，只是因为并行的两条车道恰好总是不同臂。
-- **`report.py` 跨硬件折算。** 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈进入键，换机重跑各成一组。
+- **同臂并行训练互相截断配置。** 嫁接出的 `configs/*.yaml` 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 `KeyError: 'backbone'`。
+- **`report.py` 跨硬件折算。** 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈与块配置都进入键。
 - **`buckets.py` 在部分加速卡上无法评测。** `val()` 在推理模式里融合 conv+bn，有的构建拒绝对 inference tensor 取 view。现在提前融合，数值不变。
+- **路由器 logits 未钳位。** 混合精度下跑飞的 logit 到 softmax 已是 inf，整个门控变 NaN。现按上游做法夹到 `[-30, 30]` 后走 fp32 softmax。
 
 ## 反馈与迭代
 
