@@ -768,6 +768,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#results-from-the-alignment-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results from the alignment arms
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1056,6 +1067,17 @@
     <span class="md-ellipsis">
       
         Correction (late 2026-09-09, still before any structural-arm result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#results-from-the-alignment-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results from the alignment arms
       
     </span>
   </a>
@@ -1386,6 +1408,9 @@ ight)^2 \]</div>
 <p><strong>The fix, and the audit.</strong> <code>graft()</code> now writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. <code>scripts/train.py</code> records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; <code>tests/test_ultralytics.py</code> trains a model to hold that path.</p>
 <p>The audit does not rely on memory: <code>scripts/blockspec.py</code> reads each checkpoint's block settings on the host that holds it, and <code>scripts/backfill.py --settings</code> rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and <strong>none needed correcting</strong> — the published data is sound; what was wrong were the new arms, none of them merged yet.</p>
 <p><strong>The general lesson</strong>: a <code>--flag</code> in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.</p>
+<h3 id="results-from-the-alignment-arms">Results from the alignment arms<a class="headerlink" href="#results-from-the-alignment-arms" title="Permanent link">&para;</a></h3>
+<p>Filled in as the runs land, from the same numbers as <code>results/summary.md</code>.</p>
+<div id="esmoe-alignment"></div>
 
 
 

@@ -16,5 +16,8 @@ window.ESMOE_EFFECT = {
     {backbone: "yolo12n", arm: "rewire", "mAP50": {mean: 0.0001, seeds: [0.0012, -0.0028, 0.0019], wins: 2}, "mAP50-95": {mean: 0.0006, seeds: [0.0011, -0.0010, 0.0016], wins: 2}},
     {backbone: "yolo26n", arm: "default graft", "mAP50": {mean: -0.0034, seeds: [-0.0057, -0.0035, -0.0010], wins: 0}, "mAP50-95": {mean: -0.0022, seeds: [-0.0022, -0.0031, -0.0011], wins: 0}},
     {backbone: "yolo26n", arm: "rewire", "mAP50": {mean: -0.0005, seeds: [-0.0033, -0.0008, 0.0026], wins: 1}, "mAP50-95": {mean: 0.0008, seeds: [0.0006, -0.0001, 0.0019], wins: 2}}
+  ],
+  alignment: [
+
   ]
 };

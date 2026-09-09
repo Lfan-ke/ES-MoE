@@ -768,6 +768,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        对照臂结果
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1056,6 +1067,17 @@
     <span class="md-ellipsis">
       
         更正（2026-09-09 深夜，仍在任何结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        对照臂结果
       
     </span>
   </a>
@@ -1386,6 +1408,9 @@ ight)^2 \]</div>
 <p><strong>修法与复核。</strong> <code>graft()</code> 把设置写进配置文件（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数——重建多少次都在。<code>scripts/train.py</code> 改为从训练完的模型上读块配置写进记录，请求与实际不符即在开跑前退出；<code>tests/test_ultralytics.py</code> 真训一轮守住这条路径。</p>
 <p>复核不靠回忆：<code>scripts/blockspec.py</code> 在存权重的机器上读出每个 checkpoint 的块设置，<code>scripts/backfill.py --settings</code> 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，<strong>0 条需要更正</strong>——已发布的数据是准的，错的只是尚未并入的新臂。</p>
 <p><strong>一般化的一条</strong>：记录里写着 <code>--flag</code>，不等于 <code>--flag</code> 进了模型。记录要从训练完的模型上读，不要复述命令行。</p>
+<h3 id="_11">对照臂结果<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>结果产出后自动填入，数字与 <code>results/summary.md</code> 同源。</p>
+<div id="esmoe-alignment"></div>
 
 
 
