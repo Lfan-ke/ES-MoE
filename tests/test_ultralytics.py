@@ -302,3 +302,49 @@ def test_stage_grafted_model_builds_and_trains():
     model.train()
     model(torch.randn(1, 3, 128, 128))
     assert collect_aux_loss(model).item() > 0
+
+
+def test_block_settings_survive_the_trainers_rebuild(tmp_path):
+    """The trainer rebuilds the model from the yaml, so settings have to live in the yaml.
+
+    Applying them to the instance handed to `YOLO(...)` is discarded without a word: a run asking
+    for the paper's objective trained the default one, and a run asking for the output norm trained
+    without it while its record claimed otherwise.
+    """
+    from torch import nn
+    from ultralytics import YOLO
+    from ultralytics.utils.torch_utils import get_num_params
+
+    import esmoe
+
+    inject_esmoe()
+    cfg = tmp_path / "settings.yaml"
+    graft("yolov8n.yaml", out=str(cfg), balance="master", out_norm=True, dense_training=True)
+    model = YOLO(str(cfg))
+    attach_aux_loss(model, weight=0.01)
+
+    trained = []
+    model.add_callback("on_train_start", lambda t: trained.extend(blocks(t.model)))
+    model.train(
+        data="coco8.yaml",
+        epochs=1,
+        imgsz=96,
+        batch=2,
+        workers=0,
+        device="cpu",
+        pretrained=False,
+        plots=False,
+        val=False,
+        project=str(tmp_path),
+        name="run",
+        exist_ok=True,
+        verbose=False,
+    )
+
+    assert trained, "no ESMoE block reached the trainer"
+    for block in trained:
+        assert block.balance is esmoe.master_balance
+        assert block.dense_training is True
+        assert not isinstance(block.norm, nn.Identity)
+    # The normalisation must exist before the optimiser is built, or its parameters never train.
+    assert get_num_params(model.model) == get_num_params(YOLO(str(cfg)).model)

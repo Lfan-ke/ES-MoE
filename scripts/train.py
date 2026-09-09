@@ -69,6 +69,24 @@ def dataset_facts(data: str) -> dict:
     return {"name": base.name or str(base), "classes": len(spec.get("names", {})), "splits": splits}
 
 
+def block_facts(model) -> dict:
+    """The block settings the trained model actually has, read off it rather than off the flags.
+
+    A record that repeats the request cannot catch a setting that failed to reach the model, which
+    is how three arms trained the default objective while their records named another.
+    """
+    found = list(esmoe.blocks(model.model))
+    if not found:
+        return {"balance": "none", "out_norm": False, "dense_training": False, "blocks": 0}
+    first = found[0]
+    return {
+        "balance": first.balance.__name__.removesuffix("_balance"),
+        "out_norm": bool(first.out_norm),
+        "dense_training": bool(first.dense_training),
+        "blocks": len(found),
+    }
+
+
 def build(args):
     if not args.esmoe:
         return YOLO(args.base), args.base
@@ -87,21 +105,14 @@ def build(args):
         num_experts=args.num_experts,
         top_k=args.top_k,
         rewire=args.rewire,
+        # In the config, not on the built blocks: the trainer rebuilds the model from this file and
+        # drops whatever was set on the instance. Runs that set them afterwards trained the
+        # defaults while their records claimed otherwise.
+        balance=args.balance,
+        out_norm=args.out_norm,
+        dense_training=args.dense_training,
     )
     model = YOLO(str(cfg))
-    # The objective is a callable, so it cannot travel through the YAML args; set it on the built
-    # blocks instead. `gshard` is the objective YOLO-Master's own ES_MOE optimises.
-    # Set on every run, not only the non-default ones: the 75 records already in results/ were
-    # measured with the Switch term, and they stay reproducible only if the arm is stated outright.
-    objective = {
-        "switch": esmoe.switch_balance,
-        "gshard": esmoe.gshard_balance,
-        "master": esmoe.master_balance,
-        "gshard_probs": esmoe.gshard_probs_balance,
-    }[args.balance]
-    for block in esmoe.blocks(model.model):
-        block.balance = objective
-        block.configure(out_norm=args.out_norm, dense_training=args.dense_training)
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
 
@@ -159,6 +170,14 @@ def main():
     args = build_parser().parse_args()
 
     model, cfg = build(args)
+    facts = block_facts(model)
+    # Fail before burning a card rather than record an arm the model does not have.
+    if args.esmoe and (facts["balance"], facts["out_norm"], facts["dense_training"]) != (
+        args.balance,
+        args.out_norm,
+        args.dense_training,
+    ):
+        raise SystemExit(f"block settings did not reach the model: asked {vars(args)}, got {facts}")
     arch = architecture(args)
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
@@ -194,6 +213,8 @@ def main():
         metrics = {k: float(v) for k, v in trainer.metrics.items() if isinstance(v, (int, float))}
 
     weights = ROOT / "runs" / name / "weights" / "best.pt"
+    # Re-read after training: `model.model` is now the checkpoint that was actually saved.
+    facts = block_facts(model)
     record = {
         "experiment_id": experiment_id,
         "git_ref": {
@@ -211,10 +232,7 @@ def main():
             "top_k": args.top_k,
             "rewire": bool(args.rewire and args.esmoe),
             "aux_weight": args.aux_weight if args.esmoe else 0.0,
-            "balance": args.balance if args.esmoe else "none",
-            "out_norm": bool(args.out_norm and args.esmoe),
-            "dense_training": bool(args.dense_training and args.esmoe),
-            "blocks": sum(1 for _ in esmoe.blocks(model.model)) if args.esmoe else 0,
+            **facts,
         },
         "dataset": {"yaml": args.data, "fraction": args.fraction, **dataset_facts(args.data)},
         "hardware": {

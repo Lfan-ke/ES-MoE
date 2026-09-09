@@ -59,6 +59,7 @@ def graft(
     num_experts: int = 4,
     top_k: int = 2,
     rewire: bool = False,
+    **options,
 ) -> dict:
     """Insert ESMoE blocks after the given layers and renumber every later reference.
 
@@ -75,9 +76,17 @@ def graft(
         rewire: Also point every later consumer of an insertion layer at the block that now
             follows it. Off, a head branch that names the old backbone end by index keeps
             reading the pre-block feature (YOLOv8's P5 lateral does exactly that).
+        **options: Block settings to write into the config - ``balance``, ``out_norm``,
+            ``dense_training``. They belong in the config because the trainer rebuilds the
+            model from it, discarding anything set on the instance beforehand.
     """
     from ultralytics.nn.tasks import yaml_model_load
 
+    from .module import SETTINGS
+
+    if unknown := set(options) - set(SETTINGS):
+        raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {SETTINGS}")
+    args = [num_experts, top_k] + ([None, dict(options)] if options else [])
     d = dict(yaml_model_load(base))
     d.pop("yaml_file", None)
     backbone, head = list(d["backbone"]), list(d["head"])
@@ -90,7 +99,7 @@ def graft(
         moved[index] = len(grafted)
         grafted.append(list(layer))
         if index in spots:
-            grafted.append([-1, 1, "ESMoE", [num_experts, top_k]])
+            grafted.append([-1, 1, "ESMoE", list(args)])
             backbone_len += index < len(backbone)
 
     targets = moved | {s: moved[s] + 1 for s in spots} if rewire else moved

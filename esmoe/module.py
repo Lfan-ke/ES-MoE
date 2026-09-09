@@ -87,6 +87,17 @@ def gshard_probs_balance(probs: Tensor, gate: Tensor) -> Tensor:
     return probs.shape[1] * (usage * usage).sum()
 
 
+# The block settings a model.yaml can carry, in the order the constructor takes them.
+SETTINGS = ("balance", "out_norm", "dense_training")
+
+BALANCES: dict[str, BalanceFn] = {
+    "switch": switch_balance,
+    "gshard": gshard_balance,
+    "master": master_balance,
+    "gshard_probs": gshard_probs_balance,
+}
+
+
 class ESMoE(nn.Module):
     """Channel-preserving mixture-of-experts block.
 
@@ -102,14 +113,17 @@ class ESMoE(nn.Module):
         max_kernel_size: Cap for the generated odd kernels.
         expert_kernel_sizes: Explicit per-expert kernels, overriding the generated ones.
         expert: Factory ``(c1, c2, k) -> Module`` for a custom expert branch.
-        balance: Auxiliary loss ``(probs, gate) -> scalar``. Defaults to the objective
-            YOLO-Master's released ES_MOE optimises; `master_balance` is the one its
-            paper specifies, and `switch_balance` the Switch-Transformer form.
+        balance: Auxiliary loss ``(probs, gate) -> scalar``, or a name from `BALANCES`. Defaults
+            to the objective YOLO-Master's released ES_MOE optimises; `master_balance` is the
+            one its paper specifies, and `switch_balance` the Switch-Transformer form.
         out_norm: Normalise the mixed output, as upstream and the paper's equation 2 do.
             Off by default so the runs already in ``results/`` stay reproducible.
         dense_training: Run every expert while training, weighting the unrouted ones by zero.
             That is what upstream does, and it keeps an unrouted expert's normalisation
             statistics moving. Off by default for the same reason.
+        options: The same settings as a mapping, which is how a model.yaml carries them. The
+            trainer rebuilds the model from that yaml, so a setting applied to the instance
+            afterwards is discarded; one written into the config survives every rebuild.
     """
 
     def __init__(
@@ -117,16 +131,21 @@ class ESMoE(nn.Module):
         num_experts: int = 4,
         top_k: int = 2,
         channels: int | None = None,
+        options: dict | None = None,
         *,
         reduction: int = 8,
         max_kernel_size: int = 15,
         expert_kernel_sizes: Sequence[int] | None = None,
         expert: ExpertFactory = DWExpert,
-        balance: BalanceFn = gshard_balance,
+        balance: BalanceFn | str = gshard_balance,
         out_norm: bool = False,
         dense_training: bool = False,
     ):
         super().__init__()
+        if unknown := set(options or {}) - set(SETTINGS):
+            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {SETTINGS}")
+        settings = dict(zip(SETTINGS, (balance, out_norm, dense_training), strict=True)) | (options or {})
+        balance, out_norm, dense_training = (settings[key] for key in SETTINGS)
         if not 1 <= top_k <= num_experts:
             raise ValueError(f"top_k must be in [1, {num_experts}], got {top_k}")
         kernels = list(expert_kernel_sizes) if expert_kernel_sizes else odd_kernels(num_experts, max_kernel_size)
@@ -134,7 +153,8 @@ class ESMoE(nn.Module):
             raise ValueError(f"expert_kernel_sizes needs {num_experts} entries, got {len(kernels)}")
         self.num_experts, self.top_k, self.expert_kernel_sizes = num_experts, top_k, kernels
         self.reduction, self.channels = reduction, None
-        self.expert_factory, self.balance = expert, balance
+        self.expert_factory = expert
+        self.balance = BALANCES[balance] if isinstance(balance, str) else balance
         self.out_norm, self.dense_training = out_norm, dense_training
         self.experts, self.router = nn.ModuleList(), nn.Sequential()
         self.norm: nn.Module = nn.Identity()
@@ -206,7 +226,8 @@ class ESMoE(nn.Module):
         return (
             f"channels={self.channels}, num_experts={self.num_experts}, "
             f"top_k={self.top_k}, kernels={self.expert_kernel_sizes}, "
-            f"out_norm={self.out_norm}, dense_training={self.dense_training}"
+            f"balance={self.balance.__name__}, out_norm={self.out_norm}, "
+            f"dense_training={self.dense_training}"
         )
 
 
