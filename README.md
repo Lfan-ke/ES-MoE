@@ -61,10 +61,12 @@ back-propagated auxiliary term shows up in `results.csv` rather than merely in a
 
 Written by hand, a grafted config layer is just:
 
-    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+    [-1, 1, ESMoE, [4, 2]]                              # num_experts, top_k
+    [-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]      # ... and settings the trainer must keep
 
 The block is channel preserving and infers its width on the first forward, which is what lets stock
-`parse_model` size it without a patch.
+`parse_model` size it without a patch. Settings belong in the config because the trainer rebuilds
+the model from it, dropping anything set on the blocks beforehand.
 
 ## Extend
 
@@ -72,9 +74,11 @@ Experts and the balancing objective are plain callables, so a variant is a few l
 
     esmoe.ESMoE(num_experts=4, top_k=2, expert=MyExpert, balance=my_balance_fn)
 
-`MyExpert(c1, c2, k) -> Module`, `my_balance_fn(probs, gate) -> scalar`. `esmoe.blocks(model)` walks
-every block in a model, and `esmoe.collect_aux_loss(model)` returns the current step's router loss
-for custom training loops.
+`MyExpert(c1, c2, k) -> Module`, `my_balance_fn(probs, gate) -> scalar`. A custom objective lives on
+the instance, so it cannot survive a trainer rebuilding the model from its config; the four that
+ship (`switch`, `gshard`, `master`, `gshard_probs`) can be named there instead. `esmoe.blocks(model)`
+walks every block in a model, `esmoe.collect_aux_loss(model)` returns the current step's router loss
+for custom training loops, and `block.spec()` reports the settings a block is holding.
 
 ## Compatibility
 
