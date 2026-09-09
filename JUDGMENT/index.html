@@ -1499,8 +1499,28 @@ ight)^2 \]</div>
 </table>
 <p>两个 checkpoint 都落在 Switch 那组的上半段或之上；seed 1 的 1.898 是全部 48 个 checkpoint 里最集中的一个。seed 0 出现了本课题<strong>第一个死专家</strong>（用量 0.0091），此前 46 个 checkpoint 一个都没有。同时概率熵反而更高（97%–98% 对 90%–97%）——<strong>路由概率更平，分派却更集中</strong>，正是这条线一直在追的那个背离。</p>
 <p>配对精度是 +0.0018（两 seed，1/2 胜），落在同配置重复运行的离散度之内，说明不了什么。</p>
-<p><strong>必须写明的混淆项</strong>：两个目标在同一个 <code>weight=0.01</code> 下的绝对尺度不同——均匀分派时 Switch 取 2.0、GShard 取 1.0，因此这一臂承受的平衡压力大约是对照臂的一半。所以本轮能下的结论是「<strong>在 weight=0.01 这一档，读门控没有解除塌缩</strong>」，不是「读门控的目标做不到」。要分清这两件事，需要按项的尺度对齐权重再跑一轮，本轮没有跑。</p>
-<p><strong>预登记的第四条预测不成立，照实记录。</strong> 后续该做的是权重对齐的对照，而不是换目标。</p>
+<p><strong>混淆项曾被我写反，此处更正。</strong> 起初写的是「两项在同一权重下尺度差一倍，这一臂只承受一半压力」——那是拿两项在最优点的<strong>取值</strong>去比，而取值说明不了压力。真正决定一个权重买到多少的是该项加在路由 logits 上的<strong>梯度</strong>。按各 checkpoint 实际收敛到的平均路由概率量（<code>scripts/pressure.py</code>，结果在 <code>results/pressure.md</code>）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">目标</th>
+<th style="text-align: center;">相对 Switch 的梯度（v5n 各 checkpoint）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>gshard</code>（读门控）</td>
+<td style="text-align: center;">0.59× – 1.48×</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master</code>（论文式 13）</td>
+<td style="text-align: center;">约 1/11 – 1/134，即 <code>1/E²</code> 那个因子</td>
+</tr>
+</tbody>
+</table>
+<p><strong>同一个 weight=0.01 下，读门控的项与对照臂受力同量级</strong>，并非只有一半。「压力不够」这条退路因此不成立，本轮的判定反而更硬：<strong>在与对照臂相当的平衡压力下，读门控没有解除塌缩，分派反而更集中。</strong></p>
+<p>仍需说明的是样本量：两个 seed 对四十六个，单一主干对七代。</p>
+<p><strong>预登记的第四条预测不成立，照实记录。</strong> <code>master</code> 那一档确实受力低一个数量级，要单独回答「论文那个尺度够不够」，需要把权重按 <code>1/E²</code> 抬上去再跑一轮，本轮没有跑。</p>
 <h2 id="2026-09-09_2">同配置重复运行的离散度（2026-09-09，非计划所得）<a class="headerlink" href="#2026-09-09_2" title="Permanent link">&para;</a></h2>
 <p>上一节那六轮误标的运行，实际训练的与默认臂完全相同——同配置、同 seed、同一张卡上的另一次运行。它们因此不是重复样本，而是一把直接的尺子：<strong>同一个配置跑两遍，指标能差多少。</strong></p>
 <p><code>results/summary.md</code> 末尾的表由 <code>scripts/report.py</code> 逐条算出：</p>
