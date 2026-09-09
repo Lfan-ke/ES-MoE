@@ -70,9 +70,11 @@ def build(args):
         "switch": esmoe.switch_balance,
         "gshard": esmoe.gshard_balance,
         "master": esmoe.master_balance,
+        "gshard_probs": esmoe.gshard_probs_balance,
     }[args.balance]
     for block in esmoe.blocks(model.model):
         block.balance = objective
+        block.configure(out_norm=args.out_norm, dense_training=args.dense_training)
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
 
@@ -85,7 +87,9 @@ def main():
     p.add_argument("--num-experts", type=int, default=4)
     p.add_argument("--top-k", type=int, default=2)
     p.add_argument("--rewire", action="store_true")
-    p.add_argument("--balance", choices=("switch", "gshard", "master"), default="switch")
+    p.add_argument("--balance", choices=("switch", "gshard", "master", "gshard_probs"), default="switch")
+    p.add_argument("--out-norm", action="store_true", help="normalise the mixed output, as upstream does")
+    p.add_argument("--dense-training", action="store_true", help="run every expert while training")
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)
@@ -155,6 +159,9 @@ def main():
             "rewire": bool(args.rewire and args.esmoe),
             "aux_weight": args.aux_weight if args.esmoe else 0.0,
             "balance": args.balance if args.esmoe else "none",
+            "out_norm": bool(args.out_norm and args.esmoe),
+            "dense_training": bool(args.dense_training and args.esmoe),
+            "blocks": sum(1 for _ in esmoe.blocks(model.model)) if args.esmoe else 0,
         },
         "dataset": {"yaml": args.data, "fraction": args.fraction},
         "hardware": {

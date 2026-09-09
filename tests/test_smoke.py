@@ -106,20 +106,20 @@ def test_gate_still_sums_to_one_in_half_precision():
 
 
 def test_gshard_matches_the_upstream_definition():
-    """N * sum(usage^2) over normalised mean routing mass: 1.0 at uniform, N when one expert takes all."""
-    uniform = torch.full((6, 4), 0.25)
-    one_hot = torch.zeros(6, 4)
-    one_hot[:, 0] = 1.0
-    gate = torch.zeros(6, 4)
-    assert esmoe.gshard_balance(uniform, gate).item() == pytest.approx(1.0, rel=1e-5)
-    assert esmoe.gshard_balance(one_hot, gate).item() == pytest.approx(4.0, rel=1e-5)
+    """N * sum(usage^2) on the gated weights: 1.0 at uniform, N when one expert takes everything."""
+    probs = torch.full((6, 4), 0.25)
+    uniform_gate = torch.full((6, 4), 0.25)
+    one_hot_gate = torch.zeros(6, 4)
+    one_hot_gate[:, 0] = 1.0
+    assert esmoe.gshard_balance(probs, uniform_gate).item() == pytest.approx(1.0, rel=1e-5)
+    assert esmoe.gshard_balance(probs, one_hot_gate).item() == pytest.approx(4.0, rel=1e-5)
 
 
-def test_gshard_rises_as_routing_mass_concentrates():
-    gate = torch.zeros(3, 4)
+def test_gshard_rises_as_the_dispatch_concentrates():
+    probs = torch.full((3, 4), 0.25)
     flat = torch.tensor([[0.25, 0.25, 0.25, 0.25]]).repeat(3, 1)
     skewed = torch.tensor([[0.70, 0.20, 0.05, 0.05]]).repeat(3, 1)
-    assert esmoe.gshard_balance(skewed, gate) > esmoe.gshard_balance(flat, gate)
+    assert esmoe.gshard_balance(probs, skewed) > esmoe.gshard_balance(probs, flat)
 
 
 def test_switch_is_flat_where_gshard_is_not():
@@ -175,12 +175,28 @@ def _gate_of(probs, k=2):
     return gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
 
 
-def test_only_the_paper_objective_sees_a_collapsed_dispatch():
-    """Three objectives, one difference that matters.
+def test_paper_and_upstream_state_the_same_objective():
+    """Eq. 13 and the released ES_MOE differ only by an affine map.
+
+    With utilisations summing to one, ``sum((u - 1/E)^2) == sum(u^2) - 1/E``, so the paper's loss
+    is ``(gshard - 1) / E^2``: same minimiser, proportional gradients. An earlier reading of the
+    source had these as different objectives; upstream feeds its term the *gated* weights, which
+    is exactly what the paper does.
+    """
+    torch.manual_seed(0)
+    for _ in range(5):
+        probs = torch.rand(6, 4).softmax(dim=1)
+        gate = _gate_of(probs)
+        upstream = esmoe.gshard_balance(probs, gate).item()
+        assert esmoe.master_balance(probs, gate).item() == pytest.approx((upstream - 1.0) / 4**2, rel=1e-5)
+
+
+def test_reading_the_gate_is_what_sees_a_collapsed_dispatch():
+    """The variable that matters is which tensor an objective reads, not the formula family.
 
     Both arms below carry uniform mean probabilities; in `collapsed` one expert is in every
-    sample's top-k. The Switch and GShard terms read the probabilities and cannot tell the two
-    apart. The paper's term reads the gated weights and can.
+    sample's top-k. Terms reading the probabilities cannot tell them apart; terms reading the
+    gated weights can.
     """
     balanced = torch.tensor(
         [[0.40, 0.30, 0.15, 0.15], [0.30, 0.40, 0.15, 0.15], [0.15, 0.15, 0.40, 0.30], [0.15, 0.15, 0.30, 0.40]]
@@ -188,12 +204,12 @@ def test_only_the_paper_objective_sees_a_collapsed_dispatch():
     collapsed = torch.tensor([[0.25, 0.45, 0.15, 0.15], [0.25, 0.15, 0.45, 0.15], [0.25, 0.15, 0.15, 0.45]])
     assert _gate_of(collapsed)[:, 0].gt(0).all(), "expert 0 must be in every top-k for this to test anything"
 
-    for blind in (esmoe.switch_balance, esmoe.gshard_balance):
+    for blind in (esmoe.switch_balance, esmoe.gshard_probs_balance):
         assert blind(balanced, _gate_of(balanced)).item() == pytest.approx(
             blind(collapsed, _gate_of(collapsed)).item(), abs=1e-6
         )
-    seeing = esmoe.master_balance
-    assert seeing(collapsed, _gate_of(collapsed)) > seeing(balanced, _gate_of(balanced)) + 1e-4
+    for seeing in (esmoe.gshard_balance, esmoe.master_balance):
+        assert seeing(collapsed, _gate_of(collapsed)) > seeing(balanced, _gate_of(balanced)) + 1e-6
 
 
 def test_master_balance_is_zero_at_uniform_use():
@@ -205,3 +221,78 @@ def test_the_default_objective_is_the_one_upstream_ships():
     """Changing this default changes what every future run optimises, so it is pinned by a test."""
     block = ESMoE(4, 2, channels=16)
     assert block.balance is esmoe.gshard_balance
+
+
+def test_defaults_keep_the_recorded_runs_reproducible():
+    """The switches that align with upstream are opt-in.
+
+    Every protocol run in `results/` was measured without the output norm and without dense
+    training. Flipping either default would silently change what `equip()` builds, so the defaults
+    are pinned here and the alignment is requested explicitly.
+    """
+    block = ESMoE(4, 2, channels=16)
+    assert block.out_norm is False
+    assert block.dense_training is False
+    assert isinstance(block.norm, nn.Identity)
+
+
+def test_out_norm_adds_a_normalisation_to_the_mixed_output():
+    plain, normed = ESMoE(4, 2, channels=16), ESMoE(4, 2, channels=16, out_norm=True)
+    assert isinstance(normed.norm, nn.Sequential)
+    assert isinstance(normed.norm[0], nn.BatchNorm2d)
+    x = torch.randn(2, 16, 8, 8)
+    assert plain(x).shape == normed(x).shape
+
+
+def test_dense_training_runs_every_expert():
+    """An unrouted expert must still see data when dense training is on, and not when it is off."""
+    x = torch.randn(4, 16, 8, 8)
+
+    def count_experts_run(block):
+        seen: set[int] = set()
+
+        def watch(index):
+            return lambda _m, _i, _o: seen.add(index)
+
+        for index, expert in enumerate(block.experts):
+            expert.register_forward_hook(watch(index))
+        block.train()
+        block(x)
+        return len(seen)
+
+    assert count_experts_run(ESMoE(4, 1, channels=16, dense_training=True)) == 4
+    assert count_experts_run(ESMoE(4, 1, channels=16, dense_training=False)) < 4
+
+
+def test_dense_training_does_not_change_the_output():
+    """Unrouted experts are weighted by zero, so running them cannot move the result."""
+    torch.manual_seed(0)
+    sparse = ESMoE(4, 2, channels=16)
+    dense = ESMoE(4, 2, channels=16, dense_training=True)
+    dense.load_state_dict(sparse.state_dict())
+    sparse.eval(), dense.eval()
+    x = torch.randn(3, 16, 8, 8)
+    with torch.no_grad():
+        assert torch.allclose(sparse(x), dense(x), atol=1e-6)
+
+
+@pytest.mark.parametrize("num_experts,top_k", [(2, 1), (3, 2), (4, 2), (4, 4), (8, 2)])
+@pytest.mark.parametrize("balance", ["switch_balance", "gshard_balance", "master_balance", "gshard_probs_balance"])
+def test_every_combination_trains_and_reports_a_finite_aux(num_experts, top_k, balance):
+    """The community will mix these freely, so every combination has to build and back-propagate."""
+    block = ESMoE(num_experts, top_k, channels=16, balance=getattr(esmoe, balance), out_norm=True)
+    net = nn.Sequential(nn.Conv2d(3, 16, 3, 1, 1), block, nn.Conv2d(16, 4, 1))
+    esmoe.clear_aux_loss()
+    out = net(torch.randn(2, 3, 16, 16))
+    aux = collect_aux_loss(net)
+    assert torch.isfinite(aux).all()
+    (out.sum() + aux).backward()
+    assert any(p.grad is not None and torch.isfinite(p.grad).all() for p in block.router.parameters())
+
+
+def test_top_k_equal_to_num_experts_is_dense_and_balanced():
+    """K == E leaves nothing to route away, so every balance term should sit at its floor."""
+    block = ESMoE(4, 4, channels=16)
+    esmoe.clear_aux_loss()
+    block(torch.randn(4, 16, 8, 8))
+    assert collect_aux_loss(nn.Sequential(block)).item() >= 0

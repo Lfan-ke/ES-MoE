@@ -36,40 +36,54 @@ class DWExpert(nn.Module):
         return self.act(self.bn(self.pw(self.dw(x))))
 
 
+def _utilisation(weights: Tensor) -> Tensor:
+    """Mean routing mass per expert, normalised to sum to one."""
+    usage = weights.mean(dim=0)
+    return usage / usage.sum().clamp_min(1e-6)
+
+
 def switch_balance(probs: Tensor, gate: Tensor) -> Tensor:
     """Switch-Transformer load balancing: routing mass times realised load, summed over experts.
 
-    Under top-k the realised loads sum to k whatever the skew, so once the mean probabilities are
-    near uniform this term sits at k and stops reporting concentration. `gshard_balance` shares that
-    blind spot, reading only the probabilities; `master_balance` measures the gated weights and does
-    not.
+    The only one of the three that multiplies the probabilities by a top-k indicator. Since the
+    realised loads sum to k whatever the skew, the term sits at k once the mean probabilities are
+    near uniform and stops reporting concentration.
     """
     importance = probs.mean(dim=0)
     load = (gate > 0).float().mean(dim=0)
     return probs.shape[1] * (importance * load).sum()
 
 
+def gshard_balance(probs: Tensor, gate: Tensor) -> Tensor:
+    """``N * sum(usage^2)`` over the gated weights - the term upstream's ES_MOE optimises.
+
+    Upstream feeds this the output of its routing layer, which in training is the softmax *after*
+    the top-k mask and renormalisation, not the raw probabilities. Reading the gate is what lets
+    the term see a dispatch that has collapsed onto one expert.
+    """
+    usage = _utilisation(gate)
+    return gate.shape[1] * (usage * usage).sum()
+
+
 def master_balance(probs: Tensor, gate: Tensor) -> Tensor:
     """The YOLO-Master paper's load balancing loss: mean squared deviation from uniform use.
 
-    The paper measures utilisation on the gated weights, not on the raw router probabilities, so
-    an expert outside top-k contributes nothing to it. That is the one of these three objectives
-    that can see a dispatch which has collapsed onto a single expert.
+    Equal to `gshard_balance` up to an affine map -- with the utilisations summing to one,
+    ``sum((u - 1/E)^2) == sum(u^2) - 1/E``, so this is ``(gshard - 1) / E^2``. Same minimiser,
+    gradients proportional. Both are kept because the paper and the released code state the same
+    objective at different scales.
     """
-    used = gate.mean(dim=0)
-    used = used / used.sum().clamp_min(1e-6)
-    return ((used - 1.0 / gate.shape[1]) ** 2).mean()
+    usage = _utilisation(gate)
+    return ((usage - 1.0 / gate.shape[1]) ** 2).mean()
 
 
-def gshard_balance(probs: Tensor, gate: Tensor) -> Tensor:
-    """GShard-style balance: ``N * sum(usage^2)`` over normalised mean routing mass.
+def gshard_probs_balance(probs: Tensor, gate: Tensor) -> Tensor:
+    """`gshard_balance` computed on the raw probabilities instead of the gated weights.
 
-    This is the objective YOLO-Master's released ES_MOE optimises, which is not the one its paper
-    specifies. It reads the router probabilities only, so a dispatch that has collapsed while the
-    probabilities stay flat leaves it unmoved, exactly as with `switch_balance`.
+    Not what upstream does. It exists to isolate one variable -- whether the objective reads the
+    probabilities or the dispatch -- because a collapse can hide behind flat probabilities.
     """
-    usage = probs.mean(dim=0)
-    usage = usage / usage.sum().clamp_min(1e-6)
+    usage = _utilisation(probs)
     return probs.shape[1] * (usage * usage).sum()
 
 
@@ -91,6 +105,11 @@ class ESMoE(nn.Module):
         balance: Auxiliary loss ``(probs, gate) -> scalar``. Defaults to the objective
             YOLO-Master's released ES_MOE optimises; `master_balance` is the one its
             paper specifies, and `switch_balance` the Switch-Transformer form.
+        out_norm: Normalise the mixed output, as upstream and the paper's equation 2 do.
+            Off by default so the runs already in ``results/`` stay reproducible.
+        dense_training: Run every expert while training, weighting the unrouted ones by zero.
+            That is what upstream does, and it keeps an unrouted expert's normalisation
+            statistics moving. Off by default for the same reason.
     """
 
     def __init__(
@@ -104,6 +123,8 @@ class ESMoE(nn.Module):
         expert_kernel_sizes: Sequence[int] | None = None,
         expert: ExpertFactory = DWExpert,
         balance: BalanceFn = gshard_balance,
+        out_norm: bool = False,
+        dense_training: bool = False,
     ):
         super().__init__()
         if not 1 <= top_k <= num_experts:
@@ -114,7 +135,9 @@ class ESMoE(nn.Module):
         self.num_experts, self.top_k, self.expert_kernel_sizes = num_experts, top_k, kernels
         self.reduction, self.channels = reduction, None
         self.expert_factory, self.balance = expert, balance
+        self.out_norm, self.dense_training = out_norm, dense_training
         self.experts, self.router = nn.ModuleList(), nn.Sequential()
+        self.norm: nn.Module = nn.Identity()
         if channels:
             self.build(channels)
 
@@ -130,6 +153,8 @@ class ESMoE(nn.Module):
             nn.SiLU(),
             nn.Linear(hidden, self.num_experts),
         )
+        if self.out_norm:
+            self.norm = nn.Sequential(nn.BatchNorm2d(channels), nn.SiLU())
         self.channels = channels
 
     def forward(self, x: Tensor) -> Tensor:
@@ -145,14 +170,32 @@ class ESMoE(nn.Module):
         out = torch.zeros_like(x)
         # Skipping an unrouted expert saves work at run time, but the decision depends on the data:
         # a tracer would bake this batch's routing into the graph and the exported model would keep
-        # using these experts for every future input. Under tracing, run all of them.
-        traced = torch.jit.is_tracing() or torch.onnx.is_in_onnx_export()
+        # using these experts for every future input. Under tracing, run all of them. `dense_training`
+        # extends that to training, where upstream runs every expert so that an unrouted one keeps
+        # its normalisation statistics moving instead of freezing.
+        every = torch.jit.is_tracing() or torch.onnx.is_in_onnx_export() or (self.dense_training and self.training)
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)
-            if traced or torch.count_nonzero(share):
+            if every or torch.count_nonzero(share):
                 out = out + share * expert(x)
         registry.publish(self, self.balance(probs, gate))
-        return out
+        return self.norm(out)
+
+    def configure(self, *, out_norm: bool | None = None, dense_training: bool | None = None) -> "ESMoE":
+        """Set the upstream-alignment switches after the block exists.
+
+        ``out_norm`` builds a module, so a YAML-constructed block cannot receive it through the
+        positional args ``parse_model`` forwards; this is how a caller turns it on afterwards.
+        """
+        if dense_training is not None:
+            self.dense_training = dense_training
+        if out_norm is not None and out_norm != self.out_norm:
+            self.out_norm = out_norm
+            if not out_norm:
+                self.norm = nn.Identity()
+            elif self.channels is not None:
+                self.norm = nn.Sequential(nn.BatchNorm2d(self.channels), nn.SiLU())
+        return self
 
     @property
     def aux_loss(self) -> Tensor:
@@ -162,7 +205,8 @@ class ESMoE(nn.Module):
     def extra_repr(self) -> str:
         return (
             f"channels={self.channels}, num_experts={self.num_experts}, "
-            f"top_k={self.top_k}, kernels={self.expert_kernel_sizes}"
+            f"top_k={self.top_k}, kernels={self.expert_kernel_sizes}, "
+            f"out_norm={self.out_norm}, dense_training={self.dense_training}"
         )
 
 

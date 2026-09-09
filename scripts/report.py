@@ -48,6 +48,14 @@ def variant(record):
         block += "-rewire"
     if cfg.get("balance", "switch") not in ("switch", "none"):
         block += f"-{cfg['balance']}"
+    # The upstream-alignment switches change the model, so they belong in the key: a run with the
+    # output norm is not a repeat of one without it.
+    if cfg.get("out_norm"):
+        block += "-norm"
+    if cfg.get("dense_training"):
+        block += "-dense"
+    if cfg.get("blocks", 1) not in (0, 1):
+        block += f"-x{cfg['blocks']}"
     return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}[{stack(record)}]"
 
 
