@@ -6,6 +6,7 @@ all land in results/<experiment_id>.json.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -15,6 +16,7 @@ from pathlib import Path
 
 import torch
 import ultralytics
+import yaml
 from ultralytics import YOLO
 from ultralytics.utils.torch_utils import get_num_params
 
@@ -46,6 +48,25 @@ def git_ref():
     except (OSError, subprocess.SubprocessError):
         pass
     return os.environ.get("ESMOE_GIT_REF", "unversioned-copy")
+
+
+def digest(path: Path) -> str | None:
+    """sha256 of a file, or None when it is not there to hash."""
+    if not path.is_file():
+        return None
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def dataset_facts(data: str) -> dict:
+    """Name, split sizes and label counts, so a record says what it was measured on."""
+    spec = yaml.safe_load(Path(data).read_text(encoding="utf-8"))
+    base = Path(spec.get("path", "."))
+    splits = {}
+    for split in ("train", "val", "test"):
+        folder = base / spec[split] if split in spec else None
+        if folder and folder.is_dir():
+            splits[split] = sum(1 for _ in folder.glob("*.jpg"))
+    return {"name": base.name or str(base), "classes": len(spec.get("names", {})), "splits": splits}
 
 
 def build(args):
@@ -116,6 +137,12 @@ def main():
         arch = f"{arch}-{args.balance}"
     if args.esmoe and args.aux_weight != 0.01:
         arch = f"{arch}-w{args.aux_weight:g}"
+    if args.esmoe and args.at != "backbone_end":
+        arch = f"{arch}-{args.at.replace('backbone_', '')}"
+    if args.esmoe and args.out_norm:
+        arch = f"{arch}-norm"
+    if args.esmoe and args.dense_training:
+        arch = f"{arch}-dense"
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
 
@@ -149,6 +176,7 @@ def main():
     if trainer is not None and getattr(trainer, "metrics", None):
         metrics = {k: float(v) for k, v in trainer.metrics.items() if isinstance(v, (int, float))}
 
+    weights = ROOT / "runs" / name / "weights" / "best.pt"
     record = {
         "experiment_id": experiment_id,
         "git_ref": {
@@ -160,6 +188,7 @@ def main():
         },
         "config": {
             "model_yaml": cfg,
+            "sha256": digest(Path(cfg)),
             "arch": arch,
             "num_experts": args.num_experts,
             "top_k": args.top_k,
@@ -170,7 +199,7 @@ def main():
             "dense_training": bool(args.dense_training and args.esmoe),
             "blocks": sum(1 for _ in esmoe.blocks(model.model)) if args.esmoe else 0,
         },
-        "dataset": {"yaml": args.data, "fraction": args.fraction},
+        "dataset": {"yaml": args.data, "fraction": args.fraction, **dataset_facts(args.data)},
         "hardware": {
             "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu",
             "torch": torch.__version__,
@@ -183,11 +212,15 @@ def main():
             "patience": args.patience,
             "amp": bool(args.amp),
             "wall_seconds": round(elapsed, 1),
+            "gpu_hours": round(elapsed / 3600, 3),
         },
         "seed": args.seed,
         "metrics": metrics,
         "params": get_num_params(model.model),
-        "artifact": str(ROOT / "runs" / name / "weights" / "best.pt"),
+        "artifact": {
+            "path": str(weights),
+            "sha256": digest(weights),
+        },
         "status": status,
         "limitation": error or "single machine, single GPU; see limitations.md",
     }

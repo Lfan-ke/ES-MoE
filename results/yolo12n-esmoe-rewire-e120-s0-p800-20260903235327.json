@@ -13,11 +13,20 @@
     "num_experts": 4,
     "top_k": 2,
     "rewire": true,
-    "aux_weight": 0.01
+    "aux_weight": 0.01,
+    "sha256": "a1ac85b8e5563afa4ceb0f144d74ebb144cce57a774b3ec8a8e989db9baa58b7",
+    "sha256_of": "settings"
   },
   "dataset": {
     "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
-    "fraction": 1.0
+    "fraction": 1.0,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
   },
   "hardware": {
     "gpu": "NVIDIA GeForce RTX 4090",
@@ -30,7 +39,8 @@
     "imgsz": 800,
     "patience": 0,
     "amp": true,
-    "wall_seconds": 7945.0
+    "wall_seconds": 7945.0,
+    "gpu_hours": 2.207
   },
   "seed": 0,
   "metrics": {
@@ -40,7 +50,11 @@
     "metrics/mAP50-95(B)": 0.20836319998526323
   },
   "params": 2884530,
-  "artifact": "/data/esmoe-toolkit/runs/yolo12n-esmoe-rewire-e120-s0-p800/weights/best.pt",
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolo12n-esmoe-rewire-e120-s0-p800/weights/best.pt",
+    "sha256": "20637345aaa8e659a7f815bf2097f882a84db39bd1c5cca9045d63507171b654",
+    "sha256_of": "yolo12n-esmoe-rewire-e120-s0-p800-best.pt"
+  },
   "status": "success",
   "limitation": "single machine, single GPU; see limitations.md"
 }

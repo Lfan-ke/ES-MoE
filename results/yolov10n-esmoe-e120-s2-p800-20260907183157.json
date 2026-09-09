@@ -13,11 +13,20 @@
     "num_experts": 4,
     "top_k": 2,
     "rewire": false,
-    "aux_weight": 0.01
+    "aux_weight": 0.01,
+    "sha256": "87e1ad3b9e37c7742e2932b388be19fbb4ddd14d06372661b947286f4569ad54",
+    "sha256_of": "settings"
   },
   "dataset": {
     "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
-    "fraction": 1.0
+    "fraction": 1.0,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
   },
   "hardware": {
     "gpu": "MetaX C500",
@@ -30,7 +39,8 @@
     "imgsz": 800,
     "patience": 0,
     "amp": true,
-    "wall_seconds": 17516.5
+    "wall_seconds": 17516.5,
+    "gpu_hours": 4.866
   },
   "seed": 2,
   "metrics": {
@@ -40,7 +50,11 @@
     "metrics/mAP50-95(B)": 0.19888896757952845
   },
   "params": 3025472,
-  "artifact": "/data/esmoe-toolkit/runs/yolov10n-esmoe-e120-s2-p800/weights/best.pt",
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolov10n-esmoe-e120-s2-p800/weights/best.pt",
+    "sha256": "6089e2b71ac57ad35af449ac1365801bc712fa3869ab71fcf67eb2ce37b200c1",
+    "sha256_of": "hashes-b.txt"
+  },
   "status": "success",
   "limitation": "single machine, single GPU; see limitations.md"
 }

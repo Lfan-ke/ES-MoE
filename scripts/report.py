@@ -74,6 +74,20 @@ def spread(values):
     return f"{statistics.mean(values):.4f} ± {statistics.stdev(values):.4f}"
 
 
+# Two-sided 95% critical values of Student's t by degrees of freedom. Three seeds leaves two, and
+# the interval is correspondingly wide: that is the width a three-sample estimate actually has.
+T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
+
+
+def interval(values):
+    """95% confidence interval for a mean paired delta."""
+    if len(values) < 2:
+        return "-"
+    half = T95.get(len(values) - 1, 1.96) * statistics.stdev(values) / len(values) ** 0.5
+    mean = statistics.mean(values)
+    return f"[{mean - half:+.4f}, {mean + half:+.4f}]"
+
+
 def paired(runs, key):
     """Per-seed deltas against the baseline of the same seed.
 
@@ -146,10 +160,13 @@ def main():
         ]
         for name, seed, b, v, d in rows:
             out.append(f"| {name} | {seed} | {b:.4f} | {v:.4f} | {d:+.4f} |")
-        out += ["", "| variant | seeds | mean delta | wins |", "|:--:|:--:|:--:|:--:|"]
+        out += ["", "| variant | seeds | mean delta | 95% CI | wins |", "|:--:|:--:|:--:|:--:|:--:|"]
         for name, values in deltas.items():
             wins = sum(1 for v in values if v > 0)
-            out.append(f"| {name} | {len(values)} | {statistics.mean(values):+.4f} | {wins}/{len(values)} |")
+            out.append(
+                f"| {name} | {len(values)} | {statistics.mean(values):+.4f} "
+                f"| {interval(values)} | {wins}/{len(values)} |"
+            )
 
     if repeats:
         out += [

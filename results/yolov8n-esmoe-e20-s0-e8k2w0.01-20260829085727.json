@@ -6,11 +6,20 @@
     "arch": "esmoe",
     "num_experts": 8,
     "top_k": 2,
-    "aux_weight": 0.01
+    "aux_weight": 0.01,
+    "sha256": "7689a6b4aac0017311456c0eb8b04edfeefc620dba978e9b6fe1ff2d3237714c",
+    "sha256_of": "settings"
   },
   "dataset": {
     "yaml": "/root/esmoe-toolkit/configs/visdrone.yaml",
-    "fraction": 0.25
+    "fraction": 0.25,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
   },
   "hardware": {
     "gpu": "NVIDIA GeForce RTX 4090 D",
@@ -22,7 +31,8 @@
     "batch": 32,
     "imgsz": 640,
     "amp": true,
-    "wall_seconds": 355.0
+    "wall_seconds": 355.0,
+    "gpu_hours": 0.099
   },
   "seed": 0,
   "metrics": {
@@ -32,7 +42,10 @@
     "metrics/mAP50-95(B)": 0.04138349197308347
   },
   "params": 3781094,
-  "artifact": "/root/esmoe-toolkit/runs/yolov8n-esmoe-e20-s0-e8k2w0.01/weights/best.pt",
+  "artifact": {
+    "path": "/root/esmoe-toolkit/runs/yolov8n-esmoe-e20-s0-e8k2w0.01/weights/best.pt",
+    "unavailable": "host released before checksums were recorded"
+  },
   "status": "success",
   "limitation": "single machine, single GPU; see limitations.md"
 }
