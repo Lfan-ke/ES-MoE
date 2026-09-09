@@ -7,6 +7,7 @@ absent rather than guessed.
     uv run python scripts/backfill.py --check
     uv run python scripts/backfill.py --splits train=6471,val=548,test=1610 --hashes host-a.txt
     uv run python scripts/backfill.py --settings settings-a.txt   # reconcile against the checkpoints
+    uv run python scripts/backfill.py --mirror ../checkpoints     # hash the ones pulled back
 """
 
 import argparse
@@ -17,19 +18,18 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 REQUIRED = ("config.sha256", "dataset.splits", "budget.gpu_hours", "artifact.sha256")
-# Checkpoints pulled off the training boxes, newest mirror first.
-MIRRORS = (ROOT.parent / "e1-artifacts", Path("D:/e1-backup/extracted"), Path("D:/e1-backup/ckpt-repo/weights"))
 
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def checkpoints(listings: list[str] | None) -> dict[str, tuple[str, str]]:
+def checkpoints(listings: list[str] | None, mirrors: list[str] | None) -> dict[str, tuple[str, str]]:
     """Run name -> (sha256, where it was hashed).
 
-    A checkpoint that never left the training box is hashed there; `sha256sum runs/*/weights/best.pt`
-    piped into a file is all a listing is. Local mirrors cover the rest.
+    A checkpoint that never left the training host is hashed there, and `sha256sum
+    runs/*/weights/best.pt` piped into a file is all a listing is. A mirror is a directory of
+    `<run name>-best.pt` files pulled back from one.
     """
     found: dict[str, tuple[str, str]] = {}
     for listing in listings or ():
@@ -37,42 +37,30 @@ def checkpoints(listings: list[str] | None) -> dict[str, tuple[str, str]]:
             value, _, path = line.partition("  ")
             if path.endswith("best.pt"):
                 found.setdefault(PurePosixPath(path).parts[-3], (value, Path(listing).name))
-    for mirror in MIRRORS:
+    for mirror in map(Path, mirrors or ()):
         for path in mirror.rglob("*-best.pt") if mirror.is_dir() else ():
             found.setdefault(path.name.removesuffix("-best.pt"), (digest(path), path.name))
     return found
 
 
-def splits(spec: str | None) -> dict[str, int] | None:
-    """Split sizes: counted here when the dataset is complete, else taken from `--splits`.
+def facts(spec: str | None) -> dict | None:
+    """What the runs were measured on: name, class count and split sizes.
 
-    Runs happened on a rented box; the images are not always on the machine doing the backfill,
-    so the counts read off that box can be passed in instead of being invented here.
+    The splits are counted here when the images are on this machine; runs happen on rented hosts,
+    so counts read off one can be passed in with `--splits` rather than invented here.
     """
     import yaml
 
     config = yaml.safe_load((ROOT / "configs" / "visdrone.yaml").read_text(encoding="utf-8"))
-    for base in (ROOT.parent / "ds" / "VisDrone_dataset", Path(config["path"])):
-        counted = {
-            name: sum(1 for _ in (base / config[name]).glob("*.jpg"))
-            for name in ("train", "val", "test")
-            if name in config and (base / config[name]).is_dir()
-        }
-        if all(counted.get(name) for name in ("train", "val", "test")):
-            return counted
-    if spec:
-        return {k: int(v) for k, v in (part.split("=") for part in spec.split(","))}
-    return None
-
-
-def facts(spec: str | None) -> dict | None:
-    import yaml
-
-    config = yaml.safe_load((ROOT / "configs" / "visdrone.yaml").read_text(encoding="utf-8"))
-    counts = splits(spec)
-    if counts is None:
-        return None
-    return {"name": Path(config["path"]).name, "classes": len(config["names"]), "splits": counts}
+    base = Path(config["path"])
+    counted = {
+        name: sum(1 for _ in (base / config[name]).glob("*.jpg"))
+        for name in ("train", "val", "test")
+        if name in config and (base / config[name]).is_dir()
+    }
+    if not all(counted.get(name) for name in ("train", "val", "test")):
+        counted = {k: int(v) for k, v in (part.split("=") for part in spec.split(","))} if spec else {}
+    return {"name": base.name, "classes": len(config["names"]), "splits": counted} if counted else None
 
 
 def settings(listings: list[str] | None) -> dict[str, dict]:
@@ -157,6 +145,7 @@ def main() -> int:
     p.add_argument("--hashes", action="append", help="a `sha256sum runs/*/weights/best.pt` listing from a host")
     p.add_argument("--unavailable", default="", help="why a checkpoint cannot be hashed, for the ones left over")
     p.add_argument("--settings", action="append", help="a `scripts/blockspec.py` listing from a host")
+    p.add_argument("--mirror", action="append", help="a directory of `<run name>-best.pt` files to hash")
     args = p.parse_args()
 
     records = [path for path in sorted(RESULTS.glob("*.json")) if "experiment_id" in json.loads(path.read_text())]
@@ -170,7 +159,7 @@ def main() -> int:
             print(f"  {field:<20} missing in {gaps.get(field, 0)}")
         return 1 if gaps else 0
 
-    dataset, weights = facts(args.splits), checkpoints(args.hashes)
+    dataset, weights = facts(args.splits), checkpoints(args.hashes, args.mirror)
     specs, written, corrected = settings(args.settings), 0, []
     for path in records:
         record = json.loads(path.read_text(encoding="utf-8"))
@@ -183,8 +172,9 @@ def main() -> int:
         if changed:
             corrected.append(f"  {record['experiment_id']}: {'; '.join(changed)}")
     print(f"filled {written} records from {len(weights)} checkpoints" + ("" if dataset else "; no split sizes"))
-    print(f"checked {len(specs)} against their checkpoints, corrected {len(corrected)}")
-    print("\n".join(corrected))
+    if specs:
+        print(f"checked {len(specs)} against their checkpoints, corrected {len(corrected)}")
+        print("\n".join(corrected))
     return 0
 
 
