@@ -651,6 +651,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Third pre-registration (2026-09-09, declared before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -823,6 +834,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Third pre-registration (2026-09-09, declared before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -925,6 +947,36 @@
 <li><strong>v5n is rerun as a whole generation</strong>, completing the missing <code>rewire</code> arm and yielding a same-configuration replication on another host. <code>scripts/report.py</code> carries the hardware stack in its grouping key, so two hosts form two groups rather than folding into one cell as repeats.</li>
 <li><strong>v10n gains seeds 3 and 4.</strong> Box b's queue is shorter than box a's, and the spare hours extend <strong>all three</strong> v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.</li>
 </ol>
+<h2 id="third-pre-registration-2026-09-09-declared-before-any-gshard-result">Third pre-registration (2026-09-09, declared before any <code>gshard</code> result)<a class="headerlink" href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" title="Permanent link">&para;</a></h2>
+<p>Reading YOLO-Master's own <code>ES_MOE</code> shows it optimises a different balancing term from this toolkit's default:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">formula</th>
+<th style="text-align: center;">reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">upstream <code>ES_MOE</code></td>
+<td style="text-align: center;"><code>N · Σ usage²</code> (GShard)</td>
+<td style="text-align: center;">mean routing probabilities</td>
+</tr>
+<tr>
+<td style="text-align: center;">default <code>switch_balance</code></td>
+<td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code> (Switch)</td>
+<td style="text-align: center;">mean probabilities × realised load</td>
+</tr>
+</tbody>
+</table>
+<p>Both sit at their minimum in exactly the collapse we measured: with mean probabilities near uniform and one expert taking 62%–92% of the top-1, the Switch term is fixed at <code>k</code> and the GShard term at 1.0, and moving the top-k dispatch does not shift either. They separate only when the probability mass itself concentrates, where both rise.</p>
+<p><code>gshard_balance</code> is implemented and exported, and <code>scripts/train.py --balance gshard</code> selects it. <strong>Unknown</strong>: the <code>gshard</code> arms of v5n and v10n, three seeds each. The predictions:</p>
+<ol>
+<li><strong>Switching to the upstream GShard objective will not undo the routing collapse</strong>: the <code>gshard</code> arms still show a dominant expert above 0.6 top-1 share, mean-probability entropy above 90% of its maximum, and no dead experts. This is the mechanistic bet - if the collapse does lift, the choice of objective was the cause and this package's default should change.</li>
+<li><strong>Accuracy will not move materially</strong>: paired mAP50 means of the <code>gshard</code> arms sit within ±0.003 of their <code>switch</code> counterparts on v5n and v10n, the scale of the seed spread.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
 
 
 

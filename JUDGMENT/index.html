@@ -651,6 +651,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2026-09-09-gshard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三轮预登记（2026-09-09，声明于任何 gshard 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -823,6 +834,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2026-09-09-gshard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第三轮预登记（2026-09-09，声明于任何 gshard 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -925,6 +947,36 @@
 <li><strong>v5n 整代重跑</strong>，补齐缺的 <code>rewire</code> 臂，同时得到一份同配置换主机的复现记录。<code>scripts/report.py</code> 的分组键加入硬件栈，两台主机的同名配置各成一组，不被当作重复样本折进同一格。</li>
 <li><strong>v10n 加跑 seed 3、4</strong>。box b 的排队比 box a 短，空出的机时用于把 v10n 的三条臂<strong>同时</strong>扩到五个 seed。三臂一起扩、且在任何 v10n 结果产出之前决定，避免"看到结果再决定给哪个格子加样本"。判读线不变；五个 seed 的符号检验 p 最低为 0.031，仍不足以支撑单次运行的可靠性表述。</li>
 </ol>
+<h2 id="2026-09-09-gshard">第三轮预登记（2026-09-09，声明于任何 <code>gshard</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-gshard" title="Permanent link">&para;</a></h2>
+<p>核对 YOLO-Master 的 <code>ES_MOE</code> 源码后发现，它优化的负载均衡项与本工具包默认的不是同一个：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">公式</th>
+<th style="text-align: center;">只读什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">上游 <code>ES_MOE</code></td>
+<td style="text-align: center;"><code>N · Σ usage²</code>（GShard）</td>
+<td style="text-align: center;">平均路由概率</td>
+</tr>
+<tr>
+<td style="text-align: center;">本包默认 <code>switch_balance</code></td>
+<td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code>（Switch）</td>
+<td style="text-align: center;">平均概率 × 实际负载</td>
+</tr>
+</tbody>
+</table>
+<p>两者在<strong>我们实测到的那种塌缩</strong>上都取到最小值：平均概率近均匀、而单个专家吃下 62%–92% 的 top-1 时，Switch 项恒等于 <code>k</code>、GShard 项恒等于 1.0，改变 top-k 的分派都不会让它们动。差别只在概率本身集中时——那时两者都会上升。</p>
+<p><code>gshard_balance</code> 已实现并导出，<code>scripts/train.py --balance gshard</code> 可选。<strong>未知</strong>：v5n 与 v10n 各三 seed 的 <code>gshard</code> 臂。预测：</p>
+<ol>
+<li><strong>换成上游的 GShard 目标不会解除路由塌缩</strong>：<code>gshard</code> 臂的主导专家 top-1 份额仍在 0.6 以上，平均概率熵仍在最大值的 90% 以上，死专家仍为 0。这是机制预测——若塌缩真的消失，说明目标函数的选择才是主因，本包的默认值要改。</li>
+<li><strong>精度不因此显著改变</strong>：v5n 与 v10n 的 <code>gshard</code> 臂配对 mAP50 均值与各自的 <code>switch</code> 臂之差落在 ±0.003 以内（即 seed 间离散度的量级）。</li>
+</ol>
+<p>预测错了照实记录。</p>
 
 
 
