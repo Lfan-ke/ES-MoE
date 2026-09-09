@@ -53,7 +53,13 @@ def build(args):
         return YOLO(args.base), args.base
     esmoe.inject_esmoe()
     wire = "-rewire" if args.rewire else ""
-    cfg = ROOT / "configs" / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}.yaml"
+    # The seed is in the filename because two runs of the same arm train side by side: a shared
+    # path lets one truncate the config the other is still reading.
+    cfg = (
+        ROOT
+        / "configs"
+        / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}-{args.balance}-s{args.seed}.yaml"
+    )
     esmoe.graft(args.base, out=str(cfg), num_experts=args.num_experts, top_k=args.top_k, rewire=args.rewire)
     model = YOLO(str(cfg))
     # The objective is a callable, so it cannot travel through the YAML args; set it on the built
