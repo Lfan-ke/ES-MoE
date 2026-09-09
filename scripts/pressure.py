@@ -80,13 +80,25 @@ def main() -> int:
         cells = " | ".join(f"{g:.3e}" for g in found)
         lines.append(f"| {stem} | {spread} | {cells} | {ratio:.2f} |")
 
-    ratios = [found[2] / found[0] for _, _, found in rows if found[0]]
+    # Per backbone as well as overall: an arm is only ever compared with a control on its own
+    # backbone, so that is the range a verdict about that comparison should quote.
+    by_backbone: dict[str, list[float]] = {}
+    for stem, _, found in rows:
+        if found[0]:
+            by_backbone.setdefault(stem.split("-")[0], []).append(found[2] / found[0])
+    lines += ["", "| backbone | checkpoints | gate/switch |", "|:--|--:|--:|"]
+    for name, ratios in sorted(by_backbone.items()):
+        lines.append(f"| {name} | {len(ratios)} | {min(ratios):.2f}x - {max(ratios):.2f}x |")
+
+    everywhere = [ratio for ratios in by_backbone.values() for ratio in ratios]
     against = [found[3] / found[0] for _, _, found in rows if found[0]]
     lines += [
         "",
-        f"Reading the gate costs {min(ratios):.2f}x to {max(ratios):.2f}x what the Switch term costs at the "
-        f"same weight, so the two arms are pushed comparably hard; the paper's form is "
-        f"{1 / max(against):.0f}x to {1 / min(against):.0f}x weaker, which is the `1/E^2` factor.",
+        f"Reading the gate costs {min(everywhere):.2f}x to {max(everywhere):.2f}x what the Switch term costs "
+        f"at the same weight, so the two are pushed comparably; the paper's form is "
+        f"{1 / max(against):.0f}x to {1 / min(against):.0f}x weaker, which is the `1/E^2` factor. The low "
+        f"ratios all sit at the tightest spread, where a router whose mean is already skewed gives the "
+        f"Switch term more to pull on.",
     ]
     text = "\n".join(lines) + "\n"
     (ROOT / "results" / "pressure.md").write_text(text, encoding="utf-8")
