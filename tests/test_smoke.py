@@ -167,3 +167,35 @@ def test_router_survives_a_runaway_logit():
     out = net(torch.randn(2, 3, 32, 32))
     assert torch.isfinite(out).all()
     assert torch.isfinite(collect_aux_loss(net)).all()
+
+
+def _gate_of(probs, k=2):
+    weights, chosen = probs.topk(k, dim=1)
+    gate = torch.zeros_like(probs).scatter(1, chosen, weights)
+    return gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
+
+
+def test_only_the_paper_objective_sees_a_collapsed_dispatch():
+    """Three objectives, one difference that matters.
+
+    Both arms below carry uniform mean probabilities; in `collapsed` one expert is in every
+    sample's top-k. The Switch and GShard terms read the probabilities and cannot tell the two
+    apart. The paper's term reads the gated weights and can.
+    """
+    balanced = torch.tensor([[0.40, 0.30, 0.15, 0.15], [0.30, 0.40, 0.15, 0.15],
+                             [0.15, 0.15, 0.40, 0.30], [0.15, 0.15, 0.30, 0.40]])
+    collapsed = torch.tensor([[0.25, 0.45, 0.15, 0.15], [0.25, 0.15, 0.45, 0.15],
+                              [0.25, 0.15, 0.15, 0.45]])
+    assert _gate_of(collapsed)[:, 0].gt(0).all(), "expert 0 must be in every top-k for this to test anything"
+
+    for blind in (esmoe.switch_balance, esmoe.gshard_balance):
+        assert blind(balanced, _gate_of(balanced)).item() == pytest.approx(
+            blind(collapsed, _gate_of(collapsed)).item(), abs=1e-6
+        )
+    seeing = esmoe.master_balance
+    assert seeing(collapsed, _gate_of(collapsed)) > seeing(balanced, _gate_of(balanced)) + 1e-4
+
+
+def test_master_balance_is_zero_at_uniform_use():
+    uniform = torch.full((5, 4), 0.25)
+    assert esmoe.master_balance(uniform, uniform).item() == pytest.approx(0.0, abs=1e-9)

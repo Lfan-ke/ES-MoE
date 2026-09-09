@@ -40,19 +40,33 @@ def switch_balance(probs: Tensor, gate: Tensor) -> Tensor:
     """Switch-Transformer load balancing: routing mass times realised load, summed over experts.
 
     Under top-k the realised loads sum to k whatever the skew, so once the mean probabilities are
-    near uniform this term sits at k and stops reporting concentration. `gshard_balance` reads the
-    distribution itself and does not share that blind spot.
+    near uniform this term sits at k and stops reporting concentration. `gshard_balance` shares that
+    blind spot, reading only the probabilities; `master_balance` measures the gated weights and does
+    not.
     """
     importance = probs.mean(dim=0)
     load = (gate > 0).float().mean(dim=0)
     return probs.shape[1] * (importance * load).sum()
 
 
+def master_balance(probs: Tensor, gate: Tensor) -> Tensor:
+    """The YOLO-Master paper's load balancing loss: mean squared deviation from uniform use.
+
+    The paper measures utilisation on the gated weights, not on the raw router probabilities, so
+    an expert outside top-k contributes nothing to it. That is the one of these three objectives
+    that can see a dispatch which has collapsed onto a single expert.
+    """
+    used = gate.mean(dim=0)
+    used = used / used.sum().clamp_min(1e-6)
+    return ((used - 1.0 / gate.shape[1]) ** 2).mean()
+
+
 def gshard_balance(probs: Tensor, gate: Tensor) -> Tensor:
     """GShard-style balance: ``N * sum(usage^2)`` over normalised mean routing mass.
 
-    This is the objective YOLO-Master's own ES_MOE optimises. It is 1.0 at uniform usage and rises
-    as mass concentrates, so unlike `switch_balance` it keeps pushing once one expert takes over.
+    This is the objective YOLO-Master's released ES_MOE optimises, which is not the one its paper
+    specifies. It reads the router probabilities only, so a dispatch that has collapsed while the
+    probabilities stay flat leaves it unmoved, exactly as with `switch_balance`.
     """
     usage = probs.mean(dim=0)
     usage = usage / usage.sum().clamp_min(1e-6)

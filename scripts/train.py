@@ -64,9 +64,10 @@ def build(args):
     model = YOLO(str(cfg))
     # The objective is a callable, so it cannot travel through the YAML args; set it on the built
     # blocks instead. `gshard` is the objective YOLO-Master's own ES_MOE optimises.
-    if args.balance == "gshard":
+    if args.balance != "switch":
+        objective = {"gshard": esmoe.gshard_balance, "master": esmoe.master_balance}[args.balance]
         for block in esmoe.blocks(model.model):
-            block.balance = esmoe.gshard_balance
+            block.balance = objective
     esmoe.attach_aux_loss(model, weight=args.aux_weight)
     return model, str(cfg)
 
@@ -79,7 +80,7 @@ def main():
     p.add_argument("--num-experts", type=int, default=4)
     p.add_argument("--top-k", type=int, default=2)
     p.add_argument("--rewire", action="store_true")
-    p.add_argument("--balance", choices=("switch", "gshard"), default="switch")
+    p.add_argument("--balance", choices=("switch", "gshard", "master"), default="switch")
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)
