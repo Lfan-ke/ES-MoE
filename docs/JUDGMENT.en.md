@@ -141,7 +141,7 @@ The two predictions keep their content but change their reason: the collapse is 
 
 Reading the paper itself (arXiv 2512.23273, section 3.5) shows that **the balancing term the paper specifies is not the one the released code implements**. Paper equation (13):
 
-$$ \mathcal{L}_{LB} = rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - rac{1}{E}
+$$ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
 ight)^2 $$
 
 where μᵢ averages **Ω_train** - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's `ES_MOE` instead applies the GShard form `N·Σusage²` to the **raw router probabilities**. On one pair of inputs:
@@ -166,7 +166,7 @@ The table above in the fourth round -- "only the paper's objective sees a collap
 
 Reading upstream line by line: `ES_MOE._compute_load_balancing_loss` applies the GShard form to whatever `DynamicRoutingLayer` returns, and in training that is the output of `_soft_top_k(...)` -- **the gate, after the top-k mask and renormalisation**. The paper's equation 12 averages the same tensor. Therefore
 
-$$\mathcal{L}_{	ext{paper}}=rac{\mathcal{L}_{	ext{upstream}}-1}{E^2}$$
+$$\mathcal{L}_{\text{paper}}=\frac{\mathcal{L}_{\text{upstream}}-1}{E^2}$$
 
 **The paper and the released code state one objective, differing only by an affine map**, with the same minimiser and proportional gradients. The earlier claim that they differ was wrong.
 
@@ -193,3 +193,28 @@ The predictions:
 7. **The `norm` arm moves accuracy by less than ±0.003**, the scale of the seed spread. It is a question of structural completeness, not an expected source of accuracy.
 
 Wrong predictions get recorded as wrong.
+
+### Correction (late 2026-09-09, still before any structural-arm result)
+
+The previous section relabelled five records' `balance` as `gshard_probs`. **That relabelling was also wrong**, and so is every result from the `--balance`, `--out-norm` and `--dense-training` switches. Both are corrected here.
+
+The trainer rebuilds the model from `model.yaml`. An objective or a switch set on the blocks after `YOLO(cfg)` returns lands on an object that is then discarded — no error, no trace. So none of the three switches reached the model that trained: a run asking for `master` optimised the constructor default, a run asking for the output norm trained without one, and the record repeated the command line, which said something else.
+
+The evidence is the weights, not the logs:
+
+```python
+model = torch.load("best.pt", map_location="cpu", weights_only=False)["model"]
+[b.balance.__name__ for b in esmoe.blocks(model)]  # ['switch_balance']
+```
+
+A block pickled before a setting existed carries no attribute for it, and the absence is itself the answer. Therefore:
+
+- Those five records trained `switch_balance`: same configuration and same seed as the default arm, run a second time. They are relabelled `switch` and join the default arm as repeats — a direct measure of run-to-run spread on one card, which is exactly what three-seed intervals lack.
+- The two runs labelled `master` optimised **GShard read off the gate** (the md5 of `esmoe/module.py` matches the commit that switched to the gate, and `esmoe_aux` sits at 0.0101, which is $N\sum u^2 = 1$ under a uniform gate times the 0.01 weight). They are recorded as `gshard`.
+- The fourth round's prediction stands and is still unanswered: whether an objective that reads the gate relieves the collapse. These two runs answer it, not the two that were thought to.
+
+**The fix, and the audit.** `graft()` now writes the settings into the config (`[4, 2, null, {balance: …, out_norm: …, dense_training: …}]`), and `ESMoE` takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. `scripts/train.py` records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; `tests/test_ultralytics.py` trains a model to hold that path.
+
+The audit does not rely on memory: `scripts/blockspec.py` reads each checkpoint's block settings on the host that holds it, and `scripts/backfill.py --settings` rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and **none needed correcting** — the published data is sound; what was wrong were the new arms, none of them merged yet.
+
+**The general lesson**: a `--flag` in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.

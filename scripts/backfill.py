@@ -80,7 +80,7 @@ def settings(listings: list[str] | None) -> dict[str, dict]:
     found: dict[str, dict] = {}
     for listing in listings or ():
         for line in Path(listing).read_text(encoding="utf-8").splitlines():
-            name, _, spec = line.partition("	")
+            name, _, spec = line.partition("\t")
             if spec.startswith("{"):
                 found.setdefault(name, json.loads(spec))
     return found

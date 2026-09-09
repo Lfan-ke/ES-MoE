@@ -141,7 +141,7 @@ YOLOv10n 默认臂的均值压在零上、5 个 seed 里 3 个为正，按判读
 
 读原论文正文（arXiv 2512.23273 第 3.5 节）后发现，**论文指定的平衡项与上游代码实现的不是同一个**。论文式 (13)：
 
-$$ \mathcal{L}_{LB} = rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - rac{1}{E}
+$$ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
 ight)^2 $$
 
 其中 μᵢ 由 **Ω_train**——即 top-K 掩码并重归一之后的权重（论文式 8）——在批与空间位置上取平均得到。上游 `ES_MOE` 则把 GShard 式 `N·Σusage²` 用在**原始 router 概率**上。三者在同一对输入上的表现：
@@ -166,7 +166,7 @@ ight)^2 $$
 
 逐句读上游后确认：`ES_MOE._compute_load_balancing_loss` 把 GShard 式施加在 `DynamicRoutingLayer` 的返回值上，而它训练期返回 `_soft_top_k(...)` 的输出——**掩码并重归一后的门控**。论文式 (12) 的 μ 取的也是门控。于是
 
-$$\mathcal{L}_{	ext{论文}}=rac{\mathcal{L}_{	ext{上游}}-1}{E^2}$$
+$$\mathcal{L}_{\text{论文}}=\frac{\mathcal{L}_{\text{上游}}-1}{E^2}$$
 
 **论文与上游代码是同一个目标，仅差仿射变换**，最小值点相同、梯度成正比。此前说「两者不是同一个」是错的。
 
@@ -193,3 +193,28 @@ $$\mathcal{L}_{	ext{论文}}=rac{\mathcal{L}_{	ext{上游}}-1}{E^2}$$
 7. **`norm` 臂对精度的影响落在 ±0.003 以内**，即 seed 间离散度的量级——它是结构完整性问题，不预期是精度来源。
 
 预测错了照实记录。
+
+### 更正（2026-09-09 深夜，仍在任何结构臂结果之前）
+
+上一节把五条记录的 `balance` 改标为 `gshard_probs`。**那次改标也是错的**，连同 `--balance`、`--out-norm`、`--dense-training` 三个开关的全部结果，一并在此更正。
+
+训练器会照 `model.yaml` 重建模型。`YOLO(cfg)` 返回实例之后再设到块上的目标函数与开关，落在一个随即被丢弃的对象上，不报错、不留痕。因此这三个开关从未进入真正训练的模型：请求 `master` 的跑了构造函数默认值，请求输出归一化的训练出来没有归一化，而记录照命令行写，说的是另一回事。
+
+判据取自权重本身，不取自日志：
+
+```python
+model = torch.load("best.pt", map_location="cpu", weights_only=False)["model"]
+[b.balance.__name__ for b in esmoe.blocks(model)]  # ['switch_balance']
+```
+
+早于某设置的块连对应属性都没有，缺失本身即答案。据此：
+
+- 那五条记录训练的是 `switch_balance`，与默认臂同配置、同 seed 的另一次运行。它们改标为 `switch`，并入默认臂的重复项——同卡运行间离散度的直接测量，正是三 seed 置信区间稀缺的东西。
+- 标为 `master` 的两轮实际优化的是**读门控的 GShard**（`esmoe/module.py` 的 md5 对应「读门控」那次提交，`esmoe_aux` 稳定在 0.0101，与均匀门控下 $N\sum u^2 = 1$ 相符）。按 `gshard` 记。
+- 第四轮预测仍然成立且仍未回答：读门控的目标能否解除塌缩。回答它的是这两轮，不是原先以为的那两轮。
+
+**修法与复核。** `graft()` 把设置写进配置文件（`[4, 2, null, {balance: …, out_norm: …, dense_training: …}]`），`ESMoE` 接受 options 映射并按名解析目标函数——重建多少次都在。`scripts/train.py` 改为从训练完的模型上读块配置写进记录，请求与实际不符即在开跑前退出；`tests/test_ultralytics.py` 真训一轮守住这条路径。
+
+复核不靠回忆：`scripts/blockspec.py` 在存权重的机器上读出每个 checkpoint 的块设置，`scripts/backfill.py --settings` 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，**0 条需要更正**——已发布的数据是准的，错的只是尚未并入的新臂。
+
+**一般化的一条**：记录里写着 `--flag`，不等于 `--flag` 进了模型。记录要从训练完的模型上读，不要复述命令行。
