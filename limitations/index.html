@@ -756,7 +756,13 @@
 <h2 id="_5">报告口径<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <ul>
 <li>seed 逐个列出，并给出均值 ± 样本标准差。三个 seed 下标准差只是粗估，不主张任何显著性检验。全量数据上有一个 seed 几乎打平（mAP50 +0.0001），因此该效应方向一致，但<strong>单次运行不可靠</strong>。</li>
-<li>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</li>
+<li>
+<p>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</p>
+</li>
+<li>
+<p>每条记录里的指标是训练结束后对 <code>best.pt</code> 的那次复验，不是 <code>results.csv</code> 最后一行（最后一个 epoch）。两者相差通常在 0.001–0.005，方向一律是复验更高，因为最好的 epoch 少有落在最后。基线臂与 ESMoE 臂走同一条路径，配对差值不受影响。</p>
+</li>
+<li>配对差值同时给 95% 置信区间（三 seed 即两个自由度，区间相应地宽）。除最短预算的那一格外，<strong>所有区间都横跨零</strong>——这就是三个 seed 能支持的精度。</li>
 </ul>
 <h2 id="_6">与上游和原论文的差异<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>本包按 YOLO-Master 的 <code>ES_MOE</code> 结构复刻，逐项核对后有三处需要写明。</p>
@@ -767,6 +773,8 @@
 <p><strong>推理期的稀疏化程度不同。</strong> 上游有 <code>dynamic_threshold</code>（默认 0.4），推理时进一步剪掉低置信专家；本包只跳过 top-k 之外的专家，不按阈值再剪。训练语义相同，导出与实测时延会有差别。</p>
 <p><strong>嫁接位置与论文的最终默认一致，块数不同。</strong> 论文 §3.1 说块同时放进 Backbone 与 Neck，但 §4.3.1 的消融（Table 5）给出：Neck Only 58.2、Both 54.9、<strong>Backbone Only 62.1</strong>，作者据此写明「we adopt backbone-only ES-MoE as our default configuration」。本包只在主干嫁接，与该默认一致；此前写「论文放两处而我们只放一处」是漏读了那张表，予以更正。</p>
 <p>块数确实不同：上游 YAML 在主干每个 stage 之后各放一块，共四块；本包默认只在主干末端放一块。<code>graft(at="backbone_stages")</code> 复刻上游布局，七代主干均得到四块（stage 边界由下采样层反推，因为各代下采样模块不同——v9 用 <code>AConv</code>、v10 用 <code>SCDown</code>、其余是 stride-2 <code>Conv</code>）。</p>
+<p><strong>块内还有两处结构差异，本包做成开关。</strong> 上游在加权求和之后有一层 <code>BatchNorm2d + SiLU</code>（论文式 2 的 <code>Norm(·)</code>），本包默认没有，<code>out_norm=True</code> 打开。上游训练期跑满全部专家，未被选中的权重为 0 但其归一化统计量仍在更新；本包默认跳过未选专家，那些统计量因此冻结，<code>dense_training=True</code> 对齐。两处都不设为默认值：它们各自都可能改变路由塌缩的结论，在有对照数据之前把它们定下来，等于用论证代替数据。</p>
+<p><strong>块的设置写在配置文件里，不写在实例上。</strong> 训练器会照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的目标函数与开关会随那个被丢弃的实例一起消失，既不报错也不留痕。<code>graft()</code> 因此把设置写进配置（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数。<code>scripts/train.py</code> 记录的块配置是从训练完的模型上读的，不是复述命令行；请求与实际不符时它在开跑前退出。<code>scripts/blockspec.py</code> 可从任一 checkpoint 读回当时真正生效的设置。</p>
 <p>同一处已核对一致：四专家的默认异构核都是 <code>[3, 5, 7, 9]</code>；路由器都是全局池化后的两层瓶颈（<code>reduction = 8</code>，下限 8 通道），softmax 前都把 logits 夹到 <code>[-30, 30]</code>；论文的 Soft Top-K（式 8）与本包的门控实现逐字一致。</p>
 
 
