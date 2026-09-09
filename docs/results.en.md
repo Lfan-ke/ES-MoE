@@ -6,7 +6,7 @@ configuration and budget, so two different budgets never land in the same averag
 tables rather than the two means, and read [limitations](limitations.md) before quoting a number;
 cell-by-cell verdicts are on the [judgment lines](JUDGMENT.md) page.
 
-The 36 protocol-matrix `best.pt` checkpoints and their full training arguments live on the
+The 69 protocol-matrix `best.pt` checkpoints and their full training arguments live on the
 [`checkpoints` branch](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints) (Git LFS, isolated from
 `main`): every bucket and routing number recomputes from them.
 

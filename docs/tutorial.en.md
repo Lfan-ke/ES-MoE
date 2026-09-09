@@ -128,6 +128,23 @@ Experts and the balancing objective are plain callables:
 `esmoe.blocks(model)` iterates every block in a model, which is how the collector and the tests find
 them.
 
+### Three balancing objectives ship with the block
+
+Three are built in, the first being the default:
+
+| objective | formula | reads |
+|:--:|:--:|:--:|
+| `switch_balance` | `E * sum(p_i f_i)` | mean probabilities x realised load |
+| `gshard_balance` | `N * sum(usage_i^2)` | mean probabilities (what upstream's `ES_MOE` uses) |
+| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (what the paper's eq. 13 uses) |
+
+What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only `master_balance`, reading the gated weights, can. To pick one:
+
+    esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
+
+Upstream's code and its own paper disagree here; the trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+
+
 ## Where the edges are
 
 Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and `loss_items` changed shape across ultralytics releases. Those and the rest are in [Limitations](limitations.md), which is also the page to read before quoting any number.
