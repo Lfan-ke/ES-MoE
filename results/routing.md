@@ -343,6 +343,28 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 | 2 | 7 | 0.137 | 0.228 | 0.146 | -0.20 | +0.27 |
 | 3 | 9 | 0.858 | 0.912 | 0.387 | +0.16 | -0.22 |
 
+## yolov5n-esmoe-master-e120-s0-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [0], mean entropy 1.344 of 1.3863, distinct top-2 pairs seen: 5 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.009 | 0.203 | -0.16 | -0.21 |
+| 1 | 5 | 0.000 | 0.381 | 0.213 | -0.19 | -0.10 |
+| 2 | 7 | 0.272 | 0.715 | 0.265 | +0.29 | -0.35 |
+| 3 | 9 | 0.728 | 0.894 | 0.319 | -0.25 | +0.46 |
+
+## yolov5n-esmoe-master-e120-s1-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3597 of 1.3863, distinct top-2 pairs seen: 4 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.058 | 0.215 | +0.03 | -0.44 |
+| 1 | 5 | 0.000 | 0.044 | 0.195 | -0.20 | -0.01 |
+| 2 | 7 | 0.122 | 0.905 | 0.264 | +0.32 | -0.22 |
+| 3 | 9 | 0.878 | 0.993 | 0.327 | -0.30 | +0.39 |
+
 ## yolov5n-esmoe-rewire-e120-s0-p800h2-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3447 of 1.3863, distinct top-2 pairs seen: 6 of 6.

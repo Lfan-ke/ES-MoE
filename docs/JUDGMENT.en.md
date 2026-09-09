@@ -219,6 +219,25 @@ The audit does not rely on memory: `scripts/blockspec.py` reads each checkpoint'
 
 **The general lesson**: a `--flag` in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.
 
+## Fourth-round verdict (2026-09-10, the gate-reading objective has run)
+
+The fourth round asked whether an objective that can see the collapse relieves it. Two v5n runs (seeds 0 and 1) are in, and the answer is **no** -- and it moved the other way.
+
+The same `scripts/routing.py` over the 548 VisDrone validation images:
+
+| objective | checkpoints | top-two usage, of 2.0 | lowest usage | dead experts | probability entropy |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| Switch (every earlier record) | 46 | 1.265–1.777 (mean 1.468) | 0.0365 | 0 of 46 | 90%–97% |
+| GShard on the gate | 2 | 1.610–1.898 (mean 1.754) | 0.0091 | 1 of 2 | 97%–98% |
+
+Both checkpoints sit in the upper half of the Switch range or above it, and seed 1's 1.898 is the most concentrated dispatch among all 48 checkpoints. Seed 0 holds the **first dead expert in the project** (usage 0.0091); none of the 46 earlier checkpoints has one. Meanwhile the probability entropy is *higher*, 97%–98% against 90%–97%: **flatter probabilities, more concentrated dispatch**, which is exactly the dissociation this line of work has been chasing.
+
+The paired accuracy is +0.0018 over two seeds (1/2 wins), inside the run-to-run spread and therefore not evidence of anything.
+
+**The confound has to be stated.** At the same `weight=0.01` the two terms are not the same size: at uniform dispatch Switch sits at 2.0 and GShard at 1.0, so this arm carried roughly half the balancing pressure of the arm it is compared against. What this round supports is "**at weight 0.01, reading the gate did not relieve the collapse**", not "an objective that reads the gate cannot". Separating those needs a weight matched to the term's scale, and that run was not made.
+
+**The fourth prediction is not borne out, and is recorded as such.** The follow-up is a pressure-matched comparison, not another objective.
+
 ## Run-to-run spread at one configuration (2026-09-09, not planned)
 
 The six mislabelled runs of the previous section trained exactly what the default arm trains: same configuration, same seed, same card, run a second time. They are therefore not extra samples but a direct measure of something nothing here had measured -- **how far apart two runs of one configuration land.**
