@@ -218,3 +218,9 @@ A block pickled before a setting existed carries no attribute for it, and the ab
 The audit does not rely on memory: `scripts/blockspec.py` reads each checkpoint's block settings on the host that holds it, and `scripts/backfill.py --settings` rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and **none needed correcting** — the published data is sound; what was wrong were the new arms, none of them merged yet.
 
 **The general lesson**: a `--flag` in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.
+
+### Results from the alignment arms
+
+Filled in as the runs land, from the same numbers as `results/summary.md`.
+
+<div id="esmoe-alignment"></div>

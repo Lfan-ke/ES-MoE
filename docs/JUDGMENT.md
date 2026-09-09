@@ -218,3 +218,9 @@ model = torch.load("best.pt", map_location="cpu", weights_only=False)["model"]
 复核不靠回忆：`scripts/blockspec.py` 在存权重的机器上读出每个 checkpoint 的块设置，`scripts/backfill.py --settings` 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，**0 条需要更正**——已发布的数据是准的，错的只是尚未并入的新臂。
 
 **一般化的一条**：记录里写着 `--flag`，不等于 `--flag` 进了模型。记录要从训练完的模型上读，不要复述命令行。
+
+### 对照臂结果
+
+结果产出后自动填入，数字与 `results/summary.md` 同源。
+
+<div id="esmoe-alignment"></div>

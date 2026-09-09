@@ -11,9 +11,13 @@
   const ZH = (document.documentElement.lang || "").toLowerCase().startsWith("zh");
   const T = ZH
     ? { "default graft": "ES-MoE 默认", rewire: "ES-MoE 改接", axis: "配对差值", seed: "seed ",
-        mean: "均值，共 ", wins: "胜", seeds: "逐 seed", png: "存为 PNG" }
+        mean: "均值，共 ", wins: "胜", seeds: "逐 seed", png: "存为 PNG",
+        pending: "对照臂尚未产出结果。", colBackbone: "主干", colArm: "臂",
+        colMean: "配对差值均值", colCi: "95% 置信区间", colWins: "胜" }
     : { "default graft": "ES-MoE default", rewire: "ES-MoE rewired", axis: "paired delta", seed: "seed ",
-        mean: "mean of ", wins: "wins", seeds: "seeds", png: "PNG" };
+        mean: "mean of ", wins: "wins", seeds: "seeds", png: "PNG",
+        pending: "No results from the alignment arms yet.", colBackbone: "backbone", colArm: "arm",
+        colMean: "mean paired delta", colCi: "95% CI", colWins: "wins" };
   const SYSTEM = window.matchMedia("(prefers-color-scheme: dark)");
   const SEEDS = 3; // the protocol's seed count; fewer means the arm is still running
 
@@ -214,7 +218,34 @@
     host.parentNode.insertBefore(bar, host);
   }
 
+
+  // The alignment arms are a per-backbone comparison of block configurations, so they read as a
+  // table rather than as points on the seven-generation axis. Nothing renders until they land.
+  function alignmentTable() {
+    const host = document.getElementById("esmoe-alignment");
+    const rows = (window.ESMOE_EFFECT || {}).alignment || [];
+    if (!host) return;
+    if (!rows.length) {
+      host.textContent = T.pending;
+      return;
+    }
+    const head = [T.colBackbone, T.colArm, T.colMean, T.colCi, T.colWins];
+    const cells = rows
+      .map(function (r) {
+        const sign = r.mean > 0 ? "+" : "";
+        return (
+          "<tr><td>" + r.backbone + "</td><td><code>" + r.arm + "</code></td>" +
+          "<td>" + sign + r.mean.toFixed(4) + "</td><td>" + r.ci + "</td>" +
+          "<td>" + r.wins + "/" + r.seeds.length + "</td></tr>"
+        );
+      })
+      .join("");
+    host.innerHTML =
+      "<table><thead><tr><th>" + head.join("</th><th>") + "</th></tr></thead><tbody>" + cells + "</tbody></table>";
+  }
+
   function draw() {
+    alignmentTable();
     const host = document.getElementById("esmoe-effect");
     const data = window.ESMOE_EFFECT;
     if (!host || !window.echarts || !data || !data.rows || !data.rows.length) return;
