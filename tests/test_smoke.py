@@ -103,3 +103,67 @@ def test_gate_still_sums_to_one_in_half_precision():
     gate = torch.zeros_like(probability).scatter(1, chosen, weights).half()
     gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
     assert torch.allclose(gate.float().sum(dim=1), torch.ones(8), atol=1e-2)
+
+
+def test_gshard_matches_the_upstream_definition():
+    """N * sum(usage^2) over normalised mean routing mass: 1.0 at uniform, N when one expert takes all."""
+    uniform = torch.full((6, 4), 0.25)
+    one_hot = torch.zeros(6, 4)
+    one_hot[:, 0] = 1.0
+    gate = torch.zeros(6, 4)
+    assert esmoe.gshard_balance(uniform, gate).item() == pytest.approx(1.0, rel=1e-5)
+    assert esmoe.gshard_balance(one_hot, gate).item() == pytest.approx(4.0, rel=1e-5)
+
+
+def test_gshard_rises_as_routing_mass_concentrates():
+    gate = torch.zeros(3, 4)
+    flat = torch.tensor([[0.25, 0.25, 0.25, 0.25]]).repeat(3, 1)
+    skewed = torch.tensor([[0.70, 0.20, 0.05, 0.05]]).repeat(3, 1)
+    assert esmoe.gshard_balance(skewed, gate) > esmoe.gshard_balance(flat, gate)
+
+
+def test_switch_is_flat_where_gshard_is_not():
+    """The two objectives disagree, which is why the block lets you choose.
+
+    With uniform mean probabilities the Switch term is pinned at k however the top-k dispatch
+    falls, so it cannot report a dispatch that has collapsed onto one expert.
+    """
+    even = torch.tensor(
+        [[0.40, 0.30, 0.15, 0.15], [0.30, 0.40, 0.15, 0.15], [0.15, 0.15, 0.40, 0.30], [0.15, 0.15, 0.30, 0.40]]
+    )
+    skewed = torch.tensor([[0.25, 0.45, 0.15, 0.15], [0.25, 0.15, 0.45, 0.15], [0.25, 0.15, 0.15, 0.45]])
+
+    def top_k_gate(probs, k=2):
+        return torch.zeros_like(probs).scatter(1, probs.topk(k, dim=1).indices, 1.0)
+
+    assert esmoe.switch_balance(even, top_k_gate(even)).item() == pytest.approx(2.0, rel=1e-5)
+    assert esmoe.switch_balance(skewed, top_k_gate(skewed)).item() == pytest.approx(2.0, rel=1e-5)
+    # one expert takes every token's top-1 in `skewed`, and the Switch term never moves
+    assert top_k_gate(skewed)[:, 0].mean().item() == pytest.approx(1.0)
+
+
+def test_block_trains_with_the_upstream_objective():
+    net = _net(balance=esmoe.gshard_balance)
+    esmoe.clear_aux_loss()
+    net(torch.randn(2, 3, 32, 32))
+    aux = collect_aux_loss(net)
+    assert aux.item() > 0
+    aux.backward()
+    block = next(blocks(net))
+    assert any(p.grad is not None and p.grad.abs().sum() > 0 for p in block.router.parameters())
+
+
+def test_router_survives_a_runaway_logit():
+    """A logit large enough to overflow the softmax must not take the gate to NaN.
+
+    Upstream clamps before the softmax for this reason; without it a diverging router poisons every
+    downstream loss and the run dies far from the cause.
+    """
+    net = _net()
+    net(torch.randn(2, 3, 32, 32))
+    block = next(blocks(net))
+    with torch.no_grad():
+        block.router[-1].bias[0] = 1e4
+    out = net(torch.randn(2, 3, 32, 32))
+    assert torch.isfinite(out).all()
+    assert torch.isfinite(collect_aux_loss(net)).all()

@@ -105,7 +105,7 @@ class ESMoE(nn.Module):
     def build(self, channels: int) -> None:
         if self.channels is not None:
             return
-        hidden = max(channels // self.reduction, 1)
+        hidden = max(channels // self.reduction, 8)
         self.experts = nn.ModuleList(self.expert_factory(channels, channels, k) for k in self.expert_kernel_sizes)
         self.router = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
@@ -120,7 +120,9 @@ class ESMoE(nn.Module):
         if self.channels is None:
             self.build(x.shape[1])
             self.to(x.device)  # never x.dtype: autocast feeds half here, params must stay fp32
-        probs = F.softmax(self.router(x), dim=1)
+        # Clamped before the softmax, as upstream does: a router logit that runs away under mixed
+        # precision otherwise reaches softmax as inf and takes the whole gate to NaN.
+        probs = F.softmax(self.router(x).float().clamp(-30.0, 30.0), dim=1).type_as(x)
         weights, chosen = probs.topk(self.top_k, dim=1)
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
