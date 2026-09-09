@@ -1028,7 +1028,7 @@
 </ol>
 <h3 id="what-the-full-matrix-does-support">What the full matrix does support<a class="headerlink" href="#what-the-full-matrix-does-support" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>The default wiring's effect decays monotonically with backbone generation</strong>: +0.0025 (v8n) → +0.0013 (11n) → −0.0018 (12n) → −0.0034 (26n). The newer the backbone end (SPPF → C2PSA → A2C2f → E2E head), the worse the same graft point fares.</li>
+<li><strong>The default wiring's effect decays monotonically with backbone generation</strong>: +0.0025 (v8n) → +0.0013 (11n) → −0.0018 (12n) → −0.0034 (26n). The newer the backbone end (SPPF → C2PSA → A2C2f → E2E head), the worse the same graft point fares. <strong>Withdrawn at the second-round verdicts below</strong>: with seven generations the order no longer holds by version number, and the grouping is by what the backbone ends in.</li>
 <li><strong><code>rewire</code> pulls 12n and 26n back to near parity</strong> and is the only 3/3 arm on v8n; only on 11n does it trail the default arm. The wiring — whether consumers read the block's output — moves the metric more than the backbone does, but not in one direction everywhere.</li>
 <li><strong>Where the damage lands depends on the backbone</strong>: v8n loses large objects, 26n loses small ones, 12n is direction-unstable. No fixed "this block helps/hurts scale X" statement survives the four-generation matrix.</li>
 <li><strong>Routing collapses identically on all four generations</strong>: no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation; five of 26n's six checkpoints hand the lead to the <code>k = 9</code> expert. Rewiring changes none of it.</li>
