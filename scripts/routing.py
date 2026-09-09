@@ -58,6 +58,10 @@ def route(weights: Path, data: Path, args) -> dict:
     handle.remove()
 
     logits = torch.cat(captured)
+    # On an accelerator ultralytics warms the model up with a dummy forward before the first real
+    # batch. The hook sees that row too, and it belongs to no image.
+    if logits.shape[0] > len(stems):
+        logits = logits[-len(stems) :]
     probs = logits.softmax(dim=1)
     chosen = probs.topk(block.top_k, dim=1).indices
     n, e = probs.shape
