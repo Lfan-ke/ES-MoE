@@ -1,0 +1,51 @@
+{
+  "weights": "yolov10n-esmoe-rewire-e120-s3-p800-best.pt",
+  "images": 548,
+  "kernels": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "top_k": 2,
+  "usage": [
+    0.438,
+    0.292,
+    0.9234,
+    0.3467
+  ],
+  "top1_share": [
+    0.0018,
+    0.0931,
+    0.8905,
+    0.0146
+  ],
+  "dead_experts": [],
+  "mean_prob": [
+    0.2222,
+    0.1806,
+    0.3801,
+    0.2171
+  ],
+  "prob_entropy_mean": 1.3006,
+  "prob_entropy_max": 1.3863,
+  "unique_top2_sets": 6,
+  "scale_of_top1_choice": {
+    "0": 32.2,
+    "1": 29.5,
+    "2": 36.7,
+    "3": 73.4
+  },
+  "prob_vs_scale_corr": [
+    0.228,
+    -0.243,
+    0.042,
+    0.304
+  ],
+  "prob_vs_count_corr": [
+    -0.254,
+    0.291,
+    -0.031,
+    -0.428
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "weights": "yolov10n-esmoe-e120-s1-p800-best.pt",
+  "images": 548,
+  "kernels": [
+    3,
+    5,
+    7,
+    9
+  ],
+  "top_k": 2,
+  "usage": [
+    0.4416,
+    0.5438,
+    0.2555,
+    0.7591
+  ],
+  "top1_share": [
+    0.0182,
+    0.2482,
+    0.1168,
+    0.6168
+  ],
+  "dead_experts": [],
+  "mean_prob": [
+    0.2568,
+    0.2557,
+    0.1844,
+    0.303
+  ],
+  "prob_entropy_mean": 1.3308,
+  "prob_entropy_max": 1.3863,
+  "unique_top2_sets": 6,
+  "scale_of_top1_choice": {
+    "0": 92.9,
+    "1": 33.7,
+    "2": 27.4,
+    "3": 37.8
+  },
+  "prob_vs_scale_corr": [
+    0.461,
+    -0.078,
+    -0.281,
+    0.154
+  ],
+  "prob_vs_count_corr": [
+    -0.442,
+    0.253,
+    0.365,
+    -0.334
+  ]
+}

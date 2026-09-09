@@ -71,6 +71,44 @@ With two MetaX C500 boxes available the queue is v9t nine runs, v10n nine runs, 
 1. **v5n is rerun as a whole generation**, completing the missing `rewire` arm and yielding a same-configuration replication on another host. `scripts/report.py` carries the hardware stack in its grouping key, so two hosts form two groups rather than folding into one cell as repeats.
 2. **v10n gains seeds 3 and 4.** Box b's queue is shorter than box a's, and the spare hours extend **all three** v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.
 
+## Second-round verdicts (2026-09-09, after 33 runs)
+
+YOLOv5n, v9t and v10n all finished under the protocol. v5n was rerun as a whole generation on the new hardware stack, and every v10n arm was extended to five seeds. Cell by cell:
+
+| backbone | default `esmoe` | `rewire` |
+|:--:|:--:|:--:|
+| YOLOv5n (`metax3.3`) | effective (+0.0055, 3/3; mAP50-95 +0.0038) | effective (+0.0024, 2/3; +0.0018) |
+| YOLOv5n (`metax3.7`) | effective (+0.0041, 3/3; +0.0026) | one seed only, not judged |
+| YOLOv9t | effective (+0.0025, 2/3; +0.0009) | ineffective (−0.0013, 1/3; −0.0021) |
+| YOLOv10n (5 seeds) | ineffective (−0.0002, 3/5; −0.0003) | ineffective (−0.0031, 1/5; −0.0016) |
+
+YOLOv10n's default arm sits on zero with 3 of 5 seeds positive; the line calls that ineffective, and parity is the fairer reading.
+
+### Predictions, settled
+
+1. **Right.** v5n's default arm is positive on both stacks: +0.0055 (3/3) and +0.0041 (3/3).
+2. **Right.** v10n's default arm (−0.0002) sits below v5n's (+0.0055).
+3. **Right.** The collapse repeats across 22 checkpoints: no dead experts, a dominant expert holding 0.491–0.921 of the top-1 (0.71–0.82 by generation), mean-probability entropy at 89.8%–97.2% of its maximum, the leader changing with the seed, and the k = 3 expert never leading.
+
+### Replication on another host
+
+The same v5n configuration ran nine times on each of two C500 hosts: +0.0041 (`metax3.7`) against +0.0055 (`metax3.3`), agreeing in sign, wins and magnitude. The paired delta reproduces.
+
+One self-check worth recording: v5n's `rewire` arm read +0.0074 on a single seed and +0.0024 once all three were in. "No mean below three seeds" exists for exactly that.
+
+### Seven generations retire the earlier wording
+
+At four generations this page said the effect "decays monotonically with backbone generation". With seven it no longer does by version number - v10n (−0.0002) falls below 11n (+0.0013). Grouped by what the backbone ends in, it is orderly:
+
+| backbone end | backbones | default-arm mean |
+|:--:|:--:|:--:|
+| SPPF family | v5n / v8n / v9t | +0.0055 / +0.0025 / +0.0025 |
+| attention | v10n (PSA) / 11n (C2PSA) | −0.0002 / +0.0013 |
+| area attention | 12n (A2C2f) | −0.0018 |
+| E2E head | 26n | −0.0034 |
+
+The sign changes when the backbone end becomes an attention block, not as release numbers rise. The "monotonic with generation" wording is withdrawn.
+
 ## Third pre-registration (2026-09-09, declared before any `gshard` result)
 
 Reading YOLO-Master's own `ES_MOE` shows it optimises a different balancing term from this toolkit's default:
