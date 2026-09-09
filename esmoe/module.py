@@ -224,9 +224,10 @@ class ESMoE(nn.Module):
         if self.dynamic_threshold and not self.training:
             # Upstream's inference-time pruning: below the threshold an expert is dropped, except
             # the leading one, and the survivors are renormalised so the mixture still sums to one.
-            keep = gate >= self.dynamic_threshold
-            keep.scatter_(1, chosen[:, :1], True)
-            gate = gate * keep
+            # The mask is tensor arithmetic rather than a scatter of a Python bool, which a tracer
+            # refuses, and it is recomputed per input so an exported graph stays faithful.
+            leader = F.one_hot(chosen[:, 0], probs.shape[1]).to(torch.bool)
+            gate = gate * ((gate >= self.dynamic_threshold) | leader)
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         out = x.new_zeros(x.shape[0], self.out_channels or x.shape[1], *x.shape[2:])
         # Skipping an unrouted expert saves work at run time, but the decision depends on the data:

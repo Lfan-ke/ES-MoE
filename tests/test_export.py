@@ -42,3 +42,15 @@ def test_export_stays_faithful_for_inputs_that_route_elsewhere(tmp_path):
             expected = block(sample).numpy()
         exported = session.run(["y"], {"x": sample.numpy()})[0]
         assert np.abs(expected - exported).max() < 1e-4
+
+
+def test_tracing_survives_inference_pruning():
+    """`dynamic_threshold` must be tensor arithmetic: a tracer refuses a scatter of a Python bool,
+    and a mask baked in from the traced batch would prune the wrong experts for every later input.
+    """
+    block = esmoe.ESMoE(4, 2, channels=16, dynamic_threshold=0.4).eval()
+    x = torch.randn(3, 16, 4, 4)
+    traced = torch.jit.trace(block, x)
+    with torch.no_grad():
+        for probe in (x, torch.randn(3, 16, 4, 4) * 5):
+            assert torch.allclose(block(probe), traced(probe), atol=1e-5)
