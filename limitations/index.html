@@ -760,8 +760,9 @@
 <p>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</p>
 </li>
 <li>
-<p>每条记录里的指标是训练结束后对 <code>best.pt</code> 的那次复验，不是 <code>results.csv</code> 最后一行（最后一个 epoch）。两者相差通常在 0.001–0.005，方向一律是复验更高，因为最好的 epoch 少有落在最后。基线臂与 ESMoE 臂走同一条路径，配对差值不受影响。</p>
+<p><strong>同配置重复运行的差别与效应同量级。</strong> 曦云 C500 上，同配置同 seed 跑两遍，120 epoch 后 mAP50 平均差 0.0045、最大差 0.0130（五对）；同样的重复在 4090 上逐位相同（一对，20 epoch）。七代主干的配对差值均值全部落在 0.0045 以内，所以本文只对<strong>方向</strong>下结论，不对幅度下结论。表见 <code>results/summary.md</code> 末尾。</p>
 </li>
+<li>每条记录里的指标是训练结束后对 <code>best.pt</code> 的那次复验，不是 <code>results.csv</code> 最后一行（最后一个 epoch）。两者相差通常在 0.001–0.005，方向一律是复验更高，因为最好的 epoch 少有落在最后。基线臂与 ESMoE 臂走同一条路径，配对差值不受影响。</li>
 <li>配对差值同时给 95% 置信区间（三 seed 即两个自由度，区间相应地宽）。除最短预算的那一格外，<strong>所有区间都横跨零</strong>——这就是三个 seed 能支持的精度。</li>
 </ul>
 <h2 id="_6">与上游和原论文的差异<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>

@@ -768,6 +768,23 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-09-09_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        同配置重复运行的离散度（2026-09-09，非计划所得）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="同配置重复运行的离散度（2026-09-09，非计划所得）">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1072,6 +1089,23 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-09-09_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        同配置重复运行的离散度（2026-09-09，非计划所得）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="同配置重复运行的离散度（2026-09-09，非计划所得）">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
@@ -1408,6 +1442,51 @@ ight)^2 \]</div>
 <p><strong>修法与复核。</strong> <code>graft()</code> 把设置写进配置文件（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数——重建多少次都在。<code>scripts/train.py</code> 改为从训练完的模型上读块配置写进记录，请求与实际不符即在开跑前退出；<code>tests/test_ultralytics.py</code> 真训一轮守住这条路径。</p>
 <p>复核不靠回忆：<code>scripts/blockspec.py</code> 在存权重的机器上读出每个 checkpoint 的块设置，<code>scripts/backfill.py --settings</code> 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，<strong>0 条需要更正</strong>——已发布的数据是准的，错的只是尚未并入的新臂。</p>
 <p><strong>一般化的一条</strong>：记录里写着 <code>--flag</code>，不等于 <code>--flag</code> 进了模型。记录要从训练完的模型上读，不要复述命令行。</p>
+<h2 id="2026-09-09_2">同配置重复运行的离散度（2026-09-09，非计划所得）<a class="headerlink" href="#2026-09-09_2" title="Permanent link">&para;</a></h2>
+<p>上一节那六轮误标的运行，实际训练的与默认臂完全相同——同配置、同 seed、同一张卡上的另一次运行。它们因此不是重复样本，而是一把直接的尺子：<strong>同一个配置跑两遍，指标能差多少。</strong></p>
+<p><code>results/summary.md</code> 末尾的表由 <code>scripts/report.py</code> 逐条算出：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">硬件栈</th>
+<th style="text-align: center;">epoch</th>
+<th style="text-align: center;">重复对数</th>
+<th style="text-align: center;">平均差</th>
+<th style="text-align: center;">最大差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">120</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.0045</td>
+<td style="text-align: center;">0.0130</td>
+</tr>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+<tr>
+<td style="text-align: center;">4090d / torch2.6</td>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+</tbody>
+</table>
+<p>这把尺子量的是我们全部结论的分母。七代主干上，默认臂的配对差值均值是 v5n +0.0055、v8n +0.0025、v9t +0.0025、v10n −0.0002、11n +0.0013、12n −0.0018、26n −0.0034——<strong>每一个都落在同配置重复运行的平均差之内</strong>。</p>
+<p>三点必须写明：</p>
+<ol>
+<li><strong><code>deterministic=True</code> 在这张加速卡上没有兑现。</strong> 训练器设了固定 seed 与确定性标志，4090 上同配置重跑逐位相同（一对，20 epoch），曦云 C500 上不同（五对，120 epoch）。差异随训练变长累积：1 epoch 时为零。</li>
+<li><strong>正效应最大的那一代，恰好在噪声最大的那台机器上。</strong> v5n 的 +0.0055 与 +0.0041 都出自曦云；4090 上的四代（v8n、11n、12n、26n）目前只有一对同配置重复可依。</li>
+<li><strong>这不推翻符号的一致性，但推翻幅度的可读性。</strong> 「某代为正、某代为负」这一层由多 seed 的符号统计支撑；「+0.0055 是这个块带来的」这一层不成立——单次运行的差别就能有 0.0130。</li>
+</ol>
+<p>因此本项目对精度的表述只保留到方向一层，且明确标注样本量与置信区间；此前判读线里凡以幅度为据的推断，一律降级为方向。<strong>这是本课题最有价值的负结果，而它来自一个实现缺陷的副产品——若非那六轮被误标，同配置的重复根本不会有人去跑。</strong></p>
 <h3 id="_11">对照臂结果<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
 <p>结果产出后自动填入，数字与 <code>results/summary.md</code> 同源。</p>
 <div id="esmoe-alignment"></div>

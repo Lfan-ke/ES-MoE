@@ -768,6 +768,23 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run-to-run spread at one configuration (2026-09-09, not planned)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run-to-run spread at one configuration (2026-09-09, not planned)">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#results-from-the-alignment-arms" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1072,6 +1089,23 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run-to-run spread at one configuration (2026-09-09, not planned)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run-to-run spread at one configuration (2026-09-09, not planned)">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#results-from-the-alignment-arms" class="md-nav__link">
@@ -1408,6 +1442,51 @@ ight)^2 \]</div>
 <p><strong>The fix, and the audit.</strong> <code>graft()</code> now writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. <code>scripts/train.py</code> records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; <code>tests/test_ultralytics.py</code> trains a model to hold that path.</p>
 <p>The audit does not rely on memory: <code>scripts/blockspec.py</code> reads each checkpoint's block settings on the host that holds it, and <code>scripts/backfill.py --settings</code> rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and <strong>none needed correcting</strong> — the published data is sound; what was wrong were the new arms, none of them merged yet.</p>
 <p><strong>The general lesson</strong>: a <code>--flag</code> in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.</p>
+<h2 id="run-to-run-spread-at-one-configuration-2026-09-09-not-planned">Run-to-run spread at one configuration (2026-09-09, not planned)<a class="headerlink" href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" title="Permanent link">&para;</a></h2>
+<p>The six mislabelled runs of the previous section trained exactly what the default arm trains: same configuration, same seed, same card, run a second time. They are therefore not extra samples but a direct measure of something nothing here had measured -- <strong>how far apart two runs of one configuration land.</strong></p>
+<p><code>scripts/report.py</code> computes the table at the end of <code>results/summary.md</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">stack</th>
+<th style="text-align: center;">epochs</th>
+<th style="text-align: center;">repeats</th>
+<th style="text-align: center;">mean gap</th>
+<th style="text-align: center;">largest gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">120</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.0045</td>
+<td style="text-align: center;">0.0130</td>
+</tr>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+<tr>
+<td style="text-align: center;">4090d / torch2.6</td>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+</tbody>
+</table>
+<p>That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- <strong>every one of them inside the mean gap between two runs of one configuration.</strong></p>
+<p>Three things follow, and all three are stated rather than softened:</p>
+<ol>
+<li><strong><code>deterministic=True</code> does not hold on this accelerator.</strong> The trainer fixes the seed and sets the deterministic flag; on the 4090 a repeat reproduces bit for bit (one pair, 20 epochs), on the MetaX C500 it does not (five pairs, 120 epochs). The divergence accumulates with training: at one epoch the gap is zero.</li>
+<li><strong>The generation with the largest positive effect sits on the noisier machine.</strong> v5n's +0.0055 and +0.0041 both come from the MetaX cards; the four measured on the 4090 (v8n, 11n, 12n, 26n) rest on a single same-configuration repeat so far.</li>
+<li><strong>This does not overturn the consistency of the signs, but it does overturn reading the magnitudes.</strong> "Positive on this generation, negative on that one" is carried by the sign counts across seeds. "The block is worth +0.0055" is not: two runs of one configuration already differ by 0.0130.</li>
+</ol>
+<p>Accuracy claims here therefore stop at direction, with the sample size and interval stated alongside; anywhere an earlier judgment line reasoned from a magnitude, it is downgraded to direction. <strong>This is the most useful negative result of the project, and it is a by-product of an implementation defect -- without those six runs being mislabelled, nobody would have paid for a repeat of an identical configuration.</strong></p>
 <h3 id="results-from-the-alignment-arms">Results from the alignment arms<a class="headerlink" href="#results-from-the-alignment-arms" title="Permanent link">&para;</a></h3>
 <p>Filled in as the runs land, from the same numbers as <code>results/summary.md</code>.</p>
 <div id="esmoe-alignment"></div>
