@@ -82,8 +82,8 @@ for custom training loops.
 |:--:|:--:|:--:|:--:|:--:|
 | YOLOv5 | yes | yes | yes | yes |
 | YOLOv8 | yes | yes | yes | yes |
-| YOLOv9 | yes | yes | yes | in progress |
-| YOLOv10 | yes | yes | yes | in progress |
+| YOLOv9 | yes | yes | yes | yes |
+| YOLOv10 | yes | yes | yes | yes |
 | YOLO11 | yes | yes | yes | yes |
 | YOLO12 | yes | yes | yes | yes |
 | YOLO26 | yes | yes | yes | yes |
@@ -94,9 +94,7 @@ in two different shapes; both are handled. The training column is backed by real
 runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
 
 Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
-"we ran the full budget-fair protocol on it": YOLOv9 and YOLOv10 are training as of this commit, and their
-1-epoch records on MetaX C500 (`results/*-smoke-*.json`) already log a non-zero `train/esmoe_aux` for both the
-default and the rewired arm. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
+"we ran the full budget-fair protocol on it"; only the YOLO-Master row is still the former alone. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
@@ -107,10 +105,11 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the settled matrix is four backbone generations × three arms × three seeds, 36 runs, with YOLOv5n measured
-separately on another accelerator. The default wiring's paired mAP50 decays monotonically with the generation:
-+0.0041 (v5n, 3/3), +0.0025 (v8n, 2/3), +0.0013 (11n, 2/3), −0.0018 (12n, 0/3), −0.0034 (26n, 0/3), at +10.4%
-parameters and about 9% more wall-clock per epoch.
+the matrix runs to seven backbone generations × three arms × three seeds, 75 runs. What separates a positive
+cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
+SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
+v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
+costs +10.4% parameters and about 9% more wall-clock per epoch.
 
 <p align="center"><img alt="Paired mAP50 delta by backbone generation" src="docs/assets/effect.svg" width="720"></p>
 
