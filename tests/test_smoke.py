@@ -182,10 +182,10 @@ def test_only_the_paper_objective_sees_a_collapsed_dispatch():
     sample's top-k. The Switch and GShard terms read the probabilities and cannot tell the two
     apart. The paper's term reads the gated weights and can.
     """
-    balanced = torch.tensor([[0.40, 0.30, 0.15, 0.15], [0.30, 0.40, 0.15, 0.15],
-                             [0.15, 0.15, 0.40, 0.30], [0.15, 0.15, 0.30, 0.40]])
-    collapsed = torch.tensor([[0.25, 0.45, 0.15, 0.15], [0.25, 0.15, 0.45, 0.15],
-                              [0.25, 0.15, 0.15, 0.45]])
+    balanced = torch.tensor(
+        [[0.40, 0.30, 0.15, 0.15], [0.30, 0.40, 0.15, 0.15], [0.15, 0.15, 0.40, 0.30], [0.15, 0.15, 0.30, 0.40]]
+    )
+    collapsed = torch.tensor([[0.25, 0.45, 0.15, 0.15], [0.25, 0.15, 0.45, 0.15], [0.25, 0.15, 0.15, 0.45]])
     assert _gate_of(collapsed)[:, 0].gt(0).all(), "expert 0 must be in every top-k for this to test anything"
 
     for blind in (esmoe.switch_balance, esmoe.gshard_balance):
