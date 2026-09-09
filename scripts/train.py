@@ -56,11 +56,17 @@ def build(args):
     # The seed is in the filename because two runs of the same arm train side by side: a shared
     # path lets one truncate the config the other is still reading.
     cfg = (
-        ROOT
-        / "configs"
-        / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}-{args.balance}-s{args.seed}.yaml"
+        ROOT / "configs" / f"{Path(args.base).stem}-esmoe-e{args.num_experts}k{args.top_k}{wire}"
+        f"-{args.balance}-{args.at}-s{args.seed}.yaml"
     )
-    esmoe.graft(args.base, out=str(cfg), num_experts=args.num_experts, top_k=args.top_k, rewire=args.rewire)
+    esmoe.graft(
+        args.base,
+        out=str(cfg),
+        at=args.at,
+        num_experts=args.num_experts,
+        top_k=args.top_k,
+        rewire=args.rewire,
+    )
     model = YOLO(str(cfg))
     # The objective is a callable, so it cannot travel through the YAML args; set it on the built
     # blocks instead. `gshard` is the objective YOLO-Master's own ES_MOE optimises.
@@ -88,6 +94,7 @@ def main():
     p.add_argument("--top-k", type=int, default=2)
     p.add_argument("--rewire", action="store_true")
     p.add_argument("--balance", choices=("switch", "gshard", "master", "gshard_probs"), default="switch")
+    p.add_argument("--at", default="backbone_end", help="graft point: backbone_end or backbone_stages")
     p.add_argument("--out-norm", action="store_true", help="normalise the mixed output, as upstream does")
     p.add_argument("--dense-training", action="store_true", help="run every expert while training")
     p.add_argument("--aux-weight", type=float, default=0.01)

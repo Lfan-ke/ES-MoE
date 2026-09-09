@@ -134,15 +134,34 @@ Three are built in, and the default is **the one upstream's `ES_MOE` actually op
 
 | objective | formula | reads |
 |:--:|:--:|:--:|
-| `gshard_balance` (default) | `N * sum(usage_i^2)` | mean probabilities (what upstream's `ES_MOE` uses) |
+| `gshard_balance` (default) | `N * sum(usage_i^2)` | **the gated weights** (what upstream's `ES_MOE` reads) |
 | `switch_balance` | `E * sum(p_i f_i)` | mean probabilities x realised load |
-| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (what the paper's eq. 13 uses) |
+| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the row above) |
+| `gshard_probs_balance` | `N * sum(usage_i^2)` | the raw probabilities, to isolate which tensor is read |
 
 What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert - the shape every run here lands in - the first two evaluate identically and cannot tell that apart; only `master_balance`, reading the gated weights, can. To pick one:
 
     esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
 
-Upstream's code and its own paper disagree here; the trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+Upstream's code and its paper agree here -- both read the gate, and differ only by an affine map (`L_paper = (L_upstream - 1) / E^2`). The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+
+
+### The configuration that matches upstream
+
+Upstream's `ES_MOE` and the paper differ from this package's defaults in four places, not one. Turning all four on is the faithful reproduction:
+
+    model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # one block per stage, four in all
+    for block in esmoe.blocks(model.model):
+        block.configure(out_norm=True, dense_training=True)
+
+| item | upstream / paper | this package's default | how to turn it on |
+|:--:|:--:|:--:|:--:|
+| balancing term | `N*sum(u^2)` on the gate | same (`gshard_balance`) | already the default |
+| blocks | one per backbone stage, four in all | one, at the backbone end | `at="backbone_stages"` |
+| output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `configure(out_norm=True)` |
+| training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `configure(dense_training=True)` |
+
+The last two are off by default so the runs already in `results/` still reproduce; each has its own arm on the [judgment lines](JUDGMENT.md) page. On the command line: `--at`, `--out-norm`, `--dense-training`.
 
 
 ## Where the edges are

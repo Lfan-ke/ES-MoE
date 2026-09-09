@@ -120,15 +120,34 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 | 目标 | 公式 | 读什么 |
 |:--:|:--:|:--:|
-| `gshard_balance`（默认） | `N · Σ usageᵢ²` | 平均概率（上游 `ES_MOE` 用的） |
+| `gshard_balance`（默认） | `N · Σ usageᵢ²` | **门控权重**（上游 `ES_MOE` 用的） |
 | `switch_balance` | `E · Σ p̄ᵢfᵢ` | 平均概率 × 实际负载 |
-| `master_balance` | `(1/E) · Σ(μᵢ − 1/E)²` | 门控后的权重（论文式 13 用的） |
+| `master_balance` | `(1/E) · Σ(μᵢ − 1/E)²` | 门控权重（论文式 13；与上一行只差仿射） |
+| `gshard_probs_balance` | `N · Σ usageᵢ²` | 原始概率（用来隔离「读哪个张量」这一个变量） |
 
 三者的差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——前两者取到同一个值，分辨不出；只有 `master_balance` 读的是门控后的权重，能分辨。选法：
 
     esmoe.equip("yolo11n.yaml", balance=esmoe.master_balance)
 
-上游代码与其论文在这一点上不一致，取舍与实测见[已知局限](limitations.md)与[判读线](JUDGMENT.md)。
+上游代码与论文在这一点上是一致的——两者都读门控，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。取舍与实测见[已知局限](limitations.md)与[判读线](JUDGMENT.md)。
+
+
+### 对齐上游的完整配置
+
+上游 `ES_MOE` 与论文的默认不止是平衡项。四处一起打开才是完整复刻：
+
+    model = esmoe.equip("yolo11n.yaml", at="backbone_stages")   # 每个 stage 后一块，共四块
+    for block in esmoe.blocks(model.model):
+        block.configure(out_norm=True, dense_training=True)      # 输出归一化；训练期跑满专家
+
+| 项 | 上游 / 论文 | 本包默认 | 打开方式 |
+|:--:|:--:|:--:|:--:|
+| 平衡项 | `N·Σu²` 读门控 | 同（`gshard_balance`） | 默认即是 |
+| 块数 | 主干每 stage 一块，共四块 | 一块（主干末端） | `at="backbone_stages"` |
+| 输出归一化 | `BatchNorm + SiLU`（论文式 2 的 `Norm`） | 无 | `configure(out_norm=True)` |
+| 训练期前向 | 跑满专家，未选的权重为 0 | 跳过未选专家 | `configure(dense_training=True)` |
+
+后两项默认关着，是为了让 `results/` 里既有的运行仍能原样复现；它们各自的对照实验见[判读线](JUDGMENT.md)。命令行对应 `--at`、`--out-norm`、`--dense-training`。
 
 
 ## 使用中的边界

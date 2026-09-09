@@ -271,3 +271,34 @@ def test_grafting_into_backbone_and_neck_together():
     model(torch.randn(1, 3, 128, 128))
     assert collect_aux_loss(model).item() > 0
     assert [b.channels for b in grafted] == [256, 128]
+
+
+@pytest.mark.parametrize(
+    "base", ["yolov5n.yaml", "yolov8n.yaml", "yolov9t.yaml", "yolov10n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
+)
+def test_stage_grafting_matches_the_upstream_layout(base):
+    """One block after every backbone stage, which is where YOLO-Master's own yaml puts them.
+
+    The stage split is found from the downsampling layers rather than hard-coded indices, and the
+    generations disagree on how they downsample: v9 uses AConv, v10 uses SCDown, the rest a
+    stride-2 Conv. Four stages, four blocks, on all of them.
+    """
+    cfg = graft(base, at="backbone_stages")
+    assert sum(1 for layer in cfg["backbone"] if layer[2] == "ESMoE") == 4
+
+
+def test_stage_grafted_model_builds_and_trains():
+    import torch
+    from ultralytics.nn.tasks import DetectionModel
+
+    from esmoe import collect_aux_loss
+
+    inject_esmoe()
+    cfg = graft("yolov8n.yaml", at="backbone_stages")
+    cfg["nc"] = 10
+    model = DetectionModel(cfg, ch=3, nc=10, verbose=False)
+    assert len(list(blocks(model))) == 4
+    attach_aux_loss(model, weight=0.01)
+    model.train()
+    model(torch.randn(1, 3, 128, 128))
+    assert collect_aux_loss(model).item() > 0
