@@ -127,3 +127,12 @@ Both sit at their minimum in exactly the collapse we measured: with mean probabi
 
 Wrong predictions get recorded as wrong.
 
+### Correction (2026-09-09, still before any `gshard` result)
+
+The claim above that both objectives "sit at their minimum" in the measured collapse was computed on a hand-made uniform matrix and **does not hold on the real records**; correcting it. Taking `yolov9t-esmoe-s0`: the mean probabilities are `[0.206, 0.213, 0.200, 0.381]`, not uniform, and the GShard term evaluates to 1.0919, above its 1.0 minimum. It does register the concentration.
+
+The real gap is the coefficient. Upstream's `ES_MOE` carries `balance_loss_coeff = 1.0`, passes through `moe_gain = 1.0`, and lands as `total = native_loss + aux`; this package defaults to `attach_aux_loss(weight=0.01)`. On that same record the balancing gradient on the mean probabilities is 0.0200 here against 0.6159 upstream, a factor of **31**.
+
+The two predictions keep their content but change their reason: the collapse is unlikely to lift on a change of objective because this package applies the balancing term at one hundredth of upstream's weight, not because both objectives are blind. **A third prediction follows**:
+
+3. **Raising the weight to upstream's 1.0 moves the routing**: under `--aux-weight 1.0` the dominant expert's top-1 share falls relative to 0.01, and by more than switching the objective does. If raising the weight moves nothing either, the balancing term is not the culprit and the router is.

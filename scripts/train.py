@@ -97,6 +97,8 @@ def main():
     arch = ("esmoe-rewire" if args.rewire else "esmoe") if args.esmoe else "baseline"
     if args.esmoe and args.balance != "switch":
         arch = f"{arch}-{args.balance}"
+    if args.esmoe and args.aux_weight != 0.01:
+        arch = f"{arch}-w{args.aux_weight:g}"
     name = f"{Path(args.base).stem}-{arch}-e{args.epochs}-s{args.seed}{args.tag}"
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
 
