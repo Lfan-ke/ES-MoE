@@ -764,9 +764,11 @@
 </code></pre>
 <p>Exposes <code>ESMoE</code> where <code>parse_model</code> resolves layer names, after which any model.yaml can write <code>[-1, 1, ESMoE, [4, 2]]</code>.</p>
 <h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2, rewire=False) -&gt; dict
+<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
+            rewire=False, **settings) -&gt; dict
 </code></pre>
-<p>Inserts blocks after the layers named by <code>at</code> and renumbers every later reference. <code>at</code> is <code>"backbone_end"</code>, one index or several. With <code>rewire=True</code> every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.</p>
+<p>Inserts blocks after the layers named by <code>at</code> and renumbers every later reference. <code>at</code> is <code>"backbone_end"</code>, <code>"backbone_stages"</code> (one block after each backbone stage, reproducing the upstream layout), one index or several. With <code>rewire=True</code> every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.</p>
+<p><code>**settings</code> takes <code>balance</code>, <code>out_norm</code>, <code>dense_training</code>, <code>sparse_inference</code> and <code>dynamic_threshold</code>, and <strong>writes them into the config rather than onto the instance</strong>: the trainer rebuilds the model from <code>model.yaml</code>, and anything set on the instance goes with the instance it discards. <code>balance</code> may be a name or one of the four functions that ship; a custom objective cannot go into a config and is refused with a reason.</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
 </code></pre>
@@ -774,13 +776,58 @@
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
-<p>Sums the router losses published by the latest forward pass, for custom training loops. Repeated calls cannot double-count a stale value.</p>
+<p>Sums the routing losses published by the most recent forward, for custom training loops. Calling it twice cannot count a stale value again.</p>
 <h2 id="esmoe">ESMoE<a class="headerlink" href="#esmoe" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, *, reduction=8,
-            max_kernel_size=15, expert_kernel_sizes=None,
-            expert=DWExpert, balance=switch_balance)
+<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,
+            out_channels=None, reduction=8, max_kernel_size=15,
+            expert_kernel_sizes=None, expert=DWExpert, **settings)
 </code></pre>
-<p>The channel-preserving mixture block. <code>channels</code> is inferred on the first forward when omitted. <code>expert</code> is a <code>(c1, c2, k) -&gt; Module</code> factory and <code>balance</code> a <code>(probs, gate) -&gt; scalar</code> objective; both are replaceable. <code>esmoe.blocks(model)</code> iterates every block in a model in module order.</p>
+<p>A mixture-of-experts block, channel-preserving unless <code>out_channels</code> says otherwise. <code>channels</code> is inferred on the first forward when omitted; <code>top_k=None</code> activates every expert. <code>expert</code> is a replaceable <code>(c1, c2, k) -&gt; Module</code> factory. <code>options</code> is the mapping a config carries settings in (<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>) and is equivalent to <code>**settings</code>.</p>
+<p>The five settings and their defaults (<code>esmoe.SETTINGS</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">setting</th>
+<th style="text-align: center;">default here</th>
+<th style="text-align: center;">upstream</th>
+<th style="text-align: left;">what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>balance</code></td>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;">same</td>
+<td style="text-align: left;">the objective, <code>(probs, gate) -&gt; scalar</code>, or a name from <code>esmoe.BALANCES</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>out_norm</code></td>
+<td style="text-align: center;"><code>False</code></td>
+<td style="text-align: center;">always on</td>
+<td style="text-align: left;"><code>BatchNorm + SiLU</code> after the weighted sum (the paper's eq. 2 <code>Norm</code>)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense_training</code></td>
+<td style="text-align: center;"><code>False</code></td>
+<td style="text-align: center;">always on</td>
+<td style="text-align: left;">run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>sparse_inference</code></td>
+<td style="text-align: center;"><code>True</code></td>
+<td style="text-align: center;">same</td>
+<td style="text-align: left;">skip unrouted experts outside training</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dynamic_threshold</code></td>
+<td style="text-align: center;"><code>0.0</code></td>
+<td style="text-align: center;"><code>0.4</code></td>
+<td style="text-align: left;">outside training, drop a routed expert below the threshold, keep the leader, renormalise</td>
+</tr>
+</tbody>
+</table>
+<p>The last two affect inference only, the first three affect training. The defaults keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream.</p>
+<p><code>block.spec()</code> returns the five settings a block is holding, and <code>block.configure(**settings)</code> changes them on paths that never reach a trainer -- inference, export, a unit test. <code>esmoe.blocks(model)</code> walks every block in a model in module order, and <code>scripts/blockspec.py</code> reads back from any checkpoint what was actually in force.</p>
 
 
 

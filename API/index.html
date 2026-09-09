@@ -764,9 +764,11 @@
 </code></pre>
 <p>把 <code>ESMoE</code> 注册到 <code>parse_model</code> 解析层名的位置，此后任何 model.yaml 都能写 <code>[-1, 1, ESMoE, [4, 2]]</code>。</p>
 <h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2, rewire=False) -&gt; dict
+<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
+            rewire=False, **settings) -&gt; dict
 </code></pre>
-<p>在 <code>at</code> 指定的层后插入块并重编号其后的所有引用。<code>at</code> 可为 <code>"backbone_end"</code>、单个层号或多个层号。<code>rewire=True</code> 让引用旧插入层的下游改指块本身——不开时，按序号点名主干末层的 head 分支（如 YOLOv8 的 P5 侧向）读到的仍是插入前的特征。</p>
+<p>在 <code>at</code> 指定的层后插入块并重编号其后的所有引用。<code>at</code> 可为 <code>"backbone_end"</code>、<code>"backbone_stages"</code>（主干每个 stage 后各一块，复刻上游布局）、单个层号或多个层号。<code>rewire=True</code> 让引用旧插入层的下游改指块本身——不开时，按序号点名主干末层的 head 分支（如 YOLOv8 的 P5 侧向）读到的仍是插入前的特征。</p>
+<p><code>**settings</code> 收 <code>balance</code> / <code>out_norm</code> / <code>dense_training</code> / <code>sparse_inference</code> / <code>dynamic_threshold</code>，<strong>写进配置文件而不是设在实例上</strong>：训练器照 <code>model.yaml</code> 重建模型，设在实例上的会随那个被丢弃的实例一起消失。<code>balance</code> 可传名字或包里那四个函数之一；自定义目标进不了配置文件，会被明确拒绝。</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
 </code></pre>
@@ -776,11 +778,56 @@
 </code></pre>
 <p>汇总最近一次前向发布的路由损失，自定义训练循环用。连续调用不会重复计入陈旧值。</p>
 <h2 id="esmoe">ESMoE<a class="headerlink" href="#esmoe" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, *, reduction=8,
-            max_kernel_size=15, expert_kernel_sizes=None,
-            expert=DWExpert, balance=switch_balance)
+<pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,
+            out_channels=None, reduction=8, max_kernel_size=15,
+            expert_kernel_sizes=None, expert=DWExpert, **settings)
 </code></pre>
-<p>通道保持的专家混合块。<code>channels</code> 省略时在首次前向推断。<code>expert</code> 是 <code>(c1, c2, k) -&gt; Module</code> 的工厂，<code>balance</code> 是 <code>(probs, gate) -&gt; scalar</code> 的均衡目标，两者都可替换。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。</p>
+<p>专家混合块，默认保持通道数。<code>channels</code> 省略时在首次前向推断；<code>top_k=None</code> 等于用上全部专家。<code>expert</code> 是 <code>(c1, c2, k) -&gt; Module</code> 的工厂，可替换。<code>options</code> 是配置文件传设置的那个映射（<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>），与 <code>**settings</code> 等价。</p>
+<p>五个设置及其默认值（<code>esmoe.SETTINGS</code>）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">设置</th>
+<th style="text-align: center;">本包默认</th>
+<th style="text-align: center;">上游</th>
+<th style="text-align: left;">作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>balance</code></td>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;">同</td>
+<td style="text-align: left;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>out_norm</code></td>
+<td style="text-align: center;"><code>False</code></td>
+<td style="text-align: center;">恒开</td>
+<td style="text-align: left;">加权求和后的 <code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense_training</code></td>
+<td style="text-align: center;"><code>False</code></td>
+<td style="text-align: center;">恒开</td>
+<td style="text-align: left;">训练期跑满专家，未选权重为 0 但归一化统计量继续更新</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>sparse_inference</code></td>
+<td style="text-align: center;"><code>True</code></td>
+<td style="text-align: center;">同</td>
+<td style="text-align: left;">推理期跳过未选专家</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dynamic_threshold</code></td>
+<td style="text-align: center;"><code>0.0</code></td>
+<td style="text-align: center;"><code>0.4</code></td>
+<td style="text-align: left;">推理期剪掉份额低于阈值的专家，首位无条件保留，余下重归一</td>
+</tr>
+</tbody>
+</table>
+<p>后两项只影响推理，前三项影响训练。默认值保持 <code>results/</code> 里既有运行可原样复现，不是对上游的取舍判断。</p>
+<p><code>block.spec()</code> 返回该块当下带着的五个设置；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一 checkpoint 读回当时真正生效的设置。</p>
 
 
 
