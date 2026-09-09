@@ -1,0 +1,55 @@
+{
+  "experiment_id": "yolov9t-esmoe-e1-s0-smoke-20260907035406",
+  "git_ref": {
+    "toolkit": "82ca8af",
+    "toolkit_version": "0.1.4",
+    "ultralytics": "8.4.101",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
+  },
+  "config": {
+    "model_yaml": "/data/esmoe-toolkit/configs/yolov9t-esmoe-e4k2.yaml",
+    "arch": "esmoe",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": false,
+    "aux_weight": 0.01,
+    "sha256": "598f3dab72d54df7e2ec829febffea6d217d19e5f6eba3b65c950864759c74bb",
+    "sha256_of": "settings"
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 0.02,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
+  },
+  "hardware": {
+    "gpu": "MetaX C500",
+    "torch": "2.8.0+metax3.3.0.2",
+    "python": "3.10.10"
+  },
+  "budget": {
+    "epochs": 1,
+    "batch": 8,
+    "imgsz": 640,
+    "patience": 0,
+    "amp": true,
+    "wall_seconds": 18.1,
+    "gpu_hours": 0.005
+  },
+  "seed": 0,
+  "metrics": {},
+  "params": 2218404,
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolov9t-esmoe-e1-s0-smoke/weights/best.pt",
+    "sha256": "eb637f22aa7a07b2220fbcabe7aff0f1412f42a72cfe416892268622ac471bdf",
+    "sha256_of": "hashes.txt"
+  },
+  "status": "failed",
+  "limitation": "RuntimeError('Numpy is not available')"
+}

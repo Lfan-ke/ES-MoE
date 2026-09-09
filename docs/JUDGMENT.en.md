@@ -219,6 +219,28 @@ The audit does not rely on memory: `scripts/blockspec.py` reads each checkpoint'
 
 **The general lesson**: a `--flag` in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.
 
+## Run-to-run spread at one configuration (2026-09-09, not planned)
+
+The six mislabelled runs of the previous section trained exactly what the default arm trains: same configuration, same seed, same card, run a second time. They are therefore not extra samples but a direct measure of something nothing here had measured -- **how far apart two runs of one configuration land.**
+
+`scripts/report.py` computes the table at the end of `results/summary.md`:
+
+| stack | epochs | repeats | mean gap | largest gap |
+|:--:|:--:|:--:|:--:|:--:|
+| metaxc500 / metax3.3 | 120 | 5 | 0.0045 | 0.0130 |
+| metaxc500 / metax3.3 | 1 | 1 | 0.0000 | 0.0000 |
+| 4090d / torch2.6 | 20 | 1 | 0.0000 | 0.0000 |
+
+That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- **every one of them inside the mean gap between two runs of one configuration.**
+
+Three things follow, and all three are stated rather than softened:
+
+1. **`deterministic=True` does not hold on this accelerator.** The trainer fixes the seed and sets the deterministic flag; on the 4090 a repeat reproduces bit for bit (one pair, 20 epochs), on the MetaX C500 it does not (five pairs, 120 epochs). The divergence accumulates with training: at one epoch the gap is zero.
+2. **The generation with the largest positive effect sits on the noisier machine.** v5n's +0.0055 and +0.0041 both come from the MetaX cards; the four measured on the 4090 (v8n, 11n, 12n, 26n) rest on a single same-configuration repeat so far.
+3. **This does not overturn the consistency of the signs, but it does overturn reading the magnitudes.** "Positive on this generation, negative on that one" is carried by the sign counts across seeds. "The block is worth +0.0055" is not: two runs of one configuration already differ by 0.0130.
+
+Accuracy claims here therefore stop at direction, with the sample size and interval stated alongside; anywhere an earlier judgment line reasoned from a magnitude, it is downgraded to direction. **This is the most useful negative result of the project, and it is a by-product of an implementation defect -- without those six runs being mislabelled, nobody would have paid for a repeat of an identical configuration.**
+
 ### Results from the alignment arms
 
 Filled in as the runs land, from the same numbers as `results/summary.md`.

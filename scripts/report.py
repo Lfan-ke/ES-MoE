@@ -177,12 +177,20 @@ def main():
             "",
             "## Determinism (repeated runs of an identical config)",
             "",
-            "| variant | seed | mAP50 first | mAP50 repeat | identical |",
+            "| variant | seed | mAP50 first | mAP50 repeat | gap |",
             "|:--:|:--:|:--:|:--:|:--:|",
         ]
+        by_stack = defaultdict(list)
         for (name, seed), first, again in repeats:
             a, b = first["metrics"].get(KEYS[0], 0), again["metrics"].get(KEYS[0], 0)
-            out.append(f"| {name} | {seed} | {a:.4f} | {b:.4f} | {'yes' if a == b else 'no'} |")
+            out.append(f"| {name} | {seed} | {a:.4f} | {b:.4f} | {abs(a - b):.4f} |")
+            by_stack[(stack(first), first["budget"]["epochs"])].append(abs(a - b))
+        # This is the denominator for every effect above: where two runs of one configuration are
+        # this far apart, an arm's mean delta of the same size says nothing about the arm. Budget
+        # is part of the key because a one-epoch probe and a full run do not measure the same thing.
+        out += ["", "| stack | epochs | repeats | mean gap | largest gap |", "|:--:|:--:|:--:|:--:|:--:|"]
+        for (name, epochs), gaps in sorted(by_stack.items()):
+            out.append(f"| {name} | {epochs} | {len(gaps)} | {statistics.mean(gaps):.4f} | {max(gaps):.4f} |")
 
     table = "\n".join(out)
     (ROOT / "results" / "summary.md").write_text(table + "\n", encoding="utf-8")
