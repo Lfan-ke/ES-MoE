@@ -141,7 +141,8 @@ The two predictions keep their content but change their reason: the collapse is 
 
 Reading the paper itself (arXiv 2512.23273, section 3.5) shows that **the balancing term the paper specifies is not the one the released code implements**. Paper equation (13):
 
-$$ \mathcal{L}_{LB} = rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - rac{1}{E}ight)^2 $$
+$$ \mathcal{L}_{LB} = rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - rac{1}{E}
+ight)^2 $$
 
 where μᵢ averages **Ω_train** - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's `ES_MOE` instead applies the GShard form `N·Σusage²` to the **raw router probabilities**. On one pair of inputs:
 
@@ -158,3 +159,37 @@ Both inputs carry uniform mean probabilities and differ only in whether the top-
 4. **The paper's term measurably lowers the dominant expert's top-1 share**: the `master` arm's dominant share falls below the same backbone's `switch` arm, and by more than the `gshard` arm does. This is the strongest mechanistic bet of the four - if this one does not move either, the collapse is independent of the balancing term's form and the router or the graft point is responsible, and the explanations offered in the first three rounds give way.
 
 The paper states only λ_LB > 0 without a value, so the `master` arm keeps this package's default weight of 0.01 and stays separate from the coefficient comparison.
+
+### Correction (evening of 2026-09-09, still before any `master` or structural result)
+
+The table above in the fourth round -- "only the paper's objective sees a collapsed dispatch" -- **rests on a false premise**, corrected here.
+
+Reading upstream line by line: `ES_MOE._compute_load_balancing_loss` applies the GShard form to whatever `DynamicRoutingLayer` returns, and in training that is the output of `_soft_top_k(...)` -- **the gate, after the top-k mask and renormalisation**. The paper's equation 12 averages the same tensor. Therefore
+
+$$\mathcal{L}_{	ext{paper}}=rac{\mathcal{L}_{	ext{upstream}}-1}{E^2}$$
+
+**The paper and the released code state one objective, differing only by an affine map**, with the same minimiser and proportional gradients. The earlier claim that they differ was wrong.
+
+What was wrong is this package: `gshard_balance` had been written against the **raw softmax**, which is neither. It now reads the gate; the probability-reading form is kept as `gshard_probs_balance`. Consequently:
+
+- The `gshard` row of that table measured `gshard_probs` and **is relabelled accordingly**; the five finished records have had their `balance` field corrected in place.
+- The fourth prediction is **not withdrawn**: it asks whether an objective reading the gate lifts the collapse, which remains open. The `master` arm is running.
+- The dividing line is restated: **whether the term reads the probabilities or the gate**, not Switch versus GShard.
+
+### Fifth pre-registration (evening of 2026-09-09, declared before any structural result)
+
+The same line-by-line comparison found three structural differences that no experiment had covered. All three are switches, defaulting to the old behaviour so the 77 records already in `results/` stay reproducible, and each becomes its own arm:
+
+| arm | difference from upstream | switch |
+|:--:|:--:|:--:|
+| `stages` | upstream puts one block after every backbone stage, four in all; this package puts one | `--at backbone_stages` |
+| `norm` | upstream normalises the mixed output with `BatchNorm+SiLU` (the paper's eq. 2 `Norm`) | `--out-norm` |
+| `dense` | upstream runs every expert in training, the unrouted ones weighted zero, so their normalisation statistics keep moving | `--dense-training` |
+
+The predictions:
+
+5. **Block count is the dominant term: the `stages` arm's paired mAP50 mean beats the single-block arm**, by more than any change of balancing objective achieves. Four blocks carry four times the capacity and graft surface of one; if that does not move the metric either, the "graft location and capacity" explanation should retire.
+6. **The `dense` arm's dominant expert holds a smaller top-1 share than its sparse counterpart.** In this package an unrouted expert's normalisation statistics freeze; upstream keeps them moving. If the collapse owes anything to that, this arm should reduce the share.
+7. **The `norm` arm moves accuracy by less than ±0.003**, the scale of the seed spread. It is a question of structural completeness, not an expected source of accuracy.
+
+Wrong predictions get recorded as wrong.
