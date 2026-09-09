@@ -710,6 +710,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="第三轮预登记（2026-09-09，声明于任何 gshard 臂结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-09-gshard_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09，仍在 gshard 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -943,6 +960,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="第三轮预登记（2026-09-09，声明于任何 gshard 臂结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-09-gshard_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09，仍在 gshard 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1154,6 +1188,13 @@
 <li><strong>精度不因此显著改变</strong>：v5n 与 v10n 的 <code>gshard</code> 臂配对 mAP50 均值与各自的 <code>switch</code> 臂之差落在 ±0.003 以内（即 seed 间离散度的量级）。</li>
 </ol>
 <p>预测错了照实记录。</p>
+<h3 id="2026-09-09-gshard_1">更正（2026-09-09，仍在 <code>gshard</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-gshard_1" title="Permanent link">&para;</a></h3>
+<p>上文「两者在实测塌缩上都取到最小值」是在人工构造的均匀矩阵上算的，<strong>真实记录上不成立</strong>，照实更正。取 <code>yolov9t-esmoe-s0</code> 的路由记录：平均概率 <code>[0.206, 0.213, 0.200, 0.381]</code> 并不均匀，GShard 项算得 1.0919，高于最小值 1.0——它确实看见了概率集中。</p>
+<p>真正的差距在系数。上游 <code>ES_MOE</code> 的 <code>balance_loss_coeff = 1.0</code>，经 <code>moe_gain = 1.0</code> 后直接 <code>total = native_loss + aux</code>；本包默认 <code>attach_aux_loss(weight=0.01)</code>。在同一条真实记录上，对平均概率的平衡梯度：本包 0.0200，上游 0.6159，<strong>相差 31 倍</strong>。</p>
+<p>因此两条预测的理由改写为：塌缩多半不因换目标而解除，是因为本包把平衡项压到了上游的百分之一，而不是因为两个目标都盲。预测本身不变。<strong>新增第三条</strong>：</p>
+<ol>
+<li><strong>把权重抬到上游的 1.0 会明显改变路由</strong>：<code>--aux-weight 1.0</code> 下主导专家 top-1 份额较 0.01 时下降，且降幅大于换目标（switch → gshard）带来的降幅。若抬权重也不动，问题就不在平衡项，而在路由器本身。</li>
+</ol>
 
 
 

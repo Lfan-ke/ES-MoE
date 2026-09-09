@@ -710,6 +710,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Third pre-registration (2026-09-09, declared before any gshard result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correction-2026-09-09-still-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (2026-09-09, still before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -943,6 +960,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Third pre-registration (2026-09-09, declared before any gshard result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correction-2026-09-09-still-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (2026-09-09, still before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1154,6 +1188,13 @@
 <li><strong>Accuracy will not move materially</strong>: paired mAP50 means of the <code>gshard</code> arms sit within ±0.003 of their <code>switch</code> counterparts on v5n and v10n, the scale of the seed spread.</li>
 </ol>
 <p>Wrong predictions get recorded as wrong.</p>
+<h3 id="correction-2026-09-09-still-before-any-gshard-result">Correction (2026-09-09, still before any <code>gshard</code> result)<a class="headerlink" href="#correction-2026-09-09-still-before-any-gshard-result" title="Permanent link">&para;</a></h3>
+<p>The claim above that both objectives "sit at their minimum" in the measured collapse was computed on a hand-made uniform matrix and <strong>does not hold on the real records</strong>; correcting it. Taking <code>yolov9t-esmoe-s0</code>: the mean probabilities are <code>[0.206, 0.213, 0.200, 0.381]</code>, not uniform, and the GShard term evaluates to 1.0919, above its 1.0 minimum. It does register the concentration.</p>
+<p>The real gap is the coefficient. Upstream's <code>ES_MOE</code> carries <code>balance_loss_coeff = 1.0</code>, passes through <code>moe_gain = 1.0</code>, and lands as <code>total = native_loss + aux</code>; this package defaults to <code>attach_aux_loss(weight=0.01)</code>. On that same record the balancing gradient on the mean probabilities is 0.0200 here against 0.6159 upstream, a factor of <strong>31</strong>.</p>
+<p>The two predictions keep their content but change their reason: the collapse is unlikely to lift on a change of objective because this package applies the balancing term at one hundredth of upstream's weight, not because both objectives are blind. <strong>A third prediction follows</strong>:</p>
+<ol>
+<li><strong>Raising the weight to upstream's 1.0 moves the routing</strong>: under <code>--aux-weight 1.0</code> the dominant expert's top-1 share falls relative to 0.01, and by more than switching the objective does. If raising the weight moves nothing either, the balancing term is not the culprit and the router is.</li>
+</ol>
 
 
 
