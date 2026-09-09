@@ -774,6 +774,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth-round verdict (2026-09-10, the gate-reading objective has run)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1092,6 +1103,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth-round verdict (2026-09-10, the gate-reading objective has run)
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1442,6 +1464,43 @@ ight)^2 \]</div>
 <p><strong>The fix, and the audit.</strong> <code>graft()</code> now writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. <code>scripts/train.py</code> records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; <code>tests/test_ultralytics.py</code> trains a model to hold that path.</p>
 <p>The audit does not rely on memory: <code>scripts/blockspec.py</code> reads each checkpoint's block settings on the host that holds it, and <code>scripts/backfill.py --settings</code> rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and <strong>none needed correcting</strong> — the published data is sound; what was wrong were the new arms, none of them merged yet.</p>
 <p><strong>The general lesson</strong>: a <code>--flag</code> in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.</p>
+<h2 id="fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run">Fourth-round verdict (2026-09-10, the gate-reading objective has run)<a class="headerlink" href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" title="Permanent link">&para;</a></h2>
+<p>The fourth round asked whether an objective that can see the collapse relieves it. Two v5n runs (seeds 0 and 1) are in, and the answer is <strong>no</strong> -- and it moved the other way.</p>
+<p>The same <code>scripts/routing.py</code> over the 548 VisDrone validation images:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">checkpoints</th>
+<th style="text-align: center;">top-two usage, of 2.0</th>
+<th style="text-align: center;">lowest usage</th>
+<th style="text-align: center;">dead experts</th>
+<th style="text-align: center;">probability entropy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Switch (every earlier record)</td>
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">1.265–1.777 (mean 1.468)</td>
+<td style="text-align: center;">0.0365</td>
+<td style="text-align: center;">0 of 46</td>
+<td style="text-align: center;">90%–97%</td>
+</tr>
+<tr>
+<td style="text-align: center;">GShard on the gate</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1.610–1.898 (mean 1.754)</td>
+<td style="text-align: center;">0.0091</td>
+<td style="text-align: center;">1 of 2</td>
+<td style="text-align: center;">97%–98%</td>
+</tr>
+</tbody>
+</table>
+<p>Both checkpoints sit in the upper half of the Switch range or above it, and seed 1's 1.898 is the most concentrated dispatch among all 48 checkpoints. Seed 0 holds the <strong>first dead expert in the project</strong> (usage 0.0091); none of the 46 earlier checkpoints has one. Meanwhile the probability entropy is <em>higher</em>, 97%–98% against 90%–97%: <strong>flatter probabilities, more concentrated dispatch</strong>, which is exactly the dissociation this line of work has been chasing.</p>
+<p>The paired accuracy is +0.0018 over two seeds (1/2 wins), inside the run-to-run spread and therefore not evidence of anything.</p>
+<p><strong>The confound has to be stated.</strong> At the same <code>weight=0.01</code> the two terms are not the same size: at uniform dispatch Switch sits at 2.0 and GShard at 1.0, so this arm carried roughly half the balancing pressure of the arm it is compared against. What this round supports is "<strong>at weight 0.01, reading the gate did not relieve the collapse</strong>", not "an objective that reads the gate cannot". Separating those needs a weight matched to the term's scale, and that run was not made.</p>
+<p><strong>The fourth prediction is not borne out, and is recorded as such.</strong> The follow-up is a pressure-matched comparison, not another objective.</p>
 <h2 id="run-to-run-spread-at-one-configuration-2026-09-09-not-planned">Run-to-run spread at one configuration (2026-09-09, not planned)<a class="headerlink" href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" title="Permanent link">&para;</a></h2>
 <p>The six mislabelled runs of the previous section trained exactly what the default arm trains: same configuration, same seed, same card, run a second time. They are therefore not extra samples but a direct measure of something nothing here had measured -- <strong>how far apart two runs of one configuration land.</strong></p>
 <p><code>scripts/report.py</code> computes the table at the end of <code>results/summary.md</code>:</p>

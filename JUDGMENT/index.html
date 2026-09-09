@@ -774,6 +774,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#2026-09-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第四轮判定（2026-09-10，读门控的目标产出后）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#2026-09-09_2" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1092,6 +1103,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-09-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第四轮判定（2026-09-10，读门控的目标产出后）
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1442,6 +1464,43 @@ ight)^2 \]</div>
 <p><strong>修法与复核。</strong> <code>graft()</code> 把设置写进配置文件（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数——重建多少次都在。<code>scripts/train.py</code> 改为从训练完的模型上读块配置写进记录，请求与实际不符即在开跑前退出；<code>tests/test_ultralytics.py</code> 真训一轮守住这条路径。</p>
 <p>复核不靠回忆：<code>scripts/blockspec.py</code> 在存权重的机器上读出每个 checkpoint 的块设置，<code>scripts/backfill.py --settings</code> 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，<strong>0 条需要更正</strong>——已发布的数据是准的，错的只是尚未并入的新臂。</p>
 <p><strong>一般化的一条</strong>：记录里写着 <code>--flag</code>，不等于 <code>--flag</code> 进了模型。记录要从训练完的模型上读，不要复述命令行。</p>
+<h2 id="2026-09-10">第四轮判定（2026-09-10，读门控的目标产出后）<a class="headerlink" href="#2026-09-10" title="Permanent link">&para;</a></h2>
+<p>第四轮问的是：<strong>换成能看见塌缩的目标，塌缩会不会解除。</strong> 两轮 v5n（seed 0、1）跑完，答案是<strong>不会</strong>，而且方向相反。</p>
+<p>同一套 <code>scripts/routing.py</code> 在 VisDrone val 548 张上量出来：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">目标</th>
+<th style="text-align: center;">checkpoint 数</th>
+<th style="text-align: center;">前两名用量之和（满分 2.0）</th>
+<th style="text-align: center;">最低用量</th>
+<th style="text-align: center;">出现死专家</th>
+<th style="text-align: center;">概率熵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Switch（此前全部记录）</td>
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">1.265–1.777（均 1.468）</td>
+<td style="text-align: center;">0.0365</td>
+<td style="text-align: center;">0 / 46</td>
+<td style="text-align: center;">90%–97%</td>
+</tr>
+<tr>
+<td style="text-align: center;">GShard 读门控</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1.610–1.898（均 1.754）</td>
+<td style="text-align: center;">0.0091</td>
+<td style="text-align: center;">1 / 2</td>
+<td style="text-align: center;">97%–98%</td>
+</tr>
+</tbody>
+</table>
+<p>两个 checkpoint 都落在 Switch 那组的上半段或之上；seed 1 的 1.898 是全部 48 个 checkpoint 里最集中的一个。seed 0 出现了本课题<strong>第一个死专家</strong>（用量 0.0091），此前 46 个 checkpoint 一个都没有。同时概率熵反而更高（97%–98% 对 90%–97%）——<strong>路由概率更平，分派却更集中</strong>，正是这条线一直在追的那个背离。</p>
+<p>配对精度是 +0.0018（两 seed，1/2 胜），落在同配置重复运行的离散度之内，说明不了什么。</p>
+<p><strong>必须写明的混淆项</strong>：两个目标在同一个 <code>weight=0.01</code> 下的绝对尺度不同——均匀分派时 Switch 取 2.0、GShard 取 1.0，因此这一臂承受的平衡压力大约是对照臂的一半。所以本轮能下的结论是「<strong>在 weight=0.01 这一档，读门控没有解除塌缩</strong>」，不是「读门控的目标做不到」。要分清这两件事，需要按项的尺度对齐权重再跑一轮，本轮没有跑。</p>
+<p><strong>预登记的第四条预测不成立，照实记录。</strong> 后续该做的是权重对齐的对照，而不是换目标。</p>
 <h2 id="2026-09-09_2">同配置重复运行的离散度（2026-09-09，非计划所得）<a class="headerlink" href="#2026-09-09_2" title="Permanent link">&para;</a></h2>
 <p>上一节那六轮误标的运行，实际训练的与默认臂完全相同——同配置、同 seed、同一张卡上的另一次运行。它们因此不是重复样本，而是一把直接的尺子：<strong>同一个配置跑两遍，指标能差多少。</strong></p>
 <p><code>results/summary.md</code> 末尾的表由 <code>scripts/report.py</code> 逐条算出：</p>
