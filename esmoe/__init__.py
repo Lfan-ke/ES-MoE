@@ -17,4 +17,4 @@ __all__ = [
     "gshard_balance",
     "switch_balance",
 ]
-__version__ = "0.1.4"
+__version__ = "0.1.5"

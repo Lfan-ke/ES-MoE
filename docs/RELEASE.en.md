@@ -1,14 +1,17 @@
 # Release notes
 
-Current version **0.1.4**.
+Current version **0.1.5**.
 
 ## Added
 
-- **DDP support.** ultralytics launches multi-GPU workers from a generated file that imports only the trainer's module, so a worker never imported esmoe and failed to build the model with `KeyError: 'ESMoE'`. `attach_aux_loss` now makes `model.train()` pick a trainer subclass that lives in `esmoe.trainer`: importing it registers the block, restores the auxiliary-loss weight from the environment and patches `BaseModel.loss`. `scripts/verify.py` gains two checks: the real worker file trains one epoch in a fresh interpreter, and two gloo ranks each compute their own auxiliary term with router gradients agreeing after all-reduce. Limit: sparse dispatch needs `find_unused_parameters=True`, which `compile=True` switches off; that combination is unsupported.
-- **`graft(..., rewire=True)`.** Renumbering moves references without retargeting them, so a head branch that names the old backbone end by index (YOLOv8's P5 lateral `[-1, 9] Concat`) keeps reading SPPF after the insertion and the block reaches P5 only through the top-down path. `rewire` points every such consumer at the block. Off by default to keep existing records comparable; the two wirings have not yet been compared under one budget.
-- `scripts/train.py --patience` (default 0, early stopping off) and `IMGSZ` / `PATIENCE` / `ARMS` in `sweep.sh`, for runs under the repository protocol (imgsz 800, 120 epochs).
-- `scripts/buckets.py`, COCO-style area buckets at maxDets 500; `scripts/routing.py`, expert usage on the validation set and whether routing follows object scale.
-- Two half-precision tests: the auxiliary term stays finite and non-zero under bf16 autocast with parameters kept in fp32; the renormalised gate still sums to one in fp16.
+- **`gshard_balance`, the term upstream's `ES_MOE` actually optimises.** YOLO-Master's `ES_MOE` uses the GShard form `N * sum(usage^2)` at `balance_loss_coeff = 1.0`; this package defaults to the Switch form `E * sum(p_i f_i)` at `weight = 0.01`. Both are now selectable: `ESMoE(..., balance=esmoe.gshard_balance)`, or `scripts/train.py --balance gshard`. On a real routing record the upstream pairing puts 31x more balancing gradient on the mean probabilities than this package's default - a larger difference than the choice of formula, and the comparison's criteria are registered on the judgment-lines page ahead of the results.
+
+## Fixed
+
+- **The routing statistics counted a warmup forward.** On an accelerator ultralytics runs one dummy forward before the first real batch, and the router hook captured that row too: 549 rows against 548 images. It never fired on CPU, which is why it went unseen.
+- **Two runs of one arm truncated each other's config.** The grafted `configs/*.yaml` carried no seed, so two lanes training the same arm wrote one file; one truncated it while the other was reading, and the reader died on `KeyError: 'backbone'`. Earlier batches escaped it only because concurrent lanes always happened to run different arms.
+- **`report.py` folded hardware together.** The grouping key ignored hardware, so the same configuration measured on two machines counted as repeats of one cell. The stack is now part of the key and a rerun on another host forms its own group.
+- **`buckets.py` could not evaluate on some accelerators.** `val()` fuses conv+bn inside an inference-mode context and some builds refuse to view an inference tensor. Fusing beforehand leaves that path nothing to do; the arithmetic is unchanged.
 
 ## Feedback and iteration
 

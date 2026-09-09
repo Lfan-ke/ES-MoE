@@ -1,14 +1,17 @@
 # 发布说明
 
-当前版本 **0.1.4**。
+当前版本 **0.1.5**。
 
 ## 新增
 
-- **支持 DDP。** ultralytics 用一份生成的文件启动多卡 worker，文件里只导入训练器所在的模块，worker 进程从未导入 esmoe，建模时报 `KeyError: 'ESMoE'`。现在 `attach_aux_loss` 让 `model.train()` 选用一个住在 `esmoe.trainer` 里的训练器子类：worker 一导入它就注册块、从环境变量恢复辅助损失权重、给 `BaseModel.loss` 打补丁。`scripts/verify.py` 新增两项检查：真实的 worker 文件在干净解释器里训一轮；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 后一致。边界：稀疏分发需要 `find_unused_parameters=True`，`compile=True` 会把它关掉，该组合不可用。
-- **`graft(..., rewire=True)`。** 重编号只移动引用，不改变引用对象，因此 head 里按序号点名旧主干末层的分支（YOLOv8 的 P5 侧向 `[-1, 9] Concat`）插入之后仍读 SPPF，块只经自顶向下路径间接影响 P5。`rewire` 让所有下游改指块。默认关闭，保持既有记录可比；两种接法的同预算对照尚未完成。
-- `scripts/train.py --patience`（默认 0，禁用早停）与 `sweep.sh` 的 `IMGSZ` / `PATIENCE` / `ARMS`，用于按仓库复现协议跑（imgsz 800、120 epoch）。
-- `scripts/buckets.py`：COCO 式面积分档（maxDets 500）；`scripts/routing.py`：验证集上的专家使用分布与路由是否随目标尺度变化。
-- 两项半精度测试：bf16 autocast 下辅助项有限非零、参数不被拖成半精度；半精度门控重归一后仍和为 1。
+- **`gshard_balance`：上游 `ES_MOE` 优化的那个平衡项。** YOLO-Master 的 `ES_MOE` 用的是 GShard 式 `N · Σ usage²`（`balance_loss_coeff = 1.0`），本包默认是 Switch 式 `E · Σ p̄ᵢfᵢ`（`weight = 0.01`）。两者现在都可选：`ESMoE(..., balance=esmoe.gshard_balance)`，或 `scripts/train.py --balance gshard`。在一条真实路由记录上，上游那套对平均概率的平衡梯度是本包默认的 31 倍——这个差距比公式之别更能解释观察到的路由行为，对照实验的判据已先于结果登记在判读线页。
+
+## 修复
+
+- **路由统计混入了 warmup 前向。** 在加速卡上 ultralytics 会在第一个真实批次前跑一次空前向，路由钩子把那一行也收了进去——549 行对 548 张图。CPU 上不触发，所以此前一直没暴露。
+- **同臂并行训练互相截断配置。** 嫁接出的 `configs/*.yaml` 原先不含 seed，两条并行车道跑同一条臂时写同一个文件，一个把另一个正在读的截断，读的那个死在 `KeyError: 'backbone'`。此前没遇到，只是因为并行的两条车道恰好总是不同臂。
+- **`report.py` 跨硬件折算。** 分组键不含硬件，同一配置在两台机器上的运行被当成重复样本折进同一格。现在硬件栈进入键，换机重跑各成一组。
+- **`buckets.py` 在部分加速卡上无法评测。** `val()` 在推理模式里融合 conv+bn，有的构建拒绝对 inference tensor 取 view。现在提前融合，数值不变。
 
 ## 反馈与迭代
 
