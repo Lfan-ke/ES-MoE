@@ -760,10 +760,13 @@
 </ul>
 <h2 id="_6">与上游和原论文的差异<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <p>本包按 YOLO-Master 的 <code>ES_MOE</code> 结构复刻，逐项核对后有三处需要写明。</p>
-<p><strong>平衡项不是同一个。</strong> 上游 <code>ES_MOE</code> 优化 GShard 式 <code>N · Σ usage²</code>，<code>balance_loss_coeff = 1.0</code>，经 <code>moe_gain = 1.0</code> 直接加进总损失；本包默认 Switch 式 <code>E · Σ p̄ᵢfᵢ</code>，<code>weight = 0.01</code>。在一条真实路由记录上，前者对平均概率的平衡梯度是后者的 31 倍。两者现在都可选（<code>balance=esmoe.gshard_balance</code>），对照实验的判读线见<a href="../JUDGMENT/">判读线</a>。</p>
+<p><strong>平衡项：论文与上游一致，本包曾经读错了张量。</strong> 上游 <code>ES_MOE</code> 把 <code>N · Σ usage²</code> 施加在 <code>DynamicRoutingLayer</code> 的返回值上，而它训练期返回的是 <code>_soft_top_k</code> 的输出——<strong>掩码并重归一之后的门控</strong>；论文式 (12) 的 μ 取的也是门控。两者因此是同一个目标，只差仿射变换：<code>Σ(μ−1/E)² = Σμ² − 1/E</code>，即 <code>L_论文 = (L_上游 − 1)/E²</code>，最小值点相同、梯度成正比。</p>
+<p>本包最初把 <code>gshard_balance</code> 写成读<strong>原始 softmax</strong>，那既不是上游也不是论文，已修正为读门控，并有测试钉住上述恒等式。读概率的版本保留为 <code>gshard_probs_balance</code>，用来隔离「读概率还是读门控」这一个变量——真正决定能否看见路由塌缩的正是它，而不是 Switch 与 GShard 的公式之别。</p>
+<p>系数仍有差别：上游 <code>balance_loss_coeff = 1.0</code>，本包默认 <code>weight = 0.01</code>。但上游在求和前还有一层按该项自身 EMA 的归一与 <code>aux_budget = 3.0</code> 的封顶，稳态贡献约为 <code>1.0 × gain</code>，所以系数主要影响暂态而非稳态幅度——此前写的「平衡梯度差 31 倍」没有计入这一层，予以更正。</p>
 <p><strong>原论文写了多样性目标，上游的块没有用它。</strong> 论文（arXiv 2512.23273）称训练含一个鼓励专家互补的目标；上游代码里确有 <code>diversity_loss_coeff</code>，但它属于另一族块、默认值为 <code>0.0</code>，而 <code>ES_MOE</code> 自身一次都没引用它。也就是说，默认配置里没有任何一项在推动专家分工——这与本包七代实测「路由未学到按尺度分工」是一致的，不是本包独有的现象。</p>
 <p><strong>推理期的稀疏化程度不同。</strong> 上游有 <code>dynamic_threshold</code>（默认 0.4），推理时进一步剪掉低置信专家；本包只跳过 top-k 之外的专家，不按阈值再剪。训练语义相同，导出与实测时延会有差别。</p>
-<p><strong>嫁接点的覆盖范围不同。</strong> 论文把块同时放进 Backbone 与 Neck；本包的七代实验只取主干末端一处。多点嫁接本身可用（<code>graft(at=(...))</code>，<code>tests/test_ultralytics.py</code> 里有主干末端 + Neck 同时嫁接并训练的用例），但 Neck 位置没有进本轮的协议矩阵。</p>
+<p><strong>嫁接位置与论文的最终默认一致，块数不同。</strong> 论文 §3.1 说块同时放进 Backbone 与 Neck，但 §4.3.1 的消融（Table 5）给出：Neck Only 58.2、Both 54.9、<strong>Backbone Only 62.1</strong>，作者据此写明「we adopt backbone-only ES-MoE as our default configuration」。本包只在主干嫁接，与该默认一致；此前写「论文放两处而我们只放一处」是漏读了那张表，予以更正。</p>
+<p>块数确实不同：上游 YAML 在主干每个 stage 之后各放一块，共四块；本包默认只在主干末端放一块。<code>graft(at="backbone_stages")</code> 复刻上游布局，七代主干均得到四块（stage 边界由下采样层反推，因为各代下采样模块不同——v9 用 <code>AConv</code>、v10 用 <code>SCDown</code>、其余是 stride-2 <code>Conv</code>）。</p>
 <p>同一处已核对一致：四专家的默认异构核都是 <code>[3, 5, 7, 9]</code>；路由器都是全局池化后的两层瓶颈（<code>reduction = 8</code>，下限 8 通道），softmax 前都把 logits 夹到 <code>[-30, 30]</code>；论文的 Soft Top-K（式 8）与本包的门控实现逐字一致。</p>
 
 

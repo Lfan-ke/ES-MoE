@@ -735,6 +735,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (evening of 2026-09-09, still before any master or structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth pre-registration (evening of 2026-09-09, declared before any structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -990,6 +1012,28 @@
     <span class="md-ellipsis">
       
         Fourth pre-registration (2026-09-09, declared before any master result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (evening of 2026-09-09, still before any master or structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth pre-registration (evening of 2026-09-09, declared before any structural result)
       
     </span>
   </a>
@@ -1260,6 +1304,53 @@ ight)^2 \]</div>
 <li><strong>The paper's term measurably lowers the dominant expert's top-1 share</strong>: the <code>master</code> arm's dominant share falls below the same backbone's <code>switch</code> arm, and by more than the <code>gshard</code> arm does. This is the strongest mechanistic bet of the four - if this one does not move either, the collapse is independent of the balancing term's form and the router or the graft point is responsible, and the explanations offered in the first three rounds give way.</li>
 </ol>
 <p>The paper states only λ_LB &gt; 0 without a value, so the <code>master</code> arm keeps this package's default weight of 0.01 and stays separate from the coefficient comparison.</p>
+<h3 id="correction-evening-of-2026-09-09-still-before-any-master-or-structural-result">Correction (evening of 2026-09-09, still before any <code>master</code> or structural result)<a class="headerlink" href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" title="Permanent link">&para;</a></h3>
+<p>The table above in the fourth round -- "only the paper's objective sees a collapsed dispatch" -- <strong>rests on a false premise</strong>, corrected here.</p>
+<p>Reading upstream line by line: <code>ES_MOE._compute_load_balancing_loss</code> applies the GShard form to whatever <code>DynamicRoutingLayer</code> returns, and in training that is the output of <code>_soft_top_k(...)</code> -- <strong>the gate, after the top-k mask and renormalisation</strong>. The paper's equation 12 averages the same tensor. Therefore</p>
+<div class="arithmatex">\[\mathcal{L}_{ ext{paper}}=
+rac{\mathcal{L}_{   ext{upstream}}-1}{E^2}\]</div>
+<p><strong>The paper and the released code state one objective, differing only by an affine map</strong>, with the same minimiser and proportional gradients. The earlier claim that they differ was wrong.</p>
+<p>What was wrong is this package: <code>gshard_balance</code> had been written against the <strong>raw softmax</strong>, which is neither. It now reads the gate; the probability-reading form is kept as <code>gshard_probs_balance</code>. Consequently:</p>
+<ul>
+<li>The <code>gshard</code> row of that table measured <code>gshard_probs</code> and <strong>is relabelled accordingly</strong>; the five finished records have had their <code>balance</code> field corrected in place.</li>
+<li>The fourth prediction is <strong>not withdrawn</strong>: it asks whether an objective reading the gate lifts the collapse, which remains open. The <code>master</code> arm is running.</li>
+<li>The dividing line is restated: <strong>whether the term reads the probabilities or the gate</strong>, not Switch versus GShard.</li>
+</ul>
+<h3 id="fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result">Fifth pre-registration (evening of 2026-09-09, declared before any structural result)<a class="headerlink" href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" title="Permanent link">&para;</a></h3>
+<p>The same line-by-line comparison found three structural differences that no experiment had covered. All three are switches, defaulting to the old behaviour so the 77 records already in <code>results/</code> stay reproducible, and each becomes its own arm:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">difference from upstream</th>
+<th style="text-align: center;">switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>stages</code></td>
+<td style="text-align: center;">upstream puts one block after every backbone stage, four in all; this package puts one</td>
+<td style="text-align: center;"><code>--at backbone_stages</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>norm</code></td>
+<td style="text-align: center;">upstream normalises the mixed output with <code>BatchNorm+SiLU</code> (the paper's eq. 2 <code>Norm</code>)</td>
+<td style="text-align: center;"><code>--out-norm</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense</code></td>
+<td style="text-align: center;">upstream runs every expert in training, the unrouted ones weighted zero, so their normalisation statistics keep moving</td>
+<td style="text-align: center;"><code>--dense-training</code></td>
+</tr>
+</tbody>
+</table>
+<p>The predictions:</p>
+<ol>
+<li><strong>Block count is the dominant term: the <code>stages</code> arm's paired mAP50 mean beats the single-block arm</strong>, by more than any change of balancing objective achieves. Four blocks carry four times the capacity and graft surface of one; if that does not move the metric either, the "graft location and capacity" explanation should retire.</li>
+<li><strong>The <code>dense</code> arm's dominant expert holds a smaller top-1 share than its sparse counterpart.</strong> In this package an unrouted expert's normalisation statistics freeze; upstream keeps them moving. If the collapse owes anything to that, this arm should reduce the share.</li>
+<li><strong>The <code>norm</code> arm moves accuracy by less than ±0.003</strong>, the scale of the seed spread. It is a question of structural completeness, not an expected source of accuracy.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
 
 
 

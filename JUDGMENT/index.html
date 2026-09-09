@@ -735,6 +735,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-09-master_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09 晚，仍在 master／结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第五轮预登记（2026-09-09 晚，声明于任何结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -990,6 +1012,28 @@
     <span class="md-ellipsis">
       
         第四轮预登记（2026-09-09，声明于任何 master 臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-09-master_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09 晚，仍在 master／结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第五轮预登记（2026-09-09 晚，声明于任何结构臂结果之前）
       
     </span>
   </a>
@@ -1260,6 +1304,53 @@ ight)^2 \]</div>
 <li><strong>换成论文指定的平衡项会明显降低主导专家的 top-1 份额</strong>：<code>master</code> 臂的主导份额低于同主干 <code>switch</code> 臂，且降幅大于 <code>gshard</code> 臂相对 <code>switch</code> 臂的降幅。这是本轮最强的机制预测——若它也不动，那么塌缩就与平衡项的形式无关，责任在路由器或嫁接点，前三轮的解释都要让位。</li>
 </ol>
 <p>注：论文只写 λ_LB &gt; 0，未给具体值，故 <code>master</code> 臂沿用本包默认权重 0.01，不与系数对照混淆。</p>
+<h3 id="2026-09-09-master_1">更正（2026-09-09 晚，仍在 <code>master</code>／结构臂结果之前）<a class="headerlink" href="#2026-09-09-master_1" title="Permanent link">&para;</a></h3>
+<p>上文第四轮那张「三个目标只有论文能分辨塌缩」的表<strong>前提有误</strong>，照实更正。</p>
+<p>逐句读上游后确认：<code>ES_MOE._compute_load_balancing_loss</code> 把 GShard 式施加在 <code>DynamicRoutingLayer</code> 的返回值上，而它训练期返回 <code>_soft_top_k(...)</code> 的输出——<strong>掩码并重归一后的门控</strong>。论文式 (12) 的 μ 取的也是门控。于是</p>
+<div class="arithmatex">\[\mathcal{L}_{ ext{论文}}=
+rac{\mathcal{L}_{   ext{上游}}-1}{E^2}\]</div>
+<p><strong>论文与上游代码是同一个目标，仅差仿射变换</strong>，最小值点相同、梯度成正比。此前说「两者不是同一个」是错的。</p>
+<p>错的是本包：<code>gshard_balance</code> 被写成读<strong>原始 softmax</strong>，那既非上游亦非论文。已修正为读门控；读概率的版本更名 <code>gshard_probs_balance</code> 保留。因此：</p>
+<ul>
+<li>那张表里 <code>gshard</code> 一行测的是 <code>gshard_probs</code>，<strong>须按此重新标注</strong>；已跑完的五条记录的 <code>balance</code> 字段已就地改为 <code>gshard_probs</code>。</li>
+<li>第四轮预测<strong>不撤回</strong>：它问的是「读门控的目标能否解除塌缩」，这个问题依然未知且成立。<code>master</code> 臂正在跑。</li>
+<li>真正的分水岭因此改写为：<strong>读概率还是读门控</strong>，而不是 Switch 与 GShard 之别。</li>
+</ul>
+<h3 id="2026-09-09">第五轮预登记（2026-09-09 晚，声明于任何结构臂结果之前）<a class="headerlink" href="#2026-09-09" title="Permanent link">&para;</a></h3>
+<p>逐句对照后另有三处结构差异，此前从未纳入实验。三处都做成可配置项，默认保持旧行为以保既有 77 条记录可复现，各自跑成对照臂：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">臂</th>
+<th style="text-align: center;">与上游的差异</th>
+<th style="text-align: center;">开关</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>stages</code></td>
+<td style="text-align: center;">上游主干每 stage 一块共四块，本包一块</td>
+<td style="text-align: center;"><code>--at backbone_stages</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>norm</code></td>
+<td style="text-align: center;">上游加权求和后有 <code>BatchNorm+SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
+<td style="text-align: center;"><code>--out-norm</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense</code></td>
+<td style="text-align: center;">上游训练期跑满专家，未选权重为 0 但 BN 统计仍更新</td>
+<td style="text-align: center;"><code>--dense-training</code></td>
+</tr>
+</tbody>
+</table>
+<p>预测：</p>
+<ol>
+<li><strong>块数是精度差异的主因，<code>stages</code> 臂的配对 mAP50 均值高于单块臂</strong>，且提升幅度大于任何一个平衡项换来的幅度。四块的容量与嫁接面都是单块的四倍，若它也抬不动指标，那么「嫁接位置/容量」这一条解释就该退场。</li>
+<li><strong><code>dense</code> 臂的主导专家 top-1 份额低于对应的稀疏臂</strong>。未被选中的专家在本包实现里 BN 统计冻结、彻底"冷却"，上游让它们保持"温热"；若塌缩确与此有关，这一臂应当把份额压下来。</li>
+<li><strong><code>norm</code> 臂对精度的影响落在 ±0.003 以内</strong>，即 seed 间离散度的量级——它是结构完整性问题，不预期是精度来源。</li>
+</ol>
+<p>预测错了照实记录。</p>
 
 
 
