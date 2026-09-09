@@ -10,6 +10,7 @@ from .module import (
     gshard_balance,
     gshard_probs_balance,
     master_balance,
+    odd,
     odd_kernels,
     switch_balance,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "equip",
     "graft",
     "inject_esmoe",
+    "odd",
     "odd_kernels",
     "gshard_balance",
     "gshard_probs_balance",

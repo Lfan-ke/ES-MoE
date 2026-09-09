@@ -6,6 +6,7 @@ than a fixed recipe.
 """
 
 from collections.abc import Callable, Iterator, Sequence
+from types import MappingProxyType
 
 import torch
 import torch.nn.functional as F
@@ -17,9 +18,14 @@ ExpertFactory = Callable[[int, int, int], nn.Module]
 BalanceFn = Callable[[Tensor, Tensor], Tensor]
 
 
+def odd(size: int) -> int:
+    """An even kernel steps down, never up: upstream sizes are odd so the padding stays centred."""
+    return int(size) - 1 + int(size) % 2
+
+
 def odd_kernels(num_experts: int, max_kernel_size: int = 15) -> list[int]:
     """Heterogeneous odd kernels 3, 5, 7, ... capped at ``max_kernel_size``."""
-    return [min(3 + 2 * i, max_kernel_size) | 1 for i in range(num_experts)]
+    return [min(3 + 2 * i, odd(max_kernel_size)) for i in range(num_experts)]
 
 
 class DWExpert(nn.Module):
@@ -97,17 +103,19 @@ BALANCES: dict[str, BalanceFn] = {
 # What a model.yaml can carry, with the defaults it carries them against. The trainer rebuilds the
 # model from that yaml, so a setting applied to the instance afterwards is discarded; only these
 # survive. Upstream's own defaults are noted where they differ.
-SETTINGS = {
-    "balance": gshard_balance,
-    "out_norm": False,  # upstream: always on
-    "dense_training": False,  # upstream: always on
-    "sparse_inference": True,
-    "dynamic_threshold": 0.0,  # upstream: 0.4
-}
+SETTINGS = MappingProxyType(
+    {
+        "balance": gshard_balance,
+        "out_norm": False,  # upstream: always on
+        "dense_training": False,  # upstream: always on
+        "sparse_inference": True,
+        "dynamic_threshold": 0.0,  # upstream: 0.4
+    }
+)
 
 
 class ESMoE(nn.Module):
-    """Channel-preserving mixture-of-experts block.
+    """Mixture-of-experts block, channel-preserving unless ``out_channels`` says otherwise.
 
     Channels are inferred on the first forward pass unless ``channels`` is given. That is what lets
     a stock Ultralytics ``model.yaml`` write ``[-1, 1, ESMoE, [4, 2]]``: ``parse_model`` forwards
@@ -170,26 +178,22 @@ class ESMoE(nn.Module):
             raise ValueError(f"dynamic_threshold must be in [0, 1], got {chosen['dynamic_threshold']}")
         if max_kernel_size < 3:
             raise ValueError(f"max_kernel_size must be at least 3, got {max_kernel_size}")
-        max_kernel_size = int(max_kernel_size) - 1 + int(max_kernel_size) % 2
+        max_kernel_size = odd(max_kernel_size)
         top_k = num_experts if top_k is None else top_k
         if not 1 <= top_k <= num_experts:
             raise ValueError(f"top_k must be in [1, {num_experts}] or None, got {top_k}")
         if expert_kernel_sizes and len(expert_kernel_sizes) != num_experts:
             raise ValueError(f"expert_kernel_sizes needs {num_experts} entries, got {len(expert_kernel_sizes)}")
         kernels = (
-            [min(int(k) - 1 + int(k) % 2, max_kernel_size) for k in expert_kernel_sizes]
+            [min(odd(k), max_kernel_size) for k in expert_kernel_sizes]
             if expert_kernel_sizes
             else odd_kernels(num_experts, max_kernel_size)
         )
         self.num_experts, self.top_k, self.expert_kernel_sizes = num_experts, top_k, kernels
         self.reduction, self.channels, self.out_channels = reduction, None, out_channels
         self.expert_factory = expert
-        balance = chosen["balance"]
-        self.balance = BALANCES[balance] if isinstance(balance, str) else balance
-        self.out_norm = chosen["out_norm"]
-        self.dense_training = chosen["dense_training"]
-        self.sparse_inference = chosen["sparse_inference"]
-        self.dynamic_threshold = chosen["dynamic_threshold"]
+        for key, value in chosen.items():
+            setattr(self, key, BALANCES[value] if key == "balance" and isinstance(value, str) else value)
         self.experts, self.router = nn.ModuleList(), nn.Sequential()
         self.norm: nn.Module = nn.Identity()
         if channels:
