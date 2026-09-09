@@ -280,6 +280,20 @@ class ESMoE(nn.Module):
         value = registry.take(self)
         return registry.zeros() if value is None else value
 
+    def __setstate__(self, state: dict) -> None:
+        """Give a block unpickled from an older checkpoint the settings it predates.
+
+        A saved model carries the module object, so one written before a setting existed comes back
+        without the attribute and the forward pass raises on it. The value it ran with was the
+        default of its day, which is what `SETTINGS` still holds.
+        """
+        super().__setstate__(state)
+        for key, default in SETTINGS.items():
+            if not hasattr(self, key):
+                setattr(self, key, default)
+        if not hasattr(self, "out_channels"):
+            self.out_channels = self.channels
+
     def spec(self) -> dict:
         """The settings this block is holding, in the form a config and a record carry them."""
         return {"balance": self.balance.__name__.removesuffix("_balance")} | {

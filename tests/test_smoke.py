@@ -381,3 +381,21 @@ def test_spec_reports_every_setting_a_config_can_carry():
         "dynamic_threshold": 0.4,
     }
     assert set(block.spec()) == set(esmoe.SETTINGS)
+
+
+def test_a_block_from_an_older_checkpoint_still_runs():
+    """A checkpoint carries the module object, so one saved before a setting existed comes back
+    without the attribute. The forward pass reads it, so unpickling has to fill the gap with the
+    default of the day rather than raising halfway through an evaluation.
+    """
+    block = ESMoE(4, 2, channels=16)
+    state = {
+        k: v for k, v in block.__dict__.items() if k not in ("dynamic_threshold", "sparse_inference", "out_channels")
+    }
+    revived = ESMoE.__new__(ESMoE)
+    revived.__setstate__(state)
+
+    assert revived.spec() == dict(esmoe.SETTINGS) | {"balance": "gshard"}
+    assert revived.out_channels == 16
+    with torch.no_grad():
+        assert revived(torch.randn(2, 16, 8, 8)).shape == (2, 16, 8, 8)
