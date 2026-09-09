@@ -757,6 +757,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#correction-late-2026-09-09-still-before-any-structural-arm-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (late 2026-09-09, still before any structural-arm result)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1040,6 +1051,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#correction-late-2026-09-09-still-before-any-structural-arm-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (late 2026-09-09, still before any structural-arm result)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1263,9 +1285,7 @@
 </ol>
 <h3 id="fourth-pre-registration-2026-09-09-declared-before-any-master-result">Fourth pre-registration (2026-09-09, declared before any <code>master</code> result)<a class="headerlink" href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" title="Permanent link">&para;</a></h3>
 <p>Reading the paper itself (arXiv 2512.23273, section 3.5) shows that <strong>the balancing term the paper specifies is not the one the released code implements</strong>. Paper equation (13):</p>
-<div class="arithmatex">\[ \mathcal{L}_{LB} = 
-rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - 
-rac{1}{E}
+<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
 ight)^2 \]</div>
 <p>where μᵢ averages <strong>Ω_train</strong> - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's <code>ES_MOE</code> instead applies the GShard form <code>N·Σusage²</code> to the <strong>raw router probabilities</strong>. On one pair of inputs:</p>
 <table>
@@ -1307,8 +1327,7 @@ ight)^2 \]</div>
 <h3 id="correction-evening-of-2026-09-09-still-before-any-master-or-structural-result">Correction (evening of 2026-09-09, still before any <code>master</code> or structural result)<a class="headerlink" href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" title="Permanent link">&para;</a></h3>
 <p>The table above in the fourth round -- "only the paper's objective sees a collapsed dispatch" -- <strong>rests on a false premise</strong>, corrected here.</p>
 <p>Reading upstream line by line: <code>ES_MOE._compute_load_balancing_loss</code> applies the GShard form to whatever <code>DynamicRoutingLayer</code> returns, and in training that is the output of <code>_soft_top_k(...)</code> -- <strong>the gate, after the top-k mask and renormalisation</strong>. The paper's equation 12 averages the same tensor. Therefore</p>
-<div class="arithmatex">\[\mathcal{L}_{ ext{paper}}=
-rac{\mathcal{L}_{   ext{upstream}}-1}{E^2}\]</div>
+<div class="arithmatex">\[\mathcal{L}_{\text{paper}}=\frac{\mathcal{L}_{\text{upstream}}-1}{E^2}\]</div>
 <p><strong>The paper and the released code state one objective, differing only by an affine map</strong>, with the same minimiser and proportional gradients. The earlier claim that they differ was wrong.</p>
 <p>What was wrong is this package: <code>gshard_balance</code> had been written against the <strong>raw softmax</strong>, which is neither. It now reads the gate; the probability-reading form is kept as <code>gshard_probs_balance</code>. Consequently:</p>
 <ul>
@@ -1351,6 +1370,22 @@ rac{\mathcal{L}_{   ext{upstream}}-1}{E^2}\]</div>
 <li><strong>The <code>norm</code> arm moves accuracy by less than ±0.003</strong>, the scale of the seed spread. It is a question of structural completeness, not an expected source of accuracy.</li>
 </ol>
 <p>Wrong predictions get recorded as wrong.</p>
+<h3 id="correction-late-2026-09-09-still-before-any-structural-arm-result">Correction (late 2026-09-09, still before any structural-arm result)<a class="headerlink" href="#correction-late-2026-09-09-still-before-any-structural-arm-result" title="Permanent link">&para;</a></h3>
+<p>The previous section relabelled five records' <code>balance</code> as <code>gshard_probs</code>. <strong>That relabelling was also wrong</strong>, and so is every result from the <code>--balance</code>, <code>--out-norm</code> and <code>--dense-training</code> switches. Both are corrected here.</p>
+<p>The trainer rebuilds the model from <code>model.yaml</code>. An objective or a switch set on the blocks after <code>YOLO(cfg)</code> returns lands on an object that is then discarded — no error, no trace. So none of the three switches reached the model that trained: a run asking for <code>master</code> optimised the constructor default, a run asking for the output norm trained without one, and the record repeated the command line, which said something else.</p>
+<p>The evidence is the weights, not the logs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"best.pt"</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"model"</span><span class="p">]</span>
+<span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">balance</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">esmoe</span><span class="o">.</span><span class="n">blocks</span><span class="p">(</span><span class="n">model</span><span class="p">)]</span>  <span class="c1"># ['switch_balance']</span>
+</code></pre></div>
+<p>A block pickled before a setting existed carries no attribute for it, and the absence is itself the answer. Therefore:</p>
+<ul>
+<li>Those five records trained <code>switch_balance</code>: same configuration and same seed as the default arm, run a second time. They are relabelled <code>switch</code> and join the default arm as repeats — a direct measure of run-to-run spread on one card, which is exactly what three-seed intervals lack.</li>
+<li>The two runs labelled <code>master</code> optimised <strong>GShard read off the gate</strong> (the md5 of <code>esmoe/module.py</code> matches the commit that switched to the gate, and <code>esmoe_aux</code> sits at 0.0101, which is <span class="arithmatex">\(N\sum u^2 = 1\)</span> under a uniform gate times the 0.01 weight). They are recorded as <code>gshard</code>.</li>
+<li>The fourth round's prediction stands and is still unanswered: whether an objective that reads the gate relieves the collapse. These two runs answer it, not the two that were thought to.</li>
+</ul>
+<p><strong>The fix, and the audit.</strong> <code>graft()</code> now writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. <code>scripts/train.py</code> records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; <code>tests/test_ultralytics.py</code> trains a model to hold that path.</p>
+<p>The audit does not rely on memory: <code>scripts/blockspec.py</code> reads each checkpoint's block settings on the host that holds it, and <code>scripts/backfill.py --settings</code> rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and <strong>none needed correcting</strong> — the published data is sound; what was wrong were the new arms, none of them merged yet.</p>
+<p><strong>The general lesson</strong>: a <code>--flag</code> in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.</p>
 
 
 

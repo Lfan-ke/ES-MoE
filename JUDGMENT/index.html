@@ -757,6 +757,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-09_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09 深夜，仍在任何结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1040,6 +1051,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-09_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        更正（2026-09-09 深夜，仍在任何结构臂结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1263,9 +1285,7 @@
 </ol>
 <h3 id="2026-09-09-master">第四轮预登记（2026-09-09，声明于任何 <code>master</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-master" title="Permanent link">&para;</a></h3>
 <p>读原论文正文（arXiv 2512.23273 第 3.5 节）后发现，<strong>论文指定的平衡项与上游代码实现的不是同一个</strong>。论文式 (13)：</p>
-<div class="arithmatex">\[ \mathcal{L}_{LB} = 
-rac{1}{E}\sum_{i=1}^{E}\left(\mu_i - 
-rac{1}{E}
+<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
 ight)^2 \]</div>
 <p>其中 μᵢ 由 <strong>Ω_train</strong>——即 top-K 掩码并重归一之后的权重（论文式 8）——在批与空间位置上取平均得到。上游 <code>ES_MOE</code> 则把 GShard 式 <code>N·Σusage²</code> 用在<strong>原始 router 概率</strong>上。三者在同一对输入上的表现：</p>
 <table>
@@ -1307,8 +1327,7 @@ ight)^2 \]</div>
 <h3 id="2026-09-09-master_1">更正（2026-09-09 晚，仍在 <code>master</code>／结构臂结果之前）<a class="headerlink" href="#2026-09-09-master_1" title="Permanent link">&para;</a></h3>
 <p>上文第四轮那张「三个目标只有论文能分辨塌缩」的表<strong>前提有误</strong>，照实更正。</p>
 <p>逐句读上游后确认：<code>ES_MOE._compute_load_balancing_loss</code> 把 GShard 式施加在 <code>DynamicRoutingLayer</code> 的返回值上，而它训练期返回 <code>_soft_top_k(...)</code> 的输出——<strong>掩码并重归一后的门控</strong>。论文式 (12) 的 μ 取的也是门控。于是</p>
-<div class="arithmatex">\[\mathcal{L}_{ ext{论文}}=
-rac{\mathcal{L}_{   ext{上游}}-1}{E^2}\]</div>
+<div class="arithmatex">\[\mathcal{L}_{\text{论文}}=\frac{\mathcal{L}_{\text{上游}}-1}{E^2}\]</div>
 <p><strong>论文与上游代码是同一个目标，仅差仿射变换</strong>，最小值点相同、梯度成正比。此前说「两者不是同一个」是错的。</p>
 <p>错的是本包：<code>gshard_balance</code> 被写成读<strong>原始 softmax</strong>，那既非上游亦非论文。已修正为读门控；读概率的版本更名 <code>gshard_probs_balance</code> 保留。因此：</p>
 <ul>
@@ -1351,6 +1370,22 @@ rac{\mathcal{L}_{   ext{上游}}-1}{E^2}\]</div>
 <li><strong><code>norm</code> 臂对精度的影响落在 ±0.003 以内</strong>，即 seed 间离散度的量级——它是结构完整性问题，不预期是精度来源。</li>
 </ol>
 <p>预测错了照实记录。</p>
+<h3 id="2026-09-09_1">更正（2026-09-09 深夜，仍在任何结构臂结果之前）<a class="headerlink" href="#2026-09-09_1" title="Permanent link">&para;</a></h3>
+<p>上一节把五条记录的 <code>balance</code> 改标为 <code>gshard_probs</code>。<strong>那次改标也是错的</strong>，连同 <code>--balance</code>、<code>--out-norm</code>、<code>--dense-training</code> 三个开关的全部结果，一并在此更正。</p>
+<p>训练器会照 <code>model.yaml</code> 重建模型。<code>YOLO(cfg)</code> 返回实例之后再设到块上的目标函数与开关，落在一个随即被丢弃的对象上，不报错、不留痕。因此这三个开关从未进入真正训练的模型：请求 <code>master</code> 的跑了构造函数默认值，请求输出归一化的训练出来没有归一化，而记录照命令行写，说的是另一回事。</p>
+<p>判据取自权重本身，不取自日志：</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"best.pt"</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"model"</span><span class="p">]</span>
+<span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">balance</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">esmoe</span><span class="o">.</span><span class="n">blocks</span><span class="p">(</span><span class="n">model</span><span class="p">)]</span>  <span class="c1"># ['switch_balance']</span>
+</code></pre></div>
+<p>早于某设置的块连对应属性都没有，缺失本身即答案。据此：</p>
+<ul>
+<li>那五条记录训练的是 <code>switch_balance</code>，与默认臂同配置、同 seed 的另一次运行。它们改标为 <code>switch</code>，并入默认臂的重复项——同卡运行间离散度的直接测量，正是三 seed 置信区间稀缺的东西。</li>
+<li>标为 <code>master</code> 的两轮实际优化的是<strong>读门控的 GShard</strong>（<code>esmoe/module.py</code> 的 md5 对应「读门控」那次提交，<code>esmoe_aux</code> 稳定在 0.0101，与均匀门控下 <span class="arithmatex">\(N\sum u^2 = 1\)</span> 相符）。按 <code>gshard</code> 记。</li>
+<li>第四轮预测仍然成立且仍未回答：读门控的目标能否解除塌缩。回答它的是这两轮，不是原先以为的那两轮。</li>
+</ul>
+<p><strong>修法与复核。</strong> <code>graft()</code> 把设置写进配置文件（<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>），<code>ESMoE</code> 接受 options 映射并按名解析目标函数——重建多少次都在。<code>scripts/train.py</code> 改为从训练完的模型上读块配置写进记录，请求与实际不符即在开跑前退出；<code>tests/test_ultralytics.py</code> 真训一轮守住这条路径。</p>
+<p>复核不靠回忆：<code>scripts/blockspec.py</code> 在存权重的机器上读出每个 checkpoint 的块设置，<code>scripts/backfill.py --settings</code> 按它改写记录并把改动写进记录本身。本仓 120 条记录逐条比对，<strong>0 条需要更正</strong>——已发布的数据是准的，错的只是尚未并入的新臂。</p>
+<p><strong>一般化的一条</strong>：记录里写着 <code>--flag</code>，不等于 <code>--flag</code> 进了模型。记录要从训练完的模型上读，不要复述命令行。</p>
 
 
 
