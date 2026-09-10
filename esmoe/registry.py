@@ -15,6 +15,13 @@ def publish(module, value):
 
 
 def take(module):
+    """The value this module published on its last forward, or None.
+
+    Reading does not remove, which is what upstream's registry does too: a step may compute the
+    loss more than once and each computation needs the term. Upstream rejects a value from an
+    earlier step by stamping it; here the loss patch clears the registry before each forward,
+    which covers the same case as long as every block runs in that forward.
+    """
     with _LOCK:
         return _REGISTRY.get(module)
 

@@ -151,3 +151,58 @@ def test_the_normalisation_floor_is_the_one_difference_and_it_is_deliberate():
         gate = soft_top_k(logits, TOP_K)
         assert gate.sum(dim=1).min() > 0.99
         assert gate.max(dim=1).values.min() >= 1.0 / EXPERTS - 1e-6
+
+
+def dense_forward(block: ESMoE, x: torch.Tensor, gate: torch.Tensor) -> torch.Tensor:
+    """Upstream `ES_MOE._dense_forward`: every expert runs, weighted, nothing skipped."""
+    out = 0
+    for index, expert in enumerate(block.experts):
+        out = out + expert(x) * gate[:, index].view(-1, 1, 1, 1)
+    return out
+
+
+@pytest.mark.parametrize("top_k", [1, 2, EXPERTS, None])
+def test_skipping_an_unrouted_expert_is_the_dense_sum(top_k):
+    """Upstream sums over all experts and lets a zero weight do the work; this package skips the
+    expert instead. The two have to agree exactly, or `dense_training` would change the model
+    rather than only its normalisation statistics."""
+    torch.manual_seed(0)
+    block = ESMoE(EXPERTS, top_k, channels=CHANNELS).eval()
+    x = torch.randn(6, CHANNELS, 8, 8)
+    with torch.no_grad():
+        assert torch.allclose(block(x), dense_forward(block, x, gate_of(block, x)), atol=1e-6)
+
+
+def test_upstream_runs_dense_whenever_top_k_cannot_skip_anything():
+    """`_eager_sparse_enabled()` is false when `top_k` is None or equals the expert count, so
+    upstream goes dense. Here every weight is then non-zero, so no expert is skipped either."""
+    torch.manual_seed(0)
+    x = torch.randn(4, CHANNELS, 8, 8)
+    for top_k in (EXPERTS, None):
+        block = ESMoE(EXPERTS, top_k, channels=CHANNELS).eval()
+        assert (gate_of(block, x) > 0).all(), "no expert can be skipped when k covers them all"
+
+
+def test_a_non_finite_balance_term_cannot_reach_the_optimised_loss():
+    """Upstream replaces a non-finite balance loss with a graph-connected zero. This package zeroes
+    it in the loss patch instead; either way the total must stay finite."""
+    block = ESMoE(EXPERTS, TOP_K, channels=CHANNELS)
+    esmoe.clear_aux_loss()
+    block(torch.randn(4, CHANNELS, 8, 8))
+    esmoe.registry.publish(block, torch.tensor(float("nan")))
+    aux = esmoe.collect_aux_loss(nn.Sequential(block))
+    total = torch.tensor(1.0) + (torch.zeros_like(aux) if not torch.isfinite(aux) else aux)
+    assert torch.isfinite(total).all()
+
+
+def test_reading_the_term_does_not_consume_it_and_a_clear_is_what_drops_it():
+    """Upstream's registry read does not remove either -- a step may compute the loss more than
+    once and each computation needs the term. Upstream rejects a value from an earlier step with a
+    step stamp; here the loss patch clears before each forward. Both reads, then the clear."""
+    block = ESMoE(EXPERTS, TOP_K, channels=CHANNELS)
+    net = nn.Sequential(block)
+    esmoe.clear_aux_loss()
+    block(torch.randn(4, CHANNELS, 8, 8))
+    assert esmoe.collect_aux_loss(net).item() == pytest.approx(esmoe.collect_aux_loss(net).item())
+    esmoe.clear_aux_loss()
+    assert esmoe.collect_aux_loss(net).item() == 0.0

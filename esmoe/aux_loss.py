@@ -10,8 +10,9 @@ from .module import blocks
 def collect_aux_loss(model: nn.Module, device: torch.device | str | None = None) -> Tensor:
     """Sum this step's router losses over every ESMoE block in ``model``.
 
-    Only values published by the latest forward are summed, so calling this twice without a forward
-    in between cannot double-count a stale term.
+    Reading does not consume, so a step that computes the loss twice gets the term both times --
+    which is what upstream does as well. What keeps a value from an earlier step out is the clear
+    the loss patch issues before each forward, not the read.
     """
     published = [value for block in blocks(model) if (value := registry.take(block)) is not None]
     if not published:
