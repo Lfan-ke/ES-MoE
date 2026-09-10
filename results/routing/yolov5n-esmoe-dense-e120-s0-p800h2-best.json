@@ -1,0 +1,56 @@
+{
+  "weights": "yolov5n-esmoe-dense-e120-s0-p800h2-best",
+  "images": 548,
+  "blocks": [
+    {
+      "block": 0,
+      "channels": 256,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.5474,
+        0.0602,
+        0.6259,
+        0.7664
+      ],
+      "top1_share": [
+        0.0018,
+        0.0,
+        0.5474,
+        0.4507
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.2302,
+        0.2176,
+        0.2694,
+        0.2828
+      ],
+      "prob_entropy_mean": 1.3124,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 5,
+      "scale_of_top1_choice": {
+        "0": 15.8,
+        "2": 29.5,
+        "3": 45.3
+      },
+      "prob_vs_scale_corr": [
+        0.416,
+        0.367,
+        -0.38,
+        0.312
+      ],
+      "prob_vs_count_corr": [
+        -0.459,
+        -0.409,
+        0.48,
+        -0.435
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "weights": "yolov5n-esmoe-norm-e120-s1-p800h2-best",
+  "images": 548,
+  "blocks": [
+    {
+      "block": 0,
+      "channels": 256,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.3759,
+        0.4507,
+        0.2354,
+        0.938
+      ],
+      "top1_share": [
+        0.0,
+        0.0365,
+        0.0566,
+        0.9069
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.2212,
+        0.2259,
+        0.1857,
+        0.3672
+      ],
+      "prob_entropy_mean": 1.3193,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 6,
+      "scale_of_top1_choice": {
+        "1": 26.4,
+        "2": 30.7,
+        "3": 37.4
+      },
+      "prob_vs_scale_corr": [
+        0.045,
+        -0.013,
+        -0.251,
+        0.174
+      ],
+      "prob_vs_count_corr": [
+        -0.027,
+        0.014,
+        0.281,
+        -0.198
+      ]
+    }
+  ]
+}

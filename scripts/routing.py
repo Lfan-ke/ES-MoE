@@ -9,7 +9,7 @@ import argparse
 import json
 import sys
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import torch
 import yaml
@@ -132,6 +132,48 @@ def normalise(record: dict) -> dict:
     return {"weights": record["weights"], "images": record["images"], "blocks": [{"block": 0, **single}]}
 
 
+def against_accuracy() -> list[str]:
+    """Does a concentrated dispatch cost accuracy? Answered over every run that has both.
+
+    The whole line of work assumes routing collapse is what a balancing term is for. That only
+    matters if concentration and the paired metric move together, which is a question the records
+    can settle rather than one to argue about.
+    """
+    import statistics
+
+    from report import KEYS, arm, dedupe, load, variant
+
+    runs, _ = dedupe(load())
+    proto = [r for r in runs if "@e120f1i800" in variant(r)]
+    base = {arm(r): r for r in proto if r["config"]["arch"] == "baseline"}
+    shares, deltas = [], []
+    for r in proto:
+        if r["config"]["arch"] == "baseline" or arm(r) not in base:
+            continue
+        run = PurePosixPath(r["artifact"]["path"]).parts[-3]
+        record = OUT / f"{run}-best.json"
+        if not record.is_file():
+            continue
+        blocks = normalise(json.loads(record.read_text(encoding="utf-8")))["blocks"]
+        shares.append(statistics.mean(max(b["top1_share"]) for b in blocks))
+        deltas.append(r["metrics"][KEYS[0]] - base[arm(r)]["metrics"][KEYS[0]])
+    if len(shares) < 3:
+        return []
+    mx, my = statistics.mean(shares), statistics.mean(deltas)
+    cov = sum((x - mx) * (y - my) for x, y in zip(shares, deltas, strict=True)) / len(shares)
+    r = cov / (statistics.pstdev(shares) * statistics.pstdev(deltas))
+    return [
+        "## Does concentration cost accuracy?",
+        "",
+        f"Over the {len(shares)} runs that have both a paired delta and a routing analysis, the leading "
+        f"expert's top-1 share runs {min(shares):.2f} to {max(shares):.2f} and the paired mAP50 delta "
+        f"{min(deltas):+.4f} to {max(deltas):+.4f}. Their correlation is **r = {r:+.3f}**: on this "
+        "evidence a concentrated dispatch does not cost accuracy, which is worth holding against the "
+        "premise that a balancing term is what the block needs.",
+        "",
+    ]
+
+
 def summarise(records: list[dict]) -> str:
     """One table per block of each checkpoint, plus the reading that survives all of them."""
     records = [normalise(r) for r in records]
@@ -143,6 +185,7 @@ def summarise(records: list[dict]) -> str:
         "mean object size and the object count of the image.",
         "",
     ]
+    lines += against_accuracy()
     for r in records:
         lines += [f"## {r['weights']}", ""]
         for b in r["blocks"]:

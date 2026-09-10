@@ -1,0 +1,209 @@
+{
+  "weights": "yolov10n-esmoe-rewire-stages-e120-s1-p800-best",
+  "images": 548,
+  "blocks": [
+    {
+      "block": 0,
+      "channels": 32,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.3905,
+        0.8139,
+        0.219,
+        0.5766
+      ],
+      "top1_share": [
+        0.1606,
+        0.7518,
+        0.0839,
+        0.0036
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.2195,
+        0.34,
+        0.212,
+        0.2285
+      ],
+      "prob_entropy_mean": 1.3319,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 6,
+      "scale_of_top1_choice": {
+        "0": 39.7,
+        "1": 32.7,
+        "2": 65.8,
+        "3": 25.3
+      },
+      "prob_vs_scale_corr": [
+        0.144,
+        -0.233,
+        0.244,
+        0.187
+      ],
+      "prob_vs_count_corr": [
+        -0.154,
+        0.35,
+        -0.393,
+        -0.418
+      ]
+    },
+    {
+      "block": 1,
+      "channels": 64,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.7336,
+        0.5036,
+        0.4544,
+        0.3084
+      ],
+      "top1_share": [
+        0.6606,
+        0.2792,
+        0.0566,
+        0.0036
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.2903,
+        0.2341,
+        0.2379,
+        0.2378
+      ],
+      "prob_entropy_mean": 1.3559,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 6,
+      "scale_of_top1_choice": {
+        "0": 33.6,
+        "1": 37.6,
+        "2": 65.2,
+        "3": 62.6
+      },
+      "prob_vs_scale_corr": [
+        -0.102,
+        -0.025,
+        0.253,
+        0.25
+      ],
+      "prob_vs_count_corr": [
+        0.378,
+        -0.077,
+        -0.579,
+        -0.574
+      ]
+    },
+    {
+      "block": 2,
+      "channels": 128,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.5858,
+        0.2792,
+        0.3321,
+        0.8029
+      ],
+      "top1_share": [
+        0.3047,
+        0.0675,
+        0.0036,
+        0.6241
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.2606,
+        0.2261,
+        0.2177,
+        0.2956
+      ],
+      "prob_entropy_mean": 1.3577,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 6,
+      "scale_of_top1_choice": {
+        "0": 48.7,
+        "1": 37.6,
+        "2": 22.6,
+        "3": 30.6
+      },
+      "prob_vs_scale_corr": [
+        0.339,
+        0.146,
+        -0.283,
+        -0.284
+      ],
+      "prob_vs_count_corr": [
+        -0.369,
+        -0.549,
+        0.193,
+        0.59
+      ]
+    },
+    {
+      "block": 3,
+      "channels": 256,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.1642,
+        0.531,
+        0.9544,
+        0.3504
+      ],
+      "top1_share": [
+        0.0,
+        0.073,
+        0.9051,
+        0.0219
+      ],
+      "dead_experts": [],
+      "mean_prob": [
+        0.1953,
+        0.2182,
+        0.405,
+        0.1815
+      ],
+      "prob_entropy_mean": 1.2896,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 6,
+      "scale_of_top1_choice": {
+        "1": 41.8,
+        "2": 36.3,
+        "3": 32.4
+      },
+      "prob_vs_scale_corr": [
+        0.055,
+        0.092,
+        0.014,
+        -0.207
+      ],
+      "prob_vs_count_corr": [
+        -0.233,
+        -0.159,
+        0.102,
+        0.175
+      ]
+    }
+  ]
+}

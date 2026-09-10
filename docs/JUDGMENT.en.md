@@ -269,6 +269,40 @@ Three things follow, and all three are stated rather than softened:
 
 Accuracy claims here therefore stop at direction, with the sample size and interval stated alongside; anywhere an earlier judgment line reasoned from a magnitude, it is downgraded to direction. **This is the most useful negative result of the project, and it is a by-product of an implementation defect -- without those six runs being mislabelled, nobody would have paid for a repeat of an identical configuration.**
 
+## Fifth-round verdicts (2026-09-10, the three structural arms have run)
+
+Three arms at three seeds each, paired against a baseline of the same seed on the same card:
+
+| arm | relation to upstream | paired mAP50 | 95% CI | wins | mAP50-95 |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| `norm` (v5n) | always on upstream, off here | **+0.0038** | [−0.0033, +0.0109] | **3/3** | +0.0022 (3/3) |
+| `dense` (v5n) | always on upstream, off here | **+0.0031** | [−0.0006, +0.0068] | **3/3** | +0.0034 (3/3) |
+| `stages` (v10n, four blocks) | upstream's layout, one block here | **−0.0071** | [−0.0162, +0.0019] | **0/3** | −0.0048 (0/3) |
+
+**In one line: both of upstream's block-internal defaults are positive and 3/3; upstream's block-count layout is negative and 0/3.** Of the things this package had not copied, the good ones were inside the block and the bad one was the count.
+
+### Predictions settled
+
+**Fifth (the `stages` arm beats the single-block arm, by more than any balancing objective achieved) — refuted, and the other way round.** Four blocks did not lift the metric; they are the only cell of twenty-one that is 0/3 with both metrics negative. The prediction itself said "if it cannot move the metric either, then the graft-location-and-capacity explanation should retire". By its own terms, **it retires.** The parameter count is higher (3.15M against 3.03M), so this is not a capacity shortfall.
+
+The confound is measured, not assumed: four blocks sum four auxiliary terms, so at one weight `esmoe_aux` goes from 0.020 to 0.080, exactly fourfold. Separating "block count" from "fourfold balancing pressure" needs the four-block arm at `weight=0.0025`; that arm is queued and the verdict waits on it.
+
+**Sixth (the `dense` arm's leading expert holds a smaller top-1 share) — partly, and not on the quantity that was registered.** Per seed: −0.277, +0.095, −0.017, a mean of −0.066 at **2/3**, carried almost entirely by seed 0. On the share the top two experts take instead, dense is lower on 3/3 (1.392/1.403/1.555 against 1.431/1.610/1.646). **What was registered was the top-1 share, and on that quantity this is not established**; "dense spreads the dispatch" holds on the other measure.
+
+**Seventh (`norm` moves accuracy by less than ±0.003) — refuted, in the positive direction.** +0.0038 is outside the band. More interesting is what came with it: the `norm` arm's leading expert holds a **larger** top-1 share than the sparse arm by 0.089, on 3/3 seeds. **More concentrated, and more accurate.**
+
+### One thing that matters more than the three predictions
+
+Put "how concentrated the dispatch is" beside "how much the pairing moved", over the 58 runs that have both a routing analysis and a paired delta:
+
+$$r = +0.160$$
+
+The leading expert's top-1 share runs from 0.49 to 0.92 and the paired mAP50 delta from −0.0113 to +0.0109, and the two are **almost unrelated — with what relationship there is pointing the wrong way.** `norm` is more concentrated and more accurate; `dense` is more spread and more accurate. Both are instances of the same thing.
+
+**This unsettles the premise of the whole line of questioning.** Four rounds here asked how to relieve routing collapse, assuming collapse costs accuracy. Under these conditions that assumption has no support: **collapse and accuracy are unrelated in this data.** Whether a balancing term belongs, and how large it should be, therefore cannot be argued from "it prevents collapse"; it has to be settled by what the term does to the metric — and that effect currently sits inside the run-to-run spread.
+
+The correlation is recomputed by `scripts/routing.py --summarise` at the top of `results/routing.md`; it is not transcribed.
+
 ### Results from the alignment arms
 
 Filled in as the runs land, from the same numbers as `results/summary.md`.
