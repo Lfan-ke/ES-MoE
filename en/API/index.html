@@ -461,6 +461,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#clear_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clear_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odd-odd_kernels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odd / odd_kernels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#esmoe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -723,6 +745,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#clear_aux_loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        clear_aux_loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#odd-odd_kernels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        odd / odd_kernels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#esmoe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -777,6 +821,15 @@
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
 <p>Sums the routing losses published by the most recent forward, for custom training loops. Calling it twice cannot count a stale value again.</p>
+<h2 id="clear_aux_loss">clear_aux_loss<a class="headerlink" href="#clear_aux_loss" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.clear_aux_loss() -&gt; None
+</code></pre>
+<p>Drops every value blocks have published into the registry. The loss patch <code>attach_aux_loss</code> installs calls it before each forward; a custom training loop that does not go through that patch has to call it itself, or a block that does not run in some step will still be answering with the value from the step before.</p>
+<h2 id="odd-odd_kernels">odd / odd_kernels<a class="headerlink" href="#odd-odd_kernels" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.odd(size) -&gt; int
+esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
+</code></pre>
+<p><code>odd</code> steps an even kernel down (4 -&gt; 3) so the padding stays centred, which is what upstream does to both explicit kernel sizes and the cap. <code>odd_kernels</code> generates the default heterogeneous set <code>3, 5, 7, ...</code> capped at <code>max_kernel_size</code> -- the one <code>ESMoE</code> uses when <code>expert_kernel_sizes</code> is not given.</p>
 <h2 id="esmoe">ESMoE<a class="headerlink" href="#esmoe" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,
             out_channels=None, reduction=8, max_kernel_size=15,
