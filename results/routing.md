@@ -4,7 +4,7 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 
 ## Does concentration cost accuracy?
 
-Over the 58 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.49 to 0.92 and the paired mAP50 delta -0.0113 to +0.0109. Their correlation is **r = +0.160**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
+Over the 60 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 0.92 and the paired mAP50 delta -0.0113 to +0.0109. Their correlation is **r = +0.172**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
 
 ## yolo11n-esmoe-e120-s0-p800-best.pt
 
@@ -203,6 +203,28 @@ Over the 58 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.217 | 0.560 | 0.236 | -0.33 | +0.46 |
 | 2 | 7 | 0.111 | 0.376 | 0.216 | +0.49 | -0.47 |
 | 3 | 9 | 0.671 | 0.870 | 0.324 | -0.08 | -0.02 |
+
+## yolov10n-esmoe-dense-e120-s0-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3585 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.148 | 0.229 | -0.05 | +0.10 |
+| 1 | 5 | 0.467 | 0.737 | 0.286 | +0.14 | -0.12 |
+| 2 | 7 | 0.239 | 0.473 | 0.234 | +0.14 | -0.34 |
+| 3 | 9 | 0.292 | 0.642 | 0.251 | -0.30 | +0.46 |
+
+## yolov10n-esmoe-dense-e120-s1-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3379 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.007 | 0.409 | 0.240 | -0.01 | +0.08 |
+| 1 | 5 | 0.166 | 0.352 | 0.214 | -0.30 | +0.44 |
+| 2 | 7 | 0.188 | 0.438 | 0.230 | +0.32 | -0.40 |
+| 3 | 9 | 0.639 | 0.801 | 0.315 | +0.04 | -0.13 |
 
 ## yolov10n-esmoe-e120-s0-p800-best.pt
 
