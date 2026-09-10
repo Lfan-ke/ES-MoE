@@ -141,8 +141,7 @@ YOLOv10n 默认臂的均值压在零上、5 个 seed 里 3 个为正，按判读
 
 读原论文正文（arXiv 2512.23273 第 3.5 节）后发现，**论文指定的平衡项与上游代码实现的不是同一个**。论文式 (13)：
 
-$$ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
-ight)^2 $$
+$$ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}\right)^2 $$
 
 其中 μᵢ 由 **Ω_train**——即 top-K 掩码并重归一之后的权重（论文式 8）——在批与空间位置上取平均得到。上游 `ES_MOE` 则把 GShard 式 `N·Σusage²` 用在**原始 router 概率**上。三者在同一对输入上的表现：
 
