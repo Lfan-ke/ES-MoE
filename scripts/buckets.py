@@ -15,6 +15,10 @@ import yaml
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from routing import run_name  # noqa: E402
+
 RUNS = ROOT / "runs" / "buckets"
 OUT = ROOT / "results" / "buckets"
 STATS = ("AP", "AP50", "AP75", "APs", "APm", "APl", "AR1", "AR10", "AR", "ARs", "ARm", "ARl")
@@ -85,7 +89,7 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
         verbose=False,
         workers=0,
         project=str(RUNS),
-        name=weights.stem,
+        name=run_name(weights),
         exist_ok=True,
     )
     predictions = json.loads((Path(metrics.save_dir) / "predictions.json").read_text(encoding="utf-8"))
@@ -98,7 +102,7 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
     ev.accumulate()
     ev.summarize()
     return {
-        "weights": weights.name,
+        "weights": run_name(weights),
         "imgsz": args.imgsz,
         "max_det": args.max_det,
         "ultralytics": {"mAP50": float(metrics.box.map50), "mAP50-95": float(metrics.box.map)},
@@ -173,10 +177,10 @@ def main() -> int:
 
     for weights in args.weights:
         record = evaluate(weights, args.data, gt_file, ids, args) | {"gt_buckets": counts}
-        (OUT / f"{weights.stem}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+        (OUT / f"{run_name(weights)}.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
         c = record["coco"]
         print(
-            f"{weights.stem}: AP {c['AP']:.4f} AP50 {c['AP50']:.4f} APs {c['APs']:.4f} APm {c['APm']:.4f} "
+            f"{run_name(weights)}: AP {c['AP']:.4f} AP50 {c['AP50']:.4f} APs {c['APs']:.4f} APm {c['APm']:.4f} "
             f"APl {c['APl']:.4f} AR@{args.max_det} {c['AR']:.4f}",
             flush=True,
         )
