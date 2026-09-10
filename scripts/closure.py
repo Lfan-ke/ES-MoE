@@ -99,12 +99,14 @@ def pull_request() -> tuple[bool, str]:
 
 def safety() -> tuple[bool, str]:
     """Nothing tracked here carries a credential."""
+    # Assembled rather than written out, so this file does not match its own search.
+    pattern = "|".join(["pass" + "word", "pass" + "wd", "api[_-]?" + "token", "BEGIN [A-Z ]*PRIVATE" + " KEY"])
     out = subprocess.run(
-        ["git", "-C", str(ROOT), "grep", "-lIE", "-e", "password|passwd|api[_-]?token|BEGIN [A-Z ]*PRIVATE KEY"],
+        ["git", "-C", str(ROOT), "grep", "-lIE", "-e", pattern],
         capture_output=True,
         text=True,
     )
-    # A licence that quotes the word "password" is not a leaked credential.
+    # A licence that quotes one of these words is not a leaked credential.
     legal = {"LICENSE", "NOTICE", "CODE_OF_CONDUCT.md", "SECURITY.md"}
     hits = [line for line in out.stdout.splitlines() if line and line not in legal and not line.startswith("docs/")]
     return not hits, "no credential pattern in tracked files" if not hits else f"check {hits}"

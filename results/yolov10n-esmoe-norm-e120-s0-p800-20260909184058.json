@@ -1,0 +1,64 @@
+{
+  "experiment_id": "yolov10n-esmoe-norm-e120-s0-p800-20260909184058",
+  "git_ref": {
+    "toolkit": "82ca8af",
+    "toolkit_version": "0.1.5",
+    "ultralytics": "8.4.101",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
+  },
+  "config": {
+    "model_yaml": "/data/esmoe-toolkit/configs/yolov10n-esmoe-e4k2-switch-backbone_end-s0.yaml",
+    "sha256": "a42e13f19afead7d16b3cbfc1d55e1433efe3684dce6f36acdf799c4022d5dfe",
+    "arch": "esmoe-norm",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": false,
+    "aux_weight": 0.01,
+    "balance": "switch",
+    "out_norm": true,
+    "dense_training": false,
+    "sparse_inference": true,
+    "dynamic_threshold": 0.0,
+    "blocks": 1
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 1.0,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
+  },
+  "hardware": {
+    "gpu": "MetaX C500",
+    "torch": "2.8.0+metax3.3.0.2",
+    "python": "3.10.10"
+  },
+  "budget": {
+    "epochs": 120,
+    "batch": 32,
+    "imgsz": 800,
+    "patience": 0,
+    "amp": true,
+    "wall_seconds": 17207.8,
+    "gpu_hours": 4.78
+  },
+  "seed": 0,
+  "metrics": {
+    "metrics/precision(B)": 0.4698724415051962,
+    "metrics/recall(B)": 0.37008628426421775,
+    "metrics/mAP50(B)": 0.35064227532860714,
+    "metrics/mAP50-95(B)": 0.19936233044843152
+  },
+  "params": 3025984,
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolov10n-esmoe-norm-e120-s0-p800/weights/best.pt",
+    "sha256": "15f8ede93fd0c4e2aebb9628f08b60f0550ea7f1146c1337da73329f1ec5572a"
+  },
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}
