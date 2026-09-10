@@ -1429,8 +1429,7 @@
 </ol>
 <h3 id="2026-09-09-master">第四轮预登记（2026-09-09，声明于任何 <code>master</code> 臂结果之前）<a class="headerlink" href="#2026-09-09-master" title="Permanent link">&para;</a></h3>
 <p>读原论文正文（arXiv 2512.23273 第 3.5 节）后发现，<strong>论文指定的平衡项与上游代码实现的不是同一个</strong>。论文式 (13)：</p>
-<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
-ight)^2 \]</div>
+<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}\right)^2 \]</div>
 <p>其中 μᵢ 由 <strong>Ω_train</strong>——即 top-K 掩码并重归一之后的权重（论文式 8）——在批与空间位置上取平均得到。上游 <code>ES_MOE</code> 则把 GShard 式 <code>N·Σusage²</code> 用在<strong>原始 router 概率</strong>上。三者在同一对输入上的表现：</p>
 <table>
 <thead>

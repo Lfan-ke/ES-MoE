@@ -1429,8 +1429,7 @@
 </ol>
 <h3 id="fourth-pre-registration-2026-09-09-declared-before-any-master-result">Fourth pre-registration (2026-09-09, declared before any <code>master</code> result)<a class="headerlink" href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" title="Permanent link">&para;</a></h3>
 <p>Reading the paper itself (arXiv 2512.23273, section 3.5) shows that <strong>the balancing term the paper specifies is not the one the released code implements</strong>. Paper equation (13):</p>
-<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}
-ight)^2 \]</div>
+<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}\right)^2 \]</div>
 <p>where μᵢ averages <strong>Ω_train</strong> - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's <code>ES_MOE</code> instead applies the GShard form <code>N·Σusage²</code> to the <strong>raw router probabilities</strong>. On one pair of inputs:</p>
 <table>
 <thead>
