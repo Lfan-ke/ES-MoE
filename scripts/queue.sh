@@ -28,7 +28,9 @@ lane() {
   while :; do
     job=$(pop); [ -z "$job" ] && break
     read -r base arm seed tag w <<< "$job"
-    w=${w:-0.01}
+    # Normalised the way python's %g formats it, so a job line saying 0.0 or 1.50 still names the
+    # run the trainer will name it, and a resumed run finds the directory it left behind.
+    w=$(printf '%g' "${w:-0.01}")
     case "$arm" in
       baseline) flag=""; arch="baseline" ;;
       esmoe)    flag="--esmoe"; arch="esmoe" ;;

@@ -33,12 +33,15 @@ def test_queue_offers_every_arm_the_protocol_uses():
     }
 
 
-@pytest.mark.parametrize("weight", ["0.01", "1.5"])
+# "0.0" and "1.50" are the shapes a hand-written job line takes; the runner normalises both.
+@pytest.mark.parametrize("weight", ["0.01", "1.5", "0.0", "1.50", "0.0025"])
 @pytest.mark.parametrize("arm", ARMS, ids=lambda arm: arm[0])
 def test_queue_and_trainer_agree_on_the_run_name(arm, weight):
     name, flags, arch = arm
     argv = [*flags.split(), "--base", "yolov8n.yaml"]
     if name != "baseline":
         argv += ["--aux-weight", weight]
-    expected = arch + ("" if name == "baseline" or weight == "0.01" else f"-w{float(weight):g}")
+    # The runner pipes the weight through `printf %g`, which is what python's `:g` produces.
+    normalised = f"{float(weight):g}"
+    expected = arch + ("" if name == "baseline" or normalised == "0.01" else f"-w{normalised}")
     assert train.architecture(train.build_parser().parse_args(argv)) == expected
