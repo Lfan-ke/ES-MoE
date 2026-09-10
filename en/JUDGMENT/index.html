@@ -793,8 +793,41 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Run-to-run spread at one configuration (2026-09-09, not planned)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth-round verdicts (2026-09-10, the three structural arms have run)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fifth-round verdicts (2026-09-10, the three structural arms have run)">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-that-matters-more-than-the-three-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing that matters more than the three predictions
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#results-from-the-alignment-arms" class="md-nav__link">
@@ -1126,8 +1159,41 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Run-to-run spread at one configuration (2026-09-09, not planned)">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth-round verdicts (2026-09-10, the three structural arms have run)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fifth-round verdicts (2026-09-10, the three structural arms have run)">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-that-matters-more-than-the-three-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing that matters more than the three predictions
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#results-from-the-alignment-arms" class="md-nav__link">
@@ -1566,6 +1632,58 @@ ight)^2 \]</div>
 <li><strong>This does not overturn the consistency of the signs, but it does overturn reading the magnitudes.</strong> "Positive on this generation, negative on that one" is carried by the sign counts across seeds. "The block is worth +0.0055" is not: two runs of one configuration already differ by 0.0130.</li>
 </ol>
 <p>Accuracy claims here therefore stop at direction, with the sample size and interval stated alongside; anywhere an earlier judgment line reasoned from a magnitude, it is downgraded to direction. <strong>This is the most useful negative result of the project, and it is a by-product of an implementation defect -- without those six runs being mislabelled, nobody would have paid for a repeat of an identical configuration.</strong></p>
+<h2 id="fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run">Fifth-round verdicts (2026-09-10, the three structural arms have run)<a class="headerlink" href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" title="Permanent link">&para;</a></h2>
+<p>Three arms at three seeds each, paired against a baseline of the same seed on the same card:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">relation to upstream</th>
+<th style="text-align: center;">paired mAP50</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: center;">wins</th>
+<th style="text-align: center;">mAP50-95</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>norm</code> (v5n)</td>
+<td style="text-align: center;">always on upstream, off here</td>
+<td style="text-align: center;"><strong>+0.0038</strong></td>
+<td style="text-align: center;">[−0.0033, +0.0109]</td>
+<td style="text-align: center;"><strong>3/3</strong></td>
+<td style="text-align: center;">+0.0022 (3/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense</code> (v5n)</td>
+<td style="text-align: center;">always on upstream, off here</td>
+<td style="text-align: center;"><strong>+0.0031</strong></td>
+<td style="text-align: center;">[−0.0006, +0.0068]</td>
+<td style="text-align: center;"><strong>3/3</strong></td>
+<td style="text-align: center;">+0.0034 (3/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>stages</code> (v10n, four blocks)</td>
+<td style="text-align: center;">upstream's layout, one block here</td>
+<td style="text-align: center;"><strong>−0.0071</strong></td>
+<td style="text-align: center;">[−0.0162, +0.0019]</td>
+<td style="text-align: center;"><strong>0/3</strong></td>
+<td style="text-align: center;">−0.0048 (0/3)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In one line: both of upstream's block-internal defaults are positive and 3/3; upstream's block-count layout is negative and 0/3.</strong> Of the things this package had not copied, the good ones were inside the block and the bad one was the count.</p>
+<h3 id="predictions-settled_2">Predictions settled<a class="headerlink" href="#predictions-settled_2" title="Permanent link">&para;</a></h3>
+<p><strong>Fifth (the <code>stages</code> arm beats the single-block arm, by more than any balancing objective achieved) — refuted, and the other way round.</strong> Four blocks did not lift the metric; they are the only cell of twenty-one that is 0/3 with both metrics negative. The prediction itself said "if it cannot move the metric either, then the graft-location-and-capacity explanation should retire". By its own terms, <strong>it retires.</strong> The parameter count is higher (3.15M against 3.03M), so this is not a capacity shortfall.</p>
+<p>The confound is measured, not assumed: four blocks sum four auxiliary terms, so at one weight <code>esmoe_aux</code> goes from 0.020 to 0.080, exactly fourfold. Separating "block count" from "fourfold balancing pressure" needs the four-block arm at <code>weight=0.0025</code>; that arm is queued and the verdict waits on it.</p>
+<p><strong>Sixth (the <code>dense</code> arm's leading expert holds a smaller top-1 share) — partly, and not on the quantity that was registered.</strong> Per seed: −0.277, +0.095, −0.017, a mean of −0.066 at <strong>2/3</strong>, carried almost entirely by seed 0. On the share the top two experts take instead, dense is lower on 3/3 (1.392/1.403/1.555 against 1.431/1.610/1.646). <strong>What was registered was the top-1 share, and on that quantity this is not established</strong>; "dense spreads the dispatch" holds on the other measure.</p>
+<p><strong>Seventh (<code>norm</code> moves accuracy by less than ±0.003) — refuted, in the positive direction.</strong> +0.0038 is outside the band. More interesting is what came with it: the <code>norm</code> arm's leading expert holds a <strong>larger</strong> top-1 share than the sparse arm by 0.089, on 3/3 seeds. <strong>More concentrated, and more accurate.</strong></p>
+<h3 id="one-thing-that-matters-more-than-the-three-predictions">One thing that matters more than the three predictions<a class="headerlink" href="#one-thing-that-matters-more-than-the-three-predictions" title="Permanent link">&para;</a></h3>
+<p>Put "how concentrated the dispatch is" beside "how much the pairing moved", over the 58 runs that have both a routing analysis and a paired delta:</p>
+<div class="arithmatex">\[r = +0.160\]</div>
+<p>The leading expert's top-1 share runs from 0.49 to 0.92 and the paired mAP50 delta from −0.0113 to +0.0109, and the two are <strong>almost unrelated — with what relationship there is pointing the wrong way.</strong> <code>norm</code> is more concentrated and more accurate; <code>dense</code> is more spread and more accurate. Both are instances of the same thing.</p>
+<p><strong>This unsettles the premise of the whole line of questioning.</strong> Four rounds here asked how to relieve routing collapse, assuming collapse costs accuracy. Under these conditions that assumption has no support: <strong>collapse and accuracy are unrelated in this data.</strong> Whether a balancing term belongs, and how large it should be, therefore cannot be argued from "it prevents collapse"; it has to be settled by what the term does to the metric — and that effect currently sits inside the run-to-run spread.</p>
+<p>The correlation is recomputed by <code>scripts/routing.py --summarise</code> at the top of <code>results/routing.md</code>; it is not transcribed.</p>
 <h3 id="results-from-the-alignment-arms">Results from the alignment arms<a class="headerlink" href="#results-from-the-alignment-arms" title="Permanent link">&para;</a></h3>
 <p>Filled in as the runs land, from the same numbers as <code>results/summary.md</code>.</p>
 <div id="esmoe-alignment"></div>

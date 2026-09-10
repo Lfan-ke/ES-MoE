@@ -6267,6 +6267,8 @@ cell-by-cell verdicts are on the <a href="../JUDGMENT/">judgment lines</a> page.
 <h2 id="router-behaviour">Router behaviour<a class="headerlink" href="#router-behaviour" title="Permanent link">&para;</a></h2>
 <h1 id="router-behaviour-on-visdrone-val">Router behaviour on VisDrone val<a class="headerlink" href="#router-behaviour-on-visdrone-val" title="Permanent link">&para;</a></h1>
 <p>Per checkpoint: the share of images on which each expert is the top-1 choice, the share on which it is in the top-2, the mean routing probability, and the correlation of that probability with the mean object size and the object count of the image.</p>
+<h2 id="does-concentration-cost-accuracy">Does concentration cost accuracy?<a class="headerlink" href="#does-concentration-cost-accuracy" title="Permanent link">&para;</a></h2>
+<p>Over the 58 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.49 to 0.92 and the paired mAP50 delta -0.0113 to +0.0109. Their correlation is <strong>r = +0.160</strong>: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.</p>
 <h2 id="yolo11n-esmoe-e120-s0-p800-bestpt">yolo11n-esmoe-e120-s0-p800-best.pt<a class="headerlink" href="#yolo11n-esmoe-e120-s0-p800-bestpt" title="Permanent link">&para;</a></h2>
 <p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3335 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
 <table>
@@ -7486,6 +7488,59 @@ cell-by-cell verdicts are on the <a href="../JUDGMENT/">judgment lines</a> page.
 </tr>
 </tbody>
 </table>
+<h2 id="yolov10n-esmoe-norm-e120-s0-p800-best">yolov10n-esmoe-norm-e120-s0-p800-best<a class="headerlink" href="#yolov10n-esmoe-norm-e120-s0-p800-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3316 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.024</td>
+<td style="text-align: center;">0.339</td>
+<td style="text-align: center;">0.246</td>
+<td style="text-align: center;">+0.16</td>
+<td style="text-align: center;">-0.09</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.829</td>
+<td style="text-align: center;">0.914</td>
+<td style="text-align: center;">0.326</td>
+<td style="text-align: center;">+0.09</td>
+<td style="text-align: center;">+0.07</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.080</td>
+<td style="text-align: center;">0.571</td>
+<td style="text-align: center;">0.250</td>
+<td style="text-align: center;">+0.29</td>
+<td style="text-align: center;">-0.40</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.068</td>
+<td style="text-align: center;">0.175</td>
+<td style="text-align: center;">0.178</td>
+<td style="text-align: center;">-0.30</td>
+<td style="text-align: center;">+0.19</td>
+</tr>
+</tbody>
+</table>
 <h2 id="yolov10n-esmoe-rewire-e120-s0-p800-bestpt">yolov10n-esmoe-rewire-e120-s0-p800-best.pt<a class="headerlink" href="#yolov10n-esmoe-rewire-e120-s0-p800-bestpt" title="Permanent link">&para;</a></h2>
 <p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3054 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
 <table>
@@ -7751,6 +7806,792 @@ cell-by-cell verdicts are on the <a href="../JUDGMENT/">judgment lines</a> page.
 </tr>
 </tbody>
 </table>
+<h2 id="yolov10n-esmoe-rewire-stages-e120-s0-p800-best">yolov10n-esmoe-rewire-stages-e120-s0-p800-best<a class="headerlink" href="#yolov10n-esmoe-rewire-stages-e120-s0-p800-best" title="Permanent link">&para;</a></h2>
+<p>548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.352 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.708</td>
+<td style="text-align: center;">0.810</td>
+<td style="text-align: center;">0.310</td>
+<td style="text-align: center;">-0.21</td>
+<td style="text-align: center;">+0.32</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.122</td>
+<td style="text-align: center;">0.256</td>
+<td style="text-align: center;">0.204</td>
+<td style="text-align: center;">+0.08</td>
+<td style="text-align: center;">-0.12</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.157</td>
+<td style="text-align: center;">0.370</td>
+<td style="text-align: center;">0.242</td>
+<td style="text-align: center;">+0.22</td>
+<td style="text-align: center;">-0.37</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.013</td>
+<td style="text-align: center;">0.564</td>
+<td style="text-align: center;">0.243</td>
+<td style="text-align: center;">-0.03</td>
+<td style="text-align: center;">+0.16</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2674 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.416</td>
+<td style="text-align: center;">0.487</td>
+<td style="text-align: center;">0.244</td>
+<td style="text-align: center;">+0.18</td>
+<td style="text-align: center;">-0.16</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.566</td>
+<td style="text-align: center;">0.611</td>
+<td style="text-align: center;">0.260</td>
+<td style="text-align: center;">-0.28</td>
+<td style="text-align: center;">+0.28</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.002</td>
+<td style="text-align: center;">0.259</td>
+<td style="text-align: center;">0.248</td>
+<td style="text-align: center;">+0.36</td>
+<td style="text-align: center;">-0.41</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.016</td>
+<td style="text-align: center;">0.642</td>
+<td style="text-align: center;">0.248</td>
+<td style="text-align: center;">+0.36</td>
+<td style="text-align: center;">-0.41</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3498 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.332</td>
+<td style="text-align: center;">0.662</td>
+<td style="text-align: center;">0.257</td>
+<td style="text-align: center;">+0.27</td>
+<td style="text-align: center;">-0.21</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.606</td>
+<td style="text-align: center;">0.781</td>
+<td style="text-align: center;">0.303</td>
+<td style="text-align: center;">-0.32</td>
+<td style="text-align: center;">+0.51</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.053</td>
+<td style="text-align: center;">0.265</td>
+<td style="text-align: center;">0.222</td>
+<td style="text-align: center;">+0.18</td>
+<td style="text-align: center;">-0.59</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.009</td>
+<td style="text-align: center;">0.292</td>
+<td style="text-align: center;">0.218</td>
+<td style="text-align: center;">-0.03</td>
+<td style="text-align: center;">-0.22</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.317 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.276</td>
+<td style="text-align: center;">0.211</td>
+<td style="text-align: center;">+0.05</td>
+<td style="text-align: center;">-0.20</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.057</td>
+<td style="text-align: center;">0.330</td>
+<td style="text-align: center;">0.196</td>
+<td style="text-align: center;">-0.21</td>
+<td style="text-align: center;">+0.47</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.161</td>
+<td style="text-align: center;">0.489</td>
+<td style="text-align: center;">0.231</td>
+<td style="text-align: center;">+0.28</td>
+<td style="text-align: center;">-0.25</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.783</td>
+<td style="text-align: center;">0.905</td>
+<td style="text-align: center;">0.362</td>
+<td style="text-align: center;">-0.10</td>
+<td style="text-align: center;">-0.05</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov10n-esmoe-rewire-stages-e120-s1-p800-best">yolov10n-esmoe-rewire-stages-e120-s1-p800-best<a class="headerlink" href="#yolov10n-esmoe-rewire-stages-e120-s1-p800-best" title="Permanent link">&para;</a></h2>
+<p>548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3319 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.161</td>
+<td style="text-align: center;">0.391</td>
+<td style="text-align: center;">0.220</td>
+<td style="text-align: center;">+0.14</td>
+<td style="text-align: center;">-0.15</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.752</td>
+<td style="text-align: center;">0.814</td>
+<td style="text-align: center;">0.340</td>
+<td style="text-align: center;">-0.23</td>
+<td style="text-align: center;">+0.35</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.084</td>
+<td style="text-align: center;">0.219</td>
+<td style="text-align: center;">0.212</td>
+<td style="text-align: center;">+0.24</td>
+<td style="text-align: center;">-0.39</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.004</td>
+<td style="text-align: center;">0.577</td>
+<td style="text-align: center;">0.229</td>
+<td style="text-align: center;">+0.19</td>
+<td style="text-align: center;">-0.42</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3559 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.661</td>
+<td style="text-align: center;">0.734</td>
+<td style="text-align: center;">0.290</td>
+<td style="text-align: center;">-0.10</td>
+<td style="text-align: center;">+0.38</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.279</td>
+<td style="text-align: center;">0.504</td>
+<td style="text-align: center;">0.234</td>
+<td style="text-align: center;">-0.03</td>
+<td style="text-align: center;">-0.08</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.057</td>
+<td style="text-align: center;">0.454</td>
+<td style="text-align: center;">0.238</td>
+<td style="text-align: center;">+0.25</td>
+<td style="text-align: center;">-0.58</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.004</td>
+<td style="text-align: center;">0.308</td>
+<td style="text-align: center;">0.238</td>
+<td style="text-align: center;">+0.25</td>
+<td style="text-align: center;">-0.57</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3577 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.305</td>
+<td style="text-align: center;">0.586</td>
+<td style="text-align: center;">0.261</td>
+<td style="text-align: center;">+0.34</td>
+<td style="text-align: center;">-0.37</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.068</td>
+<td style="text-align: center;">0.279</td>
+<td style="text-align: center;">0.226</td>
+<td style="text-align: center;">+0.15</td>
+<td style="text-align: center;">-0.55</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.004</td>
+<td style="text-align: center;">0.332</td>
+<td style="text-align: center;">0.218</td>
+<td style="text-align: center;">-0.28</td>
+<td style="text-align: center;">+0.19</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.624</td>
+<td style="text-align: center;">0.803</td>
+<td style="text-align: center;">0.296</td>
+<td style="text-align: center;">-0.28</td>
+<td style="text-align: center;">+0.59</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2896 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.164</td>
+<td style="text-align: center;">0.195</td>
+<td style="text-align: center;">+0.06</td>
+<td style="text-align: center;">-0.23</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.073</td>
+<td style="text-align: center;">0.531</td>
+<td style="text-align: center;">0.218</td>
+<td style="text-align: center;">+0.09</td>
+<td style="text-align: center;">-0.16</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.905</td>
+<td style="text-align: center;">0.954</td>
+<td style="text-align: center;">0.405</td>
+<td style="text-align: center;">+0.01</td>
+<td style="text-align: center;">+0.10</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.022</td>
+<td style="text-align: center;">0.350</td>
+<td style="text-align: center;">0.181</td>
+<td style="text-align: center;">-0.21</td>
+<td style="text-align: center;">+0.17</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov10n-esmoe-rewire-stages-e120-s2-p800-best">yolov10n-esmoe-rewire-stages-e120-s2-p800-best<a class="headerlink" href="#yolov10n-esmoe-rewire-stages-e120-s2-p800-best" title="Permanent link">&para;</a></h2>
+<p>548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3745 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.093</td>
+<td style="text-align: center;">0.770</td>
+<td style="text-align: center;">0.261</td>
+<td style="text-align: center;">-0.12</td>
+<td style="text-align: center;">+0.29</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.655</td>
+<td style="text-align: center;">0.792</td>
+<td style="text-align: center;">0.281</td>
+<td style="text-align: center;">-0.26</td>
+<td style="text-align: center;">+0.10</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.184</td>
+<td style="text-align: center;">0.268</td>
+<td style="text-align: center;">0.232</td>
+<td style="text-align: center;">+0.15</td>
+<td style="text-align: center;">-0.08</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.068</td>
+<td style="text-align: center;">0.170</td>
+<td style="text-align: center;">0.226</td>
+<td style="text-align: center;">+0.20</td>
+<td style="text-align: center;">-0.23</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3824 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.699</td>
+<td style="text-align: center;">0.863</td>
+<td style="text-align: center;">0.271</td>
+<td style="text-align: center;">-0.25</td>
+<td style="text-align: center;">+0.54</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.031</td>
+<td style="text-align: center;">0.620</td>
+<td style="text-align: center;">0.246</td>
+<td style="text-align: center;">-0.21</td>
+<td style="text-align: center;">+0.21</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.013</td>
+<td style="text-align: center;">0.122</td>
+<td style="text-align: center;">0.239</td>
+<td style="text-align: center;">-0.03</td>
+<td style="text-align: center;">-0.08</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.257</td>
+<td style="text-align: center;">0.394</td>
+<td style="text-align: center;">0.243</td>
+<td style="text-align: center;">+0.31</td>
+<td style="text-align: center;">-0.52</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3351 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.179</td>
+<td style="text-align: center;">0.693</td>
+<td style="text-align: center;">0.267</td>
+<td style="text-align: center;">-0.16</td>
+<td style="text-align: center;">+0.30</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.588</td>
+<td style="text-align: center;">0.783</td>
+<td style="text-align: center;">0.296</td>
+<td style="text-align: center;">-0.17</td>
+<td style="text-align: center;">+0.43</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.069</td>
+<td style="text-align: center;">0.157</td>
+<td style="text-align: center;">0.199</td>
+<td style="text-align: center;">-0.03</td>
+<td style="text-align: center;">-0.44</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.164</td>
+<td style="text-align: center;">0.367</td>
+<td style="text-align: center;">0.238</td>
+<td style="text-align: center;">+0.38</td>
+<td style="text-align: center;">-0.43</td>
+</tr>
+</tbody>
+</table>
+<p>548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2818 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.411</td>
+<td style="text-align: center;">0.201</td>
+<td style="text-align: center;">+0.25</td>
+<td style="text-align: center;">-0.30</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.053</td>
+<td style="text-align: center;">0.237</td>
+<td style="text-align: center;">0.203</td>
+<td style="text-align: center;">+0.07</td>
+<td style="text-align: center;">-0.16</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.046</td>
+<td style="text-align: center;">0.400</td>
+<td style="text-align: center;">0.182</td>
+<td style="text-align: center;">-0.23</td>
+<td style="text-align: center;">+0.40</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.901</td>
+<td style="text-align: center;">0.953</td>
+<td style="text-align: center;">0.414</td>
+<td style="text-align: center;">+0.04</td>
+<td style="text-align: center;">-0.07</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-dense-e120-s0-p800h2-best">yolov5n-esmoe-dense-e120-s0-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-dense-e120-s0-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3124 of 1.3863, distinct top-2 pairs seen: 5 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.002</td>
+<td style="text-align: center;">0.547</td>
+<td style="text-align: center;">0.230</td>
+<td style="text-align: center;">+0.42</td>
+<td style="text-align: center;">-0.46</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.060</td>
+<td style="text-align: center;">0.218</td>
+<td style="text-align: center;">+0.37</td>
+<td style="text-align: center;">-0.41</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.547</td>
+<td style="text-align: center;">0.626</td>
+<td style="text-align: center;">0.269</td>
+<td style="text-align: center;">-0.38</td>
+<td style="text-align: center;">+0.48</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.451</td>
+<td style="text-align: center;">0.766</td>
+<td style="text-align: center;">0.283</td>
+<td style="text-align: center;">+0.31</td>
+<td style="text-align: center;">-0.43</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-dense-e120-s1-p800h2-best">yolov5n-esmoe-dense-e120-s1-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-dense-e120-s1-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2917 of 1.3863, distinct top-2 pairs seen: 5 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.161</td>
+<td style="text-align: center;">0.203</td>
+<td style="text-align: center;">+0.01</td>
+<td style="text-align: center;">-0.03</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.027</td>
+<td style="text-align: center;">0.436</td>
+<td style="text-align: center;">0.212</td>
+<td style="text-align: center;">+0.10</td>
+<td style="text-align: center;">-0.14</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.847</td>
+<td style="text-align: center;">0.916</td>
+<td style="text-align: center;">0.388</td>
+<td style="text-align: center;">+0.18</td>
+<td style="text-align: center;">-0.32</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.126</td>
+<td style="text-align: center;">0.487</td>
+<td style="text-align: center;">0.197</td>
+<td style="text-align: center;">-0.31</td>
+<td style="text-align: center;">+0.52</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-dense-e120-s2-p800h2-best">yolov5n-esmoe-dense-e120-s2-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-dense-e120-s2-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3096 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.004</td>
+<td style="text-align: center;">0.666</td>
+<td style="text-align: center;">0.244</td>
+<td style="text-align: center;">+0.14</td>
+<td style="text-align: center;">-0.30</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.075</td>
+<td style="text-align: center;">0.182</td>
+<td style="text-align: center;">0.191</td>
+<td style="text-align: center;">-0.10</td>
+<td style="text-align: center;">+0.07</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.080</td>
+<td style="text-align: center;">0.263</td>
+<td style="text-align: center;">0.208</td>
+<td style="text-align: center;">-0.12</td>
+<td style="text-align: center;">+0.38</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.841</td>
+<td style="text-align: center;">0.889</td>
+<td style="text-align: center;">0.356</td>
+<td style="text-align: center;">+0.13</td>
+<td style="text-align: center;">-0.22</td>
+</tr>
+</tbody>
+</table>
 <h2 id="yolov5n-esmoe-e120-s0-p800h2-bestpt">yolov5n-esmoe-e120-s0-p800h2-best.pt<a class="headerlink" href="#yolov5n-esmoe-e120-s0-p800h2-bestpt" title="Permanent link">&para;</a></h2>
 <p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2538 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
 <table>
@@ -8013,6 +8854,165 @@ cell-by-cell verdicts are on the <a href="../JUDGMENT/">judgment lines</a> page.
 <td style="text-align: center;">0.327</td>
 <td style="text-align: center;">-0.30</td>
 <td style="text-align: center;">+0.39</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-norm-e120-s0-p800h2-best">yolov5n-esmoe-norm-e120-s0-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-norm-e120-s0-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3489 of 1.3863, distinct top-2 pairs seen: 5 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.035</td>
+<td style="text-align: center;">0.175</td>
+<td style="text-align: center;">0.228</td>
+<td style="text-align: center;">-0.06</td>
+<td style="text-align: center;">+0.05</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.009</td>
+<td style="text-align: center;">0.173</td>
+<td style="text-align: center;">0.207</td>
+<td style="text-align: center;">+0.08</td>
+<td style="text-align: center;">+0.07</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.892</td>
+<td style="text-align: center;">0.960</td>
+<td style="text-align: center;">0.332</td>
+<td style="text-align: center;">-0.12</td>
+<td style="text-align: center;">+0.19</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.064</td>
+<td style="text-align: center;">0.692</td>
+<td style="text-align: center;">0.234</td>
+<td style="text-align: center;">+0.21</td>
+<td style="text-align: center;">-0.41</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-norm-e120-s1-p800h2-best">yolov5n-esmoe-norm-e120-s1-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-norm-e120-s1-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3193 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.376</td>
+<td style="text-align: center;">0.221</td>
+<td style="text-align: center;">+0.04</td>
+<td style="text-align: center;">-0.03</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.036</td>
+<td style="text-align: center;">0.451</td>
+<td style="text-align: center;">0.226</td>
+<td style="text-align: center;">-0.01</td>
+<td style="text-align: center;">+0.01</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.057</td>
+<td style="text-align: center;">0.235</td>
+<td style="text-align: center;">0.186</td>
+<td style="text-align: center;">-0.25</td>
+<td style="text-align: center;">+0.28</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.907</td>
+<td style="text-align: center;">0.938</td>
+<td style="text-align: center;">0.367</td>
+<td style="text-align: center;">+0.17</td>
+<td style="text-align: center;">-0.20</td>
+</tr>
+</tbody>
+</table>
+<h2 id="yolov5n-esmoe-norm-e120-s2-p800h2-best">yolov5n-esmoe-norm-e120-s2-p800h2-best<a class="headerlink" href="#yolov5n-esmoe-norm-e120-s2-p800h2-best" title="Permanent link">&para;</a></h2>
+<p>548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3152 of 1.3863, distinct top-2 pairs seen: 6 of 6.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">expert</th>
+<th style="text-align: center;">kernel</th>
+<th style="text-align: center;">top-1 share</th>
+<th style="text-align: center;">top-2 share</th>
+<th style="text-align: center;">mean prob</th>
+<th style="text-align: center;">corr. size</th>
+<th style="text-align: center;">corr. count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.414</td>
+<td style="text-align: center;">0.212</td>
+<td style="text-align: center;">-0.10</td>
+<td style="text-align: center;">+0.05</td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.029</td>
+<td style="text-align: center;">0.244</td>
+<td style="text-align: center;">0.203</td>
+<td style="text-align: center;">+0.10</td>
+<td style="text-align: center;">-0.15</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0.069</td>
+<td style="text-align: center;">0.405</td>
+<td style="text-align: center;">0.205</td>
+<td style="text-align: center;">-0.17</td>
+<td style="text-align: center;">+0.38</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">0.901</td>
+<td style="text-align: center;">0.936</td>
+<td style="text-align: center;">0.380</td>
+<td style="text-align: center;">+0.09</td>
+<td style="text-align: center;">-0.20</td>
 </tr>
 </tbody>
 </table>
