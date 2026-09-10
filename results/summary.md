@@ -44,6 +44,8 @@
 | yolov10n-baseline-e120-s3-p800-20260907232405 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 3 | 0.3532 | 0.2022 | 2710940 | 16914.6 |
 | yolov10n-baseline-e120-s4-p800-20260908085304 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 4 | 0.3523 | 0.2003 | 2710940 | 16870.7 |
 | yolov10n-esmoe-dense-e1-s0-newsmoke-20260909122846 | yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 3025472 | 54.2 |
+| yolov10n-esmoe-dense-e120-s0-p800-20260909232756 | yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 0 | 0.3503 | 0.2005 | 3025472 | 17357.6 |
+| yolov10n-esmoe-dense-e120-s1-p800-20260910005225 | yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 1 | 0.3500 | 0.2004 | 3025472 | 17548.1 |
 | yolov10n-esmoe-e1-s0-smoke-20260907035626 | yolov10n-e4k2w0.01@e1f0.02i640[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 3025472 | 81.4 |
 | yolov10n-esmoe-e120-s0-p800-20260907040938 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.3513 | 0.2025 | 3025472 | 17650.8 |
 | yolov10n-esmoe-e120-s1-p800-20260907134026 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.3511 | 0.2005 | 3025472 | 17232.5 |
@@ -157,6 +159,7 @@
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | 0.3426 ± 0.0023 | 0.1958 ± 0.0012 |
 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 5 | 0.3511 ± 0.0034 | 0.2012 ± 0.0020 |
 | yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 1 | 0.0000 | 0.0000 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 2 | 0.3501 ± 0.0002 | 0.2004 ± 0.0001 |
 | yolov10n-e4k2w0.01@e1f0.02i640[metaxc500/metax3.3] | 1 | 0.0000 | 0.0000 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 5 | 0.3509 ± 0.0020 | 0.2008 ± 0.0015 |
 | yolov10n-e4k2w0.01-norm@e120f1i800[metaxc500/metax3.3] | 1 | 0.3506 | 0.1994 |
@@ -222,6 +225,8 @@
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 0 | 0.3432 | 0.3399 | -0.0033 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 1 | 0.3444 | 0.3436 | -0.0008 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 2 | 0.3416 | 0.3442 | +0.0026 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 0 | 0.3506 | 0.3503 | -0.0003 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 1 | 0.3540 | 0.3500 | -0.0041 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.3506 | 0.3513 | +0.0007 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.3540 | 0.3511 | -0.0029 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 2 | 0.3454 | 0.3476 | +0.0021 |
@@ -292,6 +297,7 @@
 | yolo12n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | +0.0001 | [-0.0063, +0.0064] | 2/3 |
 | yolo26n-e4k2w0.01@e120f1i800[4090/torch2.6] | 3 | -0.0034 | [-0.0093, +0.0025] | 0/3 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | -0.0005 | [-0.0079, +0.0068] | 1/3 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 2 | -0.0022 | [-0.0263, +0.0219] | 0/2 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 5 | -0.0002 | [-0.0025, +0.0022] | 3/5 |
 | yolov10n-e4k2w0.01-norm@e120f1i800[metaxc500/metax3.3] | 1 | +0.0001 | - | 1/1 |
 | yolov10n-e4k2w0.01-rewire@e120f1i800[metaxc500/metax3.3] | 5 | -0.0031 | [-0.0107, +0.0044] | 1/5 |
@@ -341,6 +347,8 @@
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 0 | 0.1939 | 0.1945 | +0.0006 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 1 | 0.1965 | 0.1965 | -0.0001 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 2 | 0.1946 | 0.1965 | +0.0019 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 0 | 0.2028 | 0.2005 | -0.0023 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 1 | 0.2025 | 0.2004 | -0.0021 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.2028 | 0.2025 | -0.0003 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.2025 | 0.2005 | -0.0020 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 2 | 0.1981 | 0.1989 | +0.0007 |
@@ -411,6 +419,7 @@
 | yolo12n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | +0.0006 | [-0.0029, +0.0040] | 2/3 |
 | yolo26n-e4k2w0.01@e120f1i800[4090/torch2.6] | 3 | -0.0022 | [-0.0047, +0.0004] | 0/3 |
 | yolo26n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | +0.0008 | [-0.0017, +0.0033] | 2/3 |
+| yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 2 | -0.0022 | [-0.0038, -0.0006] | 0/2 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 5 | -0.0003 | [-0.0016, +0.0009] | 2/5 |
 | yolov10n-e4k2w0.01-norm@e120f1i800[metaxc500/metax3.3] | 1 | -0.0035 | - | 0/1 |
 | yolov10n-e4k2w0.01-rewire@e120f1i800[metaxc500/metax3.3] | 5 | -0.0016 | [-0.0066, +0.0033] | 1/5 |
