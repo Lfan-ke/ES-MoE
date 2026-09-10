@@ -1623,7 +1623,7 @@
 </tr>
 </tbody>
 </table>
-<p>That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- <strong>every one of them inside the mean gap between two runs of one configuration.</strong></p>
+<p>That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- <strong>six of the seven inside the mean gap between two runs of one configuration (0.0045)</strong>; only v5n's +0.0055 clears it, and it still sits well inside the largest gap observed, 0.0130.</p>
 <p>Three things follow, and all three are stated rather than softened:</p>
 <ol>
 <li><strong><code>deterministic=True</code> does not hold on this accelerator.</strong> The trainer fixes the seed and sets the deterministic flag; on the 4090 a repeat reproduces bit for bit (one pair, 20 epochs), on the MetaX C500 it does not (five pairs, 120 epochs). The divergence accumulates with training: at one epoch the gap is zero.</li>
