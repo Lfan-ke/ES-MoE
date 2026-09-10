@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 296" width="760" height="296" font-family="system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="12">
+<style>
+  .ink{fill:#3d4451}.rule{stroke:#c9ced8}.zero{stroke:#8b93a3}.faint{fill:#78808f}
+  @media (prefers-color-scheme:dark){
+    .ink{fill:#c9ced8}.rule{stroke:#454b57}.zero{stroke:#7e8797}.faint{fill:#98a0af}}
+</style>
+<text x="16" y="22" class="ink" font-size="13" font-weight="600">Upstream's settings, measured against the same-seed baseline</text>
+<line x1="250.0" y1="34" x2="250.0" y2="260" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="250.0" y="276" class="faint" text-anchor="middle">-0.0136</text>
+<line x1="353.5" y1="34" x2="353.5" y2="260" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="353.5" y="276" class="faint" text-anchor="middle">-0.0068</text>
+<line x1="457.0" y1="34" x2="457.0" y2="260" class="zero" stroke-width="1"/>
+<text x="457.0" y="276" class="faint" text-anchor="middle">+0.0000</text>
+<line x1="560.5" y1="34" x2="560.5" y2="260" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="560.5" y="276" class="faint" text-anchor="middle">+0.0068</text>
+<line x1="664.0" y1="34" x2="664.0" y2="260" class="rule" stroke-dasharray="3 4" stroke-width="1"/>
+<text x="664.0" y="276" class="faint" text-anchor="middle">+0.0136</text>
+<text x="238" y="58" class="ink" text-anchor="end">yolov10n dense</text>
+<line x1="458.0" y1="47" x2="458.0" y2="61" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="452.5" cy="50.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="394.7" cy="54.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="526.8" cy="58.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<text x="678" y="58" class="faint">+0.0001  1/3</text>
+<text x="238" y="88" class="ink" text-anchor="end">yolov10n norm</text>
+<circle cx="458.3" cy="84.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<text x="678" y="88" class="faint">+0.0001  1/1</text>
+<text x="238" y="118" class="ink" text-anchor="end">yolov10n rewire-x4</text>
+<line x1="348.1" y1="107" x2="348.1" y2="121" stroke="#b5453b" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="373.3" cy="110.0" r="2.6" fill="#b5453b" fill-opacity="0.55"/>
+<circle cx="284.5" cy="114.0" r="2.6" fill="#b5453b" fill-opacity="0.55"/>
+<circle cx="386.6" cy="118.0" r="2.6" fill="#b5453b" fill-opacity="0.55"/>
+<text x="678" y="118" class="faint">-0.0071  0/3</text>
+<text x="238" y="148" class="ink" text-anchor="end">yolov5n dense</text>
+<line x1="504.1" y1="137" x2="504.1" y2="151" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="487.3" cy="140.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="495.2" cy="144.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="529.7" cy="148.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<text x="678" y="148" class="faint">+0.0031  3/3</text>
+<text x="238" y="178" class="ink" text-anchor="end">yolov5n gshard</text>
+<circle cx="535.2" cy="172.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="432.7" cy="176.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<text x="678" y="178" class="faint">+0.0018  1/2</text>
+<text x="238" y="208" class="ink" text-anchor="end">yolov5n norm</text>
+<line x1="515.1" y1="197" x2="515.1" y2="211" stroke="#2f6f9f" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="466.2" cy="200.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="528.9" cy="204.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<circle cx="550.2" cy="208.0" r="2.6" fill="#2f6f9f" fill-opacity="0.55"/>
+<text x="678" y="208" class="faint">+0.0038  3/3</text>
+<text x="238" y="238" class="ink" text-anchor="end">yolov5n rewire-x4</text>
+<circle cx="337.2" cy="232.0" r="2.6" fill="#b5453b" fill-opacity="0.55"/>
+<circle cx="420.6" cy="236.0" r="2.6" fill="#b5453b" fill-opacity="0.55"/>
+<text x="678" y="238" class="faint">-0.0051  0/2</text>
+<text x="16" y="286" class="faint">dot = one seed, bar = mean of three</text></svg>

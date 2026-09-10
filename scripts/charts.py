@@ -16,6 +16,7 @@ from report import KEYS, dedupe, interval, load, paired  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg", "zh": ROOT / "docs" / "assets" / "effect.zh.svg"}
+ALIGN_OUT = {"en": ROOT / "docs" / "assets" / "alignment.svg", "zh": ROOT / "docs" / "assets" / "alignment.zh.svg"}
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
@@ -152,6 +153,98 @@ def svg(table, lang="en"):
     return "\n".join(parts) + "\n"
 
 
+ALIGN_W, ALIGN_ROW = 760, 30
+ALIGN_PAD = {"l": 250, "r": 96, "t": 46, "b": 40}
+ALIGN_TEXT = {
+    "en": {
+        "title": "Upstream's settings, measured against the same-seed baseline",
+        "note": "dot = one seed, bar = mean of three",
+        "empty": "no alignment arm has results yet",
+    },
+    "zh": {
+        "title": "上游的几处设置，对同 seed 基线量出来的差值",
+        "note": "散点 = 单个 seed，横杠 = 三 seed 均值",
+        "empty": "对照臂尚未产出结果",
+    },
+}
+
+
+def align_svg(table, lang="en"):
+    """One row per alignment arm: the paired deltas, and the mean once three seeds are in.
+
+    A separate figure because these compare block configurations on one backbone, which the
+    seven-generation axis cannot express. Drawn from the same numbers as the tables.
+    """
+    words, style = ALIGN_TEXT[lang], TEXT[lang]
+    headline = {block for block, _, _ in ARMS}
+    rows = [
+        (backbone, block, series)
+        for (backbone, block), series in sorted(table.items())
+        if block not in headline and series
+    ]
+    height = ALIGN_PAD["t"] + ALIGN_PAD["b"] + ALIGN_ROW * max(len(rows), 1)
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ALIGN_W} {height}" width="{ALIGN_W}" '
+        f'height="{height}" font-family="{style["font"]}" font-size="12">',
+        "<style>",
+        "  .ink{fill:#3d4451}.rule{stroke:#c9ced8}.zero{stroke:#8b93a3}.faint{fill:#78808f}",
+        "  @media (prefers-color-scheme:dark){",
+        "    .ink{fill:#c9ced8}.rule{stroke:#454b57}.zero{stroke:#7e8797}.faint{fill:#98a0af}}",
+        "</style>",
+        f'<text x="16" y="22" class="ink" font-size="13" font-weight="600">{words["title"]}</text>',
+    ]
+    if not rows:
+        parts.append(f'<text x="16" y="{ALIGN_PAD["t"] + 10}" class="faint">{words["empty"]}</text></svg>')
+        return "\n".join(parts)
+
+    values = [v for _, _, series in rows for v in series]
+    span = max(abs(min(values)), abs(max(values))) * 1.2 or 0.01
+    plot_w = ALIGN_W - ALIGN_PAD["l"] - ALIGN_PAD["r"]
+
+    def x(value):
+        return ALIGN_PAD["l"] + plot_w / 2 + value / span * plot_w / 2
+
+    for tick in (-1, -0.5, 0, 0.5, 1):
+        xx = x(span * tick)
+        cls = "zero" if tick == 0 else "rule"
+        dash = "" if tick == 0 else ' stroke-dasharray="3 4"'
+        parts.append(
+            f'<line x1="{xx:.1f}" y1="{ALIGN_PAD["t"] - 12}" x2="{xx:.1f}" '
+            f'y2="{height - ALIGN_PAD["b"] + 4}" class="{cls}"{dash} stroke-width="1"/>'
+        )
+        parts.append(
+            f'<text x="{xx:.1f}" y="{height - ALIGN_PAD["b"] + 20}" class="faint" '
+            f'text-anchor="middle">{span * tick:+.4f}</text>'
+        )
+
+    for index, (backbone, block, series) in enumerate(rows):
+        yy = ALIGN_PAD["t"] + ALIGN_ROW * index + 8
+        colour = "#2f6f9f" if statistics.mean(series) >= 0 else "#b5453b"
+        parts.append(
+            f'<text x="{ALIGN_PAD["l"] - 12}" y="{yy + 4}" class="ink" text-anchor="end">'
+            f"{backbone} {block.replace('e4k2w0.01', '').lstrip('-') or 'default'}</text>"
+        )
+        if len(series) >= 3:
+            mean = statistics.mean(series)
+            parts.append(
+                f'<line x1="{x(mean):.1f}" y1="{yy - 7}" x2="{x(mean):.1f}" y2="{yy + 7}" '
+                f'stroke="{colour}" stroke-width="2.5" stroke-linecap="round"/>'
+            )
+        for seed, value in enumerate(series):
+            jitter = (seed - (len(series) - 1) / 2) * 4
+            parts.append(
+                f'<circle cx="{x(value):.1f}" cy="{yy + jitter:.1f}" r="2.6" fill="{colour}" fill-opacity="0.55"/>'
+            )
+        wins = sum(1 for v in series if v > 0)
+        parts.append(
+            f'<text x="{ALIGN_W - ALIGN_PAD["r"] + 14}" y="{yy + 4}" class="faint">'
+            f"{statistics.mean(series):+.4f}  {wins}/{len(series)}</text>"
+        )
+
+    parts.append(f'<text x="16" y="{height - 10}" class="faint">{words["note"]}</text></svg>')
+    return "\n".join(parts)
+
+
 def alignment(tables):
     """Every arm outside the two headline ones, as rows the docs page can tabulate.
 
@@ -213,9 +306,12 @@ def main():
     for lang, path in SVG_OUT.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(svg(table, lang), encoding="utf-8")
+    for lang, path in ALIGN_OUT.items():
+        path.write_text(align_svg(table, lang), encoding="utf-8")
     DATA_OUT.parent.mkdir(parents=True, exist_ok=True)
     DATA_OUT.write_text(data_js(tables), encoding="utf-8")
-    print(f"wrote {len(SVG_OUT)} figures and {DATA_OUT.relative_to(ROOT)} covering {len(table)} arms")
+    figures = len(SVG_OUT) + len(ALIGN_OUT)
+    print(f"wrote {figures} figures and {DATA_OUT.relative_to(ROOT)} covering {len(table)} arms")
     for (backbone, block), values in sorted(table.items()):
         print(f"  {backbone:<9} {block:<20} {statistics.mean(values):+.4f}  n={len(values)}")
 

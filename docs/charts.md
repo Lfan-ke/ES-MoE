@@ -18,4 +18,10 @@
     uv run python scripts/report.py   # 配对表
     uv run python scripts/charts.py   # 图与数据
 
-数据源同[实验结果](results.md)与[判读线](JUDGMENT.md)。同一脚本另写 `docs/assets/effect.svg`，供 README 与 wiki 用。
+数据源同[实验结果](results.md)与[判读线](JUDGMENT.md)。同一脚本另写 `docs/assets/effect.svg` 与 `docs/assets/alignment.svg`，供 README 与 wiki 用——后者画的是对照臂（上游的块内设置与块数布局），它们比较的是同一主干上的块配置，放不进上面那张按代际排的图。
+
+## 对照臂
+
+![对照臂配对差值](assets/alignment.zh.svg)
+
+上游块内的两个设置与它的四块布局，各对同 seed 基线量出。同样由 `scripts/charts.py` 生成。

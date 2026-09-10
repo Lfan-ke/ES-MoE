@@ -35,6 +35,19 @@ Puts the router load-balancing loss into the optimised training loss; training l
 
 Sums the routing losses published by the most recent forward, for custom training loops. Calling it twice cannot count a stale value again.
 
+## clear_aux_loss
+
+    esmoe.clear_aux_loss() -> None
+
+Drops every value blocks have published into the registry. The loss patch `attach_aux_loss` installs calls it before each forward; a custom training loop that does not go through that patch has to call it itself, or a block that does not run in some step will still be answering with the value from the step before.
+
+## odd / odd_kernels
+
+    esmoe.odd(size) -> int
+    esmoe.odd_kernels(num_experts, max_kernel_size=15) -> list[int]
+
+`odd` steps an even kernel down (4 -> 3) so the padding stays centred, which is what upstream does to both explicit kernel sizes and the cap. `odd_kernels` generates the default heterogeneous set `3, 5, 7, ...` capped at `max_kernel_size` -- the one `ESMoE` uses when `expert_kernel_sizes` is not given.
+
 ## ESMoE
 
     esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,

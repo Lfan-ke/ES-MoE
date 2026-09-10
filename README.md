@@ -109,7 +109,7 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms × three seeds, 77 runs. What separates a positive
+the matrix runs to seven backbone generations × three arms × three seeds and more, 91 runs. What separates a positive
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
@@ -123,6 +123,17 @@ not, which is the honest reading of a three-seed protocol: an
 metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
 direction-unstable.
+
+Four further arms ask what upstream's own settings are worth. Two of them are internal to the block and both
+help; the third is upstream's layout of four blocks per backbone, and it is the only cell in the matrix that is
+negative on both metrics at 0/3 — on the generation where a single block helps most, it reverses the sign.
+
+<p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="docs/assets/alignment.svg" width="720"></p>
+
+Nothing here supports the premise these arms were opened to test. Across the 58 runs that have both a routing
+analysis and a paired delta, how concentrated the dispatch is and how much the pairing moved correlate at
+r = +0.160: the arm with the most concentrated routing is also the most accurate. Whether a balancing term
+belongs, and how large, cannot be argued from "it prevents expert collapse".
 
 The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
 reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n

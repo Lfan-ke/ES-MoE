@@ -35,6 +35,19 @@
 
 汇总最近一次前向发布的路由损失，自定义训练循环用。连续调用不会重复计入陈旧值。
 
+## clear_aux_loss
+
+    esmoe.clear_aux_loss() -> None
+
+丢掉注册表里所有块已发布的值。`attach_aux_loss` 装上的损失补丁在每次前向之前会自己调一次；自定义训练循环若不走那条补丁，就需要在每步前向前手动调，否则某个块在这一步没跑到时，收集到的会是它上一步的值。
+
+## odd / odd_kernels
+
+    esmoe.odd(size) -> int
+    esmoe.odd_kernels(num_experts, max_kernel_size=15) -> list[int]
+
+`odd` 把偶数核降一档为奇数（4 → 3），保证 padding 居中；上游对显式给的核尺寸与上限都做同样处理。`odd_kernels` 生成默认的异构核 `3, 5, 7, …`，按 `max_kernel_size` 截断——即 `ESMoE` 在没给 `expert_kernel_sizes` 时用的那一组。
+
 ## ESMoE
 
     esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,
