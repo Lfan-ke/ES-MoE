@@ -840,8 +840,8 @@
 <td style="text-align: left;">数学等价，已验：对 top-K 子集做 softmax ≡ 全体 softmax 后掩码重归一。本包实现与式 8 逐字一致。</td>
 </tr>
 <tr>
-<td style="text-align: left;">VisDrone 上较 YOLOv13-N 高 2.1 mAP</td>
-<td style="text-align: left;"><strong>本项目没有测这件事。</strong> 我们测的是同一主干上「加不加这个块」，不是两个架构之争；两者不可互相印证也不可互相否证。</td>
+<td style="text-align: left;">「最大的提升出现在 VisDrone（+2.1）……印证了本设计对小目标的作用」</td>
+<td style="text-align: left;">架构之争本项目没有测。但<strong>分尺度的方向可以对</strong>：VisDrone 上按 COCO 式分档，两条为正的臂的增益都落在<strong>中、大目标</strong>，小目标近乎持平——<code>norm</code> 的 APs +0.0001／APm +0.0042／APl +0.0137，<code>dense</code> 的 APs +0.0000／APm +0.0052／APl +0.0081，默认臂 APs +0.0031／APl +0.0048。四块臂则各档一律为负（APs −0.0029、APm −0.0048、APl −0.0016，AP50 0/3）。<strong>在本口径下，这个块在 VisDrone 上买到的不是小目标。</strong></td>
 </tr>
 </tbody>
 </table>

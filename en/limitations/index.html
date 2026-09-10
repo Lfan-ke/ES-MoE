@@ -839,8 +839,8 @@
 <td style="text-align: left;">Mathematically identical, and verified: a softmax over the top-K subset equals a full softmax masked and renormalised. This package matches eq. 8 term for term.</td>
 </tr>
 <tr>
-<td style="text-align: left;">+2.1 mAP over YOLOv13-N on VisDrone</td>
-<td style="text-align: left;"><strong>Not tested here.</strong> This project measures one block on and off within a backbone, not one architecture against another. Neither result bears on the other.</td>
+<td style="text-align: left;">"The largest gains appear on VisDrone (+2.1%) ... validating our design for small object detection"</td>
+<td style="text-align: left;">The architecture comparison is not tested here, but <strong>the direction by size is</strong>. Split into COCO buckets on VisDrone, both positive arms gain on <strong>medium and large</strong> objects and sit flat on small: <code>norm</code> gives APs +0.0001, APm +0.0042, APl +0.0137; <code>dense</code> gives APs +0.0000, APm +0.0052, APl +0.0081; the default arm APs +0.0031, APl +0.0048. The four-block arm is negative in every bucket (APs −0.0029, APm −0.0048, APl −0.0016, AP50 0/3). <strong>Under these conditions what the block buys on VisDrone is not small objects.</strong></td>
 </tr>
 </tbody>
 </table>
