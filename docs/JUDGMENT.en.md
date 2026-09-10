@@ -258,7 +258,7 @@ The six mislabelled runs of the previous section trained exactly what the defaul
 | metaxc500 / metax3.3 | 1 | 1 | 0.0000 | 0.0000 |
 | 4090d / torch2.6 | 20 | 1 | 0.0000 | 0.0000 |
 
-That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- **every one of them inside the mean gap between two runs of one configuration.**
+That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- **six of the seven inside the mean gap between two runs of one configuration (0.0045)**; only v5n's +0.0055 clears it, and it still sits well inside the largest gap observed, 0.0130.
 
 Three things follow, and all three are stated rather than softened:
 
