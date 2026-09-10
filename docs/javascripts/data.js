@@ -23,6 +23,7 @@ window.ESMOE_EFFECT = {
     {backbone: "yolov10n", arm: "e4k2w0.01-rewire-x4", mean: -0.0071, ci: "[-0.0162, +0.0019]", seeds: [-0.0055, -0.0113, -0.0046], wins: 0},
     {backbone: "yolov5n", arm: "e4k2w0.01-dense", mean: 0.0031, ci: "[-0.0006, +0.0068]", seeds: [0.0020, 0.0025, 0.0048], wins: 3},
     {backbone: "yolov5n", arm: "e4k2w0.01-gshard", mean: 0.0018, ci: "[-0.0409, +0.0445]", seeds: [0.0051, -0.0016], wins: 1},
-    {backbone: "yolov5n", arm: "e4k2w0.01-norm", mean: 0.0038, ci: "[-0.0033, +0.0109]", seeds: [0.0006, 0.0047, 0.0061], wins: 3}
+    {backbone: "yolov5n", arm: "e4k2w0.01-norm", mean: 0.0038, ci: "[-0.0033, +0.0109]", seeds: [0.0006, 0.0047, 0.0061], wins: 3},
+    {backbone: "yolov5n", arm: "e4k2w0.01-rewire-x4", mean: -0.0051, ci: "[-0.0399, +0.0296]", seeds: [-0.0079, -0.0024], wins: 0}
   ]
 };
