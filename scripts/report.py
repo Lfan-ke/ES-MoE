@@ -41,7 +41,11 @@ def stack(record):
     torch_version = hw.get("torch", "?")
     build = re.match(r"([A-Za-z]+)(\d+\.\d+)", torch_version.partition("+")[2])
     runtime = f"{build[1].lower()}{build[2]}" if build else "torch" + ".".join(torch_version.split(".")[:2])
-    return f"{gpu}/{runtime}"
+    # YOLO-Master's fork reports the same ultralytics version as the release it forked, but trains
+    # differently; its runs pair with its own baseline.
+    ref = record.get("git_ref")
+    trained_by = (ref.get("framework", "ultralytics") if isinstance(ref, dict) else "ultralytics").partition("@")[0]
+    return f"{gpu}/{runtime}" + ("" if trained_by == "ultralytics" else f"/{trained_by}")
 
 
 def variant(record):
