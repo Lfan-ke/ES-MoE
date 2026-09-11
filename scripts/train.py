@@ -347,6 +347,7 @@ def main():
             "patience": args.patience,
             "amp": bool(args.amp),
             "amp_at_end": seen["amp"],
+            "batch_at_end": seen["batch"],
             "epochs_replayed": max(seen["epochs_started"] - args.epochs, 0),
             "wall_seconds": round(elapsed, 1),
             "gpu_hours": round(elapsed / 3600, 3),
