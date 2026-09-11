@@ -99,15 +99,16 @@ def main() -> None:
         out += [
             "## What each run actually trained with",
             "",
-            "| seed | arm | run | amp at end | epochs replayed | hours |",
-            "|:--:|:--:|:--:|:--:|:--:|:--:|",
+            "| seed | arm | run | amp at end | batch at end | epochs replayed | hours |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
         ]
         for seed, arms in seeds.items():
             for arm in ARMS:
                 budget = arms[arm]["budget"]
                 out.append(
                     f"| {seed} | {arm} | {arms[arm]['experiment_id']} | {budget.get('amp_at_end', '?')} "
-                    f"| {budget.get('epochs_replayed', '?')} | {budget['gpu_hours']:.2f} |"
+                    f"| {budget.get('batch_at_end', '?')} | {budget.get('epochs_replayed', '?')} "
+                    f"| {budget['gpu_hours']:.2f} |"
                 )
     table = "\n".join(out)
     (ROOT / "results" / "same_config.md").write_text(table + "\n", encoding="utf-8")

@@ -65,7 +65,7 @@ lane() {
     while [ "$(busy)" -ge "$SLOTS" ]; do sleep 30; done
     echo "[lane$id] $(date -Is) start $name"
     # env execs timeout, so the process busy() counts still starts with it.
-    env ${fork:+PYTHONPATH="$FORK"} timeout -k 60 43200 python3 scripts/train.py $flag --base "$base" --epochs 120 \
+    env ${fork:+PYTHONPATH="$FORK"} timeout -k 60 "$LIMIT" python3 scripts/train.py $flag --base "$base" --epochs 120 \
       --fraction 1.0 --batch 32 --imgsz 800 --patience 0 --seed "$seed" --tag="$tag" \
       >> "/data/lane$id.log" 2>&1 &
     pid=$!

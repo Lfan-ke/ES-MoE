@@ -36,6 +36,12 @@ def test_queue_offers_every_arm_the_protocol_uses():
     }
 
 
+def test_the_queue_launches_with_the_timeout_it_counts():
+    """The slot counter finds runs by their timeout, and a limit left fixed kills a long run early."""
+    text = (ROOT / "scripts" / "queue.sh").read_text(encoding="utf-8")
+    assert {limit.strip('"') for limit in re.findall(r"timeout -k 60 (\S+) python3", text)} == {"$LIMIT"}
+
+
 def test_only_the_arms_on_yolo_masters_fork_train_there():
     assert {name for name, _, _, fork in ARMS if fork} == {"upstream", "forkbase"}
 

@@ -129,15 +129,16 @@ def watch(model) -> dict:
     """What the trainer actually did, where its arguments do not say.
 
     YOLO-Master's trainer answers the first non-finite gradient by replaying that epoch and training
-    the rest of the run without mixed precision, while the run's arguments still read amp=True.
+    the rest of the run without mixed precision, while the run's arguments still read amp=True. Both
+    trainers also halve the batch of a run that runs out of memory in its first epoch.
     """
-    seen = {"epochs_started": 0, "amp": None}
+    seen = {"epochs_started": 0, "amp": None, "batch": None}
 
     def started(trainer):
         seen["epochs_started"] += 1
 
     def ended(trainer):
-        seen["amp"] = bool(trainer.amp)
+        seen["amp"], seen["batch"] = bool(trainer.amp), int(trainer.batch_size)
 
     model.add_callback("on_train_epoch_start", started)
     model.add_callback("on_train_end", ended)
