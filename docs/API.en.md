@@ -4,9 +4,9 @@ Six entry points, all importable from the top-level `esmoe`; the package ships `
 
 ## equip
 
-    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -> YOLO
+    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -> YOLO
 
-Register, graft, build and wire in one call. `out` names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). `graft_kwargs` pass through to `graft`.
+Register, graft, build and wire in one call. `out` names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). `weight` and `recipe` go to `attach_aux_loss`, `graft_kwargs` pass through to `graft`.
 
 ## inject_esmoe
 
@@ -27,9 +27,14 @@ Inserts blocks after the layers named by `at` and renumbers every later referenc
 
 ## attach_aux_loss
 
-    esmoe.attach_aux_loss(model, weight=0.01) -> model
+    esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -> model
 
-Puts the router load-balancing loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
+Puts the router load-balancing loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
+
+`recipe` decides how the block and its term train:
+
+- `"esmoe"` (default, and what every recorded run used): the term times `weight`, counted per image the way the task loss counts.
+- `"upstream"`: the three things YOLO-Master's trainer does to any model with a routed module, for runs compared against it. The term is divided by a running mean of its own magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl; router parameters get a group of their own at half the learning rate, outside Muon; expert parameters stay frozen for the first 3 epochs. The last two happen in the trainer, so they apply to a YOLO model trained through `model.train()`. Constants and sources are in `esmoe.upstream`.
 
 ## collect_aux_loss
 

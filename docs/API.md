@@ -4,9 +4,9 @@
 
 ## equip
 
-    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -> YOLO
+    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -> YOLO
 
-注册、接入、构建、接损失一次完成。`out` 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。`graft_kwargs` 原样转给 `graft`。
+注册、接入、构建、接损失一次完成。`out` 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。`weight` 与 `recipe` 转给 `attach_aux_loss`，`graft_kwargs` 原样转给 `graft`。
 
 ## inject_esmoe
 
@@ -27,9 +27,14 @@
 
 ## attach_aux_loss
 
-    esmoe.attach_aux_loss(model, weight=0.01) -> model
+    esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -> model
 
-把路由的负载均衡损失接进被优化的训练损失，训练日志多出 `esmoe_aux` 一列。同时把 `model.train()` 的训练器指到 `esmoe.trainer`，DDP worker 因此能自行注册块并恢复权重。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 `compile=True` 时关掉 `find_unused_parameters`，多卡照样能训。
+把路由的负载均衡损失接进被优化的训练损失，训练日志多出 `esmoe_aux` 一列。同时把 `model.train()` 的训练器指到 `esmoe.trainer`，DDP worker 因此能自行注册块并恢复权重与训练方式。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 `compile=True` 时关掉 `find_unused_parameters`，多卡照样能训。
+
+`recipe` 决定块和辅助项怎么训：
+
+- `"esmoe"`（默认，已记录的运行都用它）：辅助项乘 `weight` 后按每张图计入，与任务损失的计法一致。
+- `"upstream"`：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 `weight`，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 `model.train()` 训练的 YOLO 模型生效。常数与出处见 `esmoe.upstream`。
 
 ## collect_aux_loss
 
