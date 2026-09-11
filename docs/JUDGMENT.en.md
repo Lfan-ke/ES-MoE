@@ -395,3 +395,14 @@ A comparison with YOLO-Master under one configuration: the same model (upstream'
 4. **The gate-reading balancing term still leaves dead experts here**: at least two thirds of B's checkpoints have a block with a dead expert (in the top-2 for under 1% of images). The basis is round six, where 5 of 6 checkpoints trained on a gate-reading objective had one; upstream's normalisation enlarges the term but leaves its gradient for an expert outside the top-K at zero. If B has no dead expert at all, running every expert in training or the expert warm-up closed that gap, and round six's mechanism needs adding to.
 
 Wrong predictions get recorded as wrong.
+
+### Addendum: the training loop step for step (2026-09-11, still before any full-protocol result)
+
+On CPU in FP32, upstream's trainer and this package each trained for 5 epochs: 192 VisDrone images, 12 iterations an epoch, MuSGD. Both started from the same weights, and every batch's data fingerprint matched. The script is `scripts/recipe_parity.py` and the results are in `results/recipe_parity.md`.
+
+- **The block itself.** With the same weights and input, `ES_MOE` and `ESMoE` differ by 1.9e-6 in training output (magnitude 7.07), and by 1e-11, 2e-9 and 6e-10 in the gradients to the input, the router and the experts.
+- **Without blocks.** A0 and C have bit-identical losses through epochs 0 and 1, and their parameters part at the end of epoch 1. That matches upstream's forced step on the last batch of an epoch: during warm-up the accumulation count changes, so that step stops lining up with the official one.
+- **With blocks.** A and B give every parameter group the same learning rate at every step and freeze the experts alike (0 of 64 trainable for the first 3 epochs, 64 after), yet their losses already differ by 1.8% in epoch 0.
+- **Control.** Scaling one router layer's weights by 1 + 1e-6 in the same implementation and training again moves A from itself by 2.3% and B from itself by 1.5%, the same order as A against B. Iteration 0's loss jumps between two sets of values: with router scores nearly tied, a rounding-sized difference flips the top-2 choice.
+
+Conclusion: to the resolution a CPU trajectory allows, B differs from A by no more than rounding does. The full-protocol lines for A − B stand.
