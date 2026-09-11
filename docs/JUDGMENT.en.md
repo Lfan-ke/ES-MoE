@@ -360,3 +360,38 @@ Upstream's own recipe shows the same. The previous stage trained YOLO-Master-EsM
 **The fifth round's open confound (is the four-block deficit the fourfold auxiliary term) — ruled out.**
 
 **The second half of the fifth round's "one thing that matters more" is revised.** The first half stands: concentration does not predict accuracy, and with this round included r = +0.044 over the 81 runs that have both a routing analysis and a paired delta (+0.160 over 58 in the fifth round). The second half, "whether a balancing term belongs cannot be argued from preventing collapse", went too far. Collapse has two layers: a dominant expert, and dead experts. The first is unrelated to accuracy and the term does not prevent it. The second the Switch term does prevent, 0 of 66 against 6 of 6 without it. Its effect on accuracy is still inside the noise.
+
+## Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)
+
+A comparison with YOLO-Master under one configuration: the same model (upstream's `yolo-master-n.yaml`, one block after each backbone stage, four in all) and the same protocol (full VisDrone, imgsz 800, 120 epochs, batch 32, `patience=0`, every other argument at its default), trained once on upstream's fork (locked baseline `acce839c`) and once on official ultralytics 8.4.101 with this package. Four arms, with one seed's four arms on one card:
+
+| arm | framework | model | training |
+|:--:|:--:|:--:|:--:|
+| A | upstream fork | yolo-master-n, four `ES_MOE` | upstream defaults |
+| A0 | upstream fork | the same model without the four blocks | upstream defaults |
+| B | official 8.4.101 + esmoe | the same model, four `ESMoE` (gate-reading GShard, output norm, every expert run in training, inference pruning at 0.4) | `recipe="upstream"` |
+| C | official 8.4.101 | the same model without the four blocks | defaults |
+
+**Known at declaration:**
+
+- The fork's trainer differs from the official one for every model in two places: the last batch of each epoch always steps the optimizer, and the first non-finite gradient restores the last healthy checkpoint, replays that epoch and turns mixed precision off for the rest of the run.
+- B matches A layer for layer (2,814,406 parameters at 10 classes). `recipe="upstream"` reproduces the three things upstream's trainer does to a routed model: the auxiliary term divided by a running mean of its magnitude and capped at 3.0, router parameters at half the learning rate and outside Muon, and experts frozen for the first 3 epochs. It matches upstream's source step by step (`tests/test_recipe.py`).
+- On MetaX C500, A and A0 of seeds 0 and 1 both rolled back in their first epoch and trained in FP32 from then on; B and C stayed in mixed precision in their smoke runs. A alone takes 37 GB in FP32, so each card runs A alone, then A0 beside C, then B alone.
+
+**Unknown:** every 120-epoch metric of all four arms; seed 2's card is waiting for the platform to repair it.
+
+**Lines.** Every paired difference is taken inside one card, over three seeds. Repeated runs of one configuration differ by 0.0045 on average and 0.0130 at most.
+
+- **Equivalent**: the paired mAP50 mean of A − B is at most 0.0045 in absolute value and its 95% interval spans zero.
+- **Not equivalent**: the mean of A − B exceeds 0.0130 in absolute value, or all three seeds share a sign and the interval excludes zero.
+- **Undecided**: anything else.
+- (A − A0) − (B − C) is judged on the same three lines and answers whether the block does the same in both frameworks.
+
+**Predictions:**
+
+1. **The two implementations are equivalent**: A − B lands on "equivalent". If it lands on "not equivalent", the difference comes from this package's block or from its reproduction of the recipe, and each gets checked in turn.
+2. **The block does the same in both frameworks**: (A − A0) − (B − C) lands on "equivalent", and A − A0 and B − C have means of the same sign.
+3. **The four-block layout brings no gain at this budget**: by the lines at the top of this page, both B − C and A − A0 are "ineffective". The basis is rounds five and six, where four blocks were negative on all 9 seeds across v5n and v10n. If A − A0 reaches "effective" and B − C does not, the four-block deficit depends on how the block trains, and the fifth and sixth rounds' conclusion has to be limited to `recipe="esmoe"`.
+4. **The gate-reading balancing term still leaves dead experts here**: at least two thirds of B's checkpoints have a block with a dead expert (in the top-2 for under 1% of images). The basis is round six, where 5 of 6 checkpoints trained on a gate-reading objective had one; upstream's normalisation enlarges the term but leaves its gradient for an expert outside the top-K at zero. If B has no dead expert at all, running every expert in training or the expert warm-up closed that gap, and round six's mechanism needs adding to.
+
+Wrong predictions get recorded as wrong.
