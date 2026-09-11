@@ -95,7 +95,8 @@ for custom training loops, and `block.spec()` reports the settings a block is ho
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
 in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
-runs on all four generations (`results/*-compat-*.json`), each logging a non-zero `train/esmoe_aux`.
+runs on four generations (`results/*-compat-*.json`) and by the 120-epoch protocol runs on all seven,
+each logging a non-zero `train/esmoe_aux`.
 
 Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
 "we ran the full budget-fair protocol on it"; only the YOLO-Master row is still the former alone. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
