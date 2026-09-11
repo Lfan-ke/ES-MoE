@@ -89,6 +89,33 @@ def test_equation_13_is_an_affine_map_of_the_released_code_s_term():
         assert paper.item() == pytest.approx((released.item() - 1.0) / EXPERTS**2, rel=1e-5)
 
 
+@pytest.mark.parametrize(
+    ("balance", "reaches"),
+    [(esmoe.master_balance, False), (esmoe.gshard_balance, False), (esmoe.switch_balance, True)],
+)
+def test_a_gate_reading_balance_cannot_reach_an_expert_outside_the_top_k(balance, reaches):
+    """Equation 9 holds only the logits inside the top-K subset, so a term that reads the gate has no
+    gradient for an expert that is not selected, however much probability that expert still has.
+    Once an expert drops out of every image's top-K it is beyond that term for good, which is how
+    the paper's objective ends up with dead experts that the full-softmax term never produces."""
+    torch.manual_seed(0)
+    third = 2
+    logits = (torch.tensor([2.0, 1.5, 1.0, -1.0]) + 0.05 * torch.randn(64, EXPERTS)).requires_grad_(True)
+    probs = F.softmax(logits, dim=1)
+    weights, chosen = probs.topk(TOP_K, dim=1)
+    assert not (chosen == third).any()
+    gate = torch.zeros_like(probs).scatter(1, chosen, weights)
+    gate = gate / gate.sum(dim=1, keepdim=True)
+    balance(probs, gate).backward()
+    assert logits.grad is not None
+    pull = logits.grad[:, third]
+    if reaches:
+        # Negative gradient: descent raises the unselected expert's logit, back towards the top-K.
+        assert (pull < 0).all()
+    else:
+        assert torch.allclose(pull, torch.zeros_like(pull), atol=1e-9)
+
+
 def test_equation_2_is_the_out_norm_path():
     """`Y = Norm(sum w_i Expert_i(X))`: the normalisation sits after the weighted sum, not inside
     an expert, and `out_norm=True` is what puts it there."""
