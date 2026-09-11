@@ -55,6 +55,16 @@ def test_queue_and_trainer_agree_on_the_run_name(arm, weight):
     assert train.architecture(train.build_parser().parse_args(argv)) == expected
 
 
+def test_only_yolo_masters_own_blocks_need_its_fork():
+    parse = train.build_parser().parse_args
+    fork = "yolo-master@acce839c"
+    assert train.mismatch(parse(["--upstream"]), "ultralytics")
+    assert train.mismatch(parse(["--upstream"]), fork) is None
+    assert train.mismatch(parse([]), fork) is None, "the fork trains its own baseline"
+    assert train.mismatch(parse(["--esmoe", "--grafted"]), "ultralytics") is None
+    assert train.mismatch(parse(["--grafted"]), "ultralytics")
+
+
 def test_a_config_holding_its_blocks_is_not_named_twice_and_a_fork_run_says_so():
     parse = train.build_parser().parse_args
     grafted = parse(["--esmoe", "--grafted", "--recipe", "upstream", "--aux-weight", "1", "--base", "c/m-esmoe.yaml"])

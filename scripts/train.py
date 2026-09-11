@@ -249,13 +249,24 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def mismatch(args, stack: str) -> str | None:
+    """Why these flags cannot run on this ultralytics, or None when they can.
+
+    A plain or ESMoE run trains on either framework, which is how the fork gets its own baseline;
+    only YOLO-Master's own blocks need the fork.
+    """
+    if args.upstream and stack == "ultralytics":
+        return f"--upstream trains YOLO-Master's own blocks, but {ultralytics.__file__} is the official package"
+    if args.grafted and not args.esmoe:
+        return "--grafted names a config that holds ESMoE blocks, so it needs --esmoe"
+    return None
+
+
 def main():
     args = build_parser().parse_args()
     stack = framework()
-    if args.upstream == (stack == "ultralytics"):
-        raise SystemExit(f"--upstream and the ultralytics on the path disagree: {stack} at {ultralytics.__file__}")
-    if args.grafted and not args.esmoe:
-        raise SystemExit("--grafted names a config that holds ESMoE blocks, so it needs --esmoe")
+    if problem := mismatch(args, stack):
+        raise SystemExit(problem)
 
     model, cfg = build(args)
     facts = block_facts(model)
