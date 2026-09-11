@@ -289,9 +289,11 @@ class ESMoE(nn.Module):
         probs = F.softmax(self.router(x).float().clamp(-30.0, 30.0), dim=1).type_as(x)
         weights, chosen = probs.topk(self.top_k, dim=1)
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
-        if self.dynamic_threshold and not self.training:
+        if self.dynamic_threshold and not self.training and self.sparse_inference and self.top_k < self.num_experts:
             # Upstream's inference-time pruning: below the threshold an expert is dropped, except
             # the leading one, and the survivors are renormalised so the mixture still sums to one.
+            # Upstream prunes only on its sparse path, which it takes only when top-k leaves an expert
+            # out; with every expert active, as in the model it released, it evaluates all of them.
             # The mask is tensor arithmetic rather than a scatter of a Python bool, which a tracer
             # refuses, and it is recomputed per input so an exported graph stays faithful.
             leader = F.one_hot(chosen[:, 0], probs.shape[1]).to(torch.bool)

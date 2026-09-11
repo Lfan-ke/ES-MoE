@@ -183,6 +183,30 @@ def test_upstream_runs_dense_whenever_top_k_cannot_skip_anything():
         assert (gate_of(block, x) > 0).all(), "no expert can be skipped when k covers them all"
 
 
+@pytest.mark.parametrize("top_k,sparse", [(EXPERTS, True), (TOP_K, False)])
+def test_pruning_applies_only_where_upstream_takes_its_sparse_path(top_k, sparse):
+    """`_eager_sparse_enabled` requires sparse inference and a top-k that leaves an expert out; otherwise
+    upstream evaluates every expert with its routing weights untouched. The model YOLO-Master released
+    has three experts, all active, so a threshold there must change nothing."""
+    torch.manual_seed(0)
+    x = torch.randn(6, CHANNELS, 8, 8)
+    pruned = ESMoE(EXPERTS, top_k, channels=CHANNELS, dynamic_threshold=0.4, sparse_inference=sparse).eval()
+    plain = ESMoE(EXPERTS, top_k, channels=CHANNELS, sparse_inference=sparse).eval()
+    plain.load_state_dict(pruned.state_dict())
+    with torch.no_grad():
+        assert torch.allclose(pruned(x), plain(x), atol=1e-6)
+
+
+def test_pruning_still_applies_on_the_sparse_path():
+    torch.manual_seed(0)
+    x = torch.randn(64, CHANNELS, 8, 8)
+    pruned = ESMoE(EXPERTS, TOP_K, channels=CHANNELS, dynamic_threshold=0.45).eval()
+    plain = ESMoE(EXPERTS, TOP_K, channels=CHANNELS).eval()
+    plain.load_state_dict(pruned.state_dict())
+    with torch.no_grad():
+        assert not torch.allclose(pruned(x), plain(x), atol=1e-6)
+
+
 def test_a_non_finite_balance_term_cannot_reach_the_optimised_loss():
     """Upstream replaces a non-finite balance loss with a graph-connected zero. This package zeroes
     it in the loss patch instead; either way the total must stay finite."""
