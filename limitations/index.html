@@ -772,7 +772,7 @@
 <h2 id="_4">协议与评测口径<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <ul>
 <li>早期记录（imgsz 640、20/50/100 epoch）不在仓库的复现协议下，只用于同预算的相对比较与参数筛选。协议合规的全矩阵（imgsz 800、120 epoch、<code>patience=0</code>、完整 val 548 张，七代主干 × 三臂 × 三 seed 起）已跑完，下结论以这一组为准。默认臂的符号按<strong>主干末端的结构</strong>分组才是齐的——SPPF 系为正、末端换成注意力块后贴零、E2E 头转负；按版本号排并不单调（v10n −0.0002 低于 11n +0.0013），原「随代际单调衰减」的说法已撤回。逐格判定见<a href="../JUDGMENT/">判读线</a>。</li>
-<li>训练记录里的指标由 ultralytics 自带评测器给出，<code>max_det</code> 取其默认值 300；<code>results/buckets.md</code> 另以 COCO 口径、maxDets=500 重评了协议合规的六个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。</li>
+<li>训练记录里的指标由 ultralytics 自带评测器给出，<code>max_det</code> 取其默认值 300；<code>results/buckets.md</code> 另以 COCO 口径、maxDets=500 重评了协议合规的全部 107 个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。</li>
 <li>面积分档（small &lt; 32²、medium 32²–96²、large ≥ 96²，按原图 GT 框算）是本项目采用的 COCO 式定义，不是 VisDrone 官方定义。v8n 三个 seed 的配对结果：默认接法下大目标一致变差（APl −0.0104，0/3 胜）、小目标召回一致变好（ARs +0.0026，3/3 胜）；<code>rewire=True</code> 把 APl 翻正（+0.0063，2/3）、AP50 全胜（3/3），幅度仍小。这一格局是 v8n 特有的：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上大目标方向随 seed 翻转。任何固定尺度的利害表述都过不了四代矩阵。</li>
 </ul>
 <h2 id="_5">报告口径<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
@@ -783,7 +783,7 @@
 <p>除参数增加外，该块每轮墙钟在 imgsz 640 下约多 5%（829 s 对 790 s，RTX 4090 D），在 imgsz 800 下约多 9%（85 分钟对 78 分钟，RTX 4090）。</p>
 </li>
 <li>
-<p><strong>路由塌缩与精度在这批数据上不相干。</strong> 58 个既有路由分析又有配对差值的运行上，主导专家的 top-1 份额（0.49–0.92）与配对 mAP50 差值（−0.0113–+0.0109）的相关系数是 <strong>r = +0.160</strong>——几乎无关，且方向还是正的。<code>norm</code> 臂更集中却更准，<code>dense</code> 臂更散也更准。因此「平衡项该不该有、该多大」不能从「防塌缩」推出来，只能由它对指标的影响直接定；本项目量到的那个影响落在同配置重复运行的噪声之内。该系数由 <code>scripts/routing.py --summarise</code> 算出，写在 <code>results/routing.md</code> 开头。</p>
+<p><strong>集中程度不预测精度，平衡项防的是专家死掉。</strong> 81 个既有路由分析又有配对差值的运行上，主导专家的 top-1 份额（0.47–1.00）与配对 mAP50 差值（−0.0160–+0.0109）的相关系数是 <strong>r = +0.044</strong>，几乎无关。塌缩的另一层是专家死掉（进入 top-2 的图不足 1%）：权重 0.01 的 Switch 项在 66 个 checkpoint 上一个都没有；去掉平衡项的 6 个 checkpoint 全部死掉两个专家；读门控的目标（上游的，以及论文式 13）6 个里 5 个至少死掉一个，原因是按 top-K 重归一的门控对子集外的专家没有梯度。去掉平衡项对精度的影响在同配置重复运行的噪声之内：同 seed 6 个里 5 个更低，均值 −0.0050 与 −0.0027。该系数由 <code>scripts/routing.py --summarise</code> 算出，写在 <code>results/routing.md</code> 开头；判定见 <code>docs/JUDGMENT.md</code> 第六轮。</p>
 </li>
 <li><strong>同配置重复运行的差别与效应同量级。</strong> 曦云 C500 上，同配置同 seed 跑两遍，120 epoch 后 mAP50 平均差 0.0045、最大差 0.0130（五对）；同样的重复在 4090 上逐位相同（一对，20 epoch）。七代主干的配对差值均值里，六个落在 0.0045 以内，只有 v5n 的 +0.0055 越过平均差、且仍在最大差 0.0130 之内。所以本文只对<strong>方向</strong>下结论，不对幅度下结论。表见 <code>results/summary.md</code> 末尾。</li>
 <li>每条记录里的指标是训练结束后对 <code>best.pt</code> 的那次复验，不是 <code>results.csv</code> 最后一行（最后一个 epoch）。两者相差通常在 0.001–0.005，方向一律是复验更高，因为最好的 epoch 少有落在最后。基线臂与 ESMoE 臂走同一条路径，配对差值不受影响。</li>
@@ -813,7 +813,7 @@
 <tbody>
 <tr>
 <td style="text-align: left;">「路由网络引导专家分化」，3×3/5×5/7×7 各自捕捉不同尺度的模式</td>
-<td style="text-align: left;">48 次块分析里，路由概率与目标尺寸的相关落在 −0.49 到 +0.59 之间，110 正 82 负，<strong>跨 seed 变号</strong>；主导专家的核在四种里都出现过（3 核 2 次、5 核 9 次、7 核 15 次、9 核 22 次），随 seed 变。没看到稳定的尺度分工。</td>
+<td style="text-align: left;">108 次块分析里，路由概率与目标尺寸的相关落在 −0.49 到 +0.59 之间，232 正 200 负，<strong>跨 seed 变号</strong>；主导专家的核在四种里都出现过（3 核 12 次、5 核 25 次、7 核 32 次、9 核 39 次），随 seed 变。没看到稳定的尺度分工。</td>
 </tr>
 <tr>
 <td style="text-align: left;">「简单区域激活更少专家，复杂区域拿到更多容量」</td>
@@ -821,7 +821,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">「负载均衡监督防止专家塌缩、维持均匀利用」</td>
-<td style="text-align: left;">48 个 checkpoint 里主导专家吃下 0.49–0.92 的 top-1；前两名专家占掉 1.27–1.90（满分 2.0）。换成读门控的目标（论文式 12 取的那个张量）也没解除，反而更集中，并出现本课题第一个死专家。<strong>在本口径下，这一项没有维持住均匀利用。</strong></td>
+<td style="text-align: left;">分两层看。<strong>防专家死掉：本包的 Switch 项做到了，论文的目标没做到。</strong> 论文没有去掉平衡项的对照，本项目补做：v5n、v10n 各三 seed，6 个 checkpoint 全部死掉两个专家；权重 0.01 的 Switch 项 66 个 checkpoint 一个死专家都没有。论文式 13 与上游读的是按 top-K 重归一后的门控，对子集外的专家梯度恒为零，6 个 checkpoint 里 5 个有死专家，压力抬到 Switch 的 1.2–3.0 倍也一样。<strong>维持均匀利用：都没做到。</strong> Switch 项下 84 次块分析里，主导专家吃下 0.47–0.94 的 top-1，前两名占掉 1.24–1.78（满分 2.0）。</td>
 </tr>
 <tr>
 <td style="text-align: left;">「同时放进 Backbone 与 Neck」（§3.1）</td>
@@ -829,7 +829,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">主干每 stage 一块、共四块（上游 YAML）</td>
-<td style="text-align: left;">本包 <code>at="backbone_stages"</code> 复刻该布局后，v10n 上配对 mAP50 <strong>−0.0084</strong>（0/2），mAP50-95 <strong>−0.0061</strong>，区间不跨零。方向与论文 Table 5「Both 掉 5.9 点」一致：<strong>ES-MoE 放得越多越差</strong>。混淆项：四块把辅助项按块求和，同权重下 aux 从 0.020 涨到 0.080，正好四倍。</td>
+<td style="text-align: left;">本包 <code>at="backbone_stages"</code> 复刻该布局后，配对 mAP50 在 v10n 上 <strong>−0.0071</strong>（0/3）、v5n 上 <strong>−0.0049</strong>（0/3），mAP50-95 两个主干也都是 0/3。四块把辅助项按块求和，同权重下总量是单块的四倍；每块权重降到 0.0025、总量对齐单块后，v10n 上是 <strong>−0.0113</strong>（0/3），mAP50-95 区间 [−0.0132, −0.0018] 不跨零。差在块数，不在平衡压力。方向与论文 Table 5「Both 掉 5.9 点」一致：<strong>ES-MoE 放得越多越差</strong>。</td>
 </tr>
 <tr>
 <td style="text-align: left;">「鼓励专家互补的目标」（摘要）</td>
@@ -841,7 +841,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">「最大的提升出现在 VisDrone（+2.1）……印证了本设计对小目标的作用」</td>
-<td style="text-align: left;">架构之争本项目没有测。但<strong>分尺度的方向可以对</strong>：VisDrone 上按 COCO 式分档，两条为正的臂的增益都落在<strong>中、大目标</strong>，小目标近乎持平——<code>norm</code> 的 APs +0.0001／APm +0.0042／APl +0.0137，<code>dense</code> 的 APs +0.0000／APm +0.0052／APl +0.0081，默认臂 APs +0.0031／APl +0.0048。四块臂则各档一律为负（APs −0.0029、APm −0.0048、APl −0.0016，AP50 0/3）。<strong>在本口径下，这个块在 VisDrone 上买到的不是小目标。</strong></td>
+<td style="text-align: left;">架构之争本项目没有测。但<strong>分尺度的方向可以对</strong>：VisDrone 上按 COCO 式分档，两条为正的臂的增益都落在<strong>中、大目标</strong>，小目标近乎持平——<code>norm</code> 的 APs +0.0001／APm +0.0042／APl +0.0137，<code>dense</code> 的 APs +0.0000／APm +0.0052／APl +0.0081，默认臂 APs +0.0031／APl +0.0048。四块臂在 v10n 上各档为负（APs −0.0029、APm −0.0048、APl −0.0016），在 v5n 上小、中目标为负（APs −0.0038、APm −0.0047），大目标 +0.0046。<strong>在本口径下，这个块在 VisDrone 上买到的不是小目标。</strong></td>
 </tr>
 </tbody>
 </table>
