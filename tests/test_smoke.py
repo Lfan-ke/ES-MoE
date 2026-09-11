@@ -217,10 +217,15 @@ def test_master_balance_is_zero_at_uniform_use():
     assert esmoe.master_balance(uniform, uniform).item() == pytest.approx(0.0, abs=1e-9)
 
 
-def test_the_default_objective_is_the_one_upstream_ships():
-    """Changing this default changes what every future run optimises, so it is pinned by a test."""
+def test_the_default_objective_reaches_every_expert():
+    """Changing this default changes what every future run optimises, so it is pinned by a test.
+
+    Switch is what 0.1.4 shipped and every recorded run trained. It also stays the default on the
+    evidence: the objectives that read the gate (upstream's and the paper's) have no gradient for an
+    expert outside the top-k, and lost an expert in five of six checkpoints against none in 66.
+    """
     block = ESMoE(4, 2, channels=16)
-    assert block.balance is esmoe.gshard_balance
+    assert block.balance is esmoe.switch_balance
 
 
 def test_defaults_keep_the_recorded_runs_reproducible():
@@ -304,11 +309,14 @@ def test_top_k_none_activates_every_expert():
 
 
 def test_out_channels_changes_the_block_width():
-    """Upstream's ES_MOE takes `out_channels`. A block that is not channel-preserving cannot be
-    grafted into a stock yaml, since `parse_model` assumes `c2 == c1`, but it can be wired by hand.
+    """Upstream's ES_MOE takes `out_channels`. Passed to the constructor the block returns a tensor;
+    passed through `options`, as a yaml carries it, it returns a one-element list for the official
+    `Index` layer `graft` writes after it, since that layer's width is the one `parse_model` reads.
     """
     block = ESMoE(4, 2, channels=16, out_channels=32)
     assert block(torch.randn(2, 16, 8, 8)).shape == (2, 32, 8, 8)
+    (listed,) = ESMoE(4, 2, None, {"out_channels": 32})(torch.randn(2, 16, 8, 8))
+    assert listed.shape == (2, 32, 8, 8)
 
 
 @pytest.mark.parametrize(
@@ -333,6 +341,8 @@ def test_an_even_kernel_cap_is_lowered_not_raised():
         ({"max_kernel_size": 2}, "max_kernel_size"),
         ({"top_k": 9}, "top_k"),
         ({"nonsense": True}, "unknown ESMoE options"),
+        ({"balance": "nonexistent"}, "unknown name"),
+        ({"balance": "math:pi"}, "not a callable"),
     ],
 )
 def test_invalid_settings_are_refused_with_a_reason(kwargs, message):
@@ -397,7 +407,7 @@ def test_a_block_from_an_older_checkpoint_still_runs():
     revived.__setstate__(state)
     assert isinstance(revived.norm, nn.Identity)
 
-    assert revived.spec() == dict(esmoe.SETTINGS) | {"balance": "gshard"}
+    assert revived.spec() == dict(esmoe.SETTINGS) | {"balance": "switch"}
     assert revived.out_channels == 16
     with torch.no_grad():
         assert revived(torch.randn(2, 16, 8, 8)).shape == (2, 16, 8, 8)

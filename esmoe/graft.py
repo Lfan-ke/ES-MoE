@@ -1,5 +1,6 @@
 """Config-level injection: graft ESMoE blocks into a stock Ultralytics model.yaml."""
 
+import copy
 from collections.abc import Iterable
 
 Spot = int | str | Iterable[int]
@@ -59,6 +60,7 @@ def graft(
     num_experts: int = 4,
     top_k: int = 2,
     rewire: bool = False,
+    out_channels: int | None = None,
     **options,
 ) -> dict:
     """Insert ESMoE blocks after the given layers and renumber every later reference.
@@ -76,25 +78,41 @@ def graft(
         rewire: Also point every later consumer of an insertion layer at the block that now
             follows it. Off, a head branch that names the old backbone end by index keeps
             reading the pre-block feature (YOLOv8's P5 lateral does exactly that).
+        out_channels: Widen every block to this many output channels, taken literally rather than
+            scaled by the yaml's width multiple. Stock ``parse_model`` takes a third-party module's
+            output width to be its input width, so each widened block is followed by the official
+            ``Index`` layer, whose declared width ``parse_model`` does read; the block hands it a
+            one-element list, and ``rewire`` points consumers at that layer.
         **options: Block settings to write into the config - ``balance``, ``out_norm``,
-            ``dense_training``. They belong in the config because the trainer rebuilds the
-            model from it, discarding anything set on the instance beforehand.
+            ``dense_training``, ``sparse_inference``, ``dynamic_threshold`` - and ``expert``.
+            They belong in the config because the trainer rebuilds the model from it, discarding
+            anything set on the instance beforehand. A custom ``balance`` or ``expert`` is written
+            as ``module:qualname`` and has to be importable wherever the model is rebuilt, DDP
+            workers included.
     """
     from ultralytics.nn.tasks import yaml_model_load
 
-    from .module import BALANCES, SETTINGS
+    from .module import BALANCES, EXPERTS, SETTINGS, reference
 
-    if unknown := set(options) - set(SETTINGS):
-        raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {SETTINGS}")
+    allowed = set(SETTINGS) | {"expert"}
+    if unknown := set(options) - allowed:
+        raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(allowed)}")
     options = dict(options)
     if callable(balance := options.get("balance")):
-        # A config holds names, not functions. The shipped objectives have names; a custom one has
-        # to be set on the blocks, and cannot survive the trainer rebuilding the model from here.
-        named = {fn: name for name, fn in BALANCES.items()}
-        if balance not in named:
-            raise ValueError(f"{balance.__name__} is not a named objective; pass one of {sorted(BALANCES)}")
-        options["balance"] = named[balance]
-    args = [num_experts, top_k] + ([None, options] if options else [])
+        options["balance"] = reference(balance, BALANCES)
+    if callable(expert := options.get("expert")):
+        options["expert"] = reference(expert, EXPERTS)
+    layers = [[-1, 1, "ESMoE", [num_experts, top_k]]]
+    if out_channels is not None:
+        import ultralytics.nn.tasks as tasks
+
+        if not hasattr(tasks, "Index"):
+            raise RuntimeError("widening a grafted block needs an ultralytics release that has the Index layer")
+        options["out_channels"] = int(out_channels)
+        layers.append([-1, 1, "Index", [int(out_channels), 0]])
+    if options:
+        layers[0][3] += [None, options]
+
     d = dict(yaml_model_load(base))
     d.pop("yaml_file", None)
     backbone, head = list(d["backbone"]), list(d["head"])
@@ -107,10 +125,12 @@ def graft(
         moved[index] = len(grafted)
         grafted.append(list(layer))
         if index in spots:
-            grafted.append([-1, 1, "ESMoE", list(args)])
-            backbone_len += index < len(backbone)
+            # A copy per insertion: rows that share one options mapping come out of the yaml dump as
+            # anchors and aliases, which reload but no longer read as the layer they describe.
+            grafted.extend(copy.deepcopy(layers))
+            backbone_len += len(layers) * (index < len(backbone))
 
-    targets = moved | {s: moved[s] + 1 for s in spots} if rewire else moved
+    targets = moved | {s: moved[s] + len(layers) for s in spots} if rewire else moved
     renumbered = [[_shift(layer[0], targets), *layer[1:]] for layer in grafted]
     d["backbone"], d["head"] = renumbered[:backbone_len], renumbered[backbone_len:]
     if out:

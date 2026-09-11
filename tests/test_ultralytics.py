@@ -3,11 +3,22 @@ import torch
 
 pytest.importorskip("ultralytics")
 
-from esmoe import attach_aux_loss, blocks, equip, graft, inject_esmoe  # noqa: E402
+from esmoe import DWExpert, attach_aux_loss, blocks, equip, graft, inject_esmoe, switch_balance  # noqa: E402
 from esmoe.__main__ import main as cli  # noqa: E402
 from esmoe.inject import AUX_NAME  # noqa: E402
 
 BACKBONES = ["yolov8n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
+
+
+def doubled_switch(probs, gate):
+    """A custom objective at module level: the only place a config can name one from."""
+    return 2.0 * switch_balance(probs, gate)
+
+
+class PlainExpert(DWExpert):
+    """A custom expert, named the same way."""
+
+
 # Supported, but not shipped by every ultralytics release, so the tests skip what is absent.
 GUARDED_BACKBONES = ["yolo26n.yaml", "yolov5n.yaml", "yolov9t.yaml", "yolov10n.yaml"]
 
@@ -158,6 +169,53 @@ def test_cli_writes_a_grafted_config(tmp_path):
     cfg = YAML.load(str(out))
     assert [layer for layer in cfg["backbone"] if layer[2] == "ESMoE"][0][3] == [2, 1]
     assert cli(["info"]) == 0
+
+    staged = tmp_path / "yolov8n-stages.yaml"
+    argv = ["graft", "yolov8n.yaml", "-o", str(staged), "--at", "backbone_stages", "--balance", "master", "--out-norm"]
+    assert cli(argv) == 0
+    grafted = [layer for layer in YAML.load(str(staged))["backbone"] if layer[2] == "ESMoE"]
+    assert len(grafted) == 4
+    assert all(layer[3] == [4, 2, None, {"balance": "master", "out_norm": True}] for layer in grafted)
+
+
+def test_a_widened_block_grafts_into_a_stock_yaml():
+    """Stock `parse_model` takes a third-party module's output width to be its input width, so a
+    widened block hands its output to the official `Index` layer, whose declared width it reads."""
+    cfg = graft("yolov8n.yaml", out_channels=320)
+    assert cfg["backbone"][-2:] == [
+        [-1, 1, "ESMoE", [4, 2, None, {"out_channels": 320}]],
+        [-1, 1, "Index", [320, 0]],
+    ]
+    for kwargs in ({}, {"rewire": True}, {"at": "backbone_stages"}):
+        model = _model("yolov8n.yaml", out_channels=320, **kwargs)
+        widened = list(blocks(model))
+        assert all(block.out_channels == 320 for block in widened), kwargs
+        attach_aux_loss(model, weight=0.01)
+        model.train()
+        total, _ = model.loss(_batch())
+        total.sum().backward()
+    # Each stage's stride-2 Conv takes the widened output and sets its own width again, so every
+    # block still reads what it reads without widening; a wrong width would have failed the build.
+    plain = [block.channels for block in blocks(_model("yolov8n.yaml", at="backbone_stages"))]
+    assert [block.channels for block in widened] == plain
+
+
+def test_a_custom_objective_and_expert_survive_every_rebuild_from_the_config():
+    """A config holds names. A callable defined at module level goes in as `module:qualname`, and
+    every rebuild -- the trainer's, a DDP worker's -- imports the same object back from that name."""
+    cfg = graft("yolov8n.yaml", balance=doubled_switch, expert=PlainExpert)
+    options = cfg["backbone"][-1][3][3]
+    assert options == {"balance": f"{__name__}:doubled_switch", "expert": f"{__name__}:PlainExpert"}
+    for _ in range(2):
+        block = next(blocks(_model("yolov8n.yaml", balance=doubled_switch, expert=PlainExpert)))
+        assert block.balance is doubled_switch
+        assert all(type(expert) is PlainExpert for expert in block.experts)
+        assert block.spec()["balance"] == options["balance"] and block.spec()["expert"] == options["expert"]
+
+
+def test_a_callable_no_config_can_name_is_refused_when_grafting():
+    with pytest.raises(ValueError, match="module level"):
+        graft("yolov8n.yaml", balance=lambda probs, gate: probs.sum())
 
 
 def test_equip_builds_a_wired_model(tmp_path):

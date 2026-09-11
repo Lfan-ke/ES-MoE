@@ -3,6 +3,7 @@ from .graft import graft
 from .inject import attach_aux_loss, equip, inject_esmoe
 from .module import (
     BALANCES,
+    EXPERTS,
     SETTINGS,
     DWExpert,
     ESMoE,
@@ -17,6 +18,7 @@ from .module import (
 
 __all__ = [
     "BALANCES",
+    "EXPERTS",
     "SETTINGS",
     "DWExpert",
     "ESMoE",

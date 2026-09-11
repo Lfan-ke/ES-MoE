@@ -5,10 +5,12 @@ width and the balancing objective are all replaceable, so the block is a base to
 than a fixed recipe.
 """
 
-from collections.abc import Callable, Iterator, Sequence
+import importlib
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from types import MappingProxyType
 
 import torch
+import torch.distributed as dist
 import torch.nn.functional as F
 from torch import Tensor, nn
 
@@ -99,19 +101,74 @@ BALANCES: dict[str, BalanceFn] = {
     "master": master_balance,
     "gshard_probs": gshard_probs_balance,
 }
+EXPERTS: dict[str, ExpertFactory] = {"dw": DWExpert}
+
+
+def reference(obj: Callable, shipped: Mapping[str, Callable]) -> str:
+    """How a config names a callable: a shipped one by its short name, any other by ``module:qualname``.
+
+    A config holds text, and the trainer rebuilds the model from that text, in this process and in
+    every DDP worker. A callable survives the rebuild only if its name leads back to it from a fresh
+    import, so a lambda, a nested function or anything defined in ``__main__`` is refused here
+    instead of being lost without a trace later.
+    """
+    for name, known in shipped.items():
+        if known is obj:
+            return name
+    module, qualname = getattr(obj, "__module__", None), getattr(obj, "__qualname__", "")
+    if not module or module == "__main__" or "<" in qualname:
+        raise ValueError(
+            f"{qualname or obj!r} cannot be named in a config; define it at module level in an importable "
+            "module, because the trainer and every DDP worker rebuild the model from that name"
+        )
+    name = f"{module}:{qualname}"
+    if resolve(name, shipped) is not obj:
+        raise ValueError(f"{name} does not import back to the object it names")
+    return name
+
+
+def resolve(name: str, shipped: Mapping[str, Callable]) -> Callable:
+    """The callable a config names: a key of ``shipped``, or ``module:qualname``."""
+    if name in shipped:
+        return shipped[name]
+    module, colon, qualname = name.partition(":")
+    if not colon:
+        raise ValueError(f"unknown name {name!r}; use one of {sorted(shipped)} or 'module:qualname'")
+    target = importlib.import_module(module)
+    for part in qualname.split(".") if qualname else ():
+        target = getattr(target, part)
+    if not callable(target):
+        raise ValueError(f"{name} names {type(target).__name__}, not a callable")
+    return target
+
+
+def _named(obj: Callable, shipped: Mapping[str, Callable]) -> str:
+    try:
+        return reference(obj, shipped)
+    except ValueError:
+        # A callable set on an existing block need not be nameable; the record still says what it was.
+        return getattr(obj, "__qualname__", repr(obj))
+
 
 # What a model.yaml can carry, with the defaults it carries them against. The trainer rebuilds the
 # model from that yaml, so a setting applied to the instance afterwards is discarded; only these
 # survive. Upstream's own defaults are noted where they differ.
 SETTINGS = MappingProxyType(
     {
-        "balance": gshard_balance,
+        # Upstream reads the gate (`gshard_balance`), which carries no gradient for an expert outside
+        # the top-k. Switch reads the full softmax and is the one that kept every expert alive in the
+        # runs (docs/JUDGMENT.md, round six), besides being what every recorded run trained.
+        "balance": switch_balance,
         "out_norm": False,  # upstream: always on
         "dense_training": False,  # upstream: always on
         "sparse_inference": True,
         "dynamic_threshold": 0.0,  # upstream: 0.4
     }
 )
+
+# Keys a config may carry besides `SETTINGS`. They decide how the block is built rather than how it
+# behaves, so `configure` cannot change them on a block that already exists.
+STRUCTURE = frozenset({"expert", "out_channels"})
 
 
 class ESMoE(nn.Module):
@@ -125,18 +182,20 @@ class ESMoE(nn.Module):
         num_experts: Number of expert branches.
         top_k: Experts activated per sample; ``None`` activates all of them.
         channels: Channel count; inferred on first forward when omitted.
-        out_channels: Output channels, defaulting to the input's. Anything else makes the block
-            no longer channel-preserving, so `parse_model` cannot infer its output width and the
-            block has to be wired by hand rather than grafted into a stock yaml.
+        out_channels: Output channels, defaulting to the input's. Passed here, the block returns a
+            tensor. Passed in ``options``, which is how a yaml carries it, the block returns a
+            one-element list for the official ``Index`` layer `graft` writes after it: stock
+            ``parse_model`` reads that layer's declared width, never a third-party module's.
         reduction: Router bottleneck ratio.
         max_kernel_size: Cap for the generated odd kernels; an even cap is lowered to odd.
         expert_kernel_sizes: Explicit per-expert kernels, overriding the generated ones. Even
             sizes are lowered to odd and capped, as upstream does, so a pruned checkpoint's
             kernels reload rather than failing on a shape mismatch.
-        expert: Factory ``(c1, c2, k) -> Module`` for a custom expert branch.
-        balance: Auxiliary loss ``(probs, gate) -> scalar``, or a name from `BALANCES`. Defaults
-            to the objective YOLO-Master's released ES_MOE optimises; `master_balance` is the
-            one its paper specifies, and `switch_balance` the Switch-Transformer form.
+        expert: Factory ``(c1, c2, k) -> Module`` for a custom expert branch, or its name: a key
+            of `EXPERTS` or ``module:qualname``.
+        balance: Auxiliary loss ``(probs, gate) -> scalar``, or its name: a key of `BALANCES` or
+            ``module:qualname``. Defaults to `switch_balance`; `gshard_balance` is what
+            YOLO-Master's released ES_MOE optimises and `master_balance` what its paper specifies.
         out_norm: Normalise the mixed output, as upstream and the paper's equation 2 do.
             Off by default so the runs already in ``results/`` stay reproducible.
         dense_training: Run every expert while training, weighting the unrouted ones by zero.
@@ -147,9 +206,10 @@ class ESMoE(nn.Module):
         dynamic_threshold: Outside training, drop a routed expert whose share falls below this,
             keeping the top one whatever its share, and renormalise what remains. Upstream
             defaults to 0.4; 0 here leaves evaluation as every recorded run measured it.
-        options: The same settings as a mapping, which is how a model.yaml carries them. The
-            trainer rebuilds the model from that yaml, so a setting applied to the instance
-            afterwards is discarded; one written into the config survives every rebuild.
+        options: The same settings as a mapping, plus ``expert`` and ``out_channels``, which is how
+            a model.yaml carries them. The trainer rebuilds the model from that yaml, so a setting
+            applied to the instance afterwards is discarded; one written into the config survives
+            every rebuild.
     """
 
     def __init__(
@@ -163,13 +223,17 @@ class ESMoE(nn.Module):
         reduction: int = 8,
         max_kernel_size: int = 15,
         expert_kernel_sizes: Sequence[int] | None = None,
-        expert: ExpertFactory = DWExpert,
+        expert: ExpertFactory | str = DWExpert,
         **settings,
     ):
         super().__init__()
-        if unknown := (set(settings) | set(options or {})) - set(SETTINGS):
-            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(SETTINGS)}")
-        chosen = SETTINGS | settings | (options or {})
+        options = dict(options or {})
+        if unknown := (set(settings) - set(SETTINGS)) | (set(options) - set(SETTINGS) - STRUCTURE):
+            raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(set(SETTINGS) | STRUCTURE)}")
+        self.listed = options.get("out_channels") is not None
+        out_channels = options.pop("out_channels", None) or out_channels
+        expert = options.pop("expert", expert)
+        chosen = SETTINGS | settings | options
         if num_experts < 1:
             raise ValueError(f"num_experts must be positive, got {num_experts}")
         if reduction < 1:
@@ -191,9 +255,9 @@ class ESMoE(nn.Module):
         )
         self.num_experts, self.top_k, self.expert_kernel_sizes = num_experts, top_k, kernels
         self.reduction, self.channels, self.out_channels = reduction, None, out_channels
-        self.expert_factory = expert
+        self.expert_factory = resolve(expert, EXPERTS) if isinstance(expert, str) else expert
         for key, value in chosen.items():
-            setattr(self, key, BALANCES[value] if key == "balance" and isinstance(value, str) else value)
+            setattr(self, key, resolve(value, BALANCES) if key == "balance" and isinstance(value, str) else value)
         self.experts, self.router = nn.ModuleList(), nn.Sequential()
         self.norm: nn.Module = nn.Identity()
         if channels:
@@ -216,7 +280,7 @@ class ESMoE(nn.Module):
             self.norm = nn.Sequential(nn.BatchNorm2d(width), nn.SiLU())
         self.channels, self.out_channels = channels, width
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor | list[Tensor]:
         if self.channels is None:
             self.build(x.shape[1])
             self.to(x.device)  # never x.dtype: autocast feeds half here, params must stay fp32
@@ -246,12 +310,22 @@ class ESMoE(nn.Module):
             or (self.dense_training and self.training)
             or not (self.sparse_inference or self.training)
         )
+        # Under DDP every parameter has to reach the graph on every rank. Ultralytics asks DDP to
+        # search for unused ones only while `compile` is off; with it on, an expert no image in the
+        # batch routed to fails the reducer on the next step. Such an expert joins at zero, the
+        # gradient DDP would have written for it anyway. A single process keeps skipping it, so the
+        # optimiser keeps leaving it untouched, as it did for every recorded run.
+        joined = self.training and not every and dist.is_available() and dist.is_initialized()
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)
             if every or torch.count_nonzero(share):
                 out = out + share * expert(x)
+            elif joined:
+                touched = sum((p.flatten()[0] for p in expert.parameters()), out.new_zeros(()))
+                out = out + touched.to(out.dtype) * 0.0
         registry.publish(self, self.balance(probs, gate))
-        return self.norm(out)
+        out = self.norm(out)
+        return [out] if self.listed else out
 
     def configure(self, **settings) -> "ESMoE":
         """Set the alignment switches on a block that already exists.
@@ -263,7 +337,7 @@ class ESMoE(nn.Module):
         if unknown := set(settings) - set(SETTINGS):
             raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(SETTINGS)}")
         if (balance := settings.pop("balance", None)) is not None:
-            self.balance = BALANCES[balance] if isinstance(balance, str) else balance
+            self.balance = resolve(balance, BALANCES) if isinstance(balance, str) else balance
         out_norm = settings.pop("out_norm", None)
         for key, value in settings.items():
             setattr(self, key, value)
@@ -293,6 +367,10 @@ class ESMoE(nn.Module):
                 setattr(self, key, default)
         if not hasattr(self, "out_channels"):
             self.out_channels = self.channels
+        if not hasattr(self, "listed"):
+            self.listed = False
+        if not hasattr(self, "expert_factory"):
+            self.expert_factory = DWExpert
         if not hasattr(self, "norm"):
             # A submodule, so it is missing from `_modules` rather than from `__dict__`; assigning
             # it here is what puts it back where the forward pass looks.
@@ -300,9 +378,11 @@ class ESMoE(nn.Module):
 
     def spec(self) -> dict:
         """The settings this block is holding, in the form a config and a record carry them."""
-        return {"balance": self.balance.__name__.removesuffix("_balance")} | {
-            key: getattr(self, key) for key in SETTINGS if key != "balance"
-        }
+        found = {"balance": _named(self.balance, BALANCES)}
+        found |= {key: getattr(self, key) for key in SETTINGS if key != "balance"}
+        if self.expert_factory is not DWExpert:
+            found["expert"] = _named(self.expert_factory, EXPERTS)
+        return found
 
     def extra_repr(self) -> str:
         shape = f"channels={self.channels}"
