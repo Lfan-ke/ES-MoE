@@ -809,14 +809,15 @@
 <p>Exposes <code>ESMoE</code> where <code>parse_model</code> resolves layer names, after which any model.yaml can write <code>[-1, 1, ESMoE, [4, 2]]</code>.</p>
 <h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
-            rewire=False, **settings) -&gt; dict
+            rewire=False, out_channels=None, **settings) -&gt; dict
 </code></pre>
 <p>Inserts blocks after the layers named by <code>at</code> and renumbers every later reference. <code>at</code> is <code>"backbone_end"</code>, <code>"backbone_stages"</code> (one block after each backbone stage, reproducing the upstream layout), one index or several. With <code>rewire=True</code> every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.</p>
-<p><code>**settings</code> takes <code>balance</code>, <code>out_norm</code>, <code>dense_training</code>, <code>sparse_inference</code> and <code>dynamic_threshold</code>, and <strong>writes them into the config rather than onto the instance</strong>: the trainer rebuilds the model from <code>model.yaml</code>, and anything set on the instance goes with the instance it discards. <code>balance</code> may be a name or one of the four functions that ship; a custom objective cannot go into a config and is refused with a reason.</p>
+<p><code>**settings</code> takes <code>balance</code>, <code>out_norm</code>, <code>dense_training</code>, <code>sparse_inference</code>, <code>dynamic_threshold</code> and <code>expert</code>, and <strong>writes them into the config rather than onto the instance</strong>: the trainer rebuilds the model from <code>model.yaml</code>, and anything set on the instance goes with the instance it discards. <code>balance</code> may be a name or a function, <code>expert</code> a class or a factory. The ones that ship are written by short name (objectives <code>switch</code>, <code>gshard</code>, <code>master</code>, <code>gshard_probs</code>; the expert <code>dw</code>); a custom one is written as <code>module:qualname</code>, and every rebuild -- the one in a DDP worker included -- imports the same object back from that name. A custom function or class therefore has to live at module level in a module the training environment can import; a lambda, a nested function or anything defined in <code>__main__</code> is refused when grafting.</p>
+<p><code>out_channels</code> widens the blocks to that many channels, taken literally rather than scaled by the yaml's width multiple. Stock <code>parse_model</code> takes a third-party module's output width to be its input width, so every widened block is followed by the official <code>Index</code> layer: the block hands it a one-element list, and <code>parse_model</code> reads that layer's declared width. With <code>rewire=True</code> consumers are pointed at that layer.</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
 </code></pre>
-<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight on their own.</p>
+<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
@@ -835,7 +836,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
             out_channels=None, reduction=8, max_kernel_size=15,
             expert_kernel_sizes=None, expert=DWExpert, **settings)
 </code></pre>
-<p>A mixture-of-experts block, channel-preserving unless <code>out_channels</code> says otherwise. <code>channels</code> is inferred on the first forward when omitted; <code>top_k=None</code> activates every expert. <code>expert</code> is a replaceable <code>(c1, c2, k) -&gt; Module</code> factory. <code>options</code> is the mapping a config carries settings in (<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>) and is equivalent to <code>**settings</code>.</p>
+<p>A mixture-of-experts block, channel-preserving unless <code>out_channels</code> says otherwise. <code>channels</code> is inferred on the first forward when omitted; <code>top_k=None</code> activates every expert. <code>expert</code> is a <code>(c1, c2, k) -&gt; Module</code> factory, or its name (a short name from <code>esmoe.EXPERTS</code>, or <code>module:qualname</code>). <code>options</code> is the mapping a config carries settings in (<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>); it is equivalent to <code>**settings</code> and may also carry <code>expert</code> and <code>out_channels</code>. An <code>out_channels</code> given through <code>options</code> makes the block return a one-element list for the <code>Index</code> layer after it.</p>
 <p>The five settings and their defaults (<code>esmoe.SETTINGS</code>):</p>
 <table>
 <thead>
@@ -849,9 +850,9 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <tbody>
 <tr>
 <td style="text-align: center;"><code>balance</code></td>
+<td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: center;">same</td>
-<td style="text-align: left;">the objective, <code>(probs, gate) -&gt; scalar</code>, or a name from <code>esmoe.BALANCES</code></td>
+<td style="text-align: left;">the objective, <code>(probs, gate) -&gt; scalar</code>, or a name from <code>esmoe.BALANCES</code>, or <code>module:qualname</code></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>out_norm</code></td>
@@ -879,8 +880,8 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 </tr>
 </tbody>
 </table>
-<p>The last two affect inference only, the first three affect training. The defaults keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream.</p>
-<p><code>block.spec()</code> returns the five settings a block is holding, and <code>block.configure(**settings)</code> changes them on paths that never reach a trainer -- inference, export, a unit test. <code>esmoe.blocks(model)</code> walks every block in a model in module order, and <code>scripts/blockspec.py</code> reads back from any checkpoint what was actually in force.</p>
+<p>The last two affect inference only, the first three affect training. The defaults for <code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream. The default for <code>balance</code> is settled by data: an objective that reads the gate (upstream's <code>gshard</code>, the paper's <code>master</code>) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, while Switch reads the full softmax and lost none in 66 (<a href="../JUDGMENT/">judgment lines</a>, round six).</p>
+<p><code>block.spec()</code> returns the five settings a block is holding, plus <code>expert</code> when a custom one is in use, and <code>block.configure(**settings)</code> changes them on paths that never reach a trainer -- inference, export, a unit test. <code>esmoe.blocks(model)</code> walks every block in a model in module order, and <code>scripts/blockspec.py</code> reads back from any checkpoint what was actually in force.</p>
 
 
 

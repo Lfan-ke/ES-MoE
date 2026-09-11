@@ -919,7 +919,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
 <h3 id="_8">四个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p><strong>默认是上游 <code>ES_MOE</code> 实际用的那个</strong>（<code>gshard_balance</code>）：</p>
+<p><strong>默认是 Switch</strong>（<code>switch_balance</code>），与 0.1.4 和 <code>results/</code> 里的全部记录一致：</p>
 <table>
 <thead>
 <tr>
@@ -930,19 +930,19 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;"><code>gshard_balance</code>（默认）</td>
-<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
-<td style="text-align: center;"><strong>门控权重</strong>（上游 <code>ES_MOE</code> 用的）</td>
-</tr>
-<tr>
-<td style="text-align: center;"><code>switch_balance</code></td>
+<td style="text-align: center;"><code>switch_balance</code>（默认）</td>
 <td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code></td>
 <td style="text-align: center;">平均概率 × 实际负载</td>
 </tr>
 <tr>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;"><code>N · Σ usageᵢ²</code></td>
+<td style="text-align: center;"><strong>门控权重</strong>（上游 <code>ES_MOE</code> 用的）</td>
+</tr>
+<tr>
 <td style="text-align: center;"><code>master_balance</code></td>
 <td style="text-align: center;"><code>(1/E) · Σ(μᵢ − 1/E)²</code></td>
-<td style="text-align: center;">门控权重（论文式 13；与第一行只差仿射）</td>
+<td style="text-align: center;">门控权重（论文式 13；与上一行只差仿射）</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>gshard_probs_balance</code></td>
@@ -951,15 +951,17 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tr>
 </tbody>
 </table>
-<p>差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（<code>switch</code>、<code>gshard_probs</code>）取到同一个值，分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。选法：</p>
-<pre><code>esmoe.equip("yolo11n.yaml", balance="master")
+<p>差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（<code>switch</code>、<code>gshard_probs</code>）取到同一个值，分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。</p>
+<p>分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有，默认值因此是 Switch（<a href="../JUDGMENT/">判读线</a>第六轮）。换成上游的目标：</p>
+<pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
-<p>传函数也行（<code>balance=esmoe.master_balance</code>），但只限包里这四个：配置文件存的是名字，自定义目标进不去，只能设在块上，因而挺不过训练器的重建。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
+<p>自定义目标也能写进配置：把函数定义在可导入模块的顶层，传给 <code>equip</code> 或 <code>graft</code>，配置里存的是 <code>模块:限定名</code>，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个函数。lambda、嵌套函数、<code>__main__</code> 里定义的函数按名导入不回来，嫁接时就被拒绝。自定义专家同理（<code>expert=MyExpert</code>）。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
 <h3 id="_9">对齐上游的完整配置<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<p>上游 <code>ES_MOE</code> 与论文的默认不止是平衡项。三处一起打开才是完整复刻，<strong>都从 <code>equip</code> 传进去</strong>：</p>
+<p>上游 <code>ES_MOE</code> 与论文和本包默认的差别有四处。四处一起打开才是完整复刻，<strong>都从 <code>equip</code> 传进去</strong>：</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
     at="backbone_stages",     # 每个 stage 后一块，共四块
+    balance="gshard",         # 读门控的平衡项
     out_norm=True,            # 加权求和后的 BatchNorm + SiLU
     dense_training=True,      # 训练期跑满专家
 )
@@ -977,8 +979,8 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <tr>
 <td style="text-align: center;">平衡项</td>
 <td style="text-align: center;"><code>N·Σu²</code> 读门控</td>
-<td style="text-align: center;">同（<code>gshard_balance</code>）</td>
-<td style="text-align: center;">默认即是</td>
+<td style="text-align: center;">Switch（<code>switch_balance</code>）</td>
+<td style="text-align: center;"><code>balance="gshard"</code></td>
 </tr>
 <tr>
 <td style="text-align: center;">块数</td>

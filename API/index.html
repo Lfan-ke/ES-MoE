@@ -809,14 +809,15 @@
 <p>把 <code>ESMoE</code> 注册到 <code>parse_model</code> 解析层名的位置，此后任何 model.yaml 都能写 <code>[-1, 1, ESMoE, [4, 2]]</code>。</p>
 <h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
-            rewire=False, **settings) -&gt; dict
+            rewire=False, out_channels=None, **settings) -&gt; dict
 </code></pre>
 <p>在 <code>at</code> 指定的层后插入块并重编号其后的所有引用。<code>at</code> 可为 <code>"backbone_end"</code>、<code>"backbone_stages"</code>（主干每个 stage 后各一块，复刻上游布局）、单个层号或多个层号。<code>rewire=True</code> 让引用旧插入层的下游改指块本身——不开时，按序号点名主干末层的 head 分支（如 YOLOv8 的 P5 侧向）读到的仍是插入前的特征。</p>
-<p><code>**settings</code> 收 <code>balance</code> / <code>out_norm</code> / <code>dense_training</code> / <code>sparse_inference</code> / <code>dynamic_threshold</code>，<strong>写进配置文件而不是设在实例上</strong>：训练器照 <code>model.yaml</code> 重建模型，设在实例上的会随那个被丢弃的实例一起消失。<code>balance</code> 可传名字或包里那四个函数之一；自定义目标进不了配置文件，会被明确拒绝。</p>
+<p><code>**settings</code> 收 <code>balance</code> / <code>out_norm</code> / <code>dense_training</code> / <code>sparse_inference</code> / <code>dynamic_threshold</code> 与 <code>expert</code>，<strong>写进配置文件而不是设在实例上</strong>：训练器照 <code>model.yaml</code> 重建模型，设在实例上的会随那个被丢弃的实例一起消失。<code>balance</code> 可传名字或函数，<code>expert</code> 可传类或工厂函数。包里自带的写成短名（平衡项 <code>switch</code> / <code>gshard</code> / <code>master</code> / <code>gshard_probs</code>，专家 <code>dw</code>）；自定义的写成 <code>模块:限定名</code>，每次重建（包括 DDP 子进程里的那次）都从这个名字导入回同一个对象。所以自定义的函数或类要定义在可导入模块的顶层，训练所在的环境也要导入得到它；lambda、嵌套函数、<code>__main__</code> 里定义的，在嫁接时就被拒绝。</p>
+<p><code>out_channels</code> 把块改宽到这个宽度，取字面值，不随 yaml 的 width 倍率缩放。官方 <code>parse_model</code> 对第三方模块认定输出宽度等于输入，所以每个改宽的块后面紧跟一个官方 <code>Index</code> 层：块把输出包成单元素列表交给它，<code>parse_model</code> 读的是这一层声明的宽度。<code>rewire=True</code> 时下游改指这一层。</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
 </code></pre>
-<p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重。</p>
+<p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 <code>compile=True</code> 时关掉 <code>find_unused_parameters</code>，多卡照样能训。</p>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
@@ -835,7 +836,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
             out_channels=None, reduction=8, max_kernel_size=15,
             expert_kernel_sizes=None, expert=DWExpert, **settings)
 </code></pre>
-<p>专家混合块，默认保持通道数。<code>channels</code> 省略时在首次前向推断；<code>top_k=None</code> 等于用上全部专家。<code>expert</code> 是 <code>(c1, c2, k) -&gt; Module</code> 的工厂，可替换。<code>options</code> 是配置文件传设置的那个映射（<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>），与 <code>**settings</code> 等价。</p>
+<p>专家混合块，默认保持通道数。<code>channels</code> 省略时在首次前向推断；<code>top_k=None</code> 等于用上全部专家。<code>expert</code> 是 <code>(c1, c2, k) -&gt; Module</code> 的工厂，也可以是它的名字（<code>esmoe.EXPERTS</code> 里的短名或 <code>模块:限定名</code>）。<code>options</code> 是配置文件传设置的那个映射（<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>），与 <code>**settings</code> 等价，另外还能带 <code>expert</code> 与 <code>out_channels</code>；经 <code>options</code> 给出的 <code>out_channels</code> 让块返回单元素列表，供其后的 <code>Index</code> 层取用。</p>
 <p>五个设置及其默认值（<code>esmoe.SETTINGS</code>）：</p>
 <table>
 <thead>
@@ -849,9 +850,9 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <tbody>
 <tr>
 <td style="text-align: center;"><code>balance</code></td>
+<td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: center;">同</td>
-<td style="text-align: left;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字</td>
+<td style="text-align: left;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字、<code>模块:限定名</code></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>out_norm</code></td>
@@ -879,8 +880,8 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 </tr>
 </tbody>
 </table>
-<p>后两项只影响推理，前三项影响训练。默认值保持 <code>results/</code> 里既有运行可原样复现，不是对上游的取舍判断。</p>
-<p><code>block.spec()</code> 返回该块当下带着的五个设置；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一 checkpoint 读回当时真正生效的设置。</p>
+<p>后两项只影响推理，前三项影响训练。<code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 的默认值是为了让 <code>results/</code> 里既有的运行原样复现，不是对上游的取舍判断。<code>balance</code> 的默认值由数据定：读门控的目标（上游的 <code>gshard</code>、论文的 <code>master</code>）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家；Switch 读完整 softmax，66 个 checkpoint 上一个没有（<a href="../JUDGMENT/">判读线</a>第六轮）。</p>
+<p><code>block.spec()</code> 返回该块当下带着的五个设置，用了自定义专家时再加一项 <code>expert</code>；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一 checkpoint 读回当时真正生效的设置。</p>
 
 
 

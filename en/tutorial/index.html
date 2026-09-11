@@ -933,7 +933,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 <p><code>esmoe.blocks(model)</code> iterates every block in a model, which is how the collector and the tests find
 them.</p>
 <h3 id="four-balancing-objectives-ship-with-the-block">Four balancing objectives ship with the block<a class="headerlink" href="#four-balancing-objectives-ship-with-the-block" title="Permanent link">&para;</a></h3>
-<p>The default is <strong>the one upstream's <code>ES_MOE</code> actually optimises</strong> (<code>gshard_balance</code>):</p>
+<p>The default is <strong>Switch</strong> (<code>switch_balance</code>), as in 0.1.4 and in every record under <code>results/</code>:</p>
 <table>
 <thead>
 <tr>
@@ -944,19 +944,19 @@ them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;"><code>gshard_balance</code> (default)</td>
-<td style="text-align: center;"><code>N * sum(usage_i^2)</code></td>
-<td style="text-align: center;"><strong>the gated weights</strong> (what upstream's <code>ES_MOE</code> reads)</td>
-</tr>
-<tr>
-<td style="text-align: center;"><code>switch_balance</code></td>
+<td style="text-align: center;"><code>switch_balance</code> (default)</td>
 <td style="text-align: center;"><code>E * sum(p_i f_i)</code></td>
 <td style="text-align: center;">mean probabilities x realised load</td>
 </tr>
 <tr>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;"><code>N * sum(usage_i^2)</code></td>
+<td style="text-align: center;"><strong>the gated weights</strong> (what upstream's <code>ES_MOE</code> reads)</td>
+</tr>
+<tr>
 <td style="text-align: center;"><code>master_balance</code></td>
 <td style="text-align: center;"><code>(1/E) * sum((mu_i - 1/E)^2)</code></td>
-<td style="text-align: center;">the gated weights (the paper's eq. 13; an affine map of the first row)</td>
+<td style="text-align: center;">the gated weights (the paper's eq. 13; an affine map of the row above)</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>gshard_probs_balance</code></td>
@@ -965,15 +965,17 @@ them.</p>
 </tr>
 </tbody>
 </table>
-<p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (<code>switch</code>, <code>gshard_probs</code>) evaluate identically and cannot tell that apart, while the two that read the gate (<code>gshard</code>, <code>master</code>) can. Upstream's code and its paper agree here, differing only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>). To pick one:</p>
-<pre><code>esmoe.equip("yolo11n.yaml", balance="master")
+<p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (<code>switch</code>, <code>gshard_probs</code>) evaluate identically and cannot tell that apart, while the two that read the gate (<code>gshard</code>, <code>master</code>) can. Upstream's code and its paper agree here, differing only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>).</p>
+<p>Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints and Switch in none of 66, which is why Switch is the default (<a href="../JUDGMENT/">judgment lines</a>, round six). To use upstream's objective instead:</p>
+<pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
-<p>A function works too (<code>balance=esmoe.master_balance</code>), but only for the four that ship: a config holds names, so a custom objective can only be set on the blocks and will not survive the trainer rebuilding the model. The trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
+<p>A custom objective goes into the config too: define the function at module level in an importable module and pass it to <code>equip</code> or <code>graft</code>. The config stores <code>module:qualname</code>, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in <code>__main__</code> cannot be imported back by name and is refused when grafting. Custom experts work the same way (<code>expert=MyExpert</code>). The trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
 <h3 id="the-configuration-that-matches-upstream">The configuration that matches upstream<a class="headerlink" href="#the-configuration-that-matches-upstream" title="Permanent link">&para;</a></h3>
-<p>Upstream's <code>ES_MOE</code> and the paper differ from this package's defaults in three places besides the objective. Turning all three on is the faithful reproduction, and <strong>they all go through <code>equip</code></strong>:</p>
+<p>Upstream's <code>ES_MOE</code> and the paper differ from this package's defaults in four places. Turning all four on is the faithful reproduction, and <strong>they all go through <code>equip</code></strong>:</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
     at="backbone_stages",     # one block per stage, four in all
+    balance="gshard",         # the objective that reads the gate
     out_norm=True,            # BatchNorm + SiLU after the weighted sum
     dense_training=True,      # every expert runs while training
 )
@@ -991,8 +993,8 @@ them.</p>
 <tr>
 <td style="text-align: center;">balancing term</td>
 <td style="text-align: center;"><code>N*sum(u^2)</code> on the gate</td>
-<td style="text-align: center;">same (<code>gshard_balance</code>)</td>
-<td style="text-align: center;">already the default</td>
+<td style="text-align: center;">Switch (<code>switch_balance</code>)</td>
+<td style="text-align: center;"><code>balance="gshard"</code></td>
 </tr>
 <tr>
 <td style="text-align: center;">blocks</td>
