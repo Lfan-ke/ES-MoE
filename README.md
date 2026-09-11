@@ -110,7 +110,9 @@ Graft and forward are exercised on every row in CI. The last column separates "t
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
 `scripts/verify.py` (the real worker file in a fresh interpreter; two gloo ranks with agreeing router gradients).
-Not supported together with `compile=True`, which turns off `find_unused_parameters`.
+Inside a process group an expert that no image routed to joins the graph at zero weight, so the settings
+ultralytics uses under `compile=True` (`find_unused_parameters=False`, `static_graph=True`) train as well;
+`tests/test_distributed.py` checks that with two gloo ranks, and that the block compiles and agrees with eager.
 
 ## Selected default
 
