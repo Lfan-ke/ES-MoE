@@ -351,6 +351,8 @@ $$\Omega_{\text{train},i}=\frac{e^{L_i}}{\sum_{j\in I_K}e^{L_j}},\qquad i\in I_K
 
 所以**只读门控的平衡项，对当下没进 top-K 的专家，logit 梯度恒为零**，不论这个专家还剩多少概率。一个专家在所有图上都掉出 top-K 以后，这一项再也够不着它。Switch 项读完整的 softmax，对子集外的专家有同量级的梯度，方向是把它拉回 top-K。数值断言见 `tests/test_paper_parity.py` 的 `test_a_gate_reading_balance_cannot_reach_an_expert_outside_the_top_k`。
 
+上游自己的配方里也是这样。上一阶段在上游仓库 d5afc4b（2026-07-28）原生训练的 YOLO-Master-EsMoE-N 上，平衡项同样读门控（`ES_MOE._compute_load_balancing_loss` 取 `_soft_top_k` 的输出），四个块里前三个各有两个专家利用率恰为 0，最后一个四个都用上；剪掉死专家后 mAP50 从 0.4271 到 0.4269，延迟降 24.5%（[yolomoe-ln](https://github.com/Lfan-ke/yolomoe-ln) 的 `DISCUSSION_POST.md`）。那次训练是 imgsz 1024、100 epoch、单次运行、YOLO-Master 自己的架构，与本项目协议不同，只作机制佐证，不进入任何精度比较。
+
 ### 预测对账
 
 **第四条（论文的平衡项会明显降低主导专家的 top-1 份额，降幅大于读门控 GShard）——按字面成立，背后的机制假设不成立。** 登记的是权重 0.01 的 `master`，那一档从未真正跑过（见第四轮前的更正）；按第四轮判定末尾的做法把压力抬足后，top-1 份额 2/3 个 seed 下降，均值 0.697 对默认臂 0.812，降 0.115，而读门控 GShard 反升 0.034。但同一批 checkpoint 3/3 有死专家，前两名用量 3/3 更高（1.704、2.000、1.692 对 1.431、1.610、1.646）。份额降下来，是因为分派从一个专家主导变成两个专家固定包揽，不是变均匀。读门控 GShard 补齐 seed 2 后也死掉两个专家。
