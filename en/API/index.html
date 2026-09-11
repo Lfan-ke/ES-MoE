@@ -800,9 +800,9 @@
 <h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
 <p>Six entry points, all importable from the top-level <code>esmoe</code>; the package ships <code>py.typed</code>, so the signatures are visible to IDEs and mypy.</p>
 <h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -&gt; YOLO
+<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -&gt; YOLO
 </code></pre>
-<p>Register, graft, build and wire in one call. <code>out</code> names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). <code>graft_kwargs</code> pass through to <code>graft</code>.</p>
+<p>Register, graft, build and wire in one call. <code>out</code> names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). <code>weight</code> and <code>recipe</code> go to <code>attach_aux_loss</code>, <code>graft_kwargs</code> pass through to <code>graft</code>.</p>
 <h2 id="inject_esmoe">inject_esmoe<a class="headerlink" href="#inject_esmoe" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.inject_esmoe() -&gt; type[ESMoE]
 </code></pre>
@@ -815,9 +815,14 @@
 <p><code>**settings</code> takes <code>balance</code>, <code>out_norm</code>, <code>dense_training</code>, <code>sparse_inference</code>, <code>dynamic_threshold</code> and <code>expert</code>, and <strong>writes them into the config rather than onto the instance</strong>: the trainer rebuilds the model from <code>model.yaml</code>, and anything set on the instance goes with the instance it discards. <code>balance</code> may be a name or a function, <code>expert</code> a class or a factory. The ones that ship are written by short name (objectives <code>switch</code>, <code>gshard</code>, <code>master</code>, <code>gshard_probs</code>; the expert <code>dw</code>); a custom one is written as <code>module:qualname</code>, and every rebuild -- the one in a DDP worker included -- imports the same object back from that name. A custom function or class therefore has to live at module level in a module the training environment can import; a lambda, a nested function or anything defined in <code>__main__</code> is refused when grafting.</p>
 <p><code>out_channels</code> widens the blocks to that many channels, taken literally rather than scaled by the yaml's width multiple. Stock <code>parse_model</code> takes a third-party module's output width to be its input width, so every widened block is followed by the official <code>Index</code> layer: the block hands it a one-element list, and <code>parse_model</code> reads that layer's declared width. With <code>rewire=True</code> consumers are pointed at that layer.</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
+<pre><code>esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -&gt; model
 </code></pre>
-<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
+<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
+<p><code>recipe</code> decides how the block and its term train:</p>
+<ul>
+<li><code>"esmoe"</code> (default, and what every recorded run used): the term times <code>weight</code>, counted per image the way the task loss counts.</li>
+<li><code>"upstream"</code>: the three things YOLO-Master's trainer does to any model with a routed module, for runs compared against it. The term is divided by a running mean of its own magnitude (decay 0.99, starting at 1.0), multiplied by <code>weight</code>, capped at 3.0 and added once to each of box, cls and dfl; router parameters get a group of their own at half the learning rate, outside Muon; expert parameters stay frozen for the first 3 epochs. The last two happen in the trainer, so they apply to a YOLO model trained through <code>model.train()</code>. Constants and sources are in <code>esmoe.upstream</code>.</li>
+</ul>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>

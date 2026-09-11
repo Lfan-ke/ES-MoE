@@ -800,9 +800,9 @@
 <h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
 <p>六个入口，全部从 <code>esmoe</code> 顶层导入；包内带 <code>py.typed</code>，类型签名对 IDE 与 mypy 可见。</p>
 <h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, out=None, **graft_kwargs) -&gt; YOLO
+<pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -&gt; YOLO
 </code></pre>
-<p>注册、接入、构建、接损失一次完成。<code>out</code> 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。<code>graft_kwargs</code> 原样转给 <code>graft</code>。</p>
+<p>注册、接入、构建、接损失一次完成。<code>out</code> 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。<code>weight</code> 与 <code>recipe</code> 转给 <code>attach_aux_loss</code>，<code>graft_kwargs</code> 原样转给 <code>graft</code>。</p>
 <h2 id="inject_esmoe">inject_esmoe<a class="headerlink" href="#inject_esmoe" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.inject_esmoe() -&gt; type[ESMoE]
 </code></pre>
@@ -815,9 +815,14 @@
 <p><code>**settings</code> 收 <code>balance</code> / <code>out_norm</code> / <code>dense_training</code> / <code>sparse_inference</code> / <code>dynamic_threshold</code> 与 <code>expert</code>，<strong>写进配置文件而不是设在实例上</strong>：训练器照 <code>model.yaml</code> 重建模型，设在实例上的会随那个被丢弃的实例一起消失。<code>balance</code> 可传名字或函数，<code>expert</code> 可传类或工厂函数。包里自带的写成短名（平衡项 <code>switch</code> / <code>gshard</code> / <code>master</code> / <code>gshard_probs</code>，专家 <code>dw</code>）；自定义的写成 <code>模块:限定名</code>，每次重建（包括 DDP 子进程里的那次）都从这个名字导入回同一个对象。所以自定义的函数或类要定义在可导入模块的顶层，训练所在的环境也要导入得到它；lambda、嵌套函数、<code>__main__</code> 里定义的，在嫁接时就被拒绝。</p>
 <p><code>out_channels</code> 把块改宽到这个宽度，取字面值，不随 yaml 的 width 倍率缩放。官方 <code>parse_model</code> 对第三方模块认定输出宽度等于输入，所以每个改宽的块后面紧跟一个官方 <code>Index</code> 层：块把输出包成单元素列表交给它，<code>parse_model</code> 读的是这一层声明的宽度。<code>rewire=True</code> 时下游改指这一层。</p>
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.attach_aux_loss(model, weight=0.01) -&gt; model
+<pre><code>esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -&gt; model
 </code></pre>
-<p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 <code>compile=True</code> 时关掉 <code>find_unused_parameters</code>，多卡照样能训。</p>
+<p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重与训练方式。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 <code>compile=True</code> 时关掉 <code>find_unused_parameters</code>，多卡照样能训。</p>
+<p><code>recipe</code> 决定块和辅助项怎么训：</p>
+<ul>
+<li><code>"esmoe"</code>（默认，已记录的运行都用它）：辅助项乘 <code>weight</code> 后按每张图计入，与任务损失的计法一致。</li>
+<li><code>"upstream"</code>：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 <code>weight</code>，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 <code>model.train()</code> 训练的 YOLO 模型生效。常数与出处见 <code>esmoe.upstream</code>。</li>
+</ul>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
