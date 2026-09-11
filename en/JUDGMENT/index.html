@@ -906,6 +906,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1330,6 +1341,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1936,6 +1958,66 @@
 <p><strong>Fourth (the paper's term clearly lowers the leading expert's top-1 share, by more than gate-reading GShard does) — holds as worded; the mechanism behind it does not.</strong> What was registered was <code>master</code> at 0.01, and that arm never actually ran (see the correction before round four). Raising the pressure as the end of the fourth-round verdict called for, the top-1 share drops on 2 of 3 seeds, a mean of 0.697 against the default arm's 0.812, down 0.115, while gate-reading GShard rises by 0.034. The same checkpoints have a dead expert on 3 of 3, though, and the top two take more of the dispatch on 3 of 3 (1.704, 2.000, 1.692 against 1.431, 1.610, 1.646). The share fell because the dispatch went from one dominant expert to two fixed ones, not because it evened out. With its third seed, gate-reading GShard lost two experts too.</p>
 <p><strong>The fifth round's open confound (is the four-block deficit the fourfold auxiliary term) — ruled out.</strong></p>
 <p><strong>The second half of the fifth round's "one thing that matters more" is revised.</strong> The first half stands: concentration does not predict accuracy, and with this round included r = +0.044 over the 81 runs that have both a routing analysis and a paired delta (+0.160 over 58 in the fifth round). The second half, "whether a balancing term belongs cannot be argued from preventing collapse", went too far. Collapse has two layers: a dominant expert, and dead experts. The first is unrelated to accuracy and the term does not prevent it. The second the Switch term does prevent, 0 of 66 against 6 of 6 without it. Its effect on accuracy is still inside the noise.</p>
+<h2 id="round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison">Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)<a class="headerlink" href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" title="Permanent link">&para;</a></h2>
+<p>A comparison with YOLO-Master under one configuration: the same model (upstream's <code>yolo-master-n.yaml</code>, one block after each backbone stage, four in all) and the same protocol (full VisDrone, imgsz 800, 120 epochs, batch 32, <code>patience=0</code>, every other argument at its default), trained once on upstream's fork (locked baseline <code>acce839c</code>) and once on official ultralytics 8.4.101 with this package. Four arms, with one seed's four arms on one card:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">framework</th>
+<th style="text-align: center;">model</th>
+<th style="text-align: center;">training</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">upstream fork</td>
+<td style="text-align: center;">yolo-master-n, four <code>ES_MOE</code></td>
+<td style="text-align: center;">upstream defaults</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0</td>
+<td style="text-align: center;">upstream fork</td>
+<td style="text-align: center;">the same model without the four blocks</td>
+<td style="text-align: center;">upstream defaults</td>
+</tr>
+<tr>
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">official 8.4.101 + esmoe</td>
+<td style="text-align: center;">the same model, four <code>ESMoE</code> (gate-reading GShard, output norm, every expert run in training, inference pruning at 0.4)</td>
+<td style="text-align: center;"><code>recipe="upstream"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">official 8.4.101</td>
+<td style="text-align: center;">the same model without the four blocks</td>
+<td style="text-align: center;">defaults</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Known at declaration:</strong></p>
+<ul>
+<li>The fork's trainer differs from the official one for every model in two places: the last batch of each epoch always steps the optimizer, and the first non-finite gradient restores the last healthy checkpoint, replays that epoch and turns mixed precision off for the rest of the run.</li>
+<li>B matches A layer for layer (2,814,406 parameters at 10 classes). <code>recipe="upstream"</code> reproduces the three things upstream's trainer does to a routed model: the auxiliary term divided by a running mean of its magnitude and capped at 3.0, router parameters at half the learning rate and outside Muon, and experts frozen for the first 3 epochs. It matches upstream's source step by step (<code>tests/test_recipe.py</code>).</li>
+<li>On MetaX C500, A and A0 of seeds 0 and 1 both rolled back in their first epoch and trained in FP32 from then on; B and C stayed in mixed precision in their smoke runs. A alone takes 37 GB in FP32, so each card runs A alone, then A0 beside C, then B alone.</li>
+</ul>
+<p><strong>Unknown:</strong> every 120-epoch metric of all four arms; seed 2's card is waiting for the platform to repair it.</p>
+<p><strong>Lines.</strong> Every paired difference is taken inside one card, over three seeds. Repeated runs of one configuration differ by 0.0045 on average and 0.0130 at most.</p>
+<ul>
+<li><strong>Equivalent</strong>: the paired mAP50 mean of A − B is at most 0.0045 in absolute value and its 95% interval spans zero.</li>
+<li><strong>Not equivalent</strong>: the mean of A − B exceeds 0.0130 in absolute value, or all three seeds share a sign and the interval excludes zero.</li>
+<li><strong>Undecided</strong>: anything else.</li>
+<li>(A − A0) − (B − C) is judged on the same three lines and answers whether the block does the same in both frameworks.</li>
+</ul>
+<p><strong>Predictions:</strong></p>
+<ol>
+<li><strong>The two implementations are equivalent</strong>: A − B lands on "equivalent". If it lands on "not equivalent", the difference comes from this package's block or from its reproduction of the recipe, and each gets checked in turn.</li>
+<li><strong>The block does the same in both frameworks</strong>: (A − A0) − (B − C) lands on "equivalent", and A − A0 and B − C have means of the same sign.</li>
+<li><strong>The four-block layout brings no gain at this budget</strong>: by the lines at the top of this page, both B − C and A − A0 are "ineffective". The basis is rounds five and six, where four blocks were negative on all 9 seeds across v5n and v10n. If A − A0 reaches "effective" and B − C does not, the four-block deficit depends on how the block trains, and the fifth and sixth rounds' conclusion has to be limited to <code>recipe="esmoe"</code>.</li>
+<li><strong>The gate-reading balancing term still leaves dead experts here</strong>: at least two thirds of B's checkpoints have a block with a dead expert (in the top-2 for under 1% of images). The basis is round six, where 5 of 6 checkpoints trained on a gate-reading objective had one; upstream's normalisation enlarges the term but leaves its gradient for an expert outside the top-K at zero. If B has no dead expert at all, running every expert in training or the expert warm-up closed that gap, and round six's mechanism needs adding to.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
 
 
 

@@ -906,6 +906,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2026-09-11_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第七轮预登记（2026-09-11，声明于任何同配置对比满协议结果之前）
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1330,6 +1341,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2026-09-11_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第七轮预登记（2026-09-11，声明于任何同配置对比满协议结果之前）
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1936,6 +1958,66 @@
 <p><strong>第四条（论文的平衡项会明显降低主导专家的 top-1 份额，降幅大于读门控 GShard）——按字面成立，背后的机制假设不成立。</strong> 登记的是权重 0.01 的 <code>master</code>，那一档从未真正跑过（见第四轮前的更正）；按第四轮判定末尾的做法把压力抬足后，top-1 份额 2/3 个 seed 下降，均值 0.697 对默认臂 0.812，降 0.115，而读门控 GShard 反升 0.034。但同一批 checkpoint 3/3 有死专家，前两名用量 3/3 更高（1.704、2.000、1.692 对 1.431、1.610、1.646）。份额降下来，是因为分派从一个专家主导变成两个专家固定包揽，不是变均匀。读门控 GShard 补齐 seed 2 后也死掉两个专家。</p>
 <p><strong>第五轮留下的混淆项（四块的负效应是否来自四倍辅助项）——排除。</strong></p>
 <p><strong>第五轮「由此得到的一条」修正后半句。</strong> 前半句仍成立：集中程度不预测精度，并入本轮后 81 个既有路由分析又有配对差值的运行上 r = +0.044（第五轮 58 个时为 +0.160）。后半句「平衡项该不该存在不能从防塌缩推出来」说过了头。塌缩分两层：主导专家份额高是一层，专家死掉是另一层。前一层与精度无关，平衡项也管不住；后一层 Switch 项管得住，0/66 对去掉它后的 6/6。它对精度的作用仍在噪声之内。</p>
+<h2 id="2026-09-11_1">第七轮预登记（2026-09-11，声明于任何同配置对比满协议结果之前）<a class="headerlink" href="#2026-09-11_1" title="Permanent link">&para;</a></h2>
+<p>与 YOLO-Master 在同一配置下对照：同一个模型（上游 <code>yolo-master-n.yaml</code>，主干每个 stage 后一块，共四块），同一份协议（VisDrone 全量、imgsz 800、120 epoch、batch 32、<code>patience=0</code>，其余参数取默认），分别在上游分支（锁定基线 <code>acce839c</code>）与官方 ultralytics 8.4.101 加本包上训练。四臂，每个 seed 的四臂在同一张卡上：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">臂</th>
+<th style="text-align: center;">框架</th>
+<th style="text-align: center;">模型</th>
+<th style="text-align: center;">训练方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">上游分支</td>
+<td style="text-align: center;">yolo-master-n，4 个 <code>ES_MOE</code></td>
+<td style="text-align: center;">上游默认</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0</td>
+<td style="text-align: center;">上游分支</td>
+<td style="text-align: center;">同一模型去掉 4 个块</td>
+<td style="text-align: center;">上游默认</td>
+</tr>
+<tr>
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">官方 8.4.101 + esmoe</td>
+<td style="text-align: center;">同一模型，4 个 <code>ESMoE</code>（读门控的 GShard、输出归一化、训练期跑满专家、推理剪枝 0.4）</td>
+<td style="text-align: center;"><code>recipe="upstream"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">官方 8.4.101</td>
+<td style="text-align: center;">同一模型去掉 4 个块</td>
+<td style="text-align: center;">默认</td>
+</tr>
+</tbody>
+</table>
+<p><strong>声明时已知：</strong></p>
+<ul>
+<li>上游分支的训练器对所有模型有两处与官方不同：每个 epoch 最后一个 batch 强制更新；梯度一出现非有限值，就从上一个健康 checkpoint 恢复、重跑该 epoch，并关闭混合精度直到训练结束。</li>
+<li>B 与 A 逐层参数一致（10 类时 2,814,406）。<code>recipe="upstream"</code> 复刻上游训练器对路由模型的三项处理：辅助项按自身幅值的滑动平均归一并封顶 3.0，路由器参数半学习率且不进 Muon，前 3 个 epoch 冻结专家。逐步数值与上游源码一致（<code>tests/test_recipe.py</code>）。</li>
+<li>曦云 C500 上 seed 0、1 的 A 与 A0 都在第 1 个 epoch 触发回滚，此后为 FP32；B、C 在冒烟中始终是混合精度。A 在 FP32 下单跑占显存 37 GB，因此每卡按「A 单跑，A0 与 C 同跑，B 单跑」排。</li>
+</ul>
+<p><strong>未知：</strong> 四臂全部 120 epoch 的指标；seed 2 所在的卡尚待平台修复。</p>
+<p><strong>判读线。</strong> 配对差都在同一张卡内求，三个 seed。同配置重复运行的离散度为均值 0.0045、最大 0.0130。</p>
+<ul>
+<li><strong>等效</strong>：A − B 的配对 mAP50 均值绝对值 ≤ 0.0045，且 95% 置信区间跨零。</li>
+<li><strong>不等效</strong>：A − B 的均值绝对值 &gt; 0.0130，或三个 seed 同号且区间不跨零。</li>
+<li><strong>无法判定</strong>：其余情形。</li>
+<li>(A − A0) − (B − C) 按同样三档判定，回答块在两个框架里的作用是否一致。</li>
+</ul>
+<p><strong>预测：</strong></p>
+<ol>
+<li><strong>两个实现等效</strong>：A − B 落在「等效」档。若落在「不等效」档，差异来自本包的块或训练方式的复刻，逐项排查。</li>
+<li><strong>块在两个框架里作用一致</strong>：(A − A0) − (B − C) 落在「等效」档，且 A − A0 与 B − C 的均值同号。</li>
+<li><strong>四块布局在这个预算下不带来提升</strong>：B − C 与 A − A0 按本页开头的判读线都落在「无效」。依据是第五、六轮四块布局在 v5n、v10n 上 9 个 seed 全负。若 A − A0 达到「有效」而 B − C 没有，四块的负效应就与训练方式有关，第五、六轮的结论要限定在 <code>recipe="esmoe"</code> 下。</li>
+<li><strong>读门控的平衡项在这里仍留下死专家</strong>：B 的 checkpoint 中至少三分之二有块出现死专家（进入 top-2 的图不足 1%）。依据是第六轮读门控的目标 6 个 checkpoint 里 5 个有死专家；上游的归一化把辅助项放大，但不改变它对 top-K 外专家梯度为零。若 B 一个死专家都没有，说明训练期跑满专家或专家预热补上了这一缺口，第六轮的机制解释要补充。</li>
+</ol>
+<p>预测错了照实记录。</p>
 
 
 
