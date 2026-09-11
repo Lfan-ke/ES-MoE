@@ -116,36 +116,39 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 ### 四个内置的均衡目标
 
-**默认是上游 `ES_MOE` 实际用的那个**（`gshard_balance`）：
+**默认是 Switch**（`switch_balance`），与 0.1.4 和 `results/` 里的全部记录一致：
 
 | 目标 | 公式 | 读什么 |
 |:--:|:--:|:--:|
-| `gshard_balance`（默认） | `N · Σ usageᵢ²` | **门控权重**（上游 `ES_MOE` 用的） |
-| `switch_balance` | `E · Σ p̄ᵢfᵢ` | 平均概率 × 实际负载 |
-| `master_balance` | `(1/E) · Σ(μᵢ − 1/E)²` | 门控权重（论文式 13；与第一行只差仿射） |
+| `switch_balance`（默认） | `E · Σ p̄ᵢfᵢ` | 平均概率 × 实际负载 |
+| `gshard_balance` | `N · Σ usageᵢ²` | **门控权重**（上游 `ES_MOE` 用的） |
+| `master_balance` | `(1/E) · Σ(μᵢ − 1/E)²` | 门控权重（论文式 13；与上一行只差仿射） |
 | `gshard_probs_balance` | `N · Σ usageᵢ²` | 原始概率（用来隔离「读哪个张量」这一个变量） |
 
-差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（`switch`、`gshard_probs`）取到同一个值，分辨不出；读门控的两个（`gshard`、`master`）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。选法：
+差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（`switch`、`gshard_probs`）取到同一个值，分辨不出；读门控的两个（`gshard`、`master`）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。
 
-    esmoe.equip("yolo11n.yaml", balance="master")
+分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有，默认值因此是 Switch（[判读线](JUDGMENT.md)第六轮）。换成上游的目标：
 
-传函数也行（`balance=esmoe.master_balance`），但只限包里这四个：配置文件存的是名字，自定义目标进不去，只能设在块上，因而挺不过训练器的重建。取舍与实测见[已知局限](limitations.md)与[判读线](JUDGMENT.md)。
+    esmoe.equip("yolo11n.yaml", balance="gshard")
+
+自定义目标也能写进配置：把函数定义在可导入模块的顶层，传给 `equip` 或 `graft`，配置里存的是 `模块:限定名`，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个函数。lambda、嵌套函数、`__main__` 里定义的函数按名导入不回来，嫁接时就被拒绝。自定义专家同理（`expert=MyExpert`）。取舍与实测见[已知局限](limitations.md)与[判读线](JUDGMENT.md)。
 
 
 ### 对齐上游的完整配置
 
-上游 `ES_MOE` 与论文的默认不止是平衡项。三处一起打开才是完整复刻，**都从 `equip` 传进去**：
+上游 `ES_MOE` 与论文和本包默认的差别有四处。四处一起打开才是完整复刻，**都从 `equip` 传进去**：
 
     model = esmoe.equip(
         "yolo11n.yaml",
         at="backbone_stages",     # 每个 stage 后一块，共四块
+        balance="gshard",         # 读门控的平衡项
         out_norm=True,            # 加权求和后的 BatchNorm + SiLU
         dense_training=True,      # 训练期跑满专家
     )
 
 | 项 | 上游 / 论文 | 本包默认 | 打开方式 |
 |:--:|:--:|:--:|:--:|
-| 平衡项 | `N·Σu²` 读门控 | 同（`gshard_balance`） | 默认即是 |
+| 平衡项 | `N·Σu²` 读门控 | Switch（`switch_balance`） | `balance="gshard"` |
 | 块数 | 主干每 stage 一块，共四块 | 一块（主干末端） | `at="backbone_stages"` |
 | 输出归一化 | `BatchNorm + SiLU`（论文式 2 的 `Norm`） | 无 | `out_norm=True` |
 | 训练期前向 | 跑满专家，未选的权重为 0 | 跳过未选专家 | `dense_training=True` |

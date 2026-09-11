@@ -5,7 +5,11 @@
 ## 新增
 
 - **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的 checkpoint 因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。
-- **四个平衡目标。** `gshard_balance`（默认，对齐上游：读 top-k 掩码重归一后的门控）、`switch_balance`、`master_balance`（论文式 13，与前者只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
+- **四个平衡目标，默认仍是 Switch。** `switch_balance`（默认，与 0.1.4 和 `results/` 里的全部记录一致）、`gshard_balance`（对齐上游：读 top-k 掩码重归一后的门控）、`master_balance`（论文式 13，与 `gshard` 只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。默认值由数据定：读门控的目标对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有（判读线第六轮）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
+- **多卡与 `compile=True` 同用。** 进程组里没被路由到的专家以零权重留在计算图中，DDP 不再依赖 `find_unused_parameters`。ultralytics 在 `compile=True` 时用的 `find_unused_parameters=False`、`static_graph=True` 已用两个 gloo 进程验过，块在 TorchDynamo 下能编译且与 eager 一致（`tests/test_distributed.py`）。单进程行为不变。
+- **自定义平衡项与专家写进配置。** `graft(balance=fn, expert=cls)` 把自定义的函数与类写成 `模块:限定名`，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个对象；按名导入不回来的（lambda、嵌套函数、`__main__` 里定义的）在嫁接时就拒绝。内置专家有了短名 `dw`，`esmoe.EXPERTS` 与 `esmoe.BALANCES` 并列。
+- **改宽的块嫁接进官方 yaml。** `graft(out_channels=N)` 在块后写一个官方 `Index` 层，块把输出包成单元素列表交给它；官方 `parse_model` 读这一层声明的宽度，下游因此按真实宽度建。`N` 是字面值，不随 width 倍率缩放。
+- **命令行补齐。** `esmoe graft` 新增 `--out-channels`、`--balance`、`--expert`、`--out-norm`、`--dense-training`。
 - **上游的块布局与块内结构。** `graft(at="backbone_stages")` 在主干每个 stage 后各放一块，七代主干均得四块（stage 边界由下采样层反推）；`out_norm` 补上加权求和后的 `BatchNorm + SiLU`（论文式 2 的 `Norm`）；`dense_training` 让训练期跑满专家，未选的权重为 0 但归一化统计量继续更新。三者默认关着，以保 `results/` 里既有的运行可原样复现。
 - **`scripts/blockspec.py`**：从任一 checkpoint 读回当时真正生效的块设置。**`scripts/backfill.py`**：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，`--settings` 按权重改写记录并把改动写进记录本身。**`scripts/queue.sh`** 入库，与 `scripts/train.py` 的运行命名由测试对表。
 - `scripts/report.py` 的配对差值附 95% 置信区间；`scripts/routing.py` 逐块分析而非只看第一块。

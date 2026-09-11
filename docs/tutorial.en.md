@@ -130,36 +130,39 @@ them.
 
 ### Four balancing objectives ship with the block
 
-The default is **the one upstream's `ES_MOE` actually optimises** (`gshard_balance`):
+The default is **Switch** (`switch_balance`), as in 0.1.4 and in every record under `results/`:
 
 | objective | formula | reads |
 |:--:|:--:|:--:|
-| `gshard_balance` (default) | `N * sum(usage_i^2)` | **the gated weights** (what upstream's `ES_MOE` reads) |
-| `switch_balance` | `E * sum(p_i f_i)` | mean probabilities x realised load |
-| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the first row) |
+| `switch_balance` (default) | `E * sum(p_i f_i)` | mean probabilities x realised load |
+| `gshard_balance` | `N * sum(usage_i^2)` | **the gated weights** (what upstream's `ES_MOE` reads) |
+| `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the row above) |
 | `gshard_probs_balance` | `N * sum(usage_i^2)` | the raw probabilities, to isolate which tensor is read |
 
-What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (`switch`, `gshard_probs`) evaluate identically and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`). To pick one:
+What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (`switch`, `gshard_probs`) evaluate identically and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`).
 
-    esmoe.equip("yolo11n.yaml", balance="master")
+Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints and Switch in none of 66, which is why Switch is the default ([judgment lines](JUDGMENT.md), round six). To use upstream's objective instead:
 
-A function works too (`balance=esmoe.master_balance`), but only for the four that ship: a config holds names, so a custom objective can only be set on the blocks and will not survive the trainer rebuilding the model. The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+    esmoe.equip("yolo11n.yaml", balance="gshard")
+
+A custom objective goes into the config too: define the function at module level in an importable module and pass it to `equip` or `graft`. The config stores `module:qualname`, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in `__main__` cannot be imported back by name and is refused when grafting. Custom experts work the same way (`expert=MyExpert`). The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
 
 
 ### The configuration that matches upstream
 
-Upstream's `ES_MOE` and the paper differ from this package's defaults in three places besides the objective. Turning all three on is the faithful reproduction, and **they all go through `equip`**:
+Upstream's `ES_MOE` and the paper differ from this package's defaults in four places. Turning all four on is the faithful reproduction, and **they all go through `equip`**:
 
     model = esmoe.equip(
         "yolo11n.yaml",
         at="backbone_stages",     # one block per stage, four in all
+        balance="gshard",         # the objective that reads the gate
         out_norm=True,            # BatchNorm + SiLU after the weighted sum
         dense_training=True,      # every expert runs while training
     )
 
 | item | upstream / paper | this package's default | how to turn it on |
 |:--:|:--:|:--:|:--:|
-| balancing term | `N*sum(u^2)` on the gate | same (`gshard_balance`) | already the default |
+| balancing term | `N*sum(u^2)` on the gate | Switch (`switch_balance`) | `balance="gshard"` |
 | blocks | one per backbone stage, four in all | one, at the backbone end | `at="backbone_stages"` |
 | output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `out_norm=True` |
 | training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `dense_training=True` |

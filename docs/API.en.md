@@ -17,17 +17,19 @@ Exposes `ESMoE` where `parse_model` resolves layer names, after which any model.
 ## graft
 
     esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
-                rewire=False, **settings) -> dict
+                rewire=False, out_channels=None, **settings) -> dict
 
 Inserts blocks after the layers named by `at` and renumbers every later reference. `at` is `"backbone_end"`, `"backbone_stages"` (one block after each backbone stage, reproducing the upstream layout), one index or several. With `rewire=True` every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.
 
-`**settings` takes `balance`, `out_norm`, `dense_training`, `sparse_inference` and `dynamic_threshold`, and **writes them into the config rather than onto the instance**: the trainer rebuilds the model from `model.yaml`, and anything set on the instance goes with the instance it discards. `balance` may be a name or one of the four functions that ship; a custom objective cannot go into a config and is refused with a reason.
+`**settings` takes `balance`, `out_norm`, `dense_training`, `sparse_inference`, `dynamic_threshold` and `expert`, and **writes them into the config rather than onto the instance**: the trainer rebuilds the model from `model.yaml`, and anything set on the instance goes with the instance it discards. `balance` may be a name or a function, `expert` a class or a factory. The ones that ship are written by short name (objectives `switch`, `gshard`, `master`, `gshard_probs`; the expert `dw`); a custom one is written as `module:qualname`, and every rebuild -- the one in a DDP worker included -- imports the same object back from that name. A custom function or class therefore has to live at module level in a module the training environment can import; a lambda, a nested function or anything defined in `__main__` is refused when grafting.
+
+`out_channels` widens the blocks to that many channels, taken literally rather than scaled by the yaml's width multiple. Stock `parse_model` takes a third-party module's output width to be its input width, so every widened block is followed by the official `Index` layer: the block hands it a one-element list, and `parse_model` reads that layer's declared width. With `rewire=True` consumers are pointed at that layer.
 
 ## attach_aux_loss
 
     esmoe.attach_aux_loss(model, weight=0.01) -> model
 
-Puts the router load-balancing loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight on their own.
+Puts the router load-balancing loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
 
 ## collect_aux_loss
 
@@ -54,18 +56,18 @@ Drops every value blocks have published into the registry. The loss patch `attac
                 out_channels=None, reduction=8, max_kernel_size=15,
                 expert_kernel_sizes=None, expert=DWExpert, **settings)
 
-A mixture-of-experts block, channel-preserving unless `out_channels` says otherwise. `channels` is inferred on the first forward when omitted; `top_k=None` activates every expert. `expert` is a replaceable `(c1, c2, k) -> Module` factory. `options` is the mapping a config carries settings in (`[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]`) and is equivalent to `**settings`.
+A mixture-of-experts block, channel-preserving unless `out_channels` says otherwise. `channels` is inferred on the first forward when omitted; `top_k=None` activates every expert. `expert` is a `(c1, c2, k) -> Module` factory, or its name (a short name from `esmoe.EXPERTS`, or `module:qualname`). `options` is the mapping a config carries settings in (`[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]`); it is equivalent to `**settings` and may also carry `expert` and `out_channels`. An `out_channels` given through `options` makes the block return a one-element list for the `Index` layer after it.
 
 The five settings and their defaults (`esmoe.SETTINGS`):
 
 | setting | default here | upstream | what it does |
 |:--:|:--:|:--:|:--|
-| `balance` | `gshard_balance` | same | the objective, `(probs, gate) -> scalar`, or a name from `esmoe.BALANCES` |
+| `balance` | `switch_balance` | `gshard_balance` | the objective, `(probs, gate) -> scalar`, or a name from `esmoe.BALANCES`, or `module:qualname` |
 | `out_norm` | `False` | always on | `BatchNorm + SiLU` after the weighted sum (the paper's eq. 2 `Norm`) |
 | `dense_training` | `False` | always on | run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving |
 | `sparse_inference` | `True` | same | skip unrouted experts outside training |
 | `dynamic_threshold` | `0.0` | `0.4` | outside training, drop a routed expert below the threshold, keep the leader, renormalise |
 
-The last two affect inference only, the first three affect training. The defaults keep the runs already in `results/` reproducible; they are not a judgement against upstream.
+The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), round six).
 
-`block.spec()` returns the five settings a block is holding, and `block.configure(**settings)` changes them on paths that never reach a trainer -- inference, export, a unit test. `esmoe.blocks(model)` walks every block in a model in module order, and `scripts/blockspec.py` reads back from any checkpoint what was actually in force.
+`block.spec()` returns the five settings a block is holding, plus `expert` when a custom one is in use, and `block.configure(**settings)` changes them on paths that never reach a trainer -- inference, export, a unit test. `esmoe.blocks(model)` walks every block in a model in module order, and `scripts/blockspec.py` reads back from any checkpoint what was actually in force.

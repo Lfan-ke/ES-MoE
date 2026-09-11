@@ -7,11 +7,11 @@
 - 数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。**这不是 COCO 数字**，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。
 - 短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。
 - 全部数字来自单机单卡。DDP 的机制已验证（`scripts/verify.py`：真实的 worker 文件在干净解释器里跑通；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 一致），但没有多卡训练出的精度数字。
-- 稀疏分发会把某一批没路由到的专家留在图外，DDP 因此需要 `find_unused_parameters=True`；ultralytics 默认就这么建，但开 `compile=True` 时会关掉它，那种组合下不能用本块。
+- 稀疏分发会把一批里没有任何图路由到的专家留在计算图外。在进程组里，这样的专家以零权重留在图中，DDP 因此不必搜索未用参数：ultralytics 在 `compile=True` 时用的设置（`find_unused_parameters=False`、`static_graph=True`）已用两个 gloo 进程验过，块在 TorchDynamo 下能编译、结果与 eager 一致（`tests/test_distributed.py`）。单进程仍直接跳过这些专家，与既有记录一致。本项目没有用 `compile=True` 实跑过多卡训练。
 
 ## 方法范围
 
-- `ESMoE` 默认保持通道数（`c1 -> c1`）。上游的 `c1 -> c2` 已支持（`out_channels=`），但**嫁接不进 stock yaml**：官方 `parse_model` 对第三方模块假定 `c2 == ch[f]`，改宽的块只能手工接线。
+- `ESMoE` 默认保持通道数（`c1 -> c1`）。上游的 `c1 -> c2` 已支持（`out_channels=`），`graft(..., out_channels=N)` 能把改宽的块嫁接进官方 yaml：官方 `parse_model` 对第三方模块认定输出宽度等于输入，所以块把输出包成单元素列表，交给其后写入的官方 `Index` 层，`parse_model` 读的是这一层声明的宽度。`N` 是字面宽度，不随 yaml 的 width 倍率缩放。
 - 通道在首次前向时推断。若模型在任何前向之前被 script、导出或 `state_dict` 加载，此时尚无专家权重可载入。
 - `attach_aux_loss` 会 patch 任务模型的类，并把权重同时保存在进程作用域：trainer 会重建模型，EMA 副本又在所有 callback 之前生成。因此一个进程一次只训练一种辅助损失设置；在从未调用 `attach_aux_loss` 的进程里加载 checkpoint，训练时不带辅助项。
 - 负载均衡项采用 Switch-Transformer 形式（`num_experts * sum(importance * load)`），**未**做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。
