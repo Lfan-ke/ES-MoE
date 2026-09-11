@@ -2,6 +2,21 @@
 
 当前版本 **0.1.5**。
 
+## 未发布（main）
+
+- **`recipe="upstream"`。** `attach_aux_loss` 与 `equip` 的新参数，按 YOLO-Master 训练器对含路由模块模型的做法训练，供与上游同配置对比。三件事：
+  - 辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0），乘 `weight` 后封顶 3.0，加到 box、cls、dfl 三项上各一次；
+  - 路由器参数单独成组，学习率减半、不进 Muon；
+  - 前 3 个 epoch 冻结专家参数。
+
+  常数与出处在 `esmoe.upstream`，逐步数值对上游源码的测试在 `tests/test_recipe.py`。默认 `"esmoe"` 不变，已有记录照旧可复现。
+- **在 YOLO-Master 的分支上跑同一协议。**
+  - `scripts/train.py` 新增：`--upstream` 训练上游自己的块，`--grafted` 训练已含 `ESMoE` 的配置，`--recipe` 选择训练方式。
+  - 记录新增字段：`git_ref.framework`，以及 `budget.amp_at_end`、`budget.batch_at_end`、`budget.epochs_replayed`。上游训练器会在首个非有限梯度后关闭混合精度并重跑该 epoch，两个训练器都会在首个 epoch 显存不足时把 batch 减半，而训练参数不反映这些。
+  - `scripts/report.py` 的分组键加入框架。
+  - `scripts/same_config.py` 出同配置对比表。
+  - `configs/yolo-master-n.yaml` 是上游模型去掉四个块的基线，`configs/yolo-master-n-esmoe.yaml` 与上游模型逐层参数一致。
+
 ## 新增
 
 - **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的 checkpoint 因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。

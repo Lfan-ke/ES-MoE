@@ -2,6 +2,21 @@
 
 Current version **0.1.5**.
 
+## Unreleased (main)
+
+- **`recipe="upstream"`.** A new argument of `attach_aux_loss` and `equip` that trains the way YOLO-Master's trainer trains any model with a routed module, for runs compared against it. Three things:
+  - the term is divided by a running mean of its magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl;
+  - router parameters get a group of their own at half the learning rate, outside Muon;
+  - expert parameters stay frozen for the first 3 epochs.
+
+  Constants and sources are in `esmoe.upstream`, with a step-by-step numerical test against upstream's source in `tests/test_recipe.py`. The default `"esmoe"` is unchanged, so existing records still reproduce.
+- **One protocol on YOLO-Master's fork.**
+  - `scripts/train.py` gains `--upstream` (train upstream's own blocks), `--grafted` (a config that already holds `ESMoE`) and `--recipe`.
+  - Records gain `git_ref.framework`, plus `budget.amp_at_end`, `budget.batch_at_end` and `budget.epochs_replayed`. Upstream's trainer turns mixed precision off and replays the epoch after the first non-finite gradient, and both trainers halve the batch on a first-epoch out-of-memory; none of this shows in the training arguments.
+  - `scripts/report.py` keys on the framework.
+  - `scripts/same_config.py` tabulates the comparison.
+  - `configs/yolo-master-n.yaml` is upstream's model without its four blocks; `configs/yolo-master-n-esmoe.yaml` matches upstream's model layer for layer.
+
 ## Added
 
 - **Parameter parity with upstream's `ES_MOE`.** The block now takes everything upstream's constructor does: `out_channels`, `top_k=None` for every expert, `sparse_inference` (upstream's `use_sparse_inference`), and `dynamic_threshold` (0.4 upstream, 0.0 here so nothing is pruned -- every record in `results/` was measured that way). Even kernel sizes step down to odd and cap at `max_kernel_size`, so a pruned checkpoint's kernels reload, and `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel_size` are validated at construction against the same bounds.

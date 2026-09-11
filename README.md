@@ -114,6 +114,11 @@ Inside a process group an expert that no image routed to joins the graph at zero
 ultralytics uses under `compile=True` (`find_unused_parameters=False`, `static_graph=True`) train as well;
 `tests/test_distributed.py` checks that with two gloo ranks, and that the block compiles and agrees with eager.
 
+To compare against YOLO-Master under one configuration, `attach_aux_loss(model, weight=1.0, recipe="upstream")`
+trains the way its trainer trains a routed model. The auxiliary term is normalised by its running magnitude and
+capped at 3.0, routers get half the learning rate outside Muon, and experts stay frozen for three epochs.
+`scripts/train.py --upstream` runs the same protocol on the fork itself, and `scripts/same_config.py` pairs the two.
+
 ## Selected default
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
