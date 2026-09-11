@@ -821,7 +821,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">「负载均衡监督防止专家塌缩、维持均匀利用」</td>
-<td style="text-align: left;">分两层看。<strong>防专家死掉：本包的 Switch 项做到了，论文的目标没做到。</strong> 论文没有去掉平衡项的对照，本项目补做：v5n、v10n 各三 seed，6 个 checkpoint 全部死掉两个专家；权重 0.01 的 Switch 项 66 个 checkpoint 一个死专家都没有。论文式 13 与上游读的是按 top-K 重归一后的门控，对子集外的专家梯度恒为零，6 个 checkpoint 里 5 个有死专家，压力抬到 Switch 的 1.2–3.0 倍也一样。<strong>维持均匀利用：都没做到。</strong> Switch 项下 84 次块分析里，主导专家吃下 0.47–0.94 的 top-1，前两名占掉 1.24–1.78（满分 2.0）。</td>
+<td style="text-align: left;">分两层看。<strong>防专家死掉：本包的 Switch 项做到了，论文的目标没做到。</strong> 论文没有去掉平衡项的对照，本项目补做：v5n、v10n 各三 seed，6 个 checkpoint 全部死掉两个专家；权重 0.01 的 Switch 项 66 个 checkpoint 一个死专家都没有。论文式 13 与上游读的是按 top-K 重归一后的门控，对子集外的专家梯度恒为零，6 个 checkpoint 里 5 个有死专家，压力抬到 Switch 的 1.2–3.0 倍也一样。上游原生训练的 YOLO-Master-EsMoE-N 同样如此：四个块里三个各死两个专家，剪掉后 mAP50 0.4271→0.4269（上一阶段 <a href="https://github.com/Lfan-ke/yolomoe-ln">yolomoe-ln</a>，imgsz 1024、单次，仅作佐证）。<strong>维持均匀利用：都没做到。</strong> Switch 项下 84 次块分析里，主导专家吃下 0.47–0.94 的 top-1，前两名占掉 1.24–1.78（满分 2.0）。</td>
 </tr>
 <tr>
 <td style="text-align: left;">「同时放进 Backbone 与 Neck」（§3.1）</td>
