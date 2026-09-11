@@ -109,7 +109,7 @@ Not supported together with `compile=True`, which turns off `find_unused_paramet
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms × three seeds and more, 91 runs. What separates a positive
+the matrix runs to seven backbone generations × three arms × three seeds and more, 113 runs. What separates a positive
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
@@ -124,16 +124,18 @@ metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
 direction-unstable.
 
-Four further arms ask what upstream's own settings are worth. Two of them are internal to the block and both
-help; the third is upstream's layout of four blocks per backbone, and it is the only cell in the matrix that is
-negative on both metrics at 0/3 — on the generation where a single block helps most, it reverses the sign.
+Further arms ask what upstream's own settings are worth. Two of them are internal to the block and both
+help; upstream's layout of four blocks per backbone is negative on both metrics at 0/3 on both backbones it ran
+on, and stays negative with each block's weight cut to a quarter so the auxiliary total matches one block —
+the count is what costs, not the pressure.
 
 <p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="docs/assets/alignment.svg" width="720"></p>
 
-Nothing here supports the premise these arms were opened to test. Across the 58 runs that have both a routing
-analysis and a paired delta, how concentrated the dispatch is and how much the pairing moved correlate at
-r = +0.160: the arm with the most concentrated routing is also the most accurate. Whether a balancing term
-belongs, and how large, cannot be argued from "it prevents expert collapse".
+How concentrated the dispatch is does not predict accuracy: r = +0.044 over the 81 runs that have both a routing
+analysis and a paired delta. What the balancing term does secure is that no expert dies. Without it all six
+checkpoints lose two of four experts; the Switch term at 0.01 leaves none dead in 66. The paper's objective and
+upstream's read the gate, which is renormalised over the top-K and so has no gradient for an expert outside it:
+five of six such checkpoints have a dead expert, even at more pressure than Switch.
 
 The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
 reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n
@@ -150,8 +152,8 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 36
-protocol-matrix checkpoints live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
+metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 112
+protocol checkpoints live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
 branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
 
 ## Linked projects

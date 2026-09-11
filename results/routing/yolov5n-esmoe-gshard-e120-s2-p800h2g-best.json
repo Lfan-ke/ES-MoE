@@ -1,0 +1,58 @@
+{
+  "weights": "yolov5n-esmoe-gshard-e120-s2-p800h2g-best",
+  "images": 548,
+  "blocks": [
+    {
+      "block": 0,
+      "channels": 256,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "top1_share": [
+        0.9307,
+        0.0,
+        0.0,
+        0.0693
+      ],
+      "dead_experts": [
+        1,
+        2
+      ],
+      "mean_prob": [
+        0.2949,
+        0.2149,
+        0.2195,
+        0.2708
+      ],
+      "prob_entropy_mean": 1.3767,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 1,
+      "scale_of_top1_choice": {
+        "0": 36.3,
+        "3": 39.8
+      },
+      "prob_vs_scale_corr": [
+        -0.087,
+        0.237,
+        0.196,
+        -0.129
+      ],
+      "prob_vs_count_corr": [
+        -0.154,
+        -0.14,
+        0.191,
+        0.2
+      ]
+    }
+  ]
+}

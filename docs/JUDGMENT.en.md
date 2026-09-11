@@ -307,3 +307,54 @@ The correlation is recomputed by `scripts/routing.py --summarise` at the top of 
 Filled in as the runs land, from the same numbers as `results/summary.md`.
 
 <div id="esmoe-alignment"></div>
+
+## Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)
+
+The fifth round left two things open: whether the four-block deficit comes from the block count or from four times the auxiliary term, and what a balancing term is for once concentration turns out not to predict accuracy. The fourth round also still owed an answer: does the paper's objective relieve the collapse once its pressure is raised to match. Five arms at three seeds each, paired on the same card and seed:
+
+| arm | question | paired mAP50 | 95% CI | wins | mAP50-95 |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| four blocks, weight 0.0025 each (v10n) | still worse when the auxiliary total matches one block? | **−0.0113** | [−0.0242, +0.0015] | **0/3** | −0.0075 (0/3, interval [−0.0132, −0.0018]) |
+| four blocks (v5n, third seed added) | still worse on another backbone? | **−0.0049** | [−0.0118, +0.0019] | **0/3** | −0.0035 (0/3) |
+| no balancing term (v5n) | what does the term do | +0.0005 | [−0.0080, +0.0090] | 2/3 | +0.0006 (1/3) |
+| no balancing term (v10n) | same | −0.0027 | [−0.0170, +0.0116] | 1/3 | −0.0025 (1/3) |
+| paper's eq. 13 at weight 0.32 (v5n) | does the paper's objective relieve collapse at full pressure | +0.0021 | [−0.0018, +0.0059] | 3/3 | +0.0009 (2/3) |
+
+### Four blocks lose on the count, not on the auxiliary total
+
+With each block at 0.0025, `esmoe_aux` ends training at 0.020, the same as the single-block arm; four blocks at 0.01 end at 0.080. Matching the total did not bring four blocks back. Seed for seed they came out lower than four blocks at 0.01 (−0.0003, −0.0008, −0.0114), and the mAP50-95 interval no longer crosses zero. On v5n the third seed is 0/3 as well. Over two backbones and two weights, all nine seeds of the four-block layout are negative. **The fourfold-pressure confound is ruled out; the deficit comes from the number of blocks.**
+
+### Without the term, experts die
+
+Dead experts per checkpoint (an expert in the top-2 on fewer than 1% of images):
+
+| balancing term | weight per block | blocks | checkpoints | with a dead expert |
+|:--:|:--:|:--:|:--:|:--:|
+| Switch (this package's default) | 0.01 | 1 | 60 | 0 |
+| Switch | 0.01 | 4 | 6 | 0 |
+| Switch | 0.0025 | 4 | 3 | 1 |
+| none | 0 | 1 | 6 | **6** |
+| GShard on the gate (upstream) | 0.01 | 1 | 3 | 2 |
+| paper's eq. 13 | 0.32 | 1 | 3 | **3** |
+
+All six checkpoints trained without the term lose two experts outright. The other two take the top-2 on every one of the 548 images (their usage sums to exactly 2.0), so the block reduces to a weighted pair of fixed experts. On v10n the leading expert's top-1 share is 0.964, 1.000 and 1.000. The Switch term at 0.01 leaves no dead expert in 66 checkpoints; at 0.0025 per block one appears. **What the term secures here is that every expert keeps receiving images, not an even dispatch**: with it, the dispatch is still concentrated (rounds four and five).
+
+For accuracy, the arm without the term shares its baselines with the default arm, so the per-seed difference is the term's contribution. On mAP50: v5n −0.0083, +0.0005, −0.0072; v10n −0.0016, −0.0062, −0.0002, lower on 5 of 6. mAP50-95 is lower on 5 of 6 as well. The means are only −0.0050 and −0.0027, though, while the v5n default arm's seed 2 differs from its own repeat by 0.0130. **The direction leans lower; the size is inside the noise; no accuracy claim is made.**
+
+### Why the paper's family of objectives does not prevent it
+
+Of the six checkpoints trained on a gate-reading objective, five have a dead expert. Pressure is not the reason. Eq. 13 and GShard on the gate differ by an affine map with slope `1/E^2`, so eq. 13 at 0.32 has exactly the gradient of gate-reading GShard at 0.02, twice the fourth-round arm. By `results/pressure.md` that is 1.2 to 3.0 times the Switch term at 0.01 across the v5n checkpoints, and still 3 of 3 have a dead expert.
+
+The reason is the form of the gate. Eq. 8 and eq. 9 are the same number, and eq. 9 contains only the logits inside the top-K subset:
+
+$$\Omega_{\text{train},i}=\frac{e^{L_i}}{\sum_{j\in I_K}e^{L_j}},\qquad i\in I_K$$
+
+**A balancing term that reads only the gate therefore has exactly zero gradient for the logit of any expert not currently in the top-K**, however much probability that expert still carries. Once an expert drops out of the top-K on every image, the term can no longer reach it. The Switch term reads the full softmax, has a gradient of the same order for experts outside the subset, and that gradient pulls them back towards the top-K. The numerical check is `test_a_gate_reading_balance_cannot_reach_an_expert_outside_the_top_k` in `tests/test_paper_parity.py`.
+
+### Predictions settled
+
+**Fourth (the paper's term clearly lowers the leading expert's top-1 share, by more than gate-reading GShard does) — holds as worded; the mechanism behind it does not.** What was registered was `master` at 0.01, and that arm never actually ran (see the correction before round four). Raising the pressure as the end of the fourth-round verdict called for, the top-1 share drops on 2 of 3 seeds, a mean of 0.697 against the default arm's 0.812, down 0.115, while gate-reading GShard rises by 0.034. The same checkpoints have a dead expert on 3 of 3, though, and the top two take more of the dispatch on 3 of 3 (1.704, 2.000, 1.692 against 1.431, 1.610, 1.646). The share fell because the dispatch went from one dominant expert to two fixed ones, not because it evened out. With its third seed, gate-reading GShard lost two experts too.
+
+**The fifth round's open confound (is the four-block deficit the fourfold auxiliary term) — ruled out.**
+
+**The second half of the fifth round's "one thing that matters more" is revised.** The first half stands: concentration does not predict accuracy, and with this round included r = +0.044 over the 81 runs that have both a routing analysis and a paired delta (+0.160 over 58 in the fifth round). The second half, "whether a balancing term belongs cannot be argued from preventing collapse", went too far. Collapse has two layers: a dominant expert, and dead experts. The first is unrelated to accuracy and the term does not prevent it. The second the Switch term does prevent, 0 of 66 against 6 of 6 without it. Its effect on accuracy is still inside the noise.

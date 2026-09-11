@@ -4,7 +4,7 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 
 ## Does concentration cost accuracy?
 
-Over the 60 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 0.92 and the paired mAP50 delta -0.0113 to +0.0109. Their correlation is **r = +0.172**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
+Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is **r = +0.044**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
 
 ## yolo11n-esmoe-e120-s0-p800-best.pt
 
@@ -225,6 +225,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.166 | 0.352 | 0.214 | -0.30 | +0.44 |
 | 2 | 7 | 0.188 | 0.438 | 0.230 | +0.32 | -0.40 |
 | 3 | 9 | 0.639 | 0.801 | 0.315 | +0.04 | -0.13 |
+
+## yolov10n-esmoe-dense-e120-s2-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3207 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.007 | 0.181 | 0.211 | +0.17 | -0.18 |
+| 1 | 5 | 0.015 | 0.283 | 0.205 | +0.25 | -0.34 |
+| 2 | 7 | 0.234 | 0.628 | 0.232 | -0.27 | +0.49 |
+| 3 | 9 | 0.745 | 0.909 | 0.352 | +0.12 | -0.28 |
 
 ## yolov10n-esmoe-e120-s0-p800-best.pt
 
@@ -461,6 +472,153 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 2 | 7 | 0.046 | 0.400 | 0.182 | -0.23 | +0.40 |
 | 3 | 9 | 0.901 | 0.953 | 0.414 | +0.04 | -0.07 |
 
+## yolov10n-esmoe-rewire-stages-w0.0025-e120-s0-p800-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3848 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.630 | 0.244 | -0.29 | +0.36 |
+| 1 | 5 | 0.998 | 1.000 | 0.272 | +0.33 | -0.31 |
+| 2 | 7 | 0.000 | 0.192 | 0.242 | -0.24 | -0.03 |
+| 3 | 9 | 0.000 | 0.179 | 0.242 | -0.17 | -0.17 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: [2, 3], mean entropy 1.3842 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 1.000 | 1.000 | 0.276 | +0.31 | -0.45 |
+| 1 | 5 | 0.000 | 1.000 | 0.246 | -0.31 | +0.47 |
+| 2 | 7 | 0.000 | 0.000 | 0.239 | -0.31 | +0.45 |
+| 3 | 9 | 0.000 | 0.000 | 0.239 | -0.30 | +0.42 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3828 of 1.3863, distinct top-2 pairs seen: 5 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.708 | 0.945 | 0.272 | -0.28 | +0.40 |
+| 1 | 5 | 0.292 | 0.624 | 0.250 | +0.23 | -0.22 |
+| 2 | 7 | 0.000 | 0.033 | 0.239 | +0.05 | -0.40 |
+| 3 | 9 | 0.000 | 0.398 | 0.239 | +0.04 | -0.39 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2901 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.148 | 0.233 | +0.23 | -0.54 |
+| 1 | 5 | 0.657 | 0.894 | 0.342 | +0.02 | +0.09 |
+| 2 | 7 | 0.146 | 0.256 | 0.159 | -0.23 | +0.36 |
+| 3 | 9 | 0.197 | 0.703 | 0.266 | +0.26 | -0.48 |
+
+## yolov10n-esmoe-rewire-stages-w0.0025-e120-s1-p800-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3829 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.097 | 0.195 | 0.234 | +0.22 | -0.19 |
+| 1 | 5 | 0.901 | 0.943 | 0.279 | -0.24 | +0.21 |
+| 2 | 7 | 0.000 | 0.584 | 0.244 | +0.21 | -0.14 |
+| 3 | 9 | 0.002 | 0.277 | 0.244 | +0.21 | -0.20 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3845 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.447 | 0.242 | +0.13 | -0.38 |
+| 1 | 5 | 0.000 | 0.425 | 0.241 | +0.01 | -0.03 |
+| 2 | 7 | 1.000 | 1.000 | 0.275 | -0.08 | +0.22 |
+| 3 | 9 | 0.000 | 0.128 | 0.242 | +0.20 | -0.54 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3729 of 1.3863, distinct top-2 pairs seen: 4 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.235 | 0.330 | 0.229 | +0.34 | -0.48 |
+| 1 | 5 | 0.000 | 0.599 | 0.239 | -0.13 | -0.32 |
+| 2 | 7 | 0.000 | 0.204 | 0.239 | -0.12 | -0.34 |
+| 3 | 9 | 0.765 | 0.867 | 0.292 | -0.32 | +0.57 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3119 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.721 | 0.243 | +0.47 | -0.51 |
+| 1 | 5 | 0.878 | 0.911 | 0.369 | +0.10 | -0.21 |
+| 2 | 7 | 0.077 | 0.184 | 0.195 | -0.22 | +0.31 |
+| 3 | 9 | 0.044 | 0.184 | 0.193 | -0.12 | +0.24 |
+
+## yolov10n-esmoe-rewire-stages-w0.0025-e120-s2-p800-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3824 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.053 | 0.367 | 0.248 | +0.28 | -0.23 |
+| 1 | 5 | 0.659 | 0.688 | 0.267 | -0.33 | +0.32 |
+| 2 | 7 | 0.097 | 0.124 | 0.234 | +0.26 | -0.30 |
+| 3 | 9 | 0.192 | 0.821 | 0.251 | +0.31 | -0.26 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.378 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.321 | 0.232 | +0.08 | -0.52 |
+| 1 | 5 | 0.000 | 0.301 | 0.232 | +0.09 | -0.51 |
+| 2 | 7 | 0.000 | 0.378 | 0.231 | +0.19 | -0.39 |
+| 3 | 9 | 1.000 | 1.000 | 0.306 | -0.16 | +0.47 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3587 of 1.3863, distinct top-2 pairs seen: 4 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.617 | 0.234 | -0.05 | +0.04 |
+| 1 | 5 | 0.208 | 0.312 | 0.223 | +0.28 | -0.50 |
+| 2 | 7 | 0.792 | 0.872 | 0.308 | -0.30 | +0.56 |
+| 3 | 9 | 0.000 | 0.199 | 0.234 | -0.04 | +0.04 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2756 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.055 | 0.211 | +0.31 | -0.60 |
+| 1 | 5 | 0.058 | 0.257 | 0.155 | -0.20 | +0.32 |
+| 2 | 7 | 0.892 | 0.945 | 0.397 | -0.11 | +0.19 |
+| 3 | 9 | 0.049 | 0.743 | 0.236 | +0.35 | -0.53 |
+
+## yolov10n-esmoe-w0-e120-s0-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [0, 3], mean entropy 1.3779 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.000 | 0.206 | -0.36 | +0.17 |
+| 1 | 5 | 0.036 | 1.000 | 0.269 | +0.20 | +0.02 |
+| 2 | 7 | 0.964 | 1.000 | 0.290 | +0.18 | -0.22 |
+| 3 | 9 | 0.000 | 0.000 | 0.235 | -0.28 | +0.20 |
+
+## yolov10n-esmoe-w0-e120-s1-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1, 3], mean entropy 1.3705 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 1.000 | 0.261 | +0.16 | +0.17 |
+| 1 | 5 | 0.000 | 0.000 | 0.211 | -0.20 | +0.11 |
+| 2 | 7 | 1.000 | 1.000 | 0.318 | +0.09 | -0.35 |
+| 3 | 9 | 0.000 | 0.000 | 0.209 | -0.05 | +0.39 |
+
+## yolov10n-esmoe-w0-e120-s2-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1, 2], mean entropy 1.3771 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 1.000 | 0.268 | -0.07 | +0.37 |
+| 1 | 5 | 0.000 | 0.000 | 0.220 | +0.24 | -0.35 |
+| 2 | 7 | 0.000 | 0.000 | 0.216 | -0.15 | +0.07 |
+| 3 | 9 | 1.000 | 1.000 | 0.297 | -0.02 | -0.01 |
+
 ## yolov5n-esmoe-dense-e120-s0-p800h2-best
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3124 of 1.3863, distinct top-2 pairs seen: 5 of 6.
@@ -494,6 +652,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 2 | 7 | 0.080 | 0.263 | 0.208 | -0.12 | +0.38 |
 | 3 | 9 | 0.841 | 0.889 | 0.356 | +0.13 | -0.22 |
 
+## yolov5n-esmoe-e120-s0-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3236 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.024 | 0.263 | 0.215 | -0.15 | +0.08 |
+| 1 | 5 | 0.016 | 0.148 | 0.199 | -0.09 | +0.22 |
+| 2 | 7 | 0.141 | 0.642 | 0.233 | +0.14 | +0.01 |
+| 3 | 9 | 0.819 | 0.947 | 0.353 | +0.02 | -0.15 |
+
 ## yolov5n-esmoe-e120-s0-p800h2-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2538 of 1.3863, distinct top-2 pairs seen: 6 of 6.
@@ -504,6 +673,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.007 | 0.219 | 0.218 | +0.18 | -0.19 |
 | 2 | 7 | 0.825 | 0.905 | 0.387 | +0.20 | -0.21 |
 | 3 | 9 | 0.166 | 0.350 | 0.167 | -0.29 | +0.32 |
+
+## yolov5n-esmoe-e120-s1-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3227 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.319 | 0.222 | +0.04 | +0.02 |
+| 1 | 5 | 0.031 | 0.407 | 0.217 | +0.16 | -0.24 |
+| 2 | 7 | 0.120 | 0.376 | 0.204 | -0.24 | +0.41 |
+| 3 | 9 | 0.847 | 0.898 | 0.356 | +0.10 | -0.22 |
 
 ## yolov5n-esmoe-e120-s1-p800h2-best.pt
 
@@ -516,6 +696,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 2 | 7 | 0.752 | 0.885 | 0.376 | +0.22 | -0.29 |
 | 3 | 9 | 0.221 | 0.725 | 0.235 | -0.33 | +0.53 |
 
+## yolov5n-esmoe-e120-s2-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3268 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.004 | 0.555 | 0.227 | -0.04 | -0.04 |
+| 1 | 5 | 0.051 | 0.327 | 0.224 | +0.17 | -0.22 |
+| 2 | 7 | 0.058 | 0.201 | 0.187 | -0.23 | +0.35 |
+| 3 | 9 | 0.887 | 0.918 | 0.363 | +0.07 | -0.11 |
+
 ## yolov5n-esmoe-e120-s2-p800h2-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2445 of 1.3863, distinct top-2 pairs seen: 6 of 6.
@@ -526,6 +717,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.005 | 0.126 | 0.224 | +0.14 | -0.14 |
 | 2 | 7 | 0.137 | 0.228 | 0.146 | -0.20 | +0.27 |
 | 3 | 9 | 0.858 | 0.912 | 0.387 | +0.16 | -0.22 |
+
+## yolov5n-esmoe-gshard-e120-s2-p800h2g-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1, 2], mean entropy 1.3767 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.931 | 1.000 | 0.295 | -0.09 | -0.15 |
+| 1 | 5 | 0.000 | 0.000 | 0.215 | +0.24 | -0.14 |
+| 2 | 7 | 0.000 | 0.000 | 0.220 | +0.20 | +0.19 |
+| 3 | 9 | 0.069 | 1.000 | 0.271 | -0.13 | +0.20 |
 
 ## yolov5n-esmoe-master-e120-s0-p800h2-best
 
@@ -548,6 +750,39 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.000 | 0.044 | 0.195 | -0.20 | -0.01 |
 | 2 | 7 | 0.122 | 0.905 | 0.264 | +0.32 | -0.22 |
 | 3 | 9 | 0.878 | 0.993 | 0.327 | -0.30 | +0.39 |
+
+## yolov5n-esmoe-master-w0.32-e120-s0-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1], mean entropy 1.3657 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.212 | 0.845 | 0.269 | +0.11 | +0.20 |
+| 1 | 5 | 0.000 | 0.000 | 0.209 | -0.01 | +0.15 |
+| 2 | 7 | 0.179 | 0.296 | 0.229 | -0.22 | +0.24 |
+| 3 | 9 | 0.610 | 0.860 | 0.293 | +0.19 | -0.42 |
+
+## yolov5n-esmoe-master-w0.32-e120-s1-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [0, 3], mean entropy 1.3612 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.000 | 0.190 | +0.10 | -0.20 |
+| 1 | 5 | 0.113 | 1.000 | 0.286 | -0.12 | +0.21 |
+| 2 | 7 | 0.887 | 1.000 | 0.320 | +0.20 | -0.18 |
+| 3 | 9 | 0.000 | 0.000 | 0.204 | -0.46 | +0.25 |
+
+## yolov5n-esmoe-master-w0.32-e120-s2-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [2], mean entropy 1.362 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.593 | 0.794 | 0.296 | +0.31 | -0.46 |
+| 1 | 5 | 0.164 | 0.308 | 0.228 | -0.18 | +0.26 |
+| 2 | 7 | 0.000 | 0.000 | 0.200 | -0.20 | +0.11 |
+| 3 | 9 | 0.243 | 0.898 | 0.276 | -0.17 | +0.31 |
 
 ## yolov5n-esmoe-norm-e120-s0-p800h2-best
 
@@ -582,6 +817,17 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 2 | 7 | 0.069 | 0.405 | 0.205 | -0.17 | +0.38 |
 | 3 | 9 | 0.901 | 0.936 | 0.380 | +0.09 | -0.20 |
 
+## yolov5n-esmoe-rewire-e120-s0-p800-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3094 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.057 | 0.376 | 0.221 | -0.07 | +0.11 |
+| 1 | 5 | 0.016 | 0.244 | 0.197 | -0.02 | +0.22 |
+| 2 | 7 | 0.027 | 0.447 | 0.200 | +0.46 | -0.48 |
+| 3 | 9 | 0.900 | 0.932 | 0.383 | -0.17 | +0.05 |
+
 ## yolov5n-esmoe-rewire-e120-s0-p800h2-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3447 of 1.3863, distinct top-2 pairs seen: 6 of 6.
@@ -614,6 +860,153 @@ Over the 60 runs that have both a paired delta and a routing analysis, the leadi
 | 1 | 5 | 0.047 | 0.303 | 0.214 | +0.37 | -0.32 |
 | 2 | 7 | 0.179 | 0.323 | 0.217 | -0.24 | +0.42 |
 | 3 | 9 | 0.752 | 0.825 | 0.332 | +0.09 | -0.26 |
+
+## yolov5n-esmoe-rewire-stages-e120-s0-p800h2-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.367 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.058 | 0.808 | 0.254 | -0.12 | +0.28 |
+| 1 | 5 | 0.810 | 0.883 | 0.304 | -0.19 | +0.14 |
+| 2 | 7 | 0.104 | 0.150 | 0.207 | +0.16 | -0.21 |
+| 3 | 9 | 0.027 | 0.159 | 0.234 | +0.19 | -0.08 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3554 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.310 | 0.591 | 0.243 | -0.15 | +0.47 |
+| 1 | 5 | 0.688 | 0.818 | 0.308 | +0.12 | -0.36 |
+| 2 | 7 | 0.000 | 0.197 | 0.225 | -0.04 | +0.07 |
+| 3 | 9 | 0.002 | 0.394 | 0.225 | -0.03 | +0.07 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3431 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.363 | 0.642 | 0.258 | -0.04 | +0.38 |
+| 1 | 5 | 0.611 | 0.734 | 0.288 | -0.03 | -0.09 |
+| 2 | 7 | 0.016 | 0.358 | 0.227 | +0.10 | -0.38 |
+| 3 | 9 | 0.009 | 0.266 | 0.227 | +0.11 | -0.39 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2542 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.356 | 0.186 | -0.04 | -0.12 |
+| 1 | 5 | 0.058 | 0.350 | 0.193 | -0.02 | -0.19 |
+| 2 | 7 | 0.921 | 0.947 | 0.445 | +0.07 | +0.10 |
+| 3 | 9 | 0.020 | 0.347 | 0.175 | -0.11 | +0.16 |
+
+## yolov5n-esmoe-rewire-stages-e120-s1-p800h2-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3514 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.115 | 0.779 | 0.267 | -0.15 | +0.32 |
+| 1 | 5 | 0.093 | 0.173 | 0.195 | +0.20 | -0.25 |
+| 2 | 7 | 0.775 | 0.914 | 0.319 | -0.16 | +0.13 |
+| 3 | 9 | 0.016 | 0.133 | 0.219 | +0.10 | -0.19 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3615 of 1.3863, distinct top-2 pairs seen: 5 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.874 | 0.892 | 0.327 | -0.23 | +0.44 |
+| 1 | 5 | 0.126 | 0.182 | 0.215 | +0.23 | -0.41 |
+| 2 | 7 | 0.000 | 0.699 | 0.229 | +0.23 | -0.46 |
+| 3 | 9 | 0.000 | 0.226 | 0.229 | +0.23 | -0.46 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3572 of 1.3863, distinct top-2 pairs seen: 5 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.595 | 0.234 | +0.25 | -0.38 |
+| 1 | 5 | 0.168 | 0.307 | 0.217 | +0.33 | -0.47 |
+| 2 | 7 | 0.807 | 0.841 | 0.315 | -0.33 | +0.47 |
+| 3 | 9 | 0.025 | 0.257 | 0.234 | +0.26 | -0.40 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2836 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.035 | 0.367 | 0.218 | -0.01 | -0.05 |
+| 1 | 5 | 0.025 | 0.613 | 0.221 | +0.23 | -0.29 |
+| 2 | 7 | 0.004 | 0.068 | 0.147 | -0.07 | +0.22 |
+| 3 | 9 | 0.936 | 0.953 | 0.413 | -0.07 | +0.07 |
+
+## yolov5n-esmoe-rewire-stages-e120-s2-p800h2-best
+
+548 images through block 0 (32 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3585 of 1.3863, distinct top-2 pairs seen: 4 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.235 | 0.332 | 0.214 | +0.25 | -0.20 |
+| 1 | 5 | 0.000 | 0.489 | 0.236 | -0.14 | +0.19 |
+| 2 | 7 | 0.765 | 0.916 | 0.314 | -0.26 | +0.18 |
+| 3 | 9 | 0.000 | 0.263 | 0.236 | -0.14 | +0.18 |
+
+548 images through block 1 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3425 of 1.3863, distinct top-2 pairs seen: 4 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.511 | 0.222 | +0.17 | -0.35 |
+| 1 | 5 | 0.748 | 0.847 | 0.330 | -0.26 | +0.43 |
+| 2 | 7 | 0.252 | 0.359 | 0.225 | +0.23 | -0.36 |
+| 3 | 9 | 0.000 | 0.283 | 0.222 | +0.17 | -0.36 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3485 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.522 | 0.697 | 0.278 | -0.32 | +0.52 |
+| 1 | 5 | 0.474 | 0.599 | 0.258 | +0.33 | -0.40 |
+| 2 | 7 | 0.002 | 0.432 | 0.232 | -0.12 | -0.28 |
+| 3 | 9 | 0.002 | 0.272 | 0.232 | -0.11 | -0.29 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.2901 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.135 | 0.198 | +0.03 | -0.15 |
+| 1 | 5 | 0.120 | 0.666 | 0.232 | -0.03 | -0.17 |
+| 2 | 7 | 0.860 | 0.929 | 0.397 | +0.10 | +0.02 |
+| 3 | 9 | 0.020 | 0.270 | 0.174 | -0.15 | +0.31 |
+
+## yolov5n-esmoe-w0-e120-s0-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1, 3], mean entropy 1.3516 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 1.000 | 0.253 | -0.17 | +0.38 |
+| 1 | 5 | 0.000 | 0.000 | 0.199 | -0.29 | +0.15 |
+| 2 | 7 | 0.998 | 1.000 | 0.356 | +0.24 | -0.25 |
+| 3 | 9 | 0.000 | 0.000 | 0.192 | -0.16 | +0.06 |
+
+## yolov5n-esmoe-w0-e120-s1-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [0, 3], mean entropy 1.3456 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.000 | 0.189 | -0.24 | +0.15 |
+| 1 | 5 | 0.004 | 1.000 | 0.253 | -0.03 | +0.21 |
+| 2 | 7 | 0.996 | 1.000 | 0.364 | +0.21 | -0.25 |
+| 3 | 9 | 0.000 | 0.000 | 0.194 | -0.30 | +0.23 |
+
+## yolov5n-esmoe-w0-e120-s2-p800h2-best
+
+548 images, kernels [3, 5, 7, 9], top-2, dead experts: [1, 2], mean entropy 1.3762 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.608 | 1.000 | 0.288 | +0.22 | -0.22 |
+| 1 | 5 | 0.000 | 0.000 | 0.216 | -0.17 | +0.12 |
+| 2 | 7 | 0.000 | 0.000 | 0.215 | -0.30 | +0.20 |
+| 3 | 9 | 0.392 | 1.000 | 0.280 | +0.01 | +0.05 |
 
 ## yolov8n-esmoe-e120-s0-p800-best.pt
 

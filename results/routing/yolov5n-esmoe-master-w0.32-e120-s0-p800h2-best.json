@@ -1,0 +1,58 @@
+{
+  "weights": "yolov5n-esmoe-master-w0.32-e120-s0-p800h2-best",
+  "images": 548,
+  "blocks": [
+    {
+      "block": 0,
+      "channels": 256,
+      "kernels": [
+        3,
+        5,
+        7,
+        9
+      ],
+      "top_k": 2,
+      "usage": [
+        0.8449,
+        0.0,
+        0.2956,
+        0.8595
+      ],
+      "top1_share": [
+        0.2117,
+        0.0,
+        0.1788,
+        0.6095
+      ],
+      "dead_experts": [
+        1
+      ],
+      "mean_prob": [
+        0.2686,
+        0.2095,
+        0.2287,
+        0.2931
+      ],
+      "prob_entropy_mean": 1.3657,
+      "prob_entropy_max": 1.3863,
+      "unique_top2_sets": 3,
+      "scale_of_top1_choice": {
+        "0": 31.3,
+        "2": 30.8,
+        "3": 40.1
+      },
+      "prob_vs_scale_corr": [
+        0.113,
+        -0.009,
+        -0.223,
+        0.189
+      ],
+      "prob_vs_count_corr": [
+        0.202,
+        0.155,
+        0.24,
+        -0.423
+      ]
+    }
+  ]
+}

@@ -52,7 +52,8 @@
   "params": 2824946,
   "artifact": {
     "path": "/data/esmoe-toolkit/runs/yolov5n-esmoe-e120-s1-p800/weights/best.pt",
-    "unavailable": "host released before checksums were recorded"
+    "sha256": "a938380f810da5145b576bec3a3361d67a2efa1be72522a712e730904191c096",
+    "sha256_of": "yolov5n-esmoe-e120-s1-p800-best.pt"
   },
   "status": "success",
   "limitation": "single machine, single GPU; see limitations.md"
