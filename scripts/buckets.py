@@ -111,15 +111,24 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
 
 
 def summarise(records: list[dict]) -> str:
-    """Paired table across seeds: baseline vs esmoe of the same seed, per bucket."""
-    import re
+    """Per-bucket deltas, paired the way `scripts/report.py` pairs the headline metric.
 
-    arm = r"(?P<backbone>[a-z0-9]+)-(?P<arch>baseline|esmoe(?:-rewire)?)"
-    pattern = re.compile(arm + r"-e(?P<epochs>\d+)-s(?P<seed>\d+)")
-    by_key = {}
-    for r in records:
-        if m := pattern.match(r["weights"]):
-            by_key[(m["backbone"], m["arch"], m["epochs"], m["seed"])] = r
+    A run's directory name says what it was asked for; its record says what trained, once
+    `scripts/backfill.py` has checked it against the weights. Grouping by the record's variant keeps
+    a mislabelled run out of the wrong arm, and no pattern has to know every arm's name.
+    """
+    from pathlib import PurePosixPath
+
+    from report import arm, dedupe, load, variant
+
+    # Records written before `run_name` carry the checkpoint's file name, suffix included.
+    by_run = {r["weights"].removesuffix(".pt").removesuffix("-best"): r for r in records}
+    runs, _ = dedupe(load())
+    pairs = sorted(
+        ((run, by_run[name]) for run in runs if (name := PurePosixPath(run["artifact"]["path"]).parts[-3]) in by_run),
+        key=lambda pair: (variant(pair[0]), pair[0]["seed"]),
+    )
+    base = {arm(run): bucket for run, bucket in pairs if run["config"]["arch"] == "baseline"}
     keys = ("AP", "AP50", "AP75", "APs", "APm", "APl", "AR", "ARs", "ARm", "ARl")
     counts = next(iter(records))["gt_buckets"]
     lines = [
@@ -131,23 +140,24 @@ def summarise(records: list[dict]) -> str:
         "",
         f"Ground truth: {counts['small']} small, {counts['medium']} medium, {counts['large']} large boxes.",
         "",
-        "| arm | seed | " + " | ".join(keys) + " |",
+        "| variant | seed | " + " | ".join(keys) + " |",
         "|" + ":--:|" * (len(keys) + 2),
     ]
-    deltas: dict[tuple, list[dict]] = {}
-    for (backbone, arch, epochs, seed), r in sorted(by_key.items()):
-        cells = " | ".join(f"{r['coco'][k]:.4f}" for k in keys)
-        lines.append(f"| {backbone}-{arch}@e{epochs} | {seed} | {cells} |")
-        base = by_key.get((backbone, "baseline", epochs, seed))
-        if arch != "baseline" and base:
-            deltas.setdefault((backbone, arch, epochs), []).append({k: r["coco"][k] - base["coco"][k] for k in keys})
-    for (backbone, arch, epochs), rows in deltas.items():
-        lines += ["", f"## {backbone}-{arch}@e{epochs} minus baseline, per seed", ""]
+    deltas: dict[str, list[tuple[int, dict]]] = {}
+    for run, bucket in pairs:
+        cells = " | ".join(f"{bucket['coco'][k]:.4f}" for k in keys)
+        lines.append(f"| {variant(run)} | {run['seed']} | {cells} |")
+        reference = base.get(arm(run))
+        if run["config"]["arch"] != "baseline" and reference:
+            delta = {k: bucket["coco"][k] - reference["coco"][k] for k in keys}
+            deltas.setdefault(variant(run), []).append((run["seed"], delta))
+    for name, rows in deltas.items():
+        lines += ["", f"## {name} minus baseline, per seed", ""]
         lines += ["| seed | " + " | ".join(keys) + " |", "|" + ":--:|" * (len(keys) + 1)]
-        for i, d in enumerate(rows):
-            lines.append(f"| {i} | " + " | ".join(f"{d[k]:+.4f}" for k in keys) + " |")
-        lines.append("| mean | " + " | ".join(f"{sum(d[k] for d in rows) / len(rows):+.4f}" for k in keys) + " |")
-        lines.append("| wins | " + " | ".join(f"{sum(d[k] > 0 for d in rows)}/{len(rows)}" for k in keys) + " |")
+        for seed, d in rows:
+            lines.append(f"| {seed} | " + " | ".join(f"{d[k]:+.4f}" for k in keys) + " |")
+        lines.append("| mean | " + " | ".join(f"{sum(d[k] for _, d in rows) / len(rows):+.4f}" for k in keys) + " |")
+        lines.append("| wins | " + " | ".join(f"{sum(d[k] > 0 for _, d in rows)}/{len(rows)}" for k in keys) + " |")
     return "\n".join(lines) + "\n"
 
 
