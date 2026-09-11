@@ -566,6 +566,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        未发布（main）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -688,6 +699,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        未发布（main）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -797,6 +819,20 @@
 
 <h1 id="_1">发布说明<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <p>当前版本 <strong>0.1.5</strong>。</p>
+<h2 id="main">未发布（main）<a class="headerlink" href="#main" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>recipe="upstream"</code>。</strong> <code>attach_aux_loss</code> 与 <code>equip</code> 的新参数，按 YOLO-Master 训练器对含路由模块模型的做法训练，供与上游同配置对比。三件事：</li>
+<li>辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0），乘 <code>weight</code> 后封顶 3.0，加到 box、cls、dfl 三项上各一次；</li>
+<li>路由器参数单独成组，学习率减半、不进 Muon；</li>
+<li>前 3 个 epoch 冻结专家参数。</li>
+</ul>
+<p>常数与出处在 <code>esmoe.upstream</code>，逐步数值对上游源码的测试在 <code>tests/test_recipe.py</code>。默认 <code>"esmoe"</code> 不变，已有记录照旧可复现。
+- <strong>在 YOLO-Master 的分支上跑同一协议。</strong>
+  - <code>scripts/train.py</code> 新增：<code>--upstream</code> 训练上游自己的块，<code>--grafted</code> 训练已含 <code>ESMoE</code> 的配置，<code>--recipe</code> 选择训练方式。
+  - 记录新增字段：<code>git_ref.framework</code>，以及 <code>budget.amp_at_end</code>、<code>budget.batch_at_end</code>、<code>budget.epochs_replayed</code>。上游训练器会在首个非有限梯度后关闭混合精度并重跑该 epoch，两个训练器都会在首个 epoch 显存不足时把 batch 减半，而训练参数不反映这些。
+  - <code>scripts/report.py</code> 的分组键加入框架。
+  - <code>scripts/same_config.py</code> 出同配置对比表。
+  - <code>configs/yolo-master-n.yaml</code> 是上游模型去掉四个块的基线，<code>configs/yolo-master-n-esmoe.yaml</code> 与上游模型逐层参数一致。</p>
 <h2 id="_2">新增<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>与上游 <code>ES_MOE</code> 的参数对齐。</strong> 块现在接上游构造函数的全部参数：<code>out_channels</code>、<code>top_k=None</code>（等于用全部专家）、<code>sparse_inference</code>（上游的 <code>use_sparse_inference</code>）、<code>dynamic_threshold</code>（上游 0.4，本包默认 0.0 不剪——<code>results/</code> 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 <code>max_kernel_size</code> 截断，剪枝过的 checkpoint 因此装得回去；<code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel_size</code> 在构造时就按同样的边界校验。</li>

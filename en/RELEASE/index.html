@@ -566,6 +566,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unreleased (main)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#added" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -688,6 +699,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unreleased (main)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#added" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -797,6 +819,20 @@
 
 <h1 id="release-notes">Release notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
 <p>Current version <strong>0.1.5</strong>.</p>
+<h2 id="unreleased-main">Unreleased (main)<a class="headerlink" href="#unreleased-main" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>recipe="upstream"</code>.</strong> A new argument of <code>attach_aux_loss</code> and <code>equip</code> that trains the way YOLO-Master's trainer trains any model with a routed module, for runs compared against it. Three things:</li>
+<li>the term is divided by a running mean of its magnitude (decay 0.99, starting at 1.0), multiplied by <code>weight</code>, capped at 3.0 and added once to each of box, cls and dfl;</li>
+<li>router parameters get a group of their own at half the learning rate, outside Muon;</li>
+<li>expert parameters stay frozen for the first 3 epochs.</li>
+</ul>
+<p>Constants and sources are in <code>esmoe.upstream</code>, with a step-by-step numerical test against upstream's source in <code>tests/test_recipe.py</code>. The default <code>"esmoe"</code> is unchanged, so existing records still reproduce.
+- <strong>One protocol on YOLO-Master's fork.</strong>
+  - <code>scripts/train.py</code> gains <code>--upstream</code> (train upstream's own blocks), <code>--grafted</code> (a config that already holds <code>ESMoE</code>) and <code>--recipe</code>.
+  - Records gain <code>git_ref.framework</code>, plus <code>budget.amp_at_end</code>, <code>budget.batch_at_end</code> and <code>budget.epochs_replayed</code>. Upstream's trainer turns mixed precision off and replays the epoch after the first non-finite gradient, and both trainers halve the batch on a first-epoch out-of-memory; none of this shows in the training arguments.
+  - <code>scripts/report.py</code> keys on the framework.
+  - <code>scripts/same_config.py</code> tabulates the comparison.
+  - <code>configs/yolo-master-n.yaml</code> is upstream's model without its four blocks; <code>configs/yolo-master-n-esmoe.yaml</code> matches upstream's model layer for layer.</p>
 <h2 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Parameter parity with upstream's <code>ES_MOE</code>.</strong> The block now takes everything upstream's constructor does: <code>out_channels</code>, <code>top_k=None</code> for every expert, <code>sparse_inference</code> (upstream's <code>use_sparse_inference</code>), and <code>dynamic_threshold</code> (0.4 upstream, 0.0 here so nothing is pruned -- every record in <code>results/</code> was measured that way). Even kernel sizes step down to odd and cap at <code>max_kernel_size</code>, so a pruned checkpoint's kernels reload, and <code>num_experts</code>, <code>reduction</code>, <code>dynamic_threshold</code> and <code>max_kernel_size</code> are validated at construction against the same bounds.</li>
