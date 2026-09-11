@@ -4,10 +4,20 @@ import json
 import re
 import statistics
 from collections import defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 KEYS = ("metrics/mAP50(B)", "metrics/mAP50-95(B)")
+
+
+def published(record) -> str:
+    """The name a run's checkpoint, curve and analyses are published under.
+
+    Normally the run directory. Two hosts once trained under one directory name, so the record of
+    the earlier run names what its files were published as instead.
+    """
+    artifact = record["artifact"]
+    return artifact.get("published_as") or PurePosixPath(artifact["path"]).parts[-3]
 
 
 def load():

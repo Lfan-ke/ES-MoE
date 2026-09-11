@@ -13,7 +13,10 @@ absent rather than guessed.
 import argparse
 import hashlib
 import json
+from collections import Counter
 from pathlib import Path, PurePosixPath
+
+from report import published
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
@@ -41,6 +44,25 @@ def checkpoints(listings: list[str] | None, mirrors: list[str] | None) -> dict[s
         for path in mirror.rglob("*-best.pt") if mirror.is_dir() else ():
             found.setdefault(path.name.removesuffix("-best.pt"), (digest(path), path.name))
     return found
+
+
+def _name(record: dict) -> str:
+    artifact = record.get("artifact", "")
+    if isinstance(artifact, dict):
+        return published(record)
+    parts = PurePosixPath(artifact).parts
+    return parts[-3] if len(parts) > 2 else ""
+
+
+def unambiguous(weights: dict[str, tuple[str, str]], records: list[dict]) -> dict[str, tuple[str, str]]:
+    """Only the hashes whose name a single record claims.
+
+    Listings and mirrors name a checkpoint by its run directory, and two hosts can train under one
+    directory name. Filling by that name hands both records one hash, which is how a 4090 run once
+    carried the checksum of a later MetaX run; a record like that has to be resolved by hand.
+    """
+    claimed = Counter(_name(record) for record in records)
+    return {name: found for name, found in weights.items() if claimed[name] < 2}
 
 
 def facts(spec: str | None) -> dict | None:
@@ -127,7 +149,7 @@ def fill(record: dict, dataset: dict | None, weights: dict[str, tuple[str, str]]
         artifact = record["artifact"] = {"path": artifact}
         changed = True
     if isinstance(artifact, dict) and not artifact.get("sha256"):
-        found = weights.get(PurePosixPath(artifact["path"]).parts[-3])
+        found = weights.get(_name(record))
         if found:
             artifact["sha256"], artifact["sha256_of"] = found
             artifact.pop("unavailable", None)
@@ -159,13 +181,14 @@ def main() -> int:
             print(f"  {field:<20} missing in {gaps.get(field, 0)}")
         return 1 if gaps else 0
 
-    dataset, weights = facts(args.splits), checkpoints(args.hashes, args.mirror)
+    loaded = [json.loads(path.read_text(encoding="utf-8")) for path in records]
+    claimed = Counter(_name(record) for record in loaded)
+    dataset, weights = facts(args.splits), unambiguous(checkpoints(args.hashes, args.mirror), loaded)
     specs, written, corrected = settings(args.settings), 0, []
-    for path in records:
-        record = json.loads(path.read_text(encoding="utf-8"))
-        artifact = record.get("artifact", "")
-        run = PurePosixPath(artifact["path"] if isinstance(artifact, dict) else artifact).parts
-        changed = reconcile(record, specs[run[-3]]) if len(run) > 2 and run[-3] in specs else []
+    for path, record in zip(records, loaded, strict=True):
+        name = _name(record)
+        # A settings listing names checkpoints by run directory as well, so a shared name is left alone.
+        changed = reconcile(record, specs[name]) if name in specs and claimed[name] == 1 else []
         if fill(record, dataset, weights, args.unavailable) or changed:
             path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
             written += 1

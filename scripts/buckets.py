@@ -117,15 +117,13 @@ def summarise(records: list[dict]) -> str:
     `scripts/backfill.py` has checked it against the weights. Grouping by the record's variant keeps
     a mislabelled run out of the wrong arm, and no pattern has to know every arm's name.
     """
-    from pathlib import PurePosixPath
-
-    from report import arm, dedupe, load, variant
+    from report import arm, dedupe, load, published, variant
 
     # Records written before `run_name` carry the checkpoint's file name, suffix included.
     by_run = {r["weights"].removesuffix(".pt").removesuffix("-best"): r for r in records}
     runs, _ = dedupe(load())
     pairs = sorted(
-        ((run, by_run[name]) for run in runs if (name := PurePosixPath(run["artifact"]["path"]).parts[-3]) in by_run),
+        ((run, by_run[published(run)]) for run in runs if published(run) in by_run),
         key=lambda pair: (variant(pair[0]), pair[0]["seed"]),
     )
     base = {arm(run): bucket for run, bucket in pairs if run["config"]["arch"] == "baseline"}

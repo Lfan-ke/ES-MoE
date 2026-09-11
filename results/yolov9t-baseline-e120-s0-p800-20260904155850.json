@@ -52,8 +52,10 @@
   "params": 2007358,
   "artifact": {
     "path": "/data/esmoe-toolkit/runs/yolov9t-baseline-e120-s0-p800/weights/best.pt",
-    "sha256": "f03a5a6852b0a3bcea08bc7746398bd5f672f7ec21096e0e6b631cc061c33e1d",
-    "sha256_of": "hashes-a.txt"
+    "sha256": "2c19e756657d2b6312b965f7fc34a7fee1a88c0df17bf4726bd3673409d483a6",
+    "sha256_of": "v9t-salvage.tgz, the backup taken from this run's RTX 4090 host",
+    "published_as": "yolov9t-baseline-e120-s0-p800-4090",
+    "corrected": "sha256 had been filled from hashes-a.txt by directory name, and that listing hashed the later MetaX run trained under the same name; replaced with the hash of this run's own checkpoint, published under published_as"
   },
   "status": "success",
   "limitation": "single machine, single GPU; see limitations.md"

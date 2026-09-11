@@ -9,7 +9,7 @@ import argparse
 import json
 import sys
 from collections import defaultdict
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 import torch
 import yaml
@@ -141,7 +141,7 @@ def against_accuracy() -> list[str]:
     """
     import statistics
 
-    from report import KEYS, arm, dedupe, load, variant
+    from report import KEYS, arm, dedupe, load, published, variant
 
     runs, _ = dedupe(load())
     proto = [r for r in runs if "@e120f1i800" in variant(r)]
@@ -150,8 +150,7 @@ def against_accuracy() -> list[str]:
     for r in proto:
         if r["config"]["arch"] == "baseline" or arm(r) not in base:
             continue
-        run = PurePosixPath(r["artifact"]["path"]).parts[-3]
-        record = OUT / f"{run}-best.json"
+        record = OUT / f"{published(r)}-best.json"
         if not record.is_file():
             continue
         blocks = normalise(json.loads(record.read_text(encoding="utf-8")))["blocks"]
