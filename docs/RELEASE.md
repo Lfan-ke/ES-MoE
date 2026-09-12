@@ -1,10 +1,12 @@
 # 发布说明
 
-当前版本 **0.1.5**。
+当前版本 **0.1.6**。
 
-## 未发布（main）
+## 修复
 
 - **`dynamic_threshold` 剪错了专家。** 阈值原先与 top-k 重归一**之前**的原始概率比较，上游比的是重归一**之后**的份额（`_soft_top_k` 先归一，`_sparse_forward` 再比）。四选二时四个概率加起来是一，第二名很少能到 0.4，于是几乎每张图都被剪成单专家，而训练走的是两专家混合。实测：一个 VisDrone 上训练好的四块模型，同一份权重，剪错时 mAP50 0.0427，按上游次序剪 0.3741，不剪 0.3748。默认 `dynamic_threshold=0.0` 不剪，`results/` 里的记录不受影响。
+
+## 新增
 
 - **`recipe="upstream"`。** `attach_aux_loss` 与 `equip` 的新参数，按 YOLO-Master 训练器对含路由模块模型的做法训练，供与上游同配置对比。三件事：
   - 辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0），乘 `weight` 后封顶 3.0，加到 box、cls、dfl 三项上各一次；
@@ -18,6 +20,8 @@
   - `scripts/report.py` 的分组键加入框架。
   - `scripts/same_config.py` 出同配置对比表。
   - `configs/yolo-master-n.yaml` 是上游模型去掉四个块的基线，`configs/yolo-master-n-esmoe.yaml` 与上游模型逐层参数一致。
+
+## 此前的 0.1.5
 
 ## 新增
 
