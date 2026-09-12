@@ -940,6 +940,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#round-sevens-verdict-2026-09-12-all-three-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven's verdict (2026-09-12, all three seeds)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1400,6 +1411,17 @@
     <span class="md-ellipsis">
       
         Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-sevens-verdict-2026-09-12-all-three-seeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven's verdict (2026-09-12, all three seeds)
       
     </span>
   </a>
@@ -2088,6 +2110,55 @@
 <p>The four arms' metrics are therefore re-measured by <code>scripts/measure.py</code>: each run's model is rebuilt from the config it trained, loaded with the EMA weights in its <code>last.pt</code>, and evaluated with one set of validation settings. <code>last.pt</code> rather than <code>best.pt</code>, because B's <code>best</code> was selected by the broken metric; all four arms ran <code>patience=0</code> for the full 120 epochs, so their final weights are comparable. The records themselves are not rewritten -- what each trainer measured stays beside the new number as <code>metrics_by_trainer</code>.</p>
 <p><strong>Known at the time of writing</strong>: seed 0 (card c) A 0.36370, A0 0.35419, B 0.37390, C 0.35972; seed 1 (card d) A 0.37034, A0 0.35339, B 0.37240, C 0.35890. Seed 2's B arm is still training. Measuring the same weights twice differs by about 0.0002.</p>
 <p><strong>The lines stand</strong> as pre-registered above, and the four predictions are reconciled against them. Prediction 4 reads routing statistics off the checkpoints and does not depend on the evaluation path.</p>
+<h3 id="round-sevens-verdict-2026-09-12-all-three-seeds">Round seven's verdict (2026-09-12, all three seeds)<a class="headerlink" href="#round-sevens-verdict-2026-09-12-all-three-seeds" title="Permanent link">&para;</a></h3>
+<p>Metrics are the ones <code>scripts/measure.py</code> re-measures under one protocol; every difference is paired inside a card (seed 0 on c, 1 on d, 2 on e, same model and stack).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">difference (mAP50)</th>
+<th style="text-align: center;">mean</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: center;">positive</th>
+<th style="text-align: center;">verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">−0.0069</td>
+<td style="text-align: center;">[−0.0175, +0.0037]</td>
+<td style="text-align: center;">0/3</td>
+<td style="text-align: center;"><strong>undetermined</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0122</td>
+<td style="text-align: center;">[+0.0019, +0.0225]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">effective</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0126</td>
+<td style="text-align: center;">[+0.0070, +0.0181]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">effective</td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">−0.0004</td>
+<td style="text-align: center;">[−0.0105, +0.0098]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;"><strong>equivalent</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Prediction 1 (the two implementations are equivalent) is neither confirmed nor refuted.</strong> A − B has a mean of 0.0069 in absolute value, between the two lines (equivalent needs ≤ 0.0045; not equivalent needs &gt; 0.0130, or the same sign on all three seeds with an interval clear of zero), and while all three seeds share a sign the interval crosses zero, so the pre-registered answer is "undetermined". <strong>The comparison also carries a confound</strong>: upstream's trainer switches mixed precision off in epoch 1, so A and A0 ran FP32 throughout while B and C ran mixed precision, and A − B therefore mixes implementation with precision. A − A0 and B − C, each taken inside one framework, do not.</li>
+<li><strong>Prediction 2 (the block does the same in both frameworks) holds.</strong> The difference of differences lands on "equivalent", and A − A0 and B − C are positive together.</li>
+<li><strong>Prediction 3 (four blocks bring no gain at this budget) is wrong.</strong> Four blocks are "effective" in both frameworks, with intervals clear of zero. Rounds five and six found four blocks negative under <code>recipe="esmoe"</code> with per-block weight 0.01, no output norm and no dense training; with upstream's whole recipe instead (the gate-reading GShard term, output norm, every expert run in training, the auxiliary term normalised by its own magnitude and capped, experts frozen for three epochs, routers at half the learning rate) four blocks are positive in both. <strong>That conclusion has to be read as holding under <code>recipe="esmoe"</code></strong> -- which is the alternative the pre-registration named.</li>
+<li><strong>Prediction 4 (the gate-reading objective still leaves dead experts) holds.</strong> Every one of the three B checkpoints has blocks with a dead expert: three of four blocks each (block 3 never), with routing entropy at 98.5% of its maximum while the top-2 set stays constant -- flat probabilities hiding a collapsed dispatch. Neither running every expert in training nor the three-epoch expert warm-up closed that gap.</li>
+</ul>
 
 
 

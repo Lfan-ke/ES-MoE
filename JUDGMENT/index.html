@@ -940,6 +940,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-12-seed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第七轮判定（2026-09-12，三个 seed 齐全）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1400,6 +1411,17 @@
     <span class="md-ellipsis">
       
         补充：B 臂验证路径的缺陷与重测口径（2026-09-12，seed 2 尚未跑完）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-12-seed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第七轮判定（2026-09-12，三个 seed 齐全）
       
     </span>
   </a>
@@ -2088,6 +2110,55 @@
 <p>因此本轮四臂的指标改由 <code>scripts/measure.py</code> 统一重测：按各 run 自己的配置重建模型、装回 <code>last.pt</code> 里的 EMA 权重，同一套验证参数各测一遍。取 <code>last.pt</code> 而非 <code>best.pt</code>，因为 B 的 <code>best</code> 是按坏掉的指标挑的；四臂都设 <code>patience=0</code>，都跑满 120 epoch，末轮权重是可比的。记录本身不改写，训练器原来测到的值保留为 <code>metrics_by_trainer</code>。</p>
 <p><strong>声明时已知</strong>：seed 0（c 卡）A 0.36370、A0 0.35419、B 0.37390、C 0.35972；seed 1（d 卡）A 0.37034、A0 0.35339、B 0.37240、C 0.35890。seed 2 的 B 臂仍在跑。同一份权重重复测量差约 0.0002。</p>
 <p><strong>判读线不变</strong>，仍按上面预登记的三档与四条预测对账。预测 4（死专家）读的是 checkpoint 的路由统计，与验证路径无关。</p>
+<h3 id="2026-09-12-seed">第七轮判定（2026-09-12，三个 seed 齐全）<a class="headerlink" href="#2026-09-12-seed" title="Permanent link">&para;</a></h3>
+<p>指标为 <code>scripts/measure.py</code> 统一重测的值，配对差在卡内求（seed 0 在 c、1 在 d、2 在 e，同型号同栈）。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">差（mAP50）</th>
+<th style="text-align: center;">均值</th>
+<th style="text-align: center;">95% 置信区间</th>
+<th style="text-align: center;">为正</th>
+<th style="text-align: center;">判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">−0.0069</td>
+<td style="text-align: center;">[−0.0175, +0.0037]</td>
+<td style="text-align: center;">0/3</td>
+<td style="text-align: center;"><strong>无法判定</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0122</td>
+<td style="text-align: center;">[+0.0019, +0.0225]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0126</td>
+<td style="text-align: center;">[+0.0070, +0.0181]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">−0.0004</td>
+<td style="text-align: center;">[−0.0105, +0.0098]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;"><strong>等效</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>预测 1（两个实现等效）未获证实，也未被推翻。</strong> A − B 的均值绝对值 0.0069 落在两条线之间（等效要 ≤0.0045，不等效要 &gt;0.0130 或同号且区间不跨零），三个 seed 虽同号但区间跨零，按预登记只能记「无法判定」。<strong>并且这一项含混杂</strong>：上游训练器在第 1 个 epoch 就关掉混合精度，A 与 A0 整程 FP32，B 与 C 走混合精度，所以 A − B 同时含实现差与精度差。两个框架各自内部作差的 A − A0 与 B − C 不含这一项。</li>
+<li><strong>预测 2（块在两个框架里作用一致）成立。</strong> 差之差落在等效档，且 A − A0 与 B − C 同号为正。</li>
+<li><strong>预测 3（四块布局在这个预算下不带来提升）不成立。</strong> 两个框架里四块都判「有效」，区间都不跨零。第五、六轮四块为负，是在 <code>recipe="esmoe"</code>、单块权重 0.01、无输出归一化、训练期不跑满专家的配置下得到的；换成上游那一整套（读门控的 GShard、输出归一化、训练期跑满专家、辅助项按自身幅值归一并封顶、前三轮冻专家、路由器半学习率）之后，四块在两个框架里都为正。<strong>原结论应限定为「在 <code>recipe="esmoe"</code> 下」</strong>，这正是预登记里写明的那条替代解释。</li>
+<li><strong>预测 4（读门控的目标仍留下死专家）成立。</strong> 三个 B checkpoint 每个都有块出现死专家：四个块里各有三个（块 3 三次都没有），路由概率的熵是最大值的 98.5%，而 top-2 组合恒定——概率均匀掩盖了分派塌缩。训练期跑满专家与前三轮冻专家都没有补上这一缺口。</li>
+</ul>
 
 
 
