@@ -881,7 +881,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <td style="text-align: center;"><code>dynamic_threshold</code></td>
 <td style="text-align: center;"><code>0.0</code></td>
 <td style="text-align: center;"><code>0.4</code></td>
-<td style="text-align: left;">outside training, drop a routed expert below the threshold, keep the leader, renormalise</td>
+<td style="text-align: left;">outside training, drop a routed expert whose share of the mixture -- its weight after the top-k renormalisation -- is below the threshold, keep the leader, renormalise</td>
 </tr>
 </tbody>
 </table>

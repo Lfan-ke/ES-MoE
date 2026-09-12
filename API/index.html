@@ -881,7 +881,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <td style="text-align: center;"><code>dynamic_threshold</code></td>
 <td style="text-align: center;"><code>0.0</code></td>
 <td style="text-align: center;"><code>0.4</code></td>
-<td style="text-align: left;">推理期剪掉份额低于阈值的专家，首位无条件保留，余下重归一</td>
+<td style="text-align: left;">推理期剪掉份额低于阈值的专家（份额指 top-k 重归一之后的权重），首位无条件保留，余下重归一</td>
 </tr>
 </tbody>
 </table>

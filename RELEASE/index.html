@@ -821,7 +821,12 @@
 <p>当前版本 <strong>0.1.5</strong>。</p>
 <h2 id="main">未发布（main）<a class="headerlink" href="#main" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>recipe="upstream"</code>。</strong> <code>attach_aux_loss</code> 与 <code>equip</code> 的新参数，按 YOLO-Master 训练器对含路由模块模型的做法训练，供与上游同配置对比。三件事：</li>
+<li>
+<p><strong><code>dynamic_threshold</code> 剪错了专家。</strong> 阈值原先与 top-k 重归一<strong>之前</strong>的原始概率比较，上游比的是重归一<strong>之后</strong>的份额（<code>_soft_top_k</code> 先归一，<code>_sparse_forward</code> 再比）。四选二时四个概率加起来是一，第二名很少能到 0.4，于是几乎每张图都被剪成单专家，而训练走的是两专家混合。实测：一个 VisDrone 上训练好的四块模型，同一份权重，剪错时 mAP50 0.0427，按上游次序剪 0.3741，不剪 0.3748。默认 <code>dynamic_threshold=0.0</code> 不剪，<code>results/</code> 里的记录不受影响。</p>
+</li>
+<li>
+<p><strong><code>recipe="upstream"</code>。</strong> <code>attach_aux_loss</code> 与 <code>equip</code> 的新参数，按 YOLO-Master 训练器对含路由模块模型的做法训练，供与上游同配置对比。三件事：</p>
+</li>
 <li>辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0），乘 <code>weight</code> 后封顶 3.0，加到 box、cls、dfl 三项上各一次；</li>
 <li>路由器参数单独成组，学习率减半、不进 Muon；</li>
 <li>前 3 个 epoch 冻结专家参数。</li>
