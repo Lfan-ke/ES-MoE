@@ -173,6 +173,30 @@ def test_skipping_an_unrouted_expert_is_the_dense_sum(top_k):
         assert torch.allclose(block(x), dense_forward(block, x, gate_of(block, x)), atol=1e-6)
 
 
+def retained_like_upstream(gate: torch.Tensor, threshold: float) -> torch.Tensor:
+    """Upstream `ES_MOE._sparse_forward`'s pruning, on the [B, E] gate `_soft_top_k` returns.
+
+    Its `expert_importance` is the spatial mean of that gate, constant over the map, so the rank-0
+    entry is the leading expert and the threshold is compared against the renormalised share. What
+    survives is renormalised again, upstream's `retained_weights / normalizer`.
+    """
+    importance, indices = torch.topk(gate, gate.shape[1], dim=1)
+    ranks = torch.arange(gate.shape[1], device=gate.device).view(1, -1)
+    kept = torch.zeros_like(gate, dtype=torch.bool).scatter(1, indices, (ranks == 0) | (importance >= threshold))
+    return stable_normalize(gate * kept, dim=1)
+
+
+def fixed_router(block: ESMoE, probs: list[float]) -> None:
+    """Pin the router's output so a test can state the routing it is asserting about."""
+    with torch.no_grad():
+        block.router[-1].weight.zero_()
+        block.router[-1].bias.copy_(torch.tensor(probs).log())
+
+
+def mixture(block: ESMoE, x: torch.Tensor, gate: torch.Tensor) -> torch.Tensor:
+    return block.norm(sum(gate[:, i].view(-1, 1, 1, 1) * e(x) for i, e in enumerate(block.experts)))
+
+
 def test_upstream_runs_dense_whenever_top_k_cannot_skip_anything():
     """`_eager_sparse_enabled()` is false when `top_k` is None or equals the expert count, so
     upstream goes dense. Here every weight is then non-zero, so no expert is skipped either."""
@@ -198,13 +222,50 @@ def test_pruning_applies_only_where_upstream_takes_its_sparse_path(top_k, sparse
 
 
 def test_pruning_still_applies_on_the_sparse_path():
+    """A routing skewed enough for the runner-up to fall under the threshold loses it.
+
+    The router starts near uniform, which leaves a top-2 at half the mixture each and nothing for a
+    0.45 threshold to prune, so the routing this asserts about is pinned rather than sampled.
+    """
     torch.manual_seed(0)
     x = torch.randn(64, CHANNELS, 8, 8)
     pruned = ESMoE(EXPERTS, TOP_K, channels=CHANNELS, dynamic_threshold=0.45).eval()
     plain = ESMoE(EXPERTS, TOP_K, channels=CHANNELS).eval()
     plain.load_state_dict(pruned.state_dict())
+    for block in (pruned, plain):
+        fixed_router(block, [0.70, 0.20, 0.05, 0.05])  # shares 0.778 and 0.222
     with torch.no_grad():
         assert not torch.allclose(pruned(x), plain(x), atol=1e-6)
+
+
+def test_pruning_reads_the_share_of_the_mixture_not_the_raw_probability():
+    """The threshold applies after the top-k renormalisation, as upstream applies it.
+
+    Four probabilities summing to one leave the runner-up of a top-2 below 0.4 on nearly every
+    input, so reading them raw prunes to a single expert almost always -- while training mixes two.
+    On VisDrone that gap cost a trained checkpoint 0.375 mAP50 down to 0.043.
+    """
+    torch.manual_seed(0)
+    x = torch.randn(4, CHANNELS, 8, 8)
+    block = ESMoE(EXPERTS, TOP_K, channels=CHANNELS, dynamic_threshold=0.4).eval()
+    fixed_router(block, [0.35, 0.30, 0.20, 0.15])  # shares 0.538 and 0.462, raw both under 0.4
+    with torch.no_grad():
+        assert torch.allclose(block(x), mixture(block, x, gate_of(block, x)), atol=1e-6)
+
+    fixed_router(block, [0.70, 0.20, 0.05, 0.05])  # shares 0.778 and 0.222: the runner-up goes
+    with torch.no_grad():
+        leader = F.one_hot(torch.zeros(4, dtype=torch.long), EXPERTS).float()
+        assert torch.allclose(block(x), mixture(block, x, leader), atol=1e-6)
+
+
+def test_pruning_matches_upstreams_retention_on_random_routing():
+    torch.manual_seed(0)
+    x = torch.randn(32, CHANNELS, 8, 8)
+    for threshold in (0.3, 0.4, 0.45):
+        block = ESMoE(EXPERTS, TOP_K, channels=CHANNELS, dynamic_threshold=threshold).eval()
+        with torch.no_grad():
+            expected = mixture(block, x, retained_like_upstream(gate_of(block, x), threshold))
+            assert torch.allclose(block(x), expected, atol=1e-6)
 
 
 def test_a_non_finite_balance_term_cannot_reach_the_optimised_loss():

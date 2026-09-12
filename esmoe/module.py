@@ -203,8 +203,9 @@ class ESMoE(nn.Module):
             statistics moving. Off by default for the same reason.
         sparse_inference: Skip unrouted experts outside training. Off runs all of them, which
             costs more but keeps the graph independent of the batch.
-        dynamic_threshold: Outside training, drop a routed expert whose share falls below this,
-            keeping the top one whatever its share, and renormalise what remains. Upstream
+        dynamic_threshold: Outside training, drop a routed expert whose share of the mixture --
+            its weight once the top-k is renormalised, not its raw probability -- falls below
+            this, keeping the top one whatever its share, and renormalise what remains. Upstream
             defaults to 0.4; 0 here leaves evaluation as every recorded run measured it.
         options: The same settings as a mapping, plus ``expert`` and ``out_channels``, which is how
             a model.yaml carries them. The trainer rebuilds the model from that yaml, so a setting
@@ -289,16 +290,21 @@ class ESMoE(nn.Module):
         probs = F.softmax(self.router(x).float().clamp(-30.0, 30.0), dim=1).type_as(x)
         weights, chosen = probs.topk(self.top_k, dim=1)
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
+        gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         if self.dynamic_threshold and not self.training and self.sparse_inference and self.top_k < self.num_experts:
             # Upstream's inference-time pruning: below the threshold an expert is dropped, except
             # the leading one, and the survivors are renormalised so the mixture still sums to one.
+            # The threshold reads the share of the mixture an expert holds, never its raw
+            # probability: upstream renormalises the top-k in the routing layer and prunes after.
+            # Read before the renormalisation, 0.4 drops the runner-up of a top-2 on nearly every
+            # input, because four probabilities summing to one rarely leave 0.4 on the second.
             # Upstream prunes only on its sparse path, which it takes only when top-k leaves an expert
             # out; with every expert active, as in the model it released, it evaluates all of them.
             # The mask is tensor arithmetic rather than a scatter of a Python bool, which a tracer
             # refuses, and it is recomputed per input so an exported graph stays faithful.
             leader = F.one_hot(chosen[:, 0], probs.shape[1]).to(torch.bool)
             gate = gate * ((gate >= self.dynamic_threshold) | leader)
-        gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
+            gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         out = x.new_zeros(x.shape[0], self.out_channels or x.shape[1], *x.shape[2:])
         # Skipping an unrouted expert saves work at run time, but the decision depends on the data:
         # a tracer would bake this batch's routing into the graph and the exported model would keep

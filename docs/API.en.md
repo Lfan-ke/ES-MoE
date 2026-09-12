@@ -71,7 +71,7 @@ The five settings and their defaults (`esmoe.SETTINGS`):
 | `out_norm` | `False` | always on | `BatchNorm + SiLU` after the weighted sum (the paper's eq. 2 `Norm`) |
 | `dense_training` | `False` | always on | run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving |
 | `sparse_inference` | `True` | same | skip unrouted experts outside training |
-| `dynamic_threshold` | `0.0` | `0.4` | outside training, drop a routed expert below the threshold, keep the leader, renormalise |
+| `dynamic_threshold` | `0.0` | `0.4` | outside training, drop a routed expert whose share of the mixture -- its weight after the top-k renormalisation -- is below the threshold, keep the leader, renormalise |
 
 The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), round six).
 

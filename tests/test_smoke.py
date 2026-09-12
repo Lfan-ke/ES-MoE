@@ -353,19 +353,22 @@ def test_invalid_settings_are_refused_with_a_reason(kwargs, message):
 
 def test_dynamic_threshold_prunes_outside_training_and_keeps_the_leader():
     """Upstream's inference pruning: below the threshold an expert goes, except the leading one."""
-    block = ESMoE(4, 4, channels=16, dynamic_threshold=0.9).eval()
+    torch.manual_seed(0)
+    x = torch.randn(3, 16, 8, 8)
+    block = ESMoE(4, 2, channels=16, dynamic_threshold=0.9).eval()
     seen = []
-    for expert in block.experts:
-        expert.register_forward_hook(lambda m, i, o, seen=seen: seen.append(m))
+    for index, expert in enumerate(block.experts):
+        expert.register_forward_hook(lambda m, i, o, index=index: seen.append(index))
     with torch.no_grad():
-        block(torch.randn(3, 16, 8, 8))
-    # One expert can clear a 0.9 share at most, so only the leader survives on each sample.
-    assert 1 <= len(seen) <= 4
+        block(x)
+    # Two shares summing to one leave the runner-up at 0.5 at most, so only the leader survives.
+    leaders = block.router(x).argmax(dim=1).tolist()
+    assert sorted(seen) == sorted(set(leaders))
 
 
 def test_dynamic_threshold_is_inert_while_training():
-    block = ESMoE(4, 4, channels=16, dynamic_threshold=0.9).train()
-    plain = ESMoE(4, 4, channels=16).train()
+    block = ESMoE(4, 2, channels=16, dynamic_threshold=0.9).train()
+    plain = ESMoE(4, 2, channels=16).train()
     plain.load_state_dict(block.state_dict())
     x = torch.randn(3, 16, 8, 8)
     assert torch.allclose(block(x), plain(x), atol=1e-6)

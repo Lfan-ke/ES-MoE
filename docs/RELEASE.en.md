@@ -4,6 +4,8 @@ Current version **0.1.5**.
 
 ## Unreleased (main)
 
+- **`dynamic_threshold` pruned the wrong experts.** The threshold was compared against the raw probabilities, before the top-k renormalisation; upstream compares it against the share after (`_soft_top_k` normalises, `_sparse_forward` then prunes). With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so nearly every image was pruned to a single expert while training mixed two. Measured on one trained VisDrone model with four blocks, same weights: mAP50 0.0427 pruned the wrong way, 0.3741 in upstream's order, 0.3748 unpruned. The default `dynamic_threshold=0.0` prunes nothing, so the records in `results/` are unaffected.
+
 - **`recipe="upstream"`.** A new argument of `attach_aux_loss` and `equip` that trains the way YOLO-Master's trainer trains any model with a routed module, for runs compared against it. Three things:
   - the term is divided by a running mean of its magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl;
   - router parameters get a group of their own at half the learning rate, outside Muon;

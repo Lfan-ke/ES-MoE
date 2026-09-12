@@ -71,7 +71,7 @@
 | `out_norm` | `False` | 恒开 | 加权求和后的 `BatchNorm + SiLU`（论文式 2 的 `Norm`） |
 | `dense_training` | `False` | 恒开 | 训练期跑满专家，未选权重为 0 但归一化统计量继续更新 |
 | `sparse_inference` | `True` | 同 | 推理期跳过未选专家 |
-| `dynamic_threshold` | `0.0` | `0.4` | 推理期剪掉份额低于阈值的专家，首位无条件保留，余下重归一 |
+| `dynamic_threshold` | `0.0` | `0.4` | 推理期剪掉份额低于阈值的专家（份额指 top-k 重归一之后的权重），首位无条件保留，余下重归一 |
 
 后两项只影响推理，前三项影响训练。`out_norm`、`dense_training`、`dynamic_threshold` 的默认值是为了让 `results/` 里既有的运行原样复现，不是对上游的取舍判断。`balance` 的默认值由数据定：读门控的目标（上游的 `gshard`、论文的 `master`）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家；Switch 读完整 softmax，66 个 checkpoint 上一个没有（[判读线](JUDGMENT.md)第六轮）。
 
