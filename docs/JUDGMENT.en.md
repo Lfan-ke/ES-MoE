@@ -406,3 +406,13 @@ On CPU in FP32, upstream's trainer and this package each trained for 5 epochs: 1
 - **Control.** Scaling one router layer's weights by 1 + 1e-6 in the same implementation and training again moves A from itself by 2.3% and B from itself by 1.5%, the same order as A against B. Iteration 0's loss jumps between two sets of values: with router scores nearly tied, a rounding-sized difference flips the top-2 choice.
 
 Conclusion: to the resolution a CPU trajectory allows, B differs from A by no more than rounding does. The full-protocol lines for A − B stand.
+
+### Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
+
+The B arm's in-training validation collapsed to about 0.043 mAP50 on all three cards while its training losses matched A's and C's. The cause is in this package's block: inference pruning compared `dynamic_threshold` against the raw probabilities, before the top-k renormalisation, where upstream compares it against the share after. With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so validation pruned nearly every image to a single expert while training mixed two. The same weights read 0.374 mAP50 in upstream's order and 0.375 unpruned. Fixed in `d6f4dcc`; the default `dynamic_threshold=0.0` never takes that path, so the records from rounds one to six and the check of the released model are unaffected.
+
+The four arms' metrics are therefore re-measured by `scripts/measure.py`: each run's model is rebuilt from the config it trained, loaded with the EMA weights in its `last.pt`, and evaluated with one set of validation settings. `last.pt` rather than `best.pt`, because B's `best` was selected by the broken metric; all four arms ran `patience=0` for the full 120 epochs, so their final weights are comparable. The records themselves are not rewritten -- what each trainer measured stays beside the new number as `metrics_by_trainer`.
+
+**Known at the time of writing**: seed 0 (card c) A 0.36370, A0 0.35419, B 0.37390, C 0.35972; seed 1 (card d) A 0.37034, A0 0.35339, B 0.37240, C 0.35890. Seed 2's B arm is still training. Measuring the same weights twice differs by about 0.0002.
+
+**The lines stand** as pre-registered above, and the four predictions are reconciled against them. Prediction 4 reads routing statistics off the checkpoints and does not depend on the evaluation path.
