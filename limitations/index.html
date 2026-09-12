@@ -829,7 +829,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">主干每 stage 一块、共四块（上游 YAML）</td>
-<td style="text-align: left;">本包 <code>at="backbone_stages"</code> 复刻该布局后，配对 mAP50 在 v10n 上 <strong>−0.0071</strong>（0/3）、v5n 上 <strong>−0.0049</strong>（0/3），mAP50-95 两个主干也都是 0/3。四块把辅助项按块求和，同权重下总量是单块的四倍；每块权重降到 0.0025、总量对齐单块后，v10n 上是 <strong>−0.0113</strong>（0/3），mAP50-95 区间 [−0.0132, −0.0018] 不跨零。差在块数，不在平衡压力。方向与论文 Table 5「Both 掉 5.9 点」一致：<strong>ES-MoE 放得越多越差</strong>。</td>
+<td style="text-align: left;">本包 <code>at="backbone_stages"</code> 复刻该布局后，配对 mAP50 在 v10n 上 <strong>−0.0071</strong>（0/3）、v5n 上 <strong>−0.0049</strong>（0/3），mAP50-95 两个主干也都是 0/3。四块把辅助项按块求和，同权重下总量是单块的四倍；每块权重降到 0.0025、总量对齐单块后，v10n 上是 <strong>−0.0113</strong>（0/3），mAP50-95 区间 [−0.0132, −0.0018] 不跨零。差在块数，不在平衡压力。<strong>但这一条只在 <code>recipe="esmoe"</code> 下成立</strong>：第七轮把上游那一整套配方（读门控的 GShard、输出归一化、训练期跑满专家、辅助项按自身幅值归一并封顶、前三轮冻专家、路由器半学习率）一起用上之后，同样的四块布局在上游分支与官方栈上都判「有效」（A−A0 +0.0122、B−C +0.0126，各 3/3，区间不跨零）。所以「放得越多越差」要读成「在本包默认配方下放得越多越差」，不是块数本身的结论。</td>
 </tr>
 <tr>
 <td style="text-align: left;">「鼓励专家互补的目标」（摘要）</td>
