@@ -6,6 +6,82 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 
 Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is **r = +0.044**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
 
+## yolo-master-n-esmoe-upstream-w1-e120-s0-p800c
+
+548 images through block 0 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: [0, 2], mean entropy 1.3658 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.000 | 0.222 | -0.22 | +0.18 |
+| 1 | 5 | 0.002 | 1.000 | 0.280 | +0.20 | -0.35 |
+| 2 | 7 | 0.000 | 0.000 | 0.184 | +0.28 | -0.24 |
+| 3 | 9 | 0.998 | 1.000 | 0.314 | -0.20 | +0.32 |
+
+548 images through block 1 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [2, 3], mean entropy 1.382 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.622 | 1.000 | 0.270 | -0.06 | +0.34 |
+| 1 | 5 | 0.378 | 1.000 | 0.269 | +0.23 | -0.17 |
+| 2 | 7 | 0.000 | 0.000 | 0.214 | +0.12 | -0.11 |
+| 3 | 9 | 0.000 | 0.000 | 0.247 | -0.28 | -0.06 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1, 3], mean entropy 1.3814 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.854 | 1.000 | 0.277 | -0.30 | +0.35 |
+| 1 | 5 | 0.000 | 0.000 | 0.218 | +0.20 | -0.16 |
+| 2 | 7 | 0.146 | 1.000 | 0.270 | +0.18 | -0.28 |
+| 3 | 9 | 0.000 | 0.000 | 0.235 | +0.25 | -0.31 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3703 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.084 | 0.285 | 0.229 | +0.25 | -0.22 |
+| 1 | 5 | 0.055 | 0.540 | 0.238 | -0.27 | +0.33 |
+| 2 | 7 | 0.790 | 0.872 | 0.301 | +0.11 | -0.02 |
+| 3 | 9 | 0.071 | 0.303 | 0.231 | -0.33 | +0.07 |
+
+## yolo-master-n-esmoe-upstream-w1-e120-s1-p800d
+
+548 images through block 0 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1, 3], mean entropy 1.372 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.007 | 1.000 | 0.274 | +0.28 | -0.29 |
+| 1 | 5 | 0.000 | 0.000 | 0.223 | -0.30 | +0.27 |
+| 2 | 7 | 0.993 | 1.000 | 0.305 | -0.17 | +0.26 |
+| 3 | 9 | 0.000 | 0.000 | 0.198 | +0.01 | -0.10 |
+
+548 images through block 1 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1, 2], mean entropy 1.3681 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.113 | 1.000 | 0.293 | +0.09 | +0.05 |
+| 1 | 5 | 0.000 | 0.000 | 0.195 | +0.05 | -0.18 |
+| 2 | 7 | 0.000 | 0.000 | 0.211 | -0.27 | +0.13 |
+| 3 | 9 | 0.887 | 1.000 | 0.301 | +0.01 | -0.03 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1], mean entropy 1.3616 of 1.3863, distinct top-2 pairs seen: 3 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.387 | 0.504 | 0.275 | -0.26 | +0.51 |
+| 1 | 5 | 0.000 | 0.000 | 0.179 | +0.23 | -0.45 |
+| 2 | 7 | 0.124 | 0.533 | 0.262 | +0.34 | -0.55 |
+| 3 | 9 | 0.489 | 0.964 | 0.284 | +0.11 | -0.39 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3684 of 1.3863, distinct top-2 pairs seen: 6 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.064 | 0.153 | 0.219 | +0.12 | -0.17 |
+| 1 | 5 | 0.015 | 0.268 | 0.232 | -0.02 | +0.17 |
+| 2 | 7 | 0.166 | 0.681 | 0.251 | -0.23 | +0.24 |
+| 3 | 9 | 0.755 | 0.898 | 0.298 | +0.03 | -0.06 |
+
 ## yolo11n-esmoe-e120-s0-p800-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3335 of 1.3863, distinct top-2 pairs seen: 6 of 6.
