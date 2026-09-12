@@ -47,7 +47,7 @@ def test_every_run_lands_in_its_arm():
 
 def test_a_seed_missing_an_arm_is_left_out():
     runs = four(0, 0.4, 0.38, 0.41, 0.39) + four(1, 0.4, 0.38, 0.41, 0.39)[:3]
-    assert list(same_config.collect(runs)) == [0]
+    assert list(same_config.collect(runs)) == [("mixed", 0)]
 
 
 def test_the_differences_are_taken_inside_a_seed():
@@ -61,7 +61,7 @@ def test_a_seed_split_across_stacks_is_refused():
     runs = four(0, 0.4, 0.38, 0.41, 0.39)
     runs[2]["hardware"]["torch"] = "2.8.0+metax3.7.1.3"
     with pytest.raises(ValueError, match="different stacks"):
-        same_config.card(same_config.collect(runs)[0])
+        same_config.card(same_config.collect(runs)[("mixed", 0)])
 
 
 def test_a_seed_is_reported_as_measured_only_when_every_arm_was(tmp_path, monkeypatch):
@@ -93,3 +93,18 @@ def test_precision_separates_both_the_variant_and_the_pairing_key():
     base_fp32["budget"] = {**base_fp32["budget"], "amp": False}
     assert report.arm(fp32) == report.arm(base_fp32), "an FP32 arm pairs with its own baseline"
     assert report.arm(mixed) == report.arm(base_mixed)
+
+
+def test_the_two_precision_families_never_share_a_row():
+    """One seed appears once per family: asking for FP32 is a different experiment, not a repeat."""
+    runs = four(0, 0.40, 0.38, 0.41, 0.39)
+    fp32 = []
+    for run in four(0, 0.36, 0.35, 0.37, 0.355):
+        run = {**run, "budget": {**run["budget"], "amp": False}}
+        run["experiment_id"] += "-fp32"
+        run["artifact"] = {"path": f"/runs/{run['experiment_id']}/weights/best.pt"}
+        fp32.append(run)
+    found = same_config.collect(runs + fp32)
+    assert set(found) == {("mixed", 0), ("fp32", 0)}
+    assert found[("fp32", 0)]["A"]["metrics"][same_config.KEYS[0]] == 0.36
+    assert found[("mixed", 0)]["A"]["metrics"][same_config.KEYS[0]] == 0.40

@@ -49,13 +49,24 @@ def arm_of(record) -> str | None:
     return None
 
 
-def collect(records) -> dict[int, dict[str, dict]]:
-    """Seed -> arm -> record; a later record of the same arm and seed replaces an earlier one."""
-    seeds: dict[int, dict[str, dict]] = defaultdict(dict)
+def precision(record) -> str:
+    """The precision a run asked for, which decides which family of seeds it belongs to.
+
+    The fork switches mixed precision off the first time a gradient is not finite, so in the mixed
+    family A and A0 end up in FP32 while B and C stay mixed, and A - B carries that difference as
+    well as the implementation's. The FP32 family asks every arm for FP32 up front, and the same
+    seed therefore appears once in each family: they are different experiments, not repeats.
+    """
+    return "fp32" if record["budget"].get("amp", True) is False else "mixed"
+
+
+def collect(records) -> dict[tuple[str, int], dict[str, dict]]:
+    """(precision, seed) -> arm -> record; a later record of the same key replaces an earlier one."""
+    seeds: dict[tuple[str, int], dict[str, dict]] = defaultdict(dict)
     for record in records:
         if arm := arm_of(record):
-            seeds[record["seed"]][arm] = record
-    return {seed: arms for seed, arms in sorted(seeds.items()) if set(arms) == set(ARMS)}
+            seeds[(precision(record), record["seed"])][arm] = record
+    return {key: arms for key, arms in sorted(seeds.items()) if set(arms) == set(ARMS)}
 
 
 def card(arms: dict[str, dict]) -> str:
@@ -71,55 +82,56 @@ def main() -> None:
     # `load` reports a re-measured run through that measurement; a seed whose four arms were all
     # measured that way is comparable arm to arm, one that mixes the two is not.
     sources = {
-        seed: "measured" if all("metrics_by_trainer" in arms[arm] for arm in ARMS) else "curve"
-        for seed, arms in seeds.items()
+        key: "measured" if all("metrics_by_trainer" in arms[arm] for arm in ARMS) else "curve"
+        for key, arms in seeds.items()
     }
     out = ["# Same configuration: YOLO-Master's fork against official ultralytics + esmoe", ""]
     if not seeds:
         out.append("No seed has all four arms yet.")
     for key in KEYS:
-        rows, deltas = [], defaultdict(list)
-        for seed, arms in seeds.items():
+        rows, deltas = [], defaultdict(lambda: defaultdict(list))
+        for (family, seed), arms in seeds.items():
             value = {arm: arms[arm]["metrics"][key] for arm in ARMS}
             found = {name: fn(value) for name, fn in DELTAS.items()}
             for name, delta in found.items():
-                deltas[name].append(delta)
+                deltas[family][name].append(delta)
             cells = " | ".join(f"{value[arm]:.4f}" for arm in ARMS)
             differences = " | ".join(f"{d:+.4f}" for d in found.values())
-            rows.append(f"| {seed} | {card(arms)} | {sources[seed]} | {cells} | {differences} |")
+            rows.append(f"| {family} | {seed} | {card(arms)} | {sources[(family, seed)]} | {cells} | {differences} |")
         if not rows:
             continue
         out += [
             f"## {key}",
             "",
-            "| seed | card | metrics | A | A0 | B | C | " + " | ".join(DELTAS) + " |",
-            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|" + ":--:|" * len(DELTAS),
+            "| precision | seed | card | metrics | A | A0 | B | C | " + " | ".join(DELTAS) + " |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|" + ":--:|" * len(DELTAS),
             *rows,
             "",
-            "| difference | seeds | mean | 95% CI | positive |",
-            "|:--:|:--:|:--:|:--:|:--:|",
+            "| precision | difference | seeds | mean | 95% CI | positive |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|",
         ]
-        for name, values in deltas.items():
-            positive = sum(1 for v in values if v > 0)
-            out.append(
-                f"| {name} | {len(values)} | {statistics.mean(values):+.4f} | {interval(values)} "
-                f"| {positive}/{len(values)} |"
-            )
+        for family, found in deltas.items():
+            for name, values in found.items():
+                positive = sum(1 for v in values if v > 0)
+                out.append(
+                    f"| {family} | {name} | {len(values)} | {statistics.mean(values):+.4f} "
+                    f"| {interval(values)} | {positive}/{len(values)} |"
+                )
         out.append("")
     if seeds:
         out += [
             "## What each run actually trained with",
             "",
-            "| seed | arm | run | amp at end | batch at end | epochs replayed | hours |",
-            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
+            "| precision | seed | arm | run | amp asked | amp at end | batch at end | epochs replayed | hours |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|",
         ]
-        for seed, arms in seeds.items():
+        for (family, seed), arms in seeds.items():
             for arm in ARMS:
                 budget = arms[arm]["budget"]
                 out.append(
-                    f"| {seed} | {arm} | {arms[arm]['experiment_id']} | {budget.get('amp_at_end', '?')} "
-                    f"| {budget.get('batch_at_end', '?')} | {budget.get('epochs_replayed', '?')} "
-                    f"| {budget['gpu_hours']:.2f} |"
+                    f"| {family} | {seed} | {arm} | {arms[arm]['experiment_id']} | {budget.get('amp', True)} "
+                    f"| {budget.get('amp_at_end', '?')} | {budget.get('batch_at_end', '?')} "
+                    f"| {budget.get('epochs_replayed', '?')} | {budget['gpu_hours']:.2f} |"
                 )
     table = "\n".join(out)
     (ROOT / "results" / "same_config.md").write_text(table + "\n", encoding="utf-8")
