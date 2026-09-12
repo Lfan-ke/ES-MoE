@@ -79,3 +79,17 @@ def test_a_seed_is_reported_as_measured_only_when_every_arm_was(tmp_path, monkey
     assert loaded["A-0"]["metrics"] == metrics
     assert loaded["A-0"]["metrics_by_trainer"][same_config.KEYS[0]] == 0.4
     assert "metrics_by_trainer" not in loaded["B-0"]
+
+
+def test_precision_separates_both_the_variant_and_the_pairing_key():
+    """An FP32 arm pairs with an FP32 baseline; it is not a repeat of the mixed-precision run."""
+    block = {"num_experts": 4, "top_k": 2, "aux_weight": 1.0, "balance": "gshard", "blocks": 4}
+    mixed, fp32 = record("B", 0, 0.41, **block), record("B", 0, 0.41, **block)
+    fp32["budget"] = {**fp32["budget"], "amp": False}
+    assert report.variant(mixed) != report.variant(fp32)
+    assert report.variant(fp32).endswith("fp32[metaxc500/metax3.3]") or "fp32" in report.variant(fp32)
+    assert report.arm(mixed) != report.arm(fp32)
+    base_mixed, base_fp32 = record("C", 0, 0.39), record("C", 0, 0.39)
+    base_fp32["budget"] = {**base_fp32["budget"], "amp": False}
+    assert report.arm(fp32) == report.arm(base_fp32), "an FP32 arm pairs with its own baseline"
+    assert report.arm(mixed) == report.arm(base_mixed)

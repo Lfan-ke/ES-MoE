@@ -82,7 +82,7 @@ def variant(record):
     label would silently average across different experiments. Image size is part of the budget:
     800 and 640 runs of the same schedule are different experiments, not repeats of one.
     """
-    cfg, data, budget = record["config"], record["dataset"], record["budget"]
+    cfg = record["config"]
     backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
     block = "baseline" if cfg["arch"] == "baseline" else f"e{cfg['num_experts']}k{cfg['top_k']}w{cfg['aux_weight']}"
     if cfg.get("rewire"):
@@ -101,14 +101,26 @@ def variant(record):
         block += f"-t{cfg['dynamic_threshold']:g}"
     if cfg.get("blocks", 1) not in (0, 1):
         block += f"-x{cfg['blocks']}"
-    return f"{backbone}-{block}@e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}[{stack(record)}]"
+    return f"{backbone}-{block}@{schedule(record)}[{stack(record)}]"
+
+
+def schedule(record) -> str:
+    """Epochs, data fraction, image size and precision -- the budget a comparison has to hold fixed.
+
+    Precision is part of it: the same configuration trained in FP32 and under mixed precision are
+    two experiments, not two samples of one, and a run that asked for FP32 says so in its name.
+    """
+    data, budget = record["dataset"], record["budget"]
+    asked = budget.get("amp", True)
+    return f"e{budget['epochs']}f{data['fraction']:g}i{budget.get('imgsz', '?')}" + ("" if asked else "fp32")
 
 
 def arm(record):
     """The part of the label a baseline shares with the ESMoE arms it is compared against."""
-    cfg, data, budget = record["config"], record["dataset"], record["budget"]
-    backbone = Path(cfg["model_yaml"]).stem.split("-esmoe")[0]
-    return backbone, budget["epochs"], data["fraction"], budget.get("imgsz"), stack(record), record["seed"]
+    backbone = Path(record["config"]["model_yaml"]).stem.split("-esmoe")[0]
+    # Precision is in here as well as in `variant`: an FP32 arm must pair with an FP32 baseline of
+    # its own seed, never with the mixed-precision baseline that shares every other part of the key.
+    return backbone, schedule(record), stack(record), record["seed"]
 
 
 def spread(values):

@@ -216,7 +216,10 @@ def run_name(args, fork: bool) -> str:
     """
     stem = Path(args.base).stem
     stem = stem.removesuffix("-esmoe") if args.grafted else stem
-    return f"{stem}-{architecture(args)}-e{args.epochs}-s{args.seed}{args.tag}" + ("-fork" if fork else "")
+    # A run that asked for FP32 carries it in the name: two runs of one configuration at different
+    # precision are different experiments, and a shared directory is how one overwrites the other.
+    precision = "" if args.amp else "-fp32"
+    return f"{stem}-{architecture(args)}-e{args.epochs}-s{args.seed}{args.tag}{precision}" + ("-fork" if fork else "")
 
 
 def build_parser() -> argparse.ArgumentParser:

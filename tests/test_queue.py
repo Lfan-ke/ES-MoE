@@ -77,3 +77,21 @@ def test_a_config_holding_its_blocks_is_not_named_twice_and_a_fork_run_says_so()
     assert train.run_name(grafted, fork=False) == "m-esmoe-upstream-w1-e10-s0"
     plain = parse(["--base", "c/m.yaml", "--epochs", "120", "--seed", "2", "--tag=-p800h3"])
     assert train.run_name(plain, fork=True) == "m-baseline-e120-s2-p800h3-fork"
+
+
+def test_an_fp32_run_is_named_apart_from_the_mixed_precision_one():
+    """Two runs of one configuration at different precision must not share a directory."""
+    parse = train.build_parser().parse_args
+    mixed = parse(["--base", "c/m.yaml", "--epochs", "120", "--seed", "3", "--tag=-p800f"])
+    fp32 = parse(["--base", "c/m.yaml", "--epochs", "120", "--seed", "3", "--tag=-p800f", "--amp", "0"])
+    assert train.run_name(mixed, fork=False) == "m-baseline-e120-s3-p800f"
+    assert train.run_name(fp32, fork=False) == "m-baseline-e120-s3-p800f-fp32"
+    assert train.run_name(fp32, fork=True) == "m-baseline-e120-s3-p800f-fp32-fork"
+
+
+def test_the_queue_names_and_launches_at_the_precision_it_was_given():
+    """`AMP=0` has to reach both the launch line and the name the queue rebuilds to skip finished runs."""
+    text = (ROOT / "scripts" / "queue.sh").read_text(encoding="utf-8")
+    assert re.search(r'--tag="\$tag" --amp "\$AMP"', text), "the launch line must pass the precision"
+    assert re.search(r'name=.*\$\(\[ "\$AMP" = 0 \] && echo -fp32\)', text), "the name must carry it too"
+    assert re.search(r"^AMP=\$\{AMP:-1\}", text, re.MULTILINE), "mixed precision stays the default"

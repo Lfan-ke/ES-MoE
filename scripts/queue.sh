@@ -15,6 +15,9 @@ SLOTS=${SLOTS:-2}
 LANES=${LANES:-2}
 LANE0=${LANE0:-1}
 FORK=${FORK:-/data/yolo-master}
+# 1 trains in mixed precision, 0 in FP32. It reaches the run's name as well as its arguments, so an
+# FP32 run never shares a directory with the mixed-precision run of the same configuration.
+AMP=${AMP:-1}
 # Seconds a run may take. A run the fork has switched to FP32 shares its card for longer than 12 h.
 LIMIT=${LIMIT:-86400}
 LAUNCH=/data/launch.lock
@@ -55,7 +58,7 @@ lane() {
     esac
     stem=$(basename "$base" .yaml)
     case "$flag" in *--grafted*) stem=${stem%-esmoe} ;; esac
-    name="${stem}-${arch}${suffix}-e120-s${seed}${tag}${fork:+-fork}"
+    name="${stem}-${arch}${suffix}-e120-s${seed}${tag}$([ "$AMP" = 0 ] && echo -fp32)${fork:+-fork}"
     rows=$(cat "runs/$name/results.csv" 2>/dev/null | wc -l)
     if [ "$rows" -ge 121 ]; then echo "[lane$id] skip $name"; continue; fi
 
@@ -66,7 +69,7 @@ lane() {
     echo "[lane$id] $(date -Is) start $name"
     # env execs timeout, so the process busy() counts still starts with it.
     env ${fork:+PYTHONPATH="$FORK"} timeout -k 60 "$LIMIT" python3 scripts/train.py $flag --base "$base" --epochs 120 \
-      --fraction 1.0 --batch 32 --imgsz 800 --patience 0 --seed "$seed" --tag="$tag" \
+      --fraction 1.0 --batch 32 --imgsz 800 --patience 0 --seed "$seed" --tag="$tag" --amp "$AMP" \
       >> "/data/lane$id.log" 2>&1 &
     pid=$!
     sleep 90
