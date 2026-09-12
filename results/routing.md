@@ -82,6 +82,44 @@ Over the 81 runs that have both a paired delta and a routing analysis, the leadi
 | 2 | 7 | 0.166 | 0.681 | 0.251 | -0.23 | +0.24 |
 | 3 | 9 | 0.755 | 0.898 | 0.298 | +0.03 | -0.06 |
 
+## yolo-master-n-esmoe-upstream-w1-e120-s2-p800e
+
+548 images through block 0 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1, 3], mean entropy 1.373 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.036 | 1.000 | 0.273 | +0.12 | -0.12 |
+| 1 | 5 | 0.000 | 0.000 | 0.212 | +0.24 | -0.28 |
+| 2 | 7 | 0.964 | 1.000 | 0.305 | -0.24 | +0.30 |
+| 3 | 9 | 0.000 | 0.000 | 0.210 | +0.17 | -0.27 |
+
+548 images through block 1 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [1, 2], mean entropy 1.373 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.139 | 1.000 | 0.287 | -0.27 | +0.23 |
+| 1 | 5 | 0.000 | 0.000 | 0.220 | +0.23 | -0.24 |
+| 2 | 7 | 0.000 | 0.000 | 0.201 | +0.28 | -0.28 |
+| 3 | 9 | 0.861 | 1.000 | 0.293 | -0.08 | +0.12 |
+
+548 images through block 2 (128 channels), kernels [3, 5, 7, 9], top-2, dead experts: [0, 2], mean entropy 1.3797 of 1.3863, distinct top-2 pairs seen: 1 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.000 | 0.000 | 0.227 | +0.00 | -0.36 |
+| 1 | 5 | 0.779 | 1.000 | 0.281 | -0.22 | +0.52 |
+| 2 | 7 | 0.000 | 0.000 | 0.216 | +0.19 | -0.47 |
+| 3 | 9 | 0.221 | 1.000 | 0.275 | +0.23 | -0.06 |
+
+548 images through block 3 (256 channels), kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.373 of 1.3863, distinct top-2 pairs seen: 5 of 6.
+
+| expert | kernel | top-1 share | top-2 share | mean prob | corr. size | corr. count |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 3 | 0.002 | 0.237 | 0.228 | -0.08 | +0.25 |
+| 1 | 5 | 0.688 | 0.792 | 0.288 | +0.31 | -0.16 |
+| 2 | 7 | 0.159 | 0.540 | 0.244 | -0.32 | +0.28 |
+| 3 | 9 | 0.151 | 0.431 | 0.239 | -0.19 | -0.07 |
+
 ## yolo11n-esmoe-e120-s0-p800-best.pt
 
 548 images, kernels [3, 5, 7, 9], top-2, dead experts: none, mean entropy 1.3335 of 1.3863, distinct top-2 pairs seen: 6 of 6.

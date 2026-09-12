@@ -416,3 +416,19 @@ The four arms' metrics are therefore re-measured by `scripts/measure.py`: each r
 **Known at the time of writing**: seed 0 (card c) A 0.36370, A0 0.35419, B 0.37390, C 0.35972; seed 1 (card d) A 0.37034, A0 0.35339, B 0.37240, C 0.35890. Seed 2's B arm is still training. Measuring the same weights twice differs by about 0.0002.
 
 **The lines stand** as pre-registered above, and the four predictions are reconciled against them. Prediction 4 reads routing statistics off the checkpoints and does not depend on the evaluation path.
+
+### Round seven's verdict (2026-09-12, all three seeds)
+
+Metrics are the ones `scripts/measure.py` re-measures under one protocol; every difference is paired inside a card (seed 0 on c, 1 on d, 2 on e, same model and stack).
+
+| difference (mAP50) | mean | 95% CI | positive | verdict |
+|:--:|:--:|:--:|:--:|:--:|
+| A − B | −0.0069 | [−0.0175, +0.0037] | 0/3 | **undetermined** |
+| A − A0 | +0.0122 | [+0.0019, +0.0225] | 3/3 | effective |
+| B − C | +0.0126 | [+0.0070, +0.0181] | 3/3 | effective |
+| (A − A0) − (B − C) | −0.0004 | [−0.0105, +0.0098] | 2/3 | **equivalent** |
+
+- **Prediction 1 (the two implementations are equivalent) is neither confirmed nor refuted.** A − B has a mean of 0.0069 in absolute value, between the two lines (equivalent needs ≤ 0.0045; not equivalent needs > 0.0130, or the same sign on all three seeds with an interval clear of zero), and while all three seeds share a sign the interval crosses zero, so the pre-registered answer is "undetermined". **The comparison also carries a confound**: upstream's trainer switches mixed precision off in epoch 1, so A and A0 ran FP32 throughout while B and C ran mixed precision, and A − B therefore mixes implementation with precision. A − A0 and B − C, each taken inside one framework, do not.
+- **Prediction 2 (the block does the same in both frameworks) holds.** The difference of differences lands on "equivalent", and A − A0 and B − C are positive together.
+- **Prediction 3 (four blocks bring no gain at this budget) is wrong.** Four blocks are "effective" in both frameworks, with intervals clear of zero. Rounds five and six found four blocks negative under `recipe="esmoe"` with per-block weight 0.01, no output norm and no dense training; with upstream's whole recipe instead (the gate-reading GShard term, output norm, every expert run in training, the auxiliary term normalised by its own magnitude and capped, experts frozen for three epochs, routers at half the learning rate) four blocks are positive in both. **That conclusion has to be read as holding under `recipe="esmoe"`** -- which is the alternative the pre-registration named.
+- **Prediction 4 (the gate-reading objective still leaves dead experts) holds.** Every one of the three B checkpoints has blocks with a dead expert: three of four blocks each (block 3 never), with routing entropy at 98.5% of its maximum while the top-2 set stays constant -- flat probabilities hiding a collapsed dispatch. Neither running every expert in training nor the three-epoch expert warm-up closed that gap.

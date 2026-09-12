@@ -1,0 +1,14 @@
+{
+ "run": "yolo-master-n-esmoe-upstream-w1-e120-s2-p800e",
+ "config": "configs/yolo-master-n-esmoe.yaml",
+ "framework": "/opt/conda/lib/python3.10/site-packages/ultralytics/__init__.py",
+ "parameters": 2814406,
+ "dropped": [],
+ "imgsz": 800,
+ "metrics": {
+  "metrics/precision(B)": 0.4876,
+  "metrics/recall(B)": 0.38806,
+  "metrics/mAP50(B)": 0.36984,
+  "metrics/mAP50-95(B)": 0.21389
+ }
+}
