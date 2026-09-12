@@ -1,0 +1,16 @@
+{
+ "run": "yolo-master-n-upstream-e120-s0-p800c-fork",
+ "config": "/data/yolo-master/ultralytics/cfg/models/master/v0/det/yolo-master-n.yaml",
+ "framework": "/data/yolo-master/ultralytics/__init__.py",
+ "parameters": 2814406,
+ "dropped": [
+  "_mixture_loss_ema_buf"
+ ],
+ "imgsz": 800,
+ "metrics": {
+  "metrics/precision(B)": 0.47134,
+  "metrics/recall(B)": 0.38542,
+  "metrics/mAP50(B)": 0.3637,
+  "metrics/mAP50-95(B)": 0.20982
+ }
+}

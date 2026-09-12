@@ -1,0 +1,14 @@
+{
+ "run": "yolo-master-n-baseline-e120-s1-p800d",
+ "config": "configs/yolo-master-n.yaml",
+ "framework": "/opt/conda/lib/python3.10/site-packages/ultralytics/__init__.py",
+ "parameters": 2291406,
+ "dropped": [],
+ "imgsz": 800,
+ "metrics": {
+  "metrics/precision(B)": 0.47925,
+  "metrics/recall(B)": 0.37729,
+  "metrics/mAP50(B)": 0.3589,
+  "metrics/mAP50-95(B)": 0.20483
+ }
+}

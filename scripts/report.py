@@ -20,12 +20,39 @@ def published(record) -> str:
     return artifact.get("published_as") or PurePosixPath(artifact["path"]).parts[-3]
 
 
+def run_of(record) -> str:
+    """The run directory a record came from; its artifact is the `weights/` inside that directory."""
+    if path := record.get("artifact", {}).get("path"):
+        return PurePosixPath(path).parts[-3]
+    return record["experiment_id"].rsplit("-", 1)[0]
+
+
+def measured() -> dict[str, dict]:
+    """What `scripts/measure.py` wrote, keyed by the run directory it measured."""
+    found = {}
+    for path in sorted((ROOT / "results" / "measured").glob("*.json")):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        found[record["run"]] = record
+    return found
+
+
 def load():
-    runs = []
+    """The records, with a re-measured run reported through that measurement.
+
+    A record's own metrics are what the trainer that produced it validated with, which is the right
+    archive and the wrong comparison: arms trained on different frameworks were each validated by
+    their own, and the B arm of the same-configuration runs was validated through a pruning bug
+    (fixed in d6f4dcc). Where `scripts/measure.py` has measured a run's final weights, that number
+    is reported and the trainer's is kept beside it as `metrics_by_trainer`.
+    """
+    runs, remeasured = [], measured()
     for path in sorted((ROOT / "results").glob("*.json")):
         record = json.loads(path.read_text(encoding="utf-8"))
         # results/ also holds verify.json, which is a different kind of evidence entirely.
         if "experiment_id" in record and record.get("status") == "success":
+            if found := remeasured.get(run_of(record)):
+                record["metrics_by_trainer"] = record["metrics"]
+                record["metrics"] = found["metrics"]
             runs.append(record)
     return runs
 

@@ -11,6 +11,11 @@ A - B compares the two implementations as each is run. (A - A0) - (B - C) compar
 adds inside each framework, where the frameworks' own differences cancel, provided both arms of a
 framework trained at the same precision; the precision table says whether they did.
 
+Metrics come from `results/measured/`, where `scripts/measure.py` puts what one piece of code
+measures from every arm's final weights, and fall back to the training curve's best epoch for a
+seed that has not been measured. The two are not interchangeable: each trainer validates with its
+own framework, and the B arm validated through a pruning bug fixed in d6f4dcc.
+
     uv run python scripts/same_config.py        # results/same_config.md
 """
 
@@ -63,6 +68,12 @@ def card(arms: dict[str, dict]) -> str:
 
 def main() -> None:
     seeds = collect(load())
+    # `load` reports a re-measured run through that measurement; a seed whose four arms were all
+    # measured that way is comparable arm to arm, one that mixes the two is not.
+    sources = {
+        seed: "measured" if all("metrics_by_trainer" in arms[arm] for arm in ARMS) else "curve"
+        for seed, arms in seeds.items()
+    }
     out = ["# Same configuration: YOLO-Master's fork against official ultralytics + esmoe", ""]
     if not seeds:
         out.append("No seed has all four arms yet.")
@@ -75,14 +86,14 @@ def main() -> None:
                 deltas[name].append(delta)
             cells = " | ".join(f"{value[arm]:.4f}" for arm in ARMS)
             differences = " | ".join(f"{d:+.4f}" for d in found.values())
-            rows.append(f"| {seed} | {card(arms)} | {cells} | {differences} |")
+            rows.append(f"| {seed} | {card(arms)} | {sources[seed]} | {cells} | {differences} |")
         if not rows:
             continue
         out += [
             f"## {key}",
             "",
-            "| seed | card | A | A0 | B | C | " + " | ".join(DELTAS) + " |",
-            "|:--:|:--:|:--:|:--:|:--:|:--:|" + ":--:|" * len(DELTAS),
+            "| seed | card | metrics | A | A0 | B | C | " + " | ".join(DELTAS) + " |",
+            "|:--:|:--:|:--:|:--:|:--:|:--:|:--:|" + ":--:|" * len(DELTAS),
             *rows,
             "",
             "| difference | seeds | mean | 95% CI | positive |",

@@ -1,5 +1,6 @@
 """The same-configuration table has to sort runs into the right arm and pair them inside a card."""
 
+import json
 import sys
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import report  # noqa: E402
 import same_config  # noqa: E402
 
 
@@ -25,6 +27,7 @@ def record(arm, seed, value, framework="ultralytics", torch="2.8.0+metax3.3.0.2"
         "dataset": {"fraction": 1.0},
         "budget": {"epochs": 120, "imgsz": 800, "gpu_hours": 5.0},
         "metrics": {key: value for key in same_config.KEYS},
+        "artifact": {"path": f"/runs/{arm}-{seed}/weights/best.pt"},
     }
 
 
@@ -59,3 +62,20 @@ def test_a_seed_split_across_stacks_is_refused():
     runs[2]["hardware"]["torch"] = "2.8.0+metax3.7.1.3"
     with pytest.raises(ValueError, match="different stacks"):
         same_config.card(same_config.collect(runs)[0])
+
+
+def test_a_seed_is_reported_as_measured_only_when_every_arm_was(tmp_path, monkeypatch):
+    """`report.load` swaps in `scripts/measure.py`'s metrics and leaves the trainer's beside them."""
+    results = tmp_path / "results"
+    (results / "measured").mkdir(parents=True)
+    metrics = {key: 0.5 for key in same_config.KEYS}
+    runs = four(0, 0.4, 0.38, 0.41, 0.39)
+    for run in runs:
+        run["status"] = "success"
+        (results / f"{run['experiment_id']}.json").write_text(json.dumps(run), encoding="utf-8")
+    (results / "measured" / "A-0.json").write_text(json.dumps({"run": "A-0", "metrics": metrics}), encoding="utf-8")
+    monkeypatch.setattr(report, "ROOT", tmp_path)
+    loaded = {r["experiment_id"]: r for r in report.load()}
+    assert loaded["A-0"]["metrics"] == metrics
+    assert loaded["A-0"]["metrics_by_trainer"][same_config.KEYS[0]] == 0.4
+    assert "metrics_by_trainer" not in loaded["B-0"]
