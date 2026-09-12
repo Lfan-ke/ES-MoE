@@ -12,6 +12,22 @@ Every protocol-matrix `best.pt` and its full training arguments live on the
 
 --8<-- "results/summary.md"
 
+## Against YOLO-Master, same configuration
+
+One model and one protocol, trained on YOLO-Master's fork and on official ultralytics plus this
+package, four arms with a seed to a card: A is the fork running its own `yolo-master-n` (four
+`ES_MOE` blocks), A0 the same fork without them, B official 8.4.101 with this package's four
+`ESMoE` blocks and `recipe="upstream"`, C official without them. A seed's four arms share a card,
+so every difference is paired inside one.
+
+The metrics are re-measured by `scripts/measure.py`: each run's model rebuilt from the config it
+trained, loaded with the EMA weights in its `last.pt`, and evaluated with one set of validation
+settings, so neither framework's own validation enters the comparison; what each trainer measured
+stays in its record as `metrics_by_trainer`. Verdicts follow round seven of the
+[judgment lines](JUDGMENT.md).
+
+--8<-- "results/same_config.md"
+
 ## Area buckets
 
 --8<-- "results/buckets.md"

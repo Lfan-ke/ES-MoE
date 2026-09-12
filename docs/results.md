@@ -6,6 +6,14 @@
 
 --8<-- "results/summary.md"
 
+## 与 YOLO-Master 同配置对照
+
+同一个模型、同一份协议，在上游分支与官方 ultralytics 加本包上各训一遍，四臂按 seed 分卡：A 是上游分支跑它自己的 `yolo-master-n`（四个 `ES_MOE`），A0 是同一分支去掉四个块，B 是官方 8.4.101 加本包四个 `ESMoE` 并按 `recipe="upstream"` 训练，C 是官方去块。每个 seed 的四臂在同一张卡上，配对差都在卡内求。
+
+指标由 `scripts/measure.py` 统一重测：按各 run 自己的配置重建模型、装回 `last.pt` 的 EMA 权重、同一套验证参数各测一遍，不让两个框架各自的验证口径混进比较；训练器当时测到的值保留在记录的 `metrics_by_trainer` 里。判读按[判读线](JUDGMENT.md)第七轮。
+
+--8<-- "results/same_config.md"
+
 ## 面积分档
 
 --8<-- "results/buckets.md"
