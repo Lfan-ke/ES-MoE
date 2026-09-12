@@ -123,7 +123,7 @@ capped at 3.0, routers get half the learning rate outside Muon, and experts stay
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms × three seeds and more, 113 runs. What separates a positive
+the matrix runs to seven backbone generations × three arms × three seeds and more, 125 runs, the last twelve of them the same-configuration comparison against YOLO-Master's own fork. What separates a positive
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
@@ -166,7 +166,7 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 113
+metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 125
 protocol checkpoints, with each run's arguments and per-epoch curve, live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
 branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
 
