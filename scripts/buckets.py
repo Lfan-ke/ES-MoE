@@ -136,6 +136,9 @@ def summarise(records: list[dict]) -> str:
         "original image, maxDets = 500. This is a definition adopted for this project; VisDrone's "
         "official protocol reports no size split.",
         "",
+        "A row named for a run alone was measured from that run's final EMA weights, as "
+        "`scripts/measure.py` rebuilds them; the rest are measured from the run's `best.pt`.",
+        "",
         f"Ground truth: {counts['small']} small, {counts['medium']} medium, {counts['large']} large boxes.",
         "",
         "| variant | seed | " + " | ".join(keys) + " |",
@@ -170,7 +173,9 @@ def main() -> int:
     parser.add_argument("--summarise", action="store_true", help="only rebuild results/buckets.md from saved records")
     args = parser.parse_args()
     if args.summarise:
-        records = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*-best.json"))]
+        # The directory also holds the ground truth the evaluation reads, which is not a record.
+        saved = (json.loads(p.read_text(encoding="utf-8")) for p in sorted(OUT.glob("*.json")))
+        records = [record for record in saved if "weights" in record]
         target = ROOT / "results" / "buckets.md"
         target.write_text(summarise(records), encoding="utf-8")
         print(f"{len(records)} records -> {target}")

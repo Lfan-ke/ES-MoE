@@ -2,10 +2,16 @@
 
 COCO-style buckets (small < 32², medium 32²–96², large ≥ 96²) on ground-truth boxes in the original image, maxDets = 500. This is a definition adopted for this project; VisDrone's official protocol reports no size split.
 
+A row named for a run alone was measured from that run's final EMA weights, as `scripts/measure.py` rebuilds them; the rest are measured from the run's `best.pt`.
+
 Ground truth: 26586 small, 11105 medium, 1068 large boxes.
 
 | variant | seed | AP | AP50 | AP75 | APs | APm | APl | AR | ARs | ARm | ARl |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.2095 | 0.3640 | 0.2061 | 0.1260 | 0.3122 | 0.3902 | 0.3783 | 0.2826 | 0.5148 | 0.5711 |
+| yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3] | 0 | 0.2122 | 0.3708 | 0.2096 | 0.1270 | 0.3153 | 0.3975 | 0.3797 | 0.2848 | 0.5145 | 0.5751 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.2150 | 0.3729 | 0.2110 | 0.1303 | 0.3183 | 0.4097 | 0.3861 | 0.2905 | 0.5244 | 0.6029 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 0 | 0.2220 | 0.3828 | 0.2214 | 0.1341 | 0.3292 | 0.4253 | 0.3904 | 0.2956 | 0.5264 | 0.6084 |
 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 0 | 0.2087 | 0.3643 | 0.2032 | 0.1244 | 0.3056 | 0.3760 | 0.3783 | 0.2825 | 0.5108 | 0.5443 |
 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 1 | 0.2112 | 0.3670 | 0.2067 | 0.1245 | 0.3092 | 0.3956 | 0.3829 | 0.2883 | 0.5138 | 0.6077 |
 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 2 | 0.2104 | 0.3644 | 0.2106 | 0.1270 | 0.3079 | 0.3870 | 0.3794 | 0.2819 | 0.5169 | 0.5778 |
@@ -113,6 +119,22 @@ Ground truth: 26586 small, 11105 medium, 1068 large boxes.
 | yolov9t-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.2187 | 0.3784 | 0.2171 | 0.1311 | 0.3225 | 0.4232 | 0.3823 | 0.2854 | 0.5192 | 0.6008 |
 | yolov9t-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.2213 | 0.3836 | 0.2166 | 0.1335 | 0.3261 | 0.4196 | 0.3847 | 0.2878 | 0.5215 | 0.6212 |
 | yolov9t-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 2 | 0.2184 | 0.3769 | 0.2174 | 0.1269 | 0.3226 | 0.4327 | 0.3831 | 0.2826 | 0.5241 | 0.6102 |
+
+## yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] minus baseline, per seed
+
+| seed | AP | AP50 | AP75 | APs | APm | APl | AR | ARs | ARm | ARl |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | +0.0054 | +0.0089 | +0.0049 | +0.0043 | +0.0061 | +0.0195 | +0.0078 | +0.0080 | +0.0096 | +0.0318 |
+| mean | +0.0054 | +0.0089 | +0.0049 | +0.0043 | +0.0061 | +0.0195 | +0.0078 | +0.0080 | +0.0096 | +0.0318 |
+| wins | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
+
+## yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] minus baseline, per seed
+
+| seed | AP | AP50 | AP75 | APs | APm | APl | AR | ARs | ARm | ARl |
+|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | +0.0097 | +0.0120 | +0.0118 | +0.0070 | +0.0139 | +0.0279 | +0.0107 | +0.0108 | +0.0119 | +0.0333 |
+| mean | +0.0097 | +0.0120 | +0.0118 | +0.0070 | +0.0139 | +0.0279 | +0.0107 | +0.0108 | +0.0119 | +0.0333 |
+| wins | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 | 1/1 |
 
 ## yolo11n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] minus baseline, per seed
 
