@@ -929,6 +929,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1378,6 +1389,17 @@
     <span class="md-ellipsis">
       
         Addendum: the training loop step for step (2026-09-11, still before any full-protocol result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
       
     </span>
   </a>
@@ -2061,6 +2083,11 @@
 <li><strong>Control.</strong> Scaling one router layer's weights by 1 + 1e-6 in the same implementation and training again moves A from itself by 2.3% and B from itself by 1.5%, the same order as A against B. Iteration 0's loss jumps between two sets of values: with router scores nearly tied, a rounding-sized difference flips the top-2 choice.</li>
 </ul>
 <p>Conclusion: to the resolution a CPU trajectory allows, B differs from A by no more than rounding does. The full-protocol lines for A − B stand.</p>
+<h3 id="addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running">Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)<a class="headerlink" href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" title="Permanent link">&para;</a></h3>
+<p>The B arm's in-training validation collapsed to about 0.043 mAP50 on all three cards while its training losses matched A's and C's. The cause is in this package's block: inference pruning compared <code>dynamic_threshold</code> against the raw probabilities, before the top-k renormalisation, where upstream compares it against the share after. With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so validation pruned nearly every image to a single expert while training mixed two. The same weights read 0.374 mAP50 in upstream's order and 0.375 unpruned. Fixed in <code>d6f4dcc</code>; the default <code>dynamic_threshold=0.0</code> never takes that path, so the records from rounds one to six and the check of the released model are unaffected.</p>
+<p>The four arms' metrics are therefore re-measured by <code>scripts/measure.py</code>: each run's model is rebuilt from the config it trained, loaded with the EMA weights in its <code>last.pt</code>, and evaluated with one set of validation settings. <code>last.pt</code> rather than <code>best.pt</code>, because B's <code>best</code> was selected by the broken metric; all four arms ran <code>patience=0</code> for the full 120 epochs, so their final weights are comparable. The records themselves are not rewritten -- what each trainer measured stays beside the new number as <code>metrics_by_trainer</code>.</p>
+<p><strong>Known at the time of writing</strong>: seed 0 (card c) A 0.36370, A0 0.35419, B 0.37390, C 0.35972; seed 1 (card d) A 0.37034, A0 0.35339, B 0.37240, C 0.35890. Seed 2's B arm is still training. Measuring the same weights twice differs by about 0.0002.</p>
+<p><strong>The lines stand</strong> as pre-registered above, and the four predictions are reconciled against them. Prediction 4 reads routing statistics off the checkpoints and does not depend on the evaluation path.</p>
 
 
 
