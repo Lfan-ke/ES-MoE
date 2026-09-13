@@ -22,7 +22,7 @@ own framework, and the B arm validated through a pruning bug fixed in d6f4dcc.
 import statistics
 from collections import defaultdict
 
-from report import KEYS, ROOT, interval, load, stack
+from report import KEYS, ROOT, interval, load, stack, started
 
 ARMS = ("A", "A0", "B", "C")
 DELTAS = {
@@ -61,11 +61,15 @@ def precision(record) -> str:
 
 
 def collect(records) -> dict[tuple[str, int], dict[str, dict]]:
-    """(precision, seed) -> arm -> record; a later record of the same key replaces an earlier one."""
+    """(precision, seed) -> arm -> record; of identical runs, the one that started first.
+
+    A later run of the same arm and seed is a repeat for the determinism table in `report.py`. It
+    never replaces the run the comparison was pre-registered on.
+    """
     seeds: dict[tuple[str, int], dict[str, dict]] = defaultdict(dict)
-    for record in records:
+    for record in sorted(records, key=started):
         if arm := arm_of(record):
-            seeds[(precision(record), record["seed"])][arm] = record
+            seeds[(precision(record), record["seed"])].setdefault(arm, record)
     return {key: arms for key, arms in sorted(seeds.items()) if set(arms) == set(ARMS)}
 
 

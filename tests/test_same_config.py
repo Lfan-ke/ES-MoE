@@ -108,3 +108,46 @@ def test_the_two_precision_families_never_share_a_row():
     assert set(found) == {("mixed", 0), ("fp32", 0)}
     assert found[("fp32", 0)]["A"]["metrics"][same_config.KEYS[0]] == 0.36
     assert found[("mixed", 0)]["A"]["metrics"][same_config.KEYS[0]] == 0.40
+
+
+def repeat_of(run, stamp, value):
+    again = json.loads(json.dumps(run))
+    again["experiment_id"] = f"{run['experiment_id'].rsplit('-', 1)[0]}r-{stamp}"
+    again["metrics"] = {key: value for key in same_config.KEYS}
+    return again
+
+
+def stamped(runs, stamp):
+    for run in runs:
+        run["experiment_id"] = f"{run['experiment_id']}-{stamp}"
+    return runs
+
+
+def test_a_later_identical_run_is_a_repeat_and_never_replaces_the_first():
+    """Whatever order the records load in, the comparison keeps the run that started first."""
+    runs = stamped(four(0, 0.40, 0.38, 0.41, 0.39), "20260912100000")
+    for run in runs[::2]:  # A and B carry blocks, and the variant key reads their settings
+        run["config"].update(num_experts=4, top_k=2, aux_weight=1.0, balance="gshard", blocks=4)
+    again = repeat_of(runs[2], "20260913100000", 0.30)
+    for order in (runs + [again], [again] + runs):
+        assert same_config.collect(order)[("mixed", 0)]["B"]["metrics"][same_config.KEYS[0]] == 0.41
+        kept, repeats = report.dedupe(order)
+        assert len(kept) == 4
+        assert len(repeats) == 1
+        _, first, later = repeats[0]
+        assert first["metrics"][same_config.KEYS[0]] == 0.41
+        assert later is again
+
+
+def test_fp32_and_mixed_precision_repeats_are_separate_floors():
+    block = {"num_experts": 4, "top_k": 2, "aux_weight": 1.0, "balance": "gshard", "blocks": 4}
+    mixed = stamped([record("B", 0, 0.41, **block)], "20260911100000")[0]
+    fp32 = stamped([record("B", 0, 0.36, **block)], "20260912100000")[0]
+    fp32["budget"] = {**fp32["budget"], "amp": False}
+    pairs = [
+        (None, mixed, repeat_of(mixed, "20260911200000", 0.40)),
+        (None, fp32, repeat_of(fp32, "20260913200000", 0.33)),
+    ]
+    found = report.floors(pairs)
+    assert len(found) == 2
+    assert sorted(round(gaps[0], 4) for gaps in found.values()) == [0.01, 0.03]

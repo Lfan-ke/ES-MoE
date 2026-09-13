@@ -55,7 +55,7 @@
 | yolov10n-baseline-e120-s2-p800-20260907182750 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 2 | 0.3454 | 0.1981 | 2710940 | 16893.6 |
 | yolov10n-baseline-e120-s3-p800-20260907232405 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 3 | 0.3532 | 0.2022 | 2710940 | 16914.6 |
 | yolov10n-baseline-e120-s4-p800-20260908085304 | yolov10n-baseline@e120f1i800[metaxc500/metax3.3] | 4 | 0.3523 | 0.2003 | 2710940 | 16870.7 |
-| yolov10n-esmoe-dense-e1-s0-newsmoke-20260909122846 | yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 3025472 | 54.2 |
+| yolov10n-esmoe-norm-e1-s0-newsmoke-20260909122747 | yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 3025472 | 49.0 |
 | yolov10n-esmoe-dense-e120-s0-p800-20260909232756 | yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 0 | 0.3503 | 0.2005 | 3025472 | 17357.6 |
 | yolov10n-esmoe-dense-e120-s1-p800-20260910005225 | yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 1 | 0.3500 | 0.2004 | 3025472 | 17548.1 |
 | yolov10n-esmoe-dense-e120-s2-p800-20260910041726 | yolov10n-e4k2w0.01-dense@e120f1i800[metaxc500/metax3.3] | 2 | 0.3500 | 0.2025 | 3025472 | 17069.9 |
@@ -546,16 +546,16 @@
 
 | variant | seed | mAP50 first | mAP50 repeat | gap |
 |:--:|:--:|:--:|:--:|:--:|
+| yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 0.0000 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.3513 | 0.3483 | 0.0029 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.3511 | 0.3489 | 0.0023 |
-| yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 0.0000 |
 | yolov5n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.3562 | 0.3571 | 0.0009 |
 | yolov5n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.3526 | 0.3494 | 0.0032 |
 | yolov5n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 2 | 0.3604 | 0.3474 | 0.0130 |
 | yolov8n-e4k2w0.01@e20f0.25i640[4090d/torch2.6] | 0 | 0.0950 | 0.0950 | 0.0000 |
 
-| stack | epochs | repeats | mean gap | largest gap |
+| stack | schedule | repeats | mean gap | largest gap |
 |:--:|:--:|:--:|:--:|:--:|
-| 4090d/torch2.6 | 20 | 1 | 0.0000 | 0.0000 |
-| metaxc500/metax3.3 | 1 | 1 | 0.0000 | 0.0000 |
-| metaxc500/metax3.3 | 120 | 5 | 0.0045 | 0.0130 |
+| 4090d/torch2.6 | e20f0.25i640 | 1 | 0.0000 | 0.0000 |
+| metaxc500/metax3.3 | e120f1i800 | 5 | 0.0045 | 0.0130 |
+| metaxc500/metax3.3 | e1f0.02i320 | 1 | 0.0000 | 0.0000 |

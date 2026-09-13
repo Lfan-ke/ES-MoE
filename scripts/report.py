@@ -163,20 +163,41 @@ def paired(runs, key):
     return rows, deltas
 
 
+def started(record) -> str:
+    """When a run started: the timestamp its experiment id ends with, or empty if it has none."""
+    stamp = record["experiment_id"].rsplit("-", 1)[-1]
+    return stamp if stamp.isdigit() else ""
+
+
 def dedupe(runs):
     """Keep one record per (variant, seed) and report repeats as a determinism check.
 
     Re-running an identical config is evidence about reproducibility, not an extra sample; folding
-    it into the mean would silently weight that seed twice.
+    it into the mean would silently weight that seed twice. The run that started first is the
+    experiment and later identical runs are its repeats, whatever order the records load in.
     """
-    kept, repeats = {}, []
+    groups: dict = {}
     for r in runs:
-        key = (variant(r), r["seed"])
-        if key in kept:
-            repeats.append((key, kept[key], r))
-        else:
-            kept[key] = r
-    return list(kept.values()), repeats
+        groups.setdefault((variant(r), r["seed"]), []).append(r)
+    kept, repeats = [], []
+    for key, group in groups.items():
+        first, *later = sorted(group, key=started)
+        kept.append(first)
+        repeats.extend((key, first, again) for again in later)
+    return kept, repeats
+
+
+def floors(repeats, key=KEYS[0]) -> dict:
+    """Gap between a run and its repeat, grouped by the stack and the schedule both ran under.
+
+    The schedule carries precision: a gap measured in FP32 and one measured under mixed precision
+    are two denominators, not two samples of one.
+    """
+    found: dict = defaultdict(list)
+    for _, first, again in repeats:
+        gap = abs(first["metrics"].get(key, 0) - again["metrics"].get(key, 0))
+        found[(stack(first), schedule(first))].append(gap)
+    return found
 
 
 def main():
@@ -233,17 +254,16 @@ def main():
             "| variant | seed | mAP50 first | mAP50 repeat | gap |",
             "|:--:|:--:|:--:|:--:|:--:|",
         ]
-        by_stack = defaultdict(list)
         for (name, seed), first, again in repeats:
             a, b = first["metrics"].get(KEYS[0], 0), again["metrics"].get(KEYS[0], 0)
             out.append(f"| {name} | {seed} | {a:.4f} | {b:.4f} | {abs(a - b):.4f} |")
-            by_stack[(stack(first), first["budget"]["epochs"])].append(abs(a - b))
         # This is the denominator for every effect above: where two runs of one configuration are
-        # this far apart, an arm's mean delta of the same size says nothing about the arm. Budget
-        # is part of the key because a one-epoch probe and a full run do not measure the same thing.
-        out += ["", "| stack | epochs | repeats | mean gap | largest gap |", "|:--:|:--:|:--:|:--:|:--:|"]
-        for (name, epochs), gaps in sorted(by_stack.items()):
-            out.append(f"| {name} | {epochs} | {len(gaps)} | {statistics.mean(gaps):.4f} | {max(gaps):.4f} |")
+        # this far apart, an arm's mean delta of the same size says nothing about the arm. The
+        # schedule is part of the key because a one-epoch probe and a full run do not measure the
+        # same thing, and neither do FP32 and mixed precision.
+        out += ["", "| stack | schedule | repeats | mean gap | largest gap |", "|:--:|:--:|:--:|:--:|:--:|"]
+        for (name, plan), gaps in sorted(floors(repeats).items()):
+            out.append(f"| {name} | {plan} | {len(gaps)} | {statistics.mean(gaps):.4f} | {max(gaps):.4f} |")
 
     table = "\n".join(out)
     (ROOT / "results" / "summary.md").write_text(table + "\n", encoding="utf-8")
