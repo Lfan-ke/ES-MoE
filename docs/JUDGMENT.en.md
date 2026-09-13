@@ -451,3 +451,25 @@ Round seven's A − B carries a precision confound: upstream's trainer switches 
 2. **(A − A0) − (B − C) is still equivalent**, with A − A0 and B − C positive together, as in round seven.
 3. **A − A0 and B − C are both still effective**: precision does not change what four blocks do under upstream's recipe. If either turns ineffective, round seven's "effective" holds under mixed precision only.
 4. **Every one of B's three checkpoints still has a block with a dead expert.**
+
+### Addendum: the same-card noise floor in FP32 (2026-09-13, before the repeats start)
+
+Round eight keeps a noise floor measured under mixed precision. This addendum adds five same-card repeats in FP32 on machine f: each pair is one of round eight's runs plus the same configuration, seed and card run again (tag `-p800fr`).
+
+| card | arm | seed | kind |
+|:--:|:--:|:--:|:--:|
+| gpu0 | B (official + four package blocks) | 0 | blocks |
+| gpu0 | C (official, no blocks) | 0 | baseline |
+| gpu1 | A (upstream's fork + four blocks) | 1 | blocks |
+| gpu1 | A0 (upstream's fork, no blocks) | 1 | baseline |
+| gpu2 | C (official, no blocks) | 2 | baseline |
+
+**Measure**: both runs of a pair are re-measured from `last.pt` by `scripts/measure.py`; the gap is the absolute difference in mAP50, reported as the mean and the largest over the five pairs, and again separately for the block and baseline pairs. The run that started first is round eight's experiment; the later one enters the floor only and never round eight's comparison table.
+
+**Use**: round eight's verdict is given twice, once against the mixed-precision floor of 0.0045 / 0.0130 and once against the mean / largest gap measured here. Where the two give different bands, both are reported and neither is chosen.
+
+**Known at the time of writing**: of the five original runs, A (seed 1) and A0 (seed 1) are done, at 0.3674 and 0.3580 mAP50 as the trainer measured them; B (seed 0) is training, C (seed 0) has not started, C (seed 2) is training. None of the five repeats has started.
+
+**Predictions**:
+1. **Both block pairs differ by more than the mean of the three baseline pairs**, on the grounds of round seven's step-by-step check: with router scores nearly tied, a rounding-sized difference flips the top-2. If the block gaps are no larger than the baseline ones, those grounds do not carry over to the full protocol.
+2. **The FP32 mean gap stays within 0.0090**, the same order as mixed precision's 0.0045. If it exceeds that, precision changes how far repeats drift, and every round's use of one shared yardstick needs revisiting.
