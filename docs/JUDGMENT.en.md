@@ -432,3 +432,22 @@ Metrics are the ones `scripts/measure.py` re-measures under one protocol; every 
 - **Prediction 2 (the block does the same in both frameworks) holds.** The difference of differences lands on "equivalent", and A − A0 and B − C are positive together.
 - **Prediction 3 (four blocks bring no gain at this budget) is wrong.** Four blocks are "effective" in both frameworks, with intervals clear of zero. Rounds five and six found four blocks negative under `recipe="esmoe"` with per-block weight 0.01, no output norm and no dense training; with upstream's whole recipe instead (the gate-reading GShard term, output norm, every expert run in training, the auxiliary term normalised by its own magnitude and capped, experts frozen for three epochs, routers at half the learning rate) four blocks are positive in both. **That conclusion has to be read as holding under `recipe="esmoe"`** -- which is the alternative the pre-registration named.
 - **Prediction 4 (the gate-reading objective still leaves dead experts) holds.** Every one of the three B checkpoints has blocks with a dead expert: three of four blocks each (block 3 never), with routing entropy at 98.5% of its maximum while the top-2 set stays constant -- flat probabilities hiding a collapsed dispatch. Neither running every expert in training nor the three-epoch expert warm-up closed that gap.
+
+## Round eight, pre-registered (2026-09-13, before the B and C arms' results)
+
+Round seven's A − B carries a precision confound: upstream's trainer switches mixed precision off in epoch 1, so A and A0 ran FP32 throughout while B and C ran mixed. This round trains all four arms with `--amp 0`; everything else is as in round seven.
+
+**Design**: one machine (f), three C500s, one seed each (0/1/2); a seed's four arms run on one card, one after another. The machine differs from round seven's, so the two rounds are compared on direction only, never paired. Metrics follow round seven's addendum: `scripts/measure.py` re-measures every arm from its `last.pt`.
+
+**Known at the time of writing**:
+- A is done on all three seeds, A0 on seeds 0 and 1. mAP50 as the trainer measured it: A 0.3682 / 0.3674 / 0.3686, A0 0.3568 / 0.3580. All five have `amp_at_end=False`, `batch_at_end=32`, `epochs_replayed=0`.
+- Seed 2's A0 was stopped in epoch 43 by a device fault (`Xnack Error/ATU Fault`) and is rerunning.
+- B and C have no results yet; neither A − B nor the difference of differences exists.
+
+**Lines**: the same three bands as round seven. The noise floor, 0.0045 / 0.0130, was measured on mixed-precision runs; there are no FP32 repeats, so this round keeps those numbers, which is a known limitation.
+
+**Predictions**:
+1. **A − B is equivalent**: with the precision confound gone, the two implementations are equivalent on the full protocol. If the mean exceeds 0.0130 in absolute value, or all three seeds share a sign with an interval clear of zero, the implementation difference is real, and the block and the recipe get checked item by item.
+2. **(A − A0) − (B − C) is still equivalent**, with A − A0 and B − C positive together, as in round seven.
+3. **A − A0 and B − C are both still effective**: precision does not change what four blocks do under upstream's recipe. If either turns ineffective, round seven's "effective" holds under mixed precision only.
+4. **Every one of B's three checkpoints still has a block with a dead expert.**
