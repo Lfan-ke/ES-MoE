@@ -28,3 +28,15 @@ def test_the_record_carries_every_fact_watch_collects():
     source = (ROOT / "scripts" / "train.py").read_text(encoding="utf-8")
     for key in ('"amp_at_end": seen["amp"]', '"batch_at_end": seen["batch"]', 'seen["epochs_started"]'):
         assert key in source
+
+
+def test_a_failed_run_exits_non_zero_after_writing_its_record():
+    """`queue.sh` logs FAILED only from the exit code; a record alone reads as done in its log."""
+    source = (ROOT / "scripts" / "train.py").read_text(encoding="utf-8")
+    body = source[source.index("def main():") :]
+    record_written = body.index("out.write_text(json.dumps(record")
+    exit_on_failure = body.index('if status != "success":')
+    assert record_written < exit_on_failure, "the record must exist before the process says it failed"
+    assert "raise SystemExit(1)" in body[exit_on_failure : exit_on_failure + 200]
+    queue = (ROOT / "scripts" / "queue.sh").read_text(encoding="utf-8")
+    assert 'wait "$pid" || echo' in queue and "FAILED" in queue

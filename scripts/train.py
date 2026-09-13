@@ -369,6 +369,9 @@ def main():
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(record, indent=2), encoding="utf-8")
     print(json.dumps(record, indent=2))
+    if status != "success":
+        # The record keeps the failure; the exit code is what `queue.sh` reads to log FAILED.
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
