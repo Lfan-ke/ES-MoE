@@ -965,6 +965,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="第八轮预登记（2026-09-13，B、C 臂结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fp32-2026-09-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充：FP32 下的同卡噪声底（2026-09-13，重复运行开跑之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1452,6 +1469,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="第八轮预登记（2026-09-13，B、C 臂结果之前）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fp32-2026-09-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充：FP32 下的同卡噪声底（2026-09-13，重复运行开跑之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2194,6 +2228,56 @@
 2. <strong>(A − A0) − (B − C) 仍落在等效档</strong>，且 A − A0 与 B − C 同号为正，复现第七轮。
 3. <strong>A − A0 与 B − C 都仍判「有效」</strong>：精度不改变四块在上游配方下的作用。若任一变成「无效」，第七轮的「有效」就要限定在混合精度下。
 4. <strong>B 的三个 checkpoint 仍都有死专家的块</strong>。</p>
+<h3 id="fp32-2026-09-13">补充：FP32 下的同卡噪声底（2026-09-13，重复运行开跑之前）<a class="headerlink" href="#fp32-2026-09-13" title="Permanent link">&para;</a></h3>
+<p>第八轮沿用的噪声底是在混合精度上量的。本补充在卡 f 上补五对 FP32 下的同卡重复运行：每对是第八轮的一条原运行，加上同一张卡、同一个 seed、同一个配置再跑一遍（标签 <code>-p800fr</code>）。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">卡</th>
+<th style="text-align: center;">臂</th>
+<th style="text-align: center;">seed</th>
+<th style="text-align: center;">类别</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">gpu0</td>
+<td style="text-align: center;">B（官方 + 本包四块）</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">带块</td>
+</tr>
+<tr>
+<td style="text-align: center;">gpu0</td>
+<td style="text-align: center;">C（官方去块）</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">基线</td>
+</tr>
+<tr>
+<td style="text-align: center;">gpu1</td>
+<td style="text-align: center;">A（上游分支 + 四块）</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">带块</td>
+</tr>
+<tr>
+<td style="text-align: center;">gpu1</td>
+<td style="text-align: center;">A0（上游分支去块）</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">基线</td>
+</tr>
+<tr>
+<td style="text-align: center;">gpu2</td>
+<td style="text-align: center;">C（官方去块）</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">基线</td>
+</tr>
+</tbody>
+</table>
+<p><strong>口径</strong>：两条都由 <code>scripts/measure.py</code> 从 <code>last.pt</code> 重测，取 mAP50 之差的绝对值，报五对的均值与最大值，带块与基线再分开各报一次。先开跑的那条是第八轮的实验，后跑的只进噪声底，不进第八轮的对照表。</p>
+<p><strong>用法</strong>：第八轮的判定按两套噪声底各给一遍，一套是混合精度的 0.0045 / 0.0130，一套是本次 FP32 量出的均值 / 最大值。两套给出的档位不同时，两个都报，不择一。</p>
+<p><strong>声明时已知</strong>：五条原运行里，A（seed 1）与 A0（seed 1）已跑完，训练器测得 mAP50 为 0.3674、0.3580；B（seed 0）在跑，C（seed 0）未开跑，C（seed 2）在跑。五条重复运行都还没开始。</p>
+<p><strong>预测</strong>：
+1. <strong>带块两对的差都大于基线三对的均值</strong>。依据是第七轮补充的逐步核对：路由分数近乎打平时，舍入级差异会翻转 top-2。若带块的差不大于基线，这条依据在满协议上不成立。
+2. <strong>FP32 的均值差在 0.0090 以内</strong>，即与混合精度的 0.0045 同一量级。若超过，说明精度改变了重复运行的离散度，此前各轮共用同一把尺子的做法要重新审视。</p>
 
 
 
