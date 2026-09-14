@@ -16,7 +16,7 @@ Exposes `ESMoE` where `parse_model` resolves layer names, after which any model.
 
 ## graft
 
-    esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
+    esmoe.graft(base="yolov8n.yaml", out=None, *, at="backbone_end", num_experts=4, top_k=2,
                 rewire=False, out_channels=None, **settings) -> dict
 
 Inserts blocks after the layers named by `at` and renumbers every later reference. `at` is `"backbone_end"`, `"backbone_stages"` (one block after each backbone stage, reproducing the upstream layout), one index or several. With `rewire=True` every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.
@@ -29,7 +29,7 @@ Inserts blocks after the layers named by `at` and renumbers every later referenc
 
     esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -> model
 
-Puts the router load-balancing loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
+Puts the auxiliary loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
 
 `recipe` decides how the block and its term train:
 
@@ -40,7 +40,7 @@ Puts the router load-balancing loss into the optimised training loss; training l
 
     esmoe.collect_aux_loss(model, device=None) -> Tensor
 
-Sums the routing losses published by the most recent forward, for custom training loops. Calling it twice cannot count a stale value again.
+Sums the auxiliary loss each block last published to the registry, for custom training loops. It reads without clearing, so call `clear_aux_loss` before each forward.
 
 ## clear_aux_loss
 
@@ -63,7 +63,7 @@ Drops every value blocks have published into the registry. The loss patch `attac
 
 A mixture-of-experts block, channel-preserving unless `out_channels` says otherwise. `channels` is inferred on the first forward when omitted; `top_k=None` activates every expert. `expert` is a `(c1, c2, k) -> Module` factory, or its name (a short name from `esmoe.EXPERTS`, or `module:qualname`). `options` is the mapping a config carries settings in (`[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]`); it is equivalent to `**settings` and may also carry `expert` and `out_channels`. An `out_channels` given through `options` makes the block return a one-element list for the `Index` layer after it.
 
-The five settings and their defaults (`esmoe.SETTINGS`):
+The five settings and their defaults (`esmoe.SETTINGS`, a read-only mapping):
 
 | setting | default here | upstream | what it does |
 |:--:|:--:|:--:|:--:|
@@ -76,3 +76,56 @@ The five settings and their defaults (`esmoe.SETTINGS`):
 The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, as did all six same-configuration B checkpoints, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), rounds six to eight).
 
 `block.spec()` returns the five settings a block is holding, plus `expert` when a custom one is in use, and `block.configure(**settings)` changes them on paths that never reach a trainer -- inference, export, a unit test. `esmoe.blocks(model)` walks every block in a model in module order, and `scripts/blockspec.py` reads back from any checkpoint what was actually in force.
+
+## blocks
+
+    esmoe.blocks(model) -> Iterator[ESMoE]
+
+Yields every block in a model in module order. It is a generator, so walking the blocks again takes another call; a `YOLO` object and its `.model` both work:
+
+    for block in esmoe.blocks(model):
+        print(block.spec())
+
+## Balancing objectives
+
+    esmoe.switch_balance(probs, gate) -> Tensor
+    esmoe.gshard_balance(probs, gate) -> Tensor
+    esmoe.master_balance(probs, gate) -> Tensor
+    esmoe.gshard_probs_balance(probs, gate) -> Tensor
+
+`probs` is the router's full softmax and `gate` the top-k selection renormalised, both shaped `(batch, E)`. The usage `u` below is the per-expert mean, normalised to sum to one.
+
+| function | short name | reads | value |
+|:--:|:--:|:--:|:--:|
+| `switch_balance` | `switch` | `probs` and `gate > 0` | `E · Σ mean(probs)ᵢ · mean(gate > 0)ᵢ` |
+| `gshard_balance` | `gshard` | `gate` | `E · Σ uᵢ²`, the form upstream's `ES_MOE` uses |
+| `master_balance` | `master` | `gate` | `(1/E) · Σ (uᵢ − 1/E)²`, the paper's eq. 13, equal to `(gshard − 1)/E²` |
+| `gshard_probs_balance` | `gshard_probs` | `probs` | `E · Σ uᵢ²`, kept to isolate which tensor is read |
+
+`esmoe.BALANCES` maps the short names to the functions. A custom objective takes the same arguments and returns a scalar.
+
+## DWExpert
+
+    esmoe.DWExpert(c1, c2, k)
+
+The default expert: a `k×k` depthwise convolution (`groups=c1`, no bias), then a `1×1` pointwise convolution, `BatchNorm` and `SiLU`. `esmoe.EXPERTS` maps short names to expert factories and holds `dw` only; a custom expert follows `(c1, c2, k) -> Module`.
+
+## Command line
+
+    esmoe graft BASE -o OUT [options]
+    esmoe info
+
+| option | default | what it does |
+|:--:|:--:|:--:|
+| `-o`, `--out` | required | where to write the config |
+| `-e`, `--num-experts` | `4` | experts per block |
+| `-k`, `--top-k` | `2` | experts active per image |
+| `--at` | `backbone_end` | `backbone_end`, `backbone_stages`, one index, or comma-separated indices |
+| `--rewire` | off | consumers read the block's output |
+| `--out-channels` | none | widen the blocks to this literal width |
+| `--balance` | `switch` | `switch`, `gshard`, `master`, `gshard_probs` or `module:qualname` |
+| `--expert` | `dw` | `module:qualname` of a custom expert |
+| `--out-norm` | off | `BatchNorm + SiLU` after the weighted sum |
+| `--dense-training` | off | run every expert while training |
+
+Only settings given explicitly are written into the config. `dynamic_threshold` and `sparse_inference` have no option; pass them through `equip` or the config. `esmoe info` prints the esmoe, ultralytics and torch versions.

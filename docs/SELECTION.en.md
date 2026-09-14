@@ -1,4 +1,4 @@
-# Selection: which ES-MoE configuration ships as the default
+# Selection
 
 Budget: VisDrone2019-DET `fraction=0.25`, imgsz 640, 20 epochs from scratch, batch 32, YOLOv8n,
 one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
@@ -13,7 +13,7 @@ path is measured on the same library version as the baseline. Records produced b
 carry `git_ref = "0.1.0"`; every later record stamps the commit, ultralytics version and both
 locked baselines.
 
-## Candidates at seed 0
+## Candidates
 
 | variant | experts | top_k | aux weight | params | mAP50 | delta vs baseline |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -24,14 +24,20 @@ locked baselines.
 | esmoe-e4k2, aux off | 4 | 2 | 0.00 | 3.33M | 0.0938 | +0.0005 |
 | esmoe-e8k2 | 8 | 2 | 0.01 | 3.78M | 0.0934 | +0.0000 |
 
-## Confirmation across seeds
+<figure class="es-fig" id="fig-1">
+<figcaption><b>Fig. 1</b><span>Paired deltas of the candidates</span><em>25% train split, 20 epochs, bar for seed 0, dots per seed</em></figcaption>
+<div class="esmoe-figure" data-figure="selection-candidates"></div>
+<small>Data: <code>results/summary.md</code></small>
+</figure>
+
+## Three seeds
 
 | arch | seeds | mAP50 | mAP50-95 | paired mean delta | wins |
 |:--:|:--:|:--:|:--:|:--:|:--:|
 | baseline | 0,1,2 | 0.0909 ± 0.0022 | 0.0405 ± 0.0013 | - | - |
 | esmoe-e4k2 | 0,1,2 | 0.0930 ± 0.0022 | 0.0410 ± 0.0013 | +0.0021 mAP50 | 3/3 |
 
-## Confirmation on the full dataset
+## Full dataset
 
 The selection above was made on a 25% subset. Rerunning the chosen arm against its baseline on the
 **full** VisDrone training set, same 20-epoch budget, three seeds:
@@ -46,7 +52,7 @@ and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so q
 did not wash the effect out. One seed is effectively a tie, which bounds how large
 the effect is: small, consistent in sign, not reliable per single run.
 
-## What a longer schedule does to the gap
+## Schedule length
 
 The same pair at three budgets on the full training set, three seeds each:
 
@@ -62,9 +68,15 @@ the spread between seeds widens as the schedule grows: at 100 epochs the three p
 reliable per-run improvement. They do not support a claim about where the effect goes at
 convergence, in either direction.
 
+<figure class="es-fig" id="fig-2">
+<figcaption><b>Fig. 2</b><span>Schedule and backbone</span><em>full train split, dots per seed, short bar for the mean</em></figcaption>
+<div class="esmoe-figure" data-figure="selection-budget"></div>
+<small>Data: <code>results/summary.md</code></small>
+</figure>
+
 ## Across backbones
 
-The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds:
+The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds (the last cell of Fig. 2):
 
 | backbone | baseline mAP50 | esmoe mAP50 | paired deltas | mean | wins |
 |:--:|:--:|:--:|:--:|:--:|:--:|
@@ -74,13 +86,13 @@ The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds
 **The gain does not transfer.** On YOLO11n the block is a wash at best: one seed gains, two lose, and
 the mean is slightly negative on both mAP50 and mAP50-95. A plausible reading is that YOLO11n
 already carries attention (C2PSA) at the end of its backbone, so a routed mixture inserted at the
-same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
+same place buys less than it does on YOLOv8n; this experiment does not test that explanation,
 and it is offered as a hypothesis, not a finding.
 
 What this bounds, at this 20-epoch selection stage: the compatibility matrix in the README is a statement
-about **mechanics** - the block builds, trains and back-propagates its auxiliary loss on every generation.
+about **mechanics**: the block builds, trains and back-propagates its auxiliary loss on every generation.
 It is not a claim that the accuracy effect exists on all of them. The accuracy evidence at this stage is
-YOLOv8n only; the seven-generation protocol matrix that followed is on the judgment-lines page.
+YOLOv8n only; the seven-generation protocol matrix that followed is on [Judgment lines](JUDGMENT.md).
 
 ## Decision
 
@@ -92,11 +104,11 @@ YOLOv8n only; the seven-generation protocol matrix that followed is on the judgm
 - Turning the auxiliary loss off costs 0.0012 mAP50 at the same parameter count, which is the
   concrete argument for wiring it into the optimised loss rather than merely computing it.
 
-## How much this claim is worth
+## Weight of evidence
 
 The per-arm standard deviations overlap; only the paired per-seed comparison supports the
 ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
 mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
-the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
+the metric exactly on the RTX 4090 D at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
 configuration differ by 0.0045 on average, as large as the effect. How the experiments were run is on
 [Experiments](experiments.md#scope).

@@ -12,10 +12,10 @@
 </ul>
 </div>
 
-<div class="es-stats" markdown>
+<div class="es-stats">
 <div><strong>142</strong><span>full-protocol runs, 600 card-hours</span></div>
-<div><strong>8</strong><span>backbones run through the full protocol</span></div>
-<div><strong>319</strong><span>tests, including bit-for-bit parity with upstream and the paper</span></div>
+<div><strong>7</strong><span>official generations, plus yolo-master-n</span></div>
+<div><strong>335</strong><span>tests, including numerical parity with upstream and the paper</span></div>
 <div><strong>11</strong><span>pre-registrations committed before their results</span></div>
 </div>
 
@@ -23,7 +23,7 @@
 <a href="tutorial/"><strong>Tutorial</strong><span>install, the three calls, grafting and renumbering, a comparison you can defend</span></a>
 <a href="API/"><strong>API</strong><span>every argument of equip, graft, attach_aux_loss and ESMoE</span></a>
 <a href="design/"><strong>ES-MoE and YOLO</strong><span>what the block adds, how it computes in training and inference, and YOLO-Master item by item</span></a>
-<a href="experiments/"><strong>Experiments</strong><span>dataset, protocol, pipeline, eight rounds and the same-configuration comparison, all interactive</span></a>
+<a href="experiments/"><strong>Experiments</strong><span>dataset, protocol, pipeline, eight rounds and the same-configuration comparison, a figure for each finding</span></a>
 <a href="charts/"><strong>Effect chart</strong><span>per-seed paired deltas across seven generations</span></a>
 <a href="JUDGMENT/"><strong>Judgment lines</strong><span>criteria and predictions first, verdicts after</span></a>
 </div>
@@ -58,8 +58,8 @@ The separate steps, the CLI and the hand-written config are covered in the [tuto
 | YOLO26 | yes | yes | yes | yes |
 | YOLO-Master (fork) | yes | yes | yes | no |
 
-Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone runs on four generations and by the 120-epoch protocol runs on all seven, each logging a non-zero `train/esmoe_aux`; graft and forward run on every row in CI. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours. The same-configuration comparison trains upstream's own blocks on the fork and this package's blocks on official ultralytics, hence the last column.
+Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and the latest release (the CI matrix), which report loss items in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone runs on four generations and by the 120-epoch protocol runs on all seven, each logging a non-zero `train/esmoe_aux`; graft and forward run on every row in CI. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours. The same-configuration comparison trains upstream's own blocks on the fork and trains `yolo-master-n` with this package's blocks on official ultralytics, hence the last column.
 
-## Shipped default
+## Default configuration
 
-`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`. Under one budget it beat the 2-, 4- and 8-expert and top-1 variants, and on the full VisDrone training set three seeds confirmed it: 3/3 paired wins, +0.0021 mAP50, for 10.4% more parameters. The argument is on [Selection](SELECTION.md).
+`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`. Under one budget of a 25% train split, 640 px and 20 epochs, it beat the 2-expert, 8-expert, top-1 and aux-off variants; on the full VisDrone training set, at the same 20 epochs and 640 px, three seeds confirmed it: 3/3 paired wins, +0.0021 mAP50, and 10.4% more parameters on YOLOv8n. Under the protocol budget (800 px, 120 epochs) the default wiring on YOLOv8n is +0.0025, 2/3. The argument is on [Selection](SELECTION.md).

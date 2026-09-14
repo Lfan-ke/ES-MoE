@@ -20,6 +20,12 @@
 
 - 与 YOLO-Master 的同配置对照两轮入库：第七轮按各框架默认精度，第八轮四臂全程 FP32，另有 FP32 同卡重复运行量出的噪声底。判定见[判读线](JUDGMENT.md)。
 
+## 文档
+
+- **实验页与设计页。** 文档站新增「实验」页（数据集、训练协议、流程图、八轮实验、同配置对照、重复运行、路由与平衡目标）与「ES-MoE 与 YOLO」页（块的结构、训练与推理、与 YOLO-Master 和论文的逐项对照），图表都可交互。原「已知局限」页的内容并入这两页，旧地址跳转到设计页。
+- **图表数据由脚本现算。** `scripts/dataset.py` 从数据集压缩包统计出 `results/dataset.json`；`scripts/charts.py` 另写出各图所用的数据：同配置四臂与差值区间、重复运行、面积分档、选型、路由统计、平衡压力与训练开销。
+- **按 1.0.0 重跑的产物。** `results/verify.json` 用 1.0.0 重跑，十项检查全部通过；快速上手笔记本的输出来自在 Linux 上安装 PyPI 1.0.0 后的一次运行。
+
 ## 仓库
 
 - 根目录只留包与 GitHub 需要的文件：`uv.lock` 不再入库，CI 按当天解析到的依赖测试；文档站配置移到 `.github/docs/`；贡献指南与行为准则移到 `.github/`；环境快照移到 `results/env/`。
@@ -50,14 +56,14 @@
 
 ### 新增
 
-- **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的 checkpoint 因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。
-- **四个平衡目标，默认仍是 Switch。** `switch_balance`（默认，与 0.1.4 和 `results/` 里的全部记录一致）、`gshard_balance`（对齐上游：读 top-k 掩码重归一后的门控）、`master_balance`（论文式 13，与 `gshard` 只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。默认值由数据定：读门控的目标对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有（判读线第六轮）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
+- **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的检查点因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。
+- **四个平衡目标，默认仍是 Switch。** `switch_balance`（默认，与 0.1.4 和 `results/` 里的全部记录一致）、`gshard_balance`（对齐上游：读 top-k 掩码重归一后的门控）、`master_balance`（论文式 13，与 `gshard` 只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。默认值由数据定：读门控的目标对没进 top-k 的专家梯度恒为零，实测 6 个检查点里 5 个出现死专家，Switch 在 66 个里一个没有（判读线第六轮）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
 - **多卡与 `compile=True` 同用。** 进程组里没被路由到的专家以零权重留在计算图中，DDP 不再依赖 `find_unused_parameters`。ultralytics 在 `compile=True` 时用的 `find_unused_parameters=False`、`static_graph=True` 已用两个 gloo 进程验过，块在 TorchDynamo 下能编译且与 eager 一致（`tests/test_distributed.py`）。单进程行为不变。
-- **自定义平衡项与专家写进配置。** `graft(balance=fn, expert=cls)` 把自定义的函数与类写成 `模块:限定名`，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个对象；按名导入不回来的（lambda、嵌套函数、`__main__` 里定义的）在嫁接时就拒绝。内置专家有了短名 `dw`，`esmoe.EXPERTS` 与 `esmoe.BALANCES` 并列。
+- **自定义平衡目标与专家写进配置。** `graft(balance=fn, expert=cls)` 把自定义的函数与类写成 `模块:限定名`，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个对象；按名导入不回来的（lambda、嵌套函数、`__main__` 里定义的）在嫁接时就拒绝。内置专家有了短名 `dw`，`esmoe.EXPERTS` 与 `esmoe.BALANCES` 并列。
 - **改宽的块嫁接进官方 yaml。** `graft(out_channels=N)` 在块后写一个官方 `Index` 层，块把输出包成单元素列表交给它；官方 `parse_model` 读这一层声明的宽度，下游因此按真实宽度建。`N` 是字面值，不随 width 倍率缩放。
 - **命令行补齐。** `esmoe graft` 新增 `--out-channels`、`--balance`、`--expert`、`--out-norm`、`--dense-training`。
 - **上游的块布局与块内结构。** `graft(at="backbone_stages")` 在主干每个 stage 后各放一块，七代主干均得四块（stage 边界由下采样层反推）；`out_norm` 补上加权求和后的 `BatchNorm + SiLU`（论文式 2 的 `Norm`）；`dense_training` 让训练期跑满专家，未选的权重为 0 但归一化统计量继续更新。三者默认关着，以保 `results/` 里既有的运行可原样复现。
-- **`scripts/blockspec.py`**：从任一 checkpoint 读回当时真正生效的块设置。**`scripts/backfill.py`**：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，`--settings` 按权重改写记录并把改动写进记录本身。**`scripts/queue.sh`** 入库，与 `scripts/train.py` 的运行命名由测试对表。
+- **`scripts/blockspec.py`**：从任一检查点读回当时真正生效的块设置。**`scripts/backfill.py`**：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，`--settings` 按权重改写记录并把改动写进记录本身。**`scripts/queue.sh`** 入库，与 `scripts/train.py` 的运行命名由测试对表。
 - `scripts/report.py` 的配对差值附 95% 置信区间；`scripts/routing.py` 逐块分析而非只看第一块。
 
 ### 修复
@@ -74,11 +80,11 @@
 
 ### 反馈与迭代
 
-0.1.4 的多数条目来自首轮使用反馈：评测口径改用 COCO 式 32²/96² 分档与 maxDets=500（`scripts/buckets.py`，口径来源已在文档注明）；`--patience` 与 `IMGSZ` 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度有限值测试对应「先检查 FP32/AMP 下损失与梯度是否一致有限」的要求。上游侧的反馈同样闭环：`OptimizedMOE` 追踪守卫的修复已被 YOLO-Master 合并（#241）。
+0.1.4 的多数条目来自首轮使用反馈：评测口径改用 COCO 式 32²/96² 分档与 maxDets=500（`scripts/buckets.py`，口径来源已在文档注明）；`--patience` 与 `IMGSZ` 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度测试检查 FP32/AMP 下损失与梯度是否有限且一致。上游侧的反馈同样闭环：`OptimizedMOE` 追踪守卫的修复已被 YOLO-Master 合并（#241）。
 
 ### 修复
 
-- `scripts/report.py` 的分组键补进 imgsz。此前同 epoch 不同分辨率的记录会被平均进同一行，正是文档承诺不会发生的事。
+- `scripts/report.py` 的分组键补进 imgsz。此前同 epoch 不同分辨率的记录会被平均进同一行，而文档说过不会出现这种情况。
 
 ## 此前的 0.1.3
 
@@ -88,7 +94,7 @@
 
 ### 新增
 
-- `scripts/verify.py`：单测做不到的正确性检查——真实训练一轮并确认辅助项为正、`weight=0` 时损失表不变、checkpoint 往返、断点续训、多个块一起训练、`val` 与 `predict`，以及 ONNX 导出。
+- `scripts/verify.py`：单测做不到的正确性检查——真实训练一轮并确认辅助损失为正、`weight=0` 时损失表不变、检查点往返、断点续训、多个块一起训练、`val` 与 `predict`，以及 ONNX 导出。
 - 一项回归测试：导出一个路由随输入符号变化的块，把两条分支都与 PyTorch 对照。
 
 ## 更早的小版本

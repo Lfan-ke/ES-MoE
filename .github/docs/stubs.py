@@ -49,6 +49,10 @@ def main(pages: Path) -> None:
             (here / "index.html").write_text(STUB.format(target=f"{base}/latest/{'/'.join(parts)}/"), encoding="utf-8")
     # GitHub Pages answers every missing address with the root 404; latest's own resolves its assets absolutely.
     shutil.copyfile(latest / "404.html", pages / "404.html")
+    # mike's root redirect waits a second before it leaves; nothing is gained by the wait.
+    entry = pages / "index.html"
+    html = entry.read_text(encoding="utf-8")
+    entry.write_text(html.replace('content="1; url=', 'content="0; url='), encoding="utf-8")
 
 
 if __name__ == "__main__":

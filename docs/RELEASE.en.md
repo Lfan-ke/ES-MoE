@@ -20,6 +20,12 @@ Current version **1.0.0**, the first stable release. The public interface in `es
 
 - Both rounds of the same-configuration comparison with YOLO-Master are in: round seven at each framework's default precision, round eight with all four arms in FP32, and the noise floor measured by repeating FP32 runs on the same cards. Verdicts are on the [judgment lines](JUDGMENT.md).
 
+## Documentation
+
+- **Experiments and design pages.** The site gains an Experiments page (dataset, training protocol, pipeline, the eight rounds, the same-configuration comparison, repeated runs, routing and balancing) and an ES-MoE and YOLO page (the block's structure, training against inference, and item-by-item comparisons with YOLO-Master and its paper), with interactive figures throughout. The former limitations page is folded into the two, and its address redirects to the design page.
+- **Figure data comes from scripts.** `scripts/dataset.py` counts the dataset archive into `results/dataset.json`, and `scripts/charts.py` also writes the data every figure draws: the four same-configuration arms and their intervals, repeated runs, area buckets, selection, routing statistics, balancing pressure and training cost.
+- **Artifacts rerun on 1.0.0.** `results/verify.json` was rerun on 1.0.0 with all ten checks passing, and the quick-start notebook's outputs come from a Linux run of the published 1.0.0.
+
 ## Repository
 
 - The root holds only the package and what GitHub needs: `uv.lock` is no longer tracked and CI tests what resolves on the day; the docs config lives in `.github/docs/`, the contributing guide and code of conduct in `.github/`, and environment snapshots in `results/env/`.
@@ -74,7 +80,7 @@ Current version **1.0.0**, the first stable release. The public interface in `es
 
 ### Feedback and iteration
 
-Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (`scripts/buckets.py`, source credited in the docs); `--patience` and `IMGSZ` exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the `OptimizedMOE` tracing guard fix was merged into YOLO-Master (#241).
+Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (`scripts/buckets.py`, source credited in the docs); `--patience` and `IMGSZ` exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the `OptimizedMOE` tracing guard fix was merged into YOLO-Master (#241).
 
 ### Fixed
 

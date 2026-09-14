@@ -23,12 +23,12 @@ flowchart LR
     E3 --> S
     E4 --> S
     S --> Y["output<br/>(n, c, h, w)"]
-    P -.-> A["load-balancing loss"]
+    P -.-> A["auxiliary loss"]
     T -.-> A
     A -.-> L["training loss"]
 ```
 
-The auxiliary term is the Switch-Transformer load-balancing loss,
+The default balancing objective is the Switch-Transformer load-balancing form; times its weight, it is the auxiliary loss:
 
 $$
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
@@ -41,7 +41,7 @@ realised load are spread evenly. Measured, what it prevents is an expert dying, 
 
 ## The three calls
 
-`inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the layer references, `attach_aux_loss` wires the router loss into training. `equip` does all four steps at once: register, graft, build, wire.
+`inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the layer references, `attach_aux_loss` wires the auxiliary loss into training. `equip` does all four steps at once: register, graft, build, wire.
 
     import esmoe
 
@@ -63,7 +63,7 @@ Written by hand, the grafted layer is one line:
 
     [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 
-## What grafting has to get right
+## Grafting and renumbering
 
 A YOLO config addresses earlier layers by absolute index:
 
@@ -78,9 +78,9 @@ Renumbering moves references; it does not retarget them. A head branch that name
 
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 
-It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); `rewire` gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; `rewire` pulls 12n and 26n back to parity and trails the default arm only on 11n. Seven-generation verdicts: [judgment lines](JUDGMENT.md).
+It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); `rewire` gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; `rewire` pulls 12n and 26n back to parity and trails the default on v5n, v9t, v10n and 11n. Seven-generation verdicts: [judgment lines](JUDGMENT.md).
 
-## Proving the auxiliary loss is real
+## Checking the auxiliary loss
 
 A configuration key named `aux_loss` proves nothing. What proves it:
 
@@ -90,13 +90,16 @@ A configuration key named `aux_loss` proves nothing. What proves it:
 
 If you want the number yourself in a custom loop:
 
+    esmoe.clear_aux_loss()
+    task_loss = criterion(model(images), targets)
     aux = esmoe.collect_aux_loss(model)
     (task_loss + 0.01 * aux).backward()
 
-`collect_aux_loss` only sums values published by the latest forward pass, so calling it twice cannot
-double-count a stale graph.
+`collect_aux_loss` reads without clearing: it sums the value each block last published to the registry. Call
+`clear_aux_loss()` before each forward, so a block that does not run in a step leaves no value from the step before;
+the loss patch `attach_aux_loss` installs does this itself.
 
-## A comparison you can defend
+## Running a comparison
 
     uv run python scripts/capture_env.py             # freeze versions and hardware into results/env/
     EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
@@ -109,9 +112,9 @@ against the baseline of the same seed.
 
 Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
-same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
-reliable per-run improvement. [Experiments](experiments.md) has the full measurements.
+same direction three times. At the selection budget (full VisDrone, 640 px, 20 epochs) the default configuration
+wins 3/3 seeds by +0.0021 mAP50, and one of those seeds is nearly a tie; at the protocol budget (800 px, 120 epochs)
+YOLOv8n gives +0.0025, 2/3. A small, consistent effect, not a reliable per-run improvement. [Experiments](experiments.md) has the full measurements.
 
 ## Extending
 
@@ -129,9 +132,9 @@ Experts and the balancing objective are plain callables:
 `esmoe.blocks(model)` iterates every block in a model, which is how the collector and the tests find
 them.
 
-### Four balancing objectives ship with the block
+### Built-in balancing objectives
 
-The default is **Switch** (`switch_balance`), as in 0.1.4 and in the default arms under `results/`:
+The default is **Switch** (`switch_balance`), as in every earlier release and in the default arms under `results/`:
 
 | objective | formula | reads |
 |:--:|:--:|:--:|
@@ -140,7 +143,7 @@ The default is **Switch** (`switch_balance`), as in 0.1.4 and in the default arm
 | `master_balance` | `(1/E) * sum((mu_i - 1/E)^2)` | the gated weights (the paper's eq. 13; an affine map of the row above) |
 | `gshard_probs_balance` | `N * sum(usage_i^2)` | the raw probabilities, to isolate which tensor is read |
 
-What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (`switch`, `gshard_probs`) evaluate identically and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`).
+What separates them is not a coefficient but what they read. Where the mean probabilities are near uniform and the top-k dispatch concentrates on a few experts, the two that read the probabilities sit at fixed values (`k` for `switch`, 1 for `gshard_probs`) and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. The measured checkpoints are close to that shape: routing entropy runs at 90% to 100% of its maximum while the leading expert's top-1 share runs from 0.47 to 1.00. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`).
 
 Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints, and in all six same-configuration B checkpoints trained with upstream's recipe, while Switch lost none in 66, which is why Switch is the default ([judgment lines](JUDGMENT.md), rounds six to eight). To use upstream's objective instead:
 
@@ -148,7 +151,7 @@ Telling a collapse apart is not the same as pushing against it. The gate holds o
 
 A custom objective goes into the config too: define the function at module level in an importable module and pass it to `equip` or `graft`. The config stores `module:qualname`, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in `__main__` cannot be imported back by name and is refused when grafting. Custom experts work the same way (`expert=MyExpert`). The measurements are on [Experiments](experiments.md) and [Judgment lines](JUDGMENT.md).
 
-### The configuration that matches upstream
+### Matching upstream
 
 Upstream's `ES_MOE` differs from this package's defaults in the first five rows below: four affect training, and pruning affects inference only. **They all go through `equip`**, and a run compared against upstream adds its training recipe, `recipe="upstream"` (see [API](API.md)):
 
@@ -164,7 +167,7 @@ Upstream's `ES_MOE` differs from this package's defaults in the first five rows 
 
 | item | upstream / paper | this package's default | how to turn it on |
 |:--:|:--:|:--:|:--:|
-| balancing term | `N*sum(u^2)` on the gate | Switch (`switch_balance`) | `balance="gshard"` |
+| balancing objective | `N*sum(u^2)` on the gate | Switch (`switch_balance`) | `balance="gshard"` |
 | blocks | one per backbone stage, four in all | one, at the backbone end | `at="backbone_stages"` |
 | output norm | `BatchNorm + SiLU` (the paper's eq. 2 `Norm`) | none | `out_norm=True` |
 | training forward | every expert runs, unrouted ones weighted zero | unrouted experts skipped | `dense_training=True` |

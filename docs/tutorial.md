@@ -23,12 +23,12 @@ flowchart LR
     E3 --> S
     E4 --> S
     S --> Y["输出<br/>(n, c, h, w)"]
-    P -.-> A["负载均衡损失"]
+    P -.-> A["辅助损失"]
     T -.-> A
     A -.-> L["训练总损失"]
 ```
 
-辅助损失是 Switch-Transformer 的负载均衡损失：
+默认的平衡目标取 Switch-Transformer 的负载均衡形式，乘上权重就是辅助损失：
 
 $$
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
@@ -38,7 +38,7 @@ $$
 
 ## 三个调用
 
-`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把路由损失接进训练。`equip` 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。
+`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把辅助损失接进训练。`equip` 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。
 
     import esmoe
 
@@ -60,7 +60,7 @@ $$
 
     [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 
-## 嫁接时必须重编号
+## 嫁接与重编号
 
 YOLO 配置用**绝对层号**引用前面的层：
 
@@ -72,9 +72,9 @@ YOLO 配置用**绝对层号**引用前面的层：
 
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 
-默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；`rewire` 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，大目标受损主要来自绕过了 P5 侧向。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；`rewire` 在 12n、26n 把默认接法的一致损失拉回持平，仅在 11n 略低于默认接法。七代判定见[判读线](JUDGMENT.md)。
+默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；`rewire` 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，大目标受损主要来自绕过了 P5 侧向。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；`rewire` 在 12n、26n 把默认接法的一致损失拉回持平，在 v5n、v9t、v10n、11n 上低于默认接法。七代判定见[判读线](JUDGMENT.md)。
 
-## 怎么证明辅助损失确实生效
+## 确认辅助损失生效
 
 配置里有个叫 `aux_loss` 的键什么都证明不了。能证明的是：
 
@@ -84,12 +84,14 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 在自定义训练循环里取这个值：
 
+    esmoe.clear_aux_loss()
+    task_loss = criterion(model(images), targets)
     aux = esmoe.collect_aux_loss(model)
     (task_loss + 0.01 * aux).backward()
 
-`collect_aux_loss` 只汇总最近一次前向发布的值，所以连着调用两次不会把陈旧的计算图重复计入。
+`collect_aux_loss` 只读不清，汇总的是各块在注册表里最近一次发布的值。每步前向之前先调 `clear_aux_loss()`，某个块这一步没有跑到时才不会留下上一步的值；`attach_aux_loss` 装上的损失补丁会自己做这一步。
 
-## 对照实验怎么做
+## 对照实验
 
     uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
     EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
@@ -97,11 +99,11 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。`report.py` 按主干、块配置与**预算**三者共同分组，两个不同预算不会被平均进同一行；随后对同 seed 的基线打印逐 seed 的配对差值。
 
-要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，但其中一个 seed 几乎打平；这是一个方向一致而幅度很小的效应，单次运行并不可靠。完整的测量见[实验](experiments.md)。
+要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在选型预算下（全量 VisDrone、640 像素、20 epoch），默认配置以 +0.0021 mAP50 赢下 3/3 seed，其中一个 seed 几乎打平；到协议预算（800 像素、120 epoch），YOLOv8n 上是 +0.0025、2/3。这是一个方向一致而幅度很小的效应，单次运行并不可靠。完整的测量见[实验](experiments.md)。
 
 ## 扩展
 
-专家与平衡目标都是普通的 callable：
+专家与平衡目标都是可调用对象：
 
     class ThinExpert(nn.Sequential):
         def __init__(self, c1, c2, k):
@@ -114,9 +116,9 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 `esmoe.blocks(model)` 遍历模型中的每一个块，汇总器与测试都靠它定位。
 
-### 四个内置的平衡目标
+### 内置平衡目标
 
-**默认是 Switch**（`switch_balance`），与 0.1.4 一致，也是 `results/` 里默认臂用的目标：
+**默认是 Switch**（`switch_balance`），与此前各版本一致，也是 `results/` 里默认臂用的目标：
 
 | 目标 | 公式 | 读什么 |
 |:--:|:--:|:--:|
@@ -125,7 +127,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 | `master_balance` | `(1/E) · Σ(μᵢ − 1/E)²` | 门控权重（论文式 13；与上一行只差仿射） |
 | `gshard_probs_balance` | `N · Σ usageᵢ²` | 原始概率（用来隔离「读哪个张量」这一个变量） |
 
-差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（`switch`、`gshard_probs`）取到同一个值，分辨不出；读门控的两个（`gshard`、`master`）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。
+差别不在系数而在读什么。平均概率接近均匀、而 top-k 分派集中在少数专家时，读概率的两个停在固定值（`switch` 为 k，`gshard_probs` 为 1），分辨不出；读门控的两个（`gshard`、`master`）能分辨。实测的检查点接近这个形态：路由概率的熵是最大值的 90% 到 100%，主导专家的 top-1 份额却在 0.47 到 1.00 之间。上游代码与论文在这一点上一致，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。
 
 分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个检查点里 5 个出现死专家，同配置对照里按上游配方训的 6 个 B 检查点全部有，Switch 在 66 个里一个没有，默认值因此是 Switch（[判读线](JUDGMENT.md)第六至八轮）。换成上游的目标：
 
@@ -133,14 +135,14 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 自定义目标也能写进配置：把函数定义在可导入模块的顶层，传给 `equip` 或 `graft`，配置里存的是 `模块:限定名`，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个函数。lambda、嵌套函数、`__main__` 里定义的函数按名导入不回来，嫁接时就被拒绝。自定义专家同理（`expert=MyExpert`）。实测见[实验](experiments.md)与[判读线](JUDGMENT.md)。
 
-### 对齐上游的完整配置
+### 对齐上游
 
 上游 `ES_MOE` 与本包默认的差别在下表前五行：四项影响训练，剪枝只影响推理。**都从 `equip` 传进去**；与上游同配置对比时，再加上训练方式 `recipe="upstream"`（见 [API](API.md)）：
 
     model = esmoe.equip(
         "yolo11n.yaml",
         at="backbone_stages",     # 每个 stage 后一块，共四块
-        balance="gshard",         # 读门控的平衡项
+        balance="gshard",         # 读门控的平衡目标
         out_norm=True,            # 加权求和后的 BatchNorm + SiLU
         dense_training=True,      # 训练期跑满专家
         dynamic_threshold=0.4,    # 推理期剪枝
@@ -149,7 +151,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 | 项 | 上游 / 论文 | 本包默认 | 打开方式 |
 |:--:|:--:|:--:|:--:|
-| 平衡项 | `N·Σu²` 读门控 | Switch（`switch_balance`） | `balance="gshard"` |
+| 平衡目标 | `N·Σu²` 读门控 | Switch（`switch_balance`） | `balance="gshard"` |
 | 块数 | 主干每 stage 一块，共四块 | 一块（主干末端） | `at="backbone_stages"` |
 | 输出归一化 | `BatchNorm + SiLU`（论文式 2 的 `Norm`） | 无 | `out_norm=True` |
 | 训练期前向 | 跑满专家，未选的权重为 0 | 跳过未选专家 | `dense_training=True` |

@@ -43,6 +43,7 @@ extra_css:
 extra:
   version:
     provider: mike
+    alias: true
     default: latest
 
 plugins:
@@ -71,7 +72,7 @@ plugins:
             使用: Usage
             设计: Design
             实验: Experiments
-            实验总览: Experiments
+            实验总览: Overview
             ES-MoE 与 YOLO: ES-MoE and YOLO
             判读线: Judgment lines
             发布说明: Release notes
@@ -113,10 +114,8 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_javascript:
-  - https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js
   - javascripts/data.js
   - javascripts/charts.js
   - javascripts/figures.js
-  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
   - javascripts/diagrams.js
+  - javascripts/loader.js

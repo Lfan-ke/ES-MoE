@@ -57,28 +57,42 @@ def fix_entries(site: Path, path: str) -> None:
     relink(site / "404.html", {"zh": f"{path}/", "en": f"{path}/en/"}, base=f"{path}/")
 
 
+CHINESE_404: list[str] = []
+
+
+def on_post_template(output: str, template_name: str, config) -> str:
+    # The English pass renders the root 404 last; the site's default language is Chinese.
+    if template_name == "404.html" and str(config["theme"]["language"]).startswith("zh"):
+        CHINESE_404[:] = [output]
+    return output
+
+
 def on_post_build(config) -> None:
     # i18n runs post_build once per language, the English pass with site_dir at site/en; both write
     # from the site root, and the last pass completes it.
     site = Path(config["site_dir"])
     site = site.parent if site.name == "en" else site
+    if CHINESE_404:
+        (site / "404.html").write_text(CHINESE_404[0], encoding="utf-8")
     base = config["site_url"].rstrip("/")
     pages = sorted(page.relative_to(site).parts[:-1] for page in site.rglob("index.html"))
     pages = [parts for parts in pages if not set(parts) & MOVED.keys()]
     chinese = [parts for parts in pages if parts[:1] != ("en",) and parts[:1] != ("zh",)]
     english = [parts for parts in pages if parts[:1] == ("en",)]
 
+    # Relative targets: the same stub inside `latest/` must land in `latest/`, not the numbered copy.
     for parts in chinese:
         alias = site.joinpath("zh", *parts, "index.html")
         alias.parent.mkdir(parents=True, exist_ok=True)
-        alias.write_text(ALIAS.format(target=f"{base}/{'/'.join(parts)}{'/' if parts else ''}"), encoding="utf-8")
+        target = "../" * (len(parts) + 1) + "".join(part + "/" for part in parts)
+        alias.write_text(ALIAS.format(target=target), encoding="utf-8")
 
     for old, new in MOVED.items():
         for language in ("", "zh/", "en/"):
-            target = f"{base}/{'en/' if language == 'en/' else ''}{new}/"
-            stub = site / language.rstrip("/") / old / "index.html" if language else site / old / "index.html"
+            stub = site / language / old / "index.html"
             stub.parent.mkdir(parents=True, exist_ok=True)
-            stub.write_text(ALIAS.format(target=target), encoding="utf-8")
+            up = "../" * (2 if language else 1)
+            stub.write_text(ALIAS.format(target=f"{up}{'en/' if language == 'en/' else ''}{new}/"), encoding="utf-8")
 
     (site / "en").mkdir(exist_ok=True)
     for pages_of_language in (chinese, english):
