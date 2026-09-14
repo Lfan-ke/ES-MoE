@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    env = ROOT / "env"
+    env = ROOT / "results" / "env"
     env.mkdir(exist_ok=True)
     freeze = subprocess.run([sys.executable, "-m", "pip", "freeze"], capture_output=True, text=True).stdout
     (env / "requirements.lock.txt").write_text(freeze, encoding="utf-8")

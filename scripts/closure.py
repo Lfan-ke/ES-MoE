@@ -107,7 +107,7 @@ def safety() -> tuple[bool, str]:
         text=True,
     )
     # A licence that quotes one of these words is not a leaked credential.
-    legal = {"LICENSE", "NOTICE", "CODE_OF_CONDUCT.md", "SECURITY.md"}
+    legal = {"LICENSE", ".github/CODE_OF_CONDUCT.md", ".github/SECURITY.md"}
     hits = [line for line in out.stdout.splitlines() if line and line not in legal and not line.startswith("docs/")]
     return not hits, "no credential pattern in tracked files" if not hits else f"check {hits}"
 

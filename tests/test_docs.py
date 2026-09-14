@@ -11,18 +11,23 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = sorted(ROOT.glob("docs/**/*.md")) + sorted(ROOT.glob("*.md"))
+# Named rather than globbed at the root, where local notes that never ship would be swept in.
+PAGES = [ROOT / "README.md", *sorted(ROOT.glob(".github/**/*.md")), *sorted(ROOT.glob("docs/**/*.md"))]
 CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 
-@pytest.mark.parametrize("page", PAGES, ids=lambda p: p.name)
+def name(page: Path) -> str:
+    return page.relative_to(ROOT).as_posix()
+
+
+@pytest.mark.parametrize("page", PAGES, ids=name)
 def test_no_control_characters_survived_writing(page):
     """A form feed or a vertical tab in a page is a `\f` or `\v` that never made it."""
     found = CONTROL.findall(page.read_text(encoding="utf-8"))
     assert not found, f"{page.name} holds control characters {[hex(ord(c)) for c in found]}"
 
 
-@pytest.mark.parametrize("page", PAGES, ids=lambda p: p.name)
+@pytest.mark.parametrize("page", PAGES, ids=name)
 def test_formulas_are_balanced_and_on_one_line(page):
     r"""`\left` needs its `\right`, and a display formula that gained a newline lost an escape."""
     for body in re.findall(r"\$\$(.+?)\$\$", page.read_text(encoding="utf-8"), re.S):
@@ -30,7 +35,7 @@ def test_formulas_are_balanced_and_on_one_line(page):
         assert "\n" not in body.strip(), f"{page.name}: newline inside {body.strip()[:60]}"
 
 
-@pytest.mark.parametrize("page", PAGES, ids=lambda p: p.name)
+@pytest.mark.parametrize("page", PAGES, ids=name)
 def test_no_line_opens_with_the_tail_of_a_latex_command(page):
     """`ight)`, `rac{` and friends at the start of a line are what an eaten escape leaves behind."""
     tails = ("ight)", "rac{", "ext{", "eft(", "abla", "elta")

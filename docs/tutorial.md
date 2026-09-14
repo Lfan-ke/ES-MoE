@@ -91,7 +91,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 ## 一次站得住的对照实验
 
-    uv run python scripts/capture_env.py             # 把版本与硬件冻进 env/
+    uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
     EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
     uv run python scripts/report.py                  # results/summary.md
 
