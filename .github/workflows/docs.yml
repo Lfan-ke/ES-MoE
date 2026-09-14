@@ -24,8 +24,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # main is `dev`; a release gets its own version and takes `latest`, which the site opens on. A manual run
-      # can redeploy a released version from main when only its documentation changed.
+      # main is `dev`. The site keeps one version per x.y: an x.y.0 release publishes it and a patch release
+      # adds nothing, its changes already being on `dev`. A manual run redeploys an x.y from main.
       VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version || 'dev' }}
     steps:
       - uses: actions/checkout@v7
@@ -41,20 +41,25 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.version != ''
         run: |
           [ "$GITHUB_REF" = refs/heads/main ] || { echo "redeploy from main only, not $GITHUB_REF"; exit 1; }
-          git rev-parse -q --verify "refs/tags/v${VERSION#v}" > /dev/null || { echo "no tag v${VERSION#v}"; exit 1; }
+          series=$(echo "${VERSION#v}" | cut -d. -f1,2)
+          git rev-parse -q --verify "refs/tags/v$series.0" > /dev/null || { echo "no tag v$series.0"; exit 1; }
       - name: Deploy the version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages:gh-pages
-          newest=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          series=$(echo "${VERSION#v}" | cut -d. -f1,2)
+          patch=$(echo "${VERSION#v}" | cut -d. -f3)
+          newest=$(git tag -l 'v*' --sort=-v:refname | head -1 | sed 's/^v//' | cut -d. -f1,2)
           if [ "$VERSION" = dev ]; then
             uv run mike deploy -F .github/docs/mkdocs.yml --push dev
-          elif [ "v${VERSION#v}" = "$newest" ]; then
-            uv run mike deploy -F .github/docs/mkdocs.yml --push --update-aliases "${VERSION#v}" latest
+          elif [ "${patch:-0}" != 0 ] && [ "${{ github.event_name }}" = release ]; then
+            echo "patch release ${VERSION#v}: its documentation is on dev"
+          elif [ "$series" = "$newest" ]; then
+            uv run mike deploy -F .github/docs/mkdocs.yml --push --update-aliases "$series" latest
             uv run mike set-default -F .github/docs/mkdocs.yml --push latest
           else
-            uv run mike deploy -F .github/docs/mkdocs.yml --push "${VERSION#v}"
+            uv run mike deploy -F .github/docs/mkdocs.yml --push "$series"
           fi
       - name: Point the unversioned addresses at latest
         run: |
