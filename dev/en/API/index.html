@@ -802,7 +802,7 @@
 
 
 <h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
-<p>Six entry points, all importable from the top-level <code>esmoe</code>; the package ships <code>py.typed</code>, so the signatures are visible to IDEs and mypy.</p>
+<p>Every entry point below imports from the top-level <code>esmoe</code>; the package ships <code>py.typed</code>, so the signatures are visible to IDEs and mypy.</p>
 <h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -&gt; YOLO
 </code></pre>
@@ -853,7 +853,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <th style="text-align: center;">setting</th>
 <th style="text-align: center;">default here</th>
 <th style="text-align: center;">upstream</th>
-<th style="text-align: left;">what it does</th>
+<th style="text-align: center;">what it does</th>
 </tr>
 </thead>
 <tbody>
@@ -861,35 +861,35 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <td style="text-align: center;"><code>balance</code></td>
 <td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: left;">the objective, <code>(probs, gate) -&gt; scalar</code>, or a name from <code>esmoe.BALANCES</code>, or <code>module:qualname</code></td>
+<td style="text-align: center;">the objective, <code>(probs, gate) -&gt; scalar</code>, or a name from <code>esmoe.BALANCES</code>, or <code>module:qualname</code></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>out_norm</code></td>
 <td style="text-align: center;"><code>False</code></td>
 <td style="text-align: center;">always on</td>
-<td style="text-align: left;"><code>BatchNorm + SiLU</code> after the weighted sum (the paper's eq. 2 <code>Norm</code>)</td>
+<td style="text-align: center;"><code>BatchNorm + SiLU</code> after the weighted sum (the paper's eq. 2 <code>Norm</code>)</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>dense_training</code></td>
 <td style="text-align: center;"><code>False</code></td>
 <td style="text-align: center;">always on</td>
-<td style="text-align: left;">run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving</td>
+<td style="text-align: center;">run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>sparse_inference</code></td>
 <td style="text-align: center;"><code>True</code></td>
 <td style="text-align: center;">same</td>
-<td style="text-align: left;">skip unrouted experts outside training</td>
+<td style="text-align: center;">skip unrouted experts outside training</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>dynamic_threshold</code></td>
 <td style="text-align: center;"><code>0.0</code></td>
 <td style="text-align: center;"><code>0.4</code></td>
-<td style="text-align: left;">outside training, drop a routed expert whose share of the mixture -- its weight after the top-k renormalisation -- is below the threshold, keep the leader, renormalise</td>
+<td style="text-align: center;">outside training, drop a routed expert whose share of the mixture -- its weight after the top-k renormalisation -- is below the threshold, keep the leader, renormalise</td>
 </tr>
 </tbody>
 </table>
-<p>The last two affect inference only, the first three affect training. The defaults for <code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream. The default for <code>balance</code> is settled by data: an objective that reads the gate (upstream's <code>gshard</code>, the paper's <code>master</code>) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, while Switch reads the full softmax and lost none in 66 (<a href="../JUDGMENT/">judgment lines</a>, round six).</p>
+<p>The last two affect inference only, the first three affect training. The defaults for <code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream. The default for <code>balance</code> is settled by data: an objective that reads the gate (upstream's <code>gshard</code>, the paper's <code>master</code>) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, as did all six same-configuration B checkpoints, while Switch reads the full softmax and lost none in 66 (<a href="../JUDGMENT/">judgment lines</a>, rounds six to eight).</p>
 <p><code>block.spec()</code> returns the five settings a block is holding, plus <code>expert</code> when a custom one is in use, and <code>block.configure(**settings)</code> changes them on paths that never reach a trainer -- inference, export, a unit test. <code>esmoe.blocks(model)</code> walks every block in a model in module order, and <code>scripts/blockspec.py</code> reads back from any checkpoint what was actually in force.</p>
 
 

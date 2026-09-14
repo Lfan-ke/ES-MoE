@@ -802,7 +802,7 @@
 
 
 <h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
-<p>六个入口，全部从 <code>esmoe</code> 顶层导入；包内带 <code>py.typed</code>，类型签名对 IDE 与 mypy 可见。</p>
+<p>下面各节的入口都从 <code>esmoe</code> 顶层导入；包内带 <code>py.typed</code>，类型签名对 IDE 与 mypy 可见。</p>
 <h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -&gt; YOLO
 </code></pre>
@@ -853,7 +853,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <th style="text-align: center;">设置</th>
 <th style="text-align: center;">本包默认</th>
 <th style="text-align: center;">上游</th>
-<th style="text-align: left;">作用</th>
+<th style="text-align: center;">作用</th>
 </tr>
 </thead>
 <tbody>
@@ -861,35 +861,35 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <td style="text-align: center;"><code>balance</code></td>
 <td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: left;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字、<code>模块:限定名</code></td>
+<td style="text-align: center;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字、<code>模块:限定名</code></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>out_norm</code></td>
 <td style="text-align: center;"><code>False</code></td>
 <td style="text-align: center;">恒开</td>
-<td style="text-align: left;">加权求和后的 <code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
+<td style="text-align: center;">加权求和后的 <code>BatchNorm + SiLU</code>（论文式 2 的 <code>Norm</code>）</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>dense_training</code></td>
 <td style="text-align: center;"><code>False</code></td>
 <td style="text-align: center;">恒开</td>
-<td style="text-align: left;">训练期跑满专家，未选权重为 0 但归一化统计量继续更新</td>
+<td style="text-align: center;">训练期跑满专家，未选权重为 0 但归一化统计量继续更新</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>sparse_inference</code></td>
 <td style="text-align: center;"><code>True</code></td>
 <td style="text-align: center;">同</td>
-<td style="text-align: left;">推理期跳过未选专家</td>
+<td style="text-align: center;">推理期跳过未选专家</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>dynamic_threshold</code></td>
 <td style="text-align: center;"><code>0.0</code></td>
 <td style="text-align: center;"><code>0.4</code></td>
-<td style="text-align: left;">推理期剪掉份额低于阈值的专家（份额指 top-k 重归一之后的权重），首位无条件保留，余下重归一</td>
+<td style="text-align: center;">推理期剪掉份额低于阈值的专家（份额指 top-k 重归一之后的权重），首位无条件保留，余下重归一</td>
 </tr>
 </tbody>
 </table>
-<p>后两项只影响推理，前三项影响训练。<code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 的默认值是为了让 <code>results/</code> 里既有的运行原样复现，不是对上游的取舍判断。<code>balance</code> 的默认值由数据定：读门控的目标（上游的 <code>gshard</code>、论文的 <code>master</code>）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家；Switch 读完整 softmax，66 个 checkpoint 上一个没有（<a href="../JUDGMENT/">判读线</a>第六轮）。</p>
+<p>后两项只影响推理，前三项影响训练。<code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 的默认值是为了让 <code>results/</code> 里既有的运行原样复现，不是对上游的取舍判断。<code>balance</code> 的默认值由数据定：读门控的目标（上游的 <code>gshard</code>、论文的 <code>master</code>）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，同配置对照的 6 个 B checkpoint 全部有；Switch 读完整 softmax，66 个 checkpoint 上一个没有（<a href="../JUDGMENT/">判读线</a>第六至八轮）。</p>
 <p><code>block.spec()</code> 返回该块当下带着的五个设置，用了自定义专家时再加一项 <code>expert</code>；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一 checkpoint 读回当时真正生效的设置。</p>
 
 

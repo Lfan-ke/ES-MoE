@@ -864,7 +864,8 @@
 \]</div>
 <p>where <span class="arithmatex">\(E\)</span> is the expert count, <span class="arithmatex">\(\bar{p}_i\)</span> the mean routing probability of expert <span class="arithmatex">\(i\)</span> over the batch
 and <span class="arithmatex">\(f_i\)</span> the fraction of samples that actually activated it. It is minimised when routing mass and
-realised load are spread evenly, which is what keeps the router from collapsing onto one expert.</p>
+realised load are spread evenly. Measured, what it prevents is an expert dying, not the dispatch concentrating
+(<a href="../JUDGMENT/">judgment lines</a>, round six).</p>
 <h2 id="the-three-calls">The three calls<a class="headerlink" href="#the-three-calls" title="Permanent link">&para;</a></h2>
 <p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the router loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
 <pre><code>import esmoe
@@ -895,7 +896,7 @@ original one reference by reference.</p>
 <p>Renumbering moves references; it does not retarget them. A head branch that names the old backbone end by index - YOLOv8's P5 lateral <code>[-1, 9] Concat</code> does - therefore keeps reading SPPF after the insertion, and the block reaches P5 only through the top-down path. To have the block take over every consumer of the backbone end, pass <code>rewire=True</code> (<code>--rewire</code> on the CLI):</p>
 <pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 </code></pre>
-<p>It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); <code>rewire</code> gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; <code>rewire</code> pulls 12n and 26n back to parity and trails the default arm only on 11n. Four-generation verdicts: <a href="../JUDGMENT/">judgment lines</a>.</p>
+<p>It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); <code>rewire</code> gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; <code>rewire</code> pulls 12n and 26n back to parity and trails the default arm only on 11n. Seven-generation verdicts: <a href="../JUDGMENT/">judgment lines</a>.</p>
 <h2 id="proving-the-auxiliary-loss-is-real">Proving the auxiliary loss is real<a class="headerlink" href="#proving-the-auxiliary-loss-is-real" title="Permanent link">&para;</a></h2>
 <p>A configuration key named <code>aux_loss</code> proves nothing. What proves it:</p>
 <ol>
@@ -970,18 +971,20 @@ them.</p>
 </tbody>
 </table>
 <p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (<code>switch</code>, <code>gshard_probs</code>) evaluate identically and cannot tell that apart, while the two that read the gate (<code>gshard</code>, <code>master</code>) can. Upstream's code and its paper agree here, differing only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>).</p>
-<p>Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints and Switch in none of 66, which is why Switch is the default (<a href="../JUDGMENT/">judgment lines</a>, round six). To use upstream's objective instead:</p>
+<p>Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints, and in all six same-configuration B checkpoints trained with upstream's recipe, while Switch lost none in 66, which is why Switch is the default (<a href="../JUDGMENT/">judgment lines</a>, rounds six to eight). To use upstream's objective instead:</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
 <p>A custom objective goes into the config too: define the function at module level in an importable module and pass it to <code>equip</code> or <code>graft</code>. The config stores <code>module:qualname</code>, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in <code>__main__</code> cannot be imported back by name and is refused when grafting. Custom experts work the same way (<code>expert=MyExpert</code>). The trade-off and the measurements are on <a href="../limitations/">Limitations</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
 <h3 id="the-configuration-that-matches-upstream">The configuration that matches upstream<a class="headerlink" href="#the-configuration-that-matches-upstream" title="Permanent link">&para;</a></h3>
-<p>Upstream's <code>ES_MOE</code> and the paper differ from this package's defaults in four places. Turning all four on is the faithful reproduction, and <strong>they all go through <code>equip</code></strong>:</p>
+<p>Upstream's <code>ES_MOE</code> differs from this package's defaults in the first five rows below: four affect training, and pruning affects inference only. <strong>They all go through <code>equip</code></strong>, and a run compared against upstream adds its training recipe, <code>recipe="upstream"</code> (see <a href="../API/">API</a>):</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
     at="backbone_stages",     # one block per stage, four in all
     balance="gshard",         # the objective that reads the gate
     out_norm=True,            # BatchNorm + SiLU after the weighted sum
     dense_training=True,      # every expert runs while training
+    dynamic_threshold=0.4,    # pruning at inference
+    recipe="upstream",        # what upstream's trainer does to a routed model
 )
 </code></pre>
 <table>
@@ -1033,7 +1036,7 @@ them.</p>
 </tbody>
 </table>
 <p>The block matches upstream's remaining parameters too: <code>out_channels</code> (the input's width by default), <code>top_k=None</code> meaning every expert, even kernels stepped down to odd and capped at <code>max_kernel_size</code> so a pruned checkpoint's kernels reload, and the same validation of <code>num_experts</code>, <code>reduction</code>, <code>dynamic_threshold</code> and <code>max_kernel_size</code> -- refused at construction rather than halfway through a run.</p>
-<p>The last two are off by default so the runs already in <code>results/</code> still reproduce; each has its own arm on the <a href="../JUDGMENT/">judgment lines</a> page. On the command line: <code>--at</code>, <code>--out-norm</code>, <code>--dense-training</code>.</p>
+<p><code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> are off by default so the runs of this package's recipe in <code>results/</code> still reproduce; the first two each have an arm on the <a href="../JUDGMENT/">judgment lines</a> page. On the <code>esmoe graft</code> command line: <code>--at</code>, <code>--balance</code>, <code>--out-norm</code>, <code>--dense-training</code>; the pruning threshold goes through <code>equip</code> or the config.</p>
 <p><strong>These settings have to travel in the config; setting them on the blocks afterwards does not work.</strong> The trainer rebuilds the model from <code>model.yaml</code>, and anything set after <code>YOLO(cfg)</code> returns disappears with the instance that is discarded -- no error, no trace. <code>equip</code> and <code>graft</code> write them into the config, so a rebuild keeps them; <code>ESMoE.configure(...)</code> is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: <code>uv run python scripts/blockspec.py</code>.</p>
 <h2 id="where-the-edges-are">Where the edges are<a class="headerlink" href="#where-the-edges-are" title="Permanent link">&para;</a></h2>
 <p>Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and <code>loss_items</code> changed shape across ultralytics releases. Those and the rest are in <a href="../limitations/">Limitations</a>, which is also the page to read before quoting any number.</p>

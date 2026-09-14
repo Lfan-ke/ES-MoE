@@ -387,6 +387,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#shipped-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shipped default
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#evidence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -681,6 +692,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#shipped-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shipped default
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#evidence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -779,6 +801,8 @@ model.train(data="coco8.yaml", epochs=10)
 </tbody>
 </table>
 <p>Verified by <code>tests/test_ultralytics.py</code> on ultralytics 8.4.101 and 8.4.132, plus a real 1-epoch training run per generation logging a non-zero <code>train/esmoe_aux</code>. Graft and forward are also exercised on yolov5n, yolov9t and yolov10n in CI. The YOLO-Master row runs on the fork's vendored ultralytics: <code>scripts/fork_smoke.py</code> grafts their <code>yolo-master-n.yaml</code>, trains one epoch with a non-zero <code>esmoe_aux</code>, and builds their own <code>ES_MOE</code> config alongside ours.</p>
+<h2 id="shipped-default">Shipped default<a class="headerlink" href="#shipped-default" title="Permanent link">&para;</a></h2>
+<p><code>ESMoE(num_experts=4, top_k=2)</code> with <code>attach_aux_loss(weight=0.01)</code>. Under one budget it beat the 2-, 4- and 8-expert and top-1 variants, and on the full VisDrone training set three seeds confirmed it: 3/3 paired wins, +0.0021 mAP50, for 10.4% more parameters. The argument is on <a href="SELECTION/">Selection</a>.</p>
 <h2 id="evidence">Evidence<a class="headerlink" href="#evidence" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="tutorial/">Tutorial</a>: from install to a comparison you can defend.</li>

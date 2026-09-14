@@ -862,7 +862,7 @@
 <div class="arithmatex">\[
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
 \]</div>
-<p>其中 <span class="arithmatex">\(E\)</span> 是专家数，<span class="arithmatex">\(\bar{p}_i\)</span> 是专家 <span class="arithmatex">\(i\)</span> 在该批次上的平均路由概率，<span class="arithmatex">\(f_i\)</span> 是实际激活它的样本比例。当路由质量与实际负载都摊平时该项最小，这是防止路由坍塌到单个专家的机制。</p>
+<p>其中 <span class="arithmatex">\(E\)</span> 是专家数，<span class="arithmatex">\(\bar{p}_i\)</span> 是专家 <span class="arithmatex">\(i\)</span> 在该批次上的平均路由概率，<span class="arithmatex">\(f_i\)</span> 是实际激活它的样本比例。路由质量与实际负载都摊平时该项最小。实测它防住的是专家死掉，防不住分派集中（<a href="../JUDGMENT/">判读线</a>第六轮）。</p>
 <h2 id="_3">三个调用<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p><code>inject_esmoe</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把路由损失接进训练。<code>equip</code> 把四件事一次做完：注册、接入、构建模型、接上辅助损失。</p>
 <pre><code>import esmoe
@@ -886,11 +886,11 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>YOLO 配置用<strong>绝对层号</strong>引用前面的层：</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
 </code></pre>
-<p>在第 10 层的位置插一层，所有大于等于 10 的引用就都往前错了一层。模型照样能建、照样能训，但已经悄悄接错。所以 <code>graft</code> 会对每个插入点之后的引用统一重编号，并有单测把改写后的 head 与原 head 逐条引用比对。</p>
+<p>在第 10 层的位置插一层，所有大于等于 10 的引用就都往前错了一层。模型照样能建、照样能训，但引用已经错开。所以 <code>graft</code> 会对每个插入点之后的引用统一重编号，并有单测把改写后的 head 与原 head 逐条引用比对。</p>
 <p>重编号只移动引用，不改变引用对象。于是 head 里按序号点名旧主干末层的分支——YOLOv8 的 P5 侧向 <code>[-1, 9] Concat</code> 就是——插入之后仍读 SPPF 的输出，块只经自顶向下路径间接影响 P5。要让块接管主干末层的全部下游，加 <code>rewire=True</code>（命令行 <code>--rewire</code>）：</p>
 <pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 </code></pre>
-<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，绕过 P5 侧向正是大目标受损的主要来源。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；<code>rewire</code> 在 12n、26n 把默认接法的一致损失拉回持平，仅在 11n 略低于默认接法。四代判定见<a href="../JUDGMENT/">判读线</a>。</p>
+<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，大目标受损主要来自绕过了 P5 侧向。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；<code>rewire</code> 在 12n、26n 把默认接法的一致损失拉回持平，仅在 11n 略低于默认接法。七代判定见<a href="../JUDGMENT/">判读线</a>。</p>
 <h2 id="_5">怎么证明辅助损失确实生效<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>配置里有个叫 <code>aux_loss</code> 的键什么都证明不了。能证明的是：</p>
 <ol>
@@ -956,18 +956,20 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tbody>
 </table>
 <p>差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（<code>switch</code>、<code>gshard_probs</code>）取到同一个值，分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。</p>
-<p>分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有，默认值因此是 Switch（<a href="../JUDGMENT/">判读线</a>第六轮）。换成上游的目标：</p>
+<p>分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个 checkpoint 里 5 个出现死专家，同配置对照里按上游配方训的 6 个 B checkpoint 全部有，Switch 在 66 个里一个没有，默认值因此是 Switch（<a href="../JUDGMENT/">判读线</a>第六至八轮）。换成上游的目标：</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
 <p>自定义目标也能写进配置：把函数定义在可导入模块的顶层，传给 <code>equip</code> 或 <code>graft</code>，配置里存的是 <code>模块:限定名</code>，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个函数。lambda、嵌套函数、<code>__main__</code> 里定义的函数按名导入不回来，嫁接时就被拒绝。自定义专家同理（<code>expert=MyExpert</code>）。取舍与实测见<a href="../limitations/">已知局限</a>与<a href="../JUDGMENT/">判读线</a>。</p>
 <h3 id="_9">对齐上游的完整配置<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<p>上游 <code>ES_MOE</code> 与论文和本包默认的差别有四处。四处一起打开才是完整复刻，<strong>都从 <code>equip</code> 传进去</strong>：</p>
+<p>上游 <code>ES_MOE</code> 与本包默认的差别在下表前五行：四项影响训练，剪枝只影响推理。<strong>都从 <code>equip</code> 传进去</strong>；与上游同配置对比时，再加上训练方式 <code>recipe="upstream"</code>（见 <a href="../API/">API</a>）：</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
     at="backbone_stages",     # 每个 stage 后一块，共四块
     balance="gshard",         # 读门控的平衡项
     out_norm=True,            # 加权求和后的 BatchNorm + SiLU
     dense_training=True,      # 训练期跑满专家
+    dynamic_threshold=0.4,    # 推理期剪枝
+    recipe="upstream",        # 上游训练器对含路由块模型的三项处理
 )
 </code></pre>
 <table>
@@ -1019,7 +1021,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tbody>
 </table>
 <p>块本身还对齐了上游的其余参数：<code>out_channels</code>（默认与输入同宽）、<code>top_k=None</code>（等于用全部专家）、偶数核逐一降为奇数再按 <code>max_kernel_size</code> 截断（剪枝过的 checkpoint 才装得回去）、以及 <code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel_size</code> 的取值校验——构造时就报错，不留到训练中途。</p>
-<p>后两项默认关着，是为了让 <code>results/</code> 里既有的运行仍能原样复现；它们各自的对照实验见<a href="../JUDGMENT/">判读线</a>。命令行对应 <code>--at</code>、<code>--out-norm</code>、<code>--dense-training</code>。</p>
+<p><code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 默认关着，是为了让 <code>results/</code> 里按本包配方跑的运行仍能原样复现；前两项各有对照臂，见<a href="../JUDGMENT/">判读线</a>。命令行 <code>esmoe graft</code> 对应 <code>--at</code>、<code>--balance</code>、<code>--out-norm</code>、<code>--dense-training</code>，剪枝阈值只能从 <code>equip</code> 或配置传。</p>
 <p><strong>这些设置必须走配置文件，不能事后设在块上。</strong> 训练器照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。<code>equip</code> 与 <code>graft</code> 把它们写进配置，因此重建多少次都在；<code>ESMoE.configure(...)</code> 只适合不经训练器的场合（推理、导出、单元测试）。从任一 checkpoint 读回当时真正生效的设置：<code>uv run python scripts/blockspec.py</code>。</p>
 <h2 id="_10">使用中的边界<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <p>通道在首次前向时推断、一个进程一次只训练一种辅助损失设置、<code>loss_items</code> 的形态跨版本变过——这些都写在<a href="../limitations/">已知局限</a>里，引用任何数字之前也先读它。</p>
