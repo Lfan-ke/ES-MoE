@@ -1,0 +1,2169 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+      
+      
+      
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/0.1.6/en/JUDGMENT/">
+      
+      
+        <link rel="prev" href="../limitations/">
+      
+      
+        <link rel="next" href="../RELEASE/">
+      
+      
+        
+          <link rel="alternate" href="../../JUDGMENT/" hreflang="zh">
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Judgment lines - ES-MoE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+3:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Source Sans 3";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#judgment-lines-pre-registered" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ES-MoE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Judgment lines
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../JUDGMENT/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    ES-MoE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Effect chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Judgment lines
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Judgment lines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#known-and-unknown-at-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known and unknown at declaration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predictions-declared-before-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions (declared before the results)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evidence chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verdicts-2026-09-04-after-the-full-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verdicts (2026-09-04, after the full matrix)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verdicts (2026-09-04, after the full matrix)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-full-matrix-does-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the full matrix does support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addendum-2026-09-07-still-before-any-v5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum (2026-09-07, still before any v5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#second-round-verdicts-2026-09-09-after-33-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second-round verdicts (2026-09-09, after 33 runs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second-round verdicts (2026-09-09, after 33 runs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replication-on-another-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replication on another host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seven-generations-retire-the-earlier-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seven generations retire the earlier wording
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Third pre-registration (2026-09-09, declared before any gshard result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Third pre-registration (2026-09-09, declared before any gshard result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correction-2026-09-09-still-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (2026-09-09, still before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth pre-registration (2026-09-09, declared before any master result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (evening of 2026-09-09, still before any master or structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth pre-registration (evening of 2026-09-09, declared before any structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correction-late-2026-09-09-still-before-any-structural-arm-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (late 2026-09-09, still before any structural-arm result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth-round verdict (2026-09-10, the gate-reading objective has run)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run-to-run spread at one configuration (2026-09-09, not planned)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth-round verdicts (2026-09-10, the three structural arms have run)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fifth-round verdicts (2026-09-10, the three structural arms have run)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-that-matters-more-than-the-three-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing that matters more than the three predictions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#results-from-the-alignment-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results from the alignment arms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sixth-round-verdicts-2026-09-11-no-balancing-term-and-four-blocks-at-a-quarter-weight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-blocks-lose-on-the-count-not-on-the-auxiliary-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four blocks lose on the count, not on the auxiliary total
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#without-the-term-experts-die" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without the term, experts die
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-papers-family-of-objectives-does-not-prevent-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the paper's family of objectives does not prevent it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addendum-the-training-loop-step-for-step-2026-09-11-still-before-any-full-protocol-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: the training loop step for step (2026-09-11, still before any full-protocol result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#known-and-unknown-at-declaration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known and unknown at declaration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lines
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predictions-declared-before-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions (declared before the results)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evidence chain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verdicts-2026-09-04-after-the-full-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verdicts (2026-09-04, after the full matrix)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verdicts (2026-09-04, after the full matrix)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-full-matrix-does-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the full matrix does support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addendum-2026-09-07-still-before-any-v5-v9-v10-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum (2026-09-07, still before any v5 / v9 / v10 result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#second-round-verdicts-2026-09-09-after-33-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Second-round verdicts (2026-09-09, after 33 runs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Second-round verdicts (2026-09-09, after 33 runs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions, settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replication-on-another-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Replication on another host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seven-generations-retire-the-earlier-wording" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seven generations retire the earlier wording
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Third pre-registration (2026-09-09, declared before any gshard result)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Third pre-registration (2026-09-09, declared before any gshard result)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correction-2026-09-09-still-before-any-gshard-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (2026-09-09, still before any gshard result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth pre-registration (2026-09-09, declared before any master result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (evening of 2026-09-09, still before any master or structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth pre-registration (evening of 2026-09-09, declared before any structural result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#correction-late-2026-09-09-still-before-any-structural-arm-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correction (late 2026-09-09, still before any structural-arm result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fourth-round verdict (2026-09-10, the gate-reading objective has run)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run-to-run spread at one configuration (2026-09-09, not planned)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fifth-round verdicts (2026-09-10, the three structural arms have run)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fifth-round verdicts (2026-09-10, the three structural arms have run)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-thing-that-matters-more-than-the-three-predictions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One thing that matters more than the three predictions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#results-from-the-alignment-arms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results from the alignment arms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sixth-round-verdicts-2026-09-11-no-balancing-term-and-four-blocks-at-a-quarter-weight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#four-blocks-lose-on-the-count-not-on-the-auxiliary-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Four blocks lose on the count, not on the auxiliary total
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#without-the-term-experts-die" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Without the term, experts die
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-papers-family-of-objectives-does-not-prevent-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the paper's family of objectives does not prevent it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#predictions-settled_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predictions settled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addendum-the-training-loop-step-for-step-2026-09-11-still-before-any-full-protocol-result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: the training loop step for step (2026-09-11, still before any full-protocol result)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="judgment-lines-pre-registered">Judgment lines (pre-registered)<a class="headerlink" href="#judgment-lines-pre-registered" title="Permanent link">&para;</a></h1>
+<p>A negative result only counts when the judgment line predates it. This page fixes the criteria and predictions <strong>before</strong> the runs they govern finish; the git commit time is the evidence.</p>
+<h2 id="known-and-unknown-at-declaration">Known and unknown at declaration<a class="headerlink" href="#known-and-unknown-at-declaration" title="Permanent link">&para;</a></h2>
+<p>Known when declared (evening of 2026-09-02, UTC+8): all three YOLOv8n arms (baseline / esmoe / esmoe-rewire), three seeds each, with their area buckets and router analysis; the overall metrics of YOLO11n baseline seed 0. <strong>Unknown</strong>: every YOLO11n esmoe / rewire run and the remaining baseline seeds; every YOLO12n and YOLO26n run. The lines and predictions below bind those unknown results.</p>
+<h2 id="lines">Lines<a class="headerlink" href="#lines" title="Permanent link">&para;</a></h2>
+<p>For each backbone × arm (same budget, data, augmentation and evaluation, three same-seed pairs):</p>
+<ul>
+<li><strong>Effective</strong>: paired mAP50 mean &gt; 0, at least 2/3 seeds positive, and paired mAP50-95 mean ≥ 0.</li>
+<li><strong>Ineffective</strong>: paired mAP50 mean ≤ 0, or at most 1/3 seeds positive.</li>
+<li><strong>Insufficient evidence</strong>: anything else (e.g. positive mean with negative mAP50-95).</li>
+</ul>
+<p>Three seeds support no significance test: even 3/3 wins gives a sign-test p of 0.125, so "effective" is always phrased as a small, direction-consistent improvement, never a reliable per-run one.</p>
+<h2 id="predictions-declared-before-the-results">Predictions (declared before the results)<a class="headerlink" href="#predictions-declared-before-the-results" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>The non-transfer of the default wiring is a wiring property, not a backbone property</strong>: on YOLO11n / 12n / 26n the <code>rewire</code> arm's paired mAP50 mean beats the same backbone's default <code>esmoe</code> arm.</li>
+<li><strong>The default wiring hurts large objects on every generation</strong>: the default arms of 12n / 26n show a negative mean APl (the P5 lateral bypass exists in all four structures).</li>
+<li><strong>YOLO11n's default arm stays below "effective" under the protocol budget</strong> (it was negative at 640/20ep; if 800/120ep turns it positive, the earlier "does not transfer" conclusion gets corrected publicly).</li>
+</ol>
+<p>Wrong predictions get recorded as wrong - that is what this page is for.</p>
+<h2 id="evidence-chain">Evidence chain<a class="headerlink" href="#evidence-chain" title="Permanent link">&para;</a></h2>
+<p>One JSON per run (<code>results/</code>, with git_ref, environment, budget, seed, metrics, artifact path); buckets and router analyses are recomputed from checkpoints by <code>scripts/buckets.py</code> / <code>scripts/routing.py</code>. The 36 <code>best.pt</code> files and training arguments live on the <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> branch</a> (Git LFS).</p>
+<h2 id="verdicts-2026-09-04-after-the-full-matrix">Verdicts (2026-09-04, after the full matrix)<a class="headerlink" href="#verdicts-2026-09-04-after-the-full-matrix" title="Permanent link">&para;</a></h2>
+<p>All 36 runs — four backbone generations × three arms × three seeds — completed under the protocol budget (full VisDrone training, 800px, 120 epochs, patience 0, batch 32, same-seed pairing). Cell by cell against the lines above:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">backbone</th>
+<th style="text-align: center;">default <code>esmoe</code></th>
+<th style="text-align: center;"><code>rewire</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">YOLOv8n</td>
+<td style="text-align: center;">effective (mAP50 +0.0025, 2/3; mAP50-95 +0.0004)</td>
+<td style="text-align: center;">effective (+0.0036, 3/3; +0.0011)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLO11n</td>
+<td style="text-align: center;">effective (+0.0013, 2/3; +0.0001)</td>
+<td style="text-align: center;">effective (+0.0004, 2/3; +0.0002)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLO12n</td>
+<td style="text-align: center;">ineffective (−0.0018, 0/3; −0.0021)</td>
+<td style="text-align: center;">effective (+0.0001, 2/3; +0.0006)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLO26n</td>
+<td style="text-align: center;">ineffective (−0.0034, 0/3; −0.0022)</td>
+<td style="text-align: center;">ineffective (−0.0005, 1/3; +0.0008)</td>
+</tr>
+</tbody>
+</table>
+<p>As declared, three seeds support no significance test; every "effective" is a small, direction-consistent improvement. YOLO12n's <code>rewire</code> clears the line with a near-zero mean and is better read as parity.</p>
+<h3 id="predictions-settled">Predictions, settled<a class="headerlink" href="#predictions-settled" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Partly right.</strong> The <code>rewire</code> arm beats the default arm on 12n (+0.0001 vs −0.0018) and 26n (−0.0005 vs −0.0034), and loses to it on 11n (+0.0004 vs +0.0013).</li>
+<li><strong>Wrong.</strong> The default arms' mean APl is +0.0068 on 12n and +0.0085 on 26n — not negative. "The default wiring hurts large objects" was a v8n-specific finding (APl 0/3, mean −0.0104) that did not transfer. What 26n's default arm consistently loses is small objects (APs 0/3, mean −0.0045).</li>
+<li><strong>Wrong; corrected publicly.</strong> YOLO11n's default arm is effective under the protocol budget (+0.0013, 2/3; mAP50-95 +0.0001). The earlier "does not transfer across backbones" conclusion, drawn from 640px/20ep runs, does not hold: the small-budget negative flipped positive at full budget, and the claim is withdrawn.</li>
+</ol>
+<h3 id="what-the-full-matrix-does-support">What the full matrix does support<a class="headerlink" href="#what-the-full-matrix-does-support" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>The default wiring's effect decays monotonically with backbone generation</strong>: +0.0025 (v8n) → +0.0013 (11n) → −0.0018 (12n) → −0.0034 (26n). The newer the backbone end (SPPF → C2PSA → A2C2f → E2E head), the worse the same graft point fares. <strong>Withdrawn at the second-round verdicts below</strong>: with seven generations the order no longer holds by version number, and the grouping is by what the backbone ends in.</li>
+<li><strong><code>rewire</code> pulls 12n and 26n back to near parity</strong> and is the only 3/3 arm on v8n; only on 11n does it trail the default arm. The wiring — whether consumers read the block's output — moves the metric more than the backbone does, but not in one direction everywhere.</li>
+<li><strong>Where the damage lands depends on the backbone</strong>: v8n loses large objects, 26n loses small ones, 12n is direction-unstable. No fixed "this block helps/hurts scale X" statement survives the four-generation matrix.</li>
+<li><strong>Routing collapses identically on all four generations</strong>: no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation; five of 26n's six checkpoints hand the lead to the <code>k = 9</code> expert. Rewiring changes none of it.</li>
+</ul>
+<h2 id="second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result">Second pre-registration (2026-09-05, declared before any YOLOv5 / v9 / v10 result)<a class="headerlink" href="#second-pre-registration-2026-09-05-declared-before-any-yolov5-v9-v10-result" title="Permanent link">&para;</a></h2>
+<p>The four-generation matrix is settled. <strong>Unknown</strong>: all 27 runs of YOLOv5n / YOLOv9t / YOLOv10n (same protocol, three arms, three seeds). The judgment lines above carry over; the predictions:</p>
+<ol>
+<li><strong>v5n's default arm has a positive paired mAP50 mean</strong> — its backbone end is SPPF, the same family as v8n; the old end of the "monotonic decay with generation" line should sit above zero.</li>
+<li><strong>v10n's default-arm mean is below v5n's</strong> — v10 ends in an attention block (PSA), and the "newer end fares worse" ordering puts it under v5.</li>
+<li><strong>The routing collapse repeats on all three</strong> — no dead experts, one dominant expert, near-uniform mean probabilities, no scale specialisation. This is the mechanistic bet: a failure here would carry more information than the other two combined.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
+<h3 id="addendum-2026-09-07-still-before-any-v5-v9-v10-result">Addendum (2026-09-07, still before any v5 / v9 / v10 result)<a class="headerlink" href="#addendum-2026-09-07-still-before-any-v5-v9-v10-result" title="Permanent link">&para;</a></h3>
+<p>With two MetaX C500 boxes available the queue is v9t nine runs, v10n nine runs, v5n nine runs. Two points belong on the record in advance:</p>
+<ol>
+<li><strong>v5n is rerun as a whole generation</strong>, completing the missing <code>rewire</code> arm and yielding a same-configuration replication on another host. <code>scripts/report.py</code> carries the hardware stack in its grouping key, so two hosts form two groups rather than folding into one cell as repeats.</li>
+<li><strong>v10n gains seeds 3 and 4.</strong> Box b's queue is shorter than box a's, and the spare hours extend <strong>all three</strong> v10n arms to five seeds. Extending every arm together, and deciding it before any v10n result exists, keeps this from being a cell chosen after the fact. The judgment lines are unchanged; five seeds put the best possible sign test at p = 0.031, still short of licensing a claim about any single run.</li>
+</ol>
+<h2 id="second-round-verdicts-2026-09-09-after-33-runs">Second-round verdicts (2026-09-09, after 33 runs)<a class="headerlink" href="#second-round-verdicts-2026-09-09-after-33-runs" title="Permanent link">&para;</a></h2>
+<p>YOLOv5n, v9t and v10n all finished under the protocol. v5n was rerun as a whole generation on the new hardware stack, and every v10n arm was extended to five seeds. Cell by cell:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">backbone</th>
+<th style="text-align: center;">default <code>esmoe</code></th>
+<th style="text-align: center;"><code>rewire</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">YOLOv5n (<code>metax3.3</code>)</td>
+<td style="text-align: center;">effective (+0.0055, 3/3; mAP50-95 +0.0038)</td>
+<td style="text-align: center;">effective (+0.0024, 2/3; +0.0018)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv5n (<code>metax3.7</code>)</td>
+<td style="text-align: center;">effective (+0.0041, 3/3; +0.0026)</td>
+<td style="text-align: center;">one seed only, not judged</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv9t</td>
+<td style="text-align: center;">effective (+0.0025, 2/3; +0.0009)</td>
+<td style="text-align: center;">ineffective (−0.0013, 1/3; −0.0021)</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv10n (5 seeds)</td>
+<td style="text-align: center;">ineffective (−0.0002, 3/5; −0.0003)</td>
+<td style="text-align: center;">ineffective (−0.0031, 1/5; −0.0016)</td>
+</tr>
+</tbody>
+</table>
+<p>YOLOv10n's default arm sits on zero with 3 of 5 seeds positive; the line calls that ineffective, and parity is the fairer reading.</p>
+<h3 id="predictions-settled_1">Predictions, settled<a class="headerlink" href="#predictions-settled_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Right.</strong> v5n's default arm is positive on both stacks: +0.0055 (3/3) and +0.0041 (3/3).</li>
+<li><strong>Right.</strong> v10n's default arm (−0.0002) sits below v5n's (+0.0055).</li>
+<li><strong>Right.</strong> The collapse repeats across 22 checkpoints: no dead experts, a dominant expert holding 0.491–0.921 of the top-1 (0.71–0.82 by generation), mean-probability entropy at 89.8%–97.2% of its maximum, the leader changing with the seed, and the k = 3 expert never leading.</li>
+</ol>
+<h3 id="replication-on-another-host">Replication on another host<a class="headerlink" href="#replication-on-another-host" title="Permanent link">&para;</a></h3>
+<p>The same v5n configuration ran nine times on each of two C500 hosts: +0.0041 (<code>metax3.7</code>) against +0.0055 (<code>metax3.3</code>), agreeing in sign, wins and magnitude. The paired delta reproduces.</p>
+<p>One self-check worth recording: v5n's <code>rewire</code> arm read +0.0074 on a single seed and +0.0024 once all three were in. "No mean below three seeds" exists for exactly that.</p>
+<h3 id="seven-generations-retire-the-earlier-wording">Seven generations retire the earlier wording<a class="headerlink" href="#seven-generations-retire-the-earlier-wording" title="Permanent link">&para;</a></h3>
+<p>At four generations this page said the effect "decays monotonically with backbone generation". With seven it no longer does by version number - v10n (−0.0002) falls below 11n (+0.0013). Grouped by what the backbone ends in, it is orderly:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">backbone end</th>
+<th style="text-align: center;">backbones</th>
+<th style="text-align: center;">default-arm mean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">SPPF family</td>
+<td style="text-align: center;">v5n / v8n / v9t</td>
+<td style="text-align: center;">+0.0055 / +0.0025 / +0.0025</td>
+</tr>
+<tr>
+<td style="text-align: center;">attention</td>
+<td style="text-align: center;">v10n (PSA) / 11n (C2PSA)</td>
+<td style="text-align: center;">−0.0002 / +0.0013</td>
+</tr>
+<tr>
+<td style="text-align: center;">area attention</td>
+<td style="text-align: center;">12n (A2C2f)</td>
+<td style="text-align: center;">−0.0018</td>
+</tr>
+<tr>
+<td style="text-align: center;">E2E head</td>
+<td style="text-align: center;">26n</td>
+<td style="text-align: center;">−0.0034</td>
+</tr>
+</tbody>
+</table>
+<p>The sign changes when the backbone end becomes an attention block, not as release numbers rise. The "monotonic with generation" wording is withdrawn.</p>
+<h2 id="third-pre-registration-2026-09-09-declared-before-any-gshard-result">Third pre-registration (2026-09-09, declared before any <code>gshard</code> result)<a class="headerlink" href="#third-pre-registration-2026-09-09-declared-before-any-gshard-result" title="Permanent link">&para;</a></h2>
+<p>Reading YOLO-Master's own <code>ES_MOE</code> shows it optimises a different balancing term from this toolkit's default:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">formula</th>
+<th style="text-align: center;">reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">upstream <code>ES_MOE</code></td>
+<td style="text-align: center;"><code>N · Σ usage²</code> (GShard)</td>
+<td style="text-align: center;">mean routing probabilities</td>
+</tr>
+<tr>
+<td style="text-align: center;">default <code>switch_balance</code></td>
+<td style="text-align: center;"><code>E · Σ p̄ᵢfᵢ</code> (Switch)</td>
+<td style="text-align: center;">mean probabilities × realised load</td>
+</tr>
+</tbody>
+</table>
+<p>Both sit at their minimum in exactly the collapse we measured: with mean probabilities near uniform and one expert taking 62%–92% of the top-1, the Switch term is fixed at <code>k</code> and the GShard term at 1.0, and moving the top-k dispatch does not shift either. They separate only when the probability mass itself concentrates, where both rise.</p>
+<p><code>gshard_balance</code> is implemented and exported, and <code>scripts/train.py --balance gshard</code> selects it. <strong>Unknown</strong>: the <code>gshard</code> arms of v5n and v10n, three seeds each. The predictions:</p>
+<ol>
+<li><strong>Switching to the upstream GShard objective will not undo the routing collapse</strong>: the <code>gshard</code> arms still show a dominant expert above 0.6 top-1 share, mean-probability entropy above 90% of its maximum, and no dead experts. This is the mechanistic bet - if the collapse does lift, the choice of objective was the cause and this package's default should change.</li>
+<li><strong>Accuracy will not move materially</strong>: paired mAP50 means of the <code>gshard</code> arms sit within ±0.003 of their <code>switch</code> counterparts on v5n and v10n, the scale of the seed spread.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
+<h3 id="correction-2026-09-09-still-before-any-gshard-result">Correction (2026-09-09, still before any <code>gshard</code> result)<a class="headerlink" href="#correction-2026-09-09-still-before-any-gshard-result" title="Permanent link">&para;</a></h3>
+<p>The claim above that both objectives "sit at their minimum" in the measured collapse was computed on a hand-made uniform matrix and <strong>does not hold on the real records</strong>; correcting it. Taking <code>yolov9t-esmoe-s0</code>: the mean probabilities are <code>[0.206, 0.213, 0.200, 0.381]</code>, not uniform, and the GShard term evaluates to 1.0919, above its 1.0 minimum. It does register the concentration.</p>
+<p>The real gap is the coefficient. Upstream's <code>ES_MOE</code> carries <code>balance_loss_coeff = 1.0</code>, passes through <code>moe_gain = 1.0</code>, and lands as <code>total = native_loss + aux</code>; this package defaults to <code>attach_aux_loss(weight=0.01)</code>. On that same record the balancing gradient on the mean probabilities is 0.0200 here against 0.6159 upstream, a factor of <strong>31</strong>.</p>
+<p>The two predictions keep their content but change their reason: the collapse is unlikely to lift on a change of objective because this package applies the balancing term at one hundredth of upstream's weight, not because both objectives are blind. <strong>A third prediction follows</strong>:</p>
+<ol>
+<li><strong>Raising the weight to upstream's 1.0 moves the routing</strong>: under <code>--aux-weight 1.0</code> the dominant expert's top-1 share falls relative to 0.01, and by more than switching the objective does. If raising the weight moves nothing either, the balancing term is not the culprit and the router is.</li>
+</ol>
+<h3 id="fourth-pre-registration-2026-09-09-declared-before-any-master-result">Fourth pre-registration (2026-09-09, declared before any <code>master</code> result)<a class="headerlink" href="#fourth-pre-registration-2026-09-09-declared-before-any-master-result" title="Permanent link">&para;</a></h3>
+<p>Reading the paper itself (arXiv 2512.23273, section 3.5) shows that <strong>the balancing term the paper specifies is not the one the released code implements</strong>. Paper equation (13):</p>
+<div class="arithmatex">\[ \mathcal{L}_{LB} = \frac{1}{E}\sum_{i=1}^{E}\left(\mu_i - \frac{1}{E}\right)^2 \]</div>
+<p>where μᵢ averages <strong>Ω_train</strong> - the weights after the top-K mask and renormalisation (paper equation 8) - over the batch and spatial positions. Upstream's <code>ES_MOE</code> instead applies the GShard form <code>N·Σusage²</code> to the <strong>raw router probabilities</strong>. On one pair of inputs:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">balanced dispatch</th>
+<th style="text-align: center;">collapsed dispatch</th>
+<th style="text-align: center;">separates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code> (this package's default)</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">2.00000</td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code> (upstream code)</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">1.00000</td>
+<td style="text-align: center;">no</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code> (paper eq. 13)</td>
+<td style="text-align: center;">0.00000</td>
+<td style="text-align: center;">0.00383</td>
+<td style="text-align: center;"><strong>yes</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Both inputs carry uniform mean probabilities and differ only in whether the top-k dispatch collapses onto one expert. The first two read the probabilities and cannot tell them apart; the paper's reads the gated weights and can. <strong>The collapse measured across seven generations sits inside the blind spot of the first two.</strong></p>
+<p><code>master_balance</code> is implemented and <code>--balance master</code> selects it. <strong>Unknown</strong>: the <code>master</code> arms of v5n and v10n, two seeds each. The prediction:</p>
+<ol>
+<li><strong>The paper's term measurably lowers the dominant expert's top-1 share</strong>: the <code>master</code> arm's dominant share falls below the same backbone's <code>switch</code> arm, and by more than the <code>gshard</code> arm does. This is the strongest mechanistic bet of the four - if this one does not move either, the collapse is independent of the balancing term's form and the router or the graft point is responsible, and the explanations offered in the first three rounds give way.</li>
+</ol>
+<p>The paper states only λ_LB &gt; 0 without a value, so the <code>master</code> arm keeps this package's default weight of 0.01 and stays separate from the coefficient comparison.</p>
+<h3 id="correction-evening-of-2026-09-09-still-before-any-master-or-structural-result">Correction (evening of 2026-09-09, still before any <code>master</code> or structural result)<a class="headerlink" href="#correction-evening-of-2026-09-09-still-before-any-master-or-structural-result" title="Permanent link">&para;</a></h3>
+<p>The table above in the fourth round -- "only the paper's objective sees a collapsed dispatch" -- <strong>rests on a false premise</strong>, corrected here.</p>
+<p>Reading upstream line by line: <code>ES_MOE._compute_load_balancing_loss</code> applies the GShard form to whatever <code>DynamicRoutingLayer</code> returns, and in training that is the output of <code>_soft_top_k(...)</code> -- <strong>the gate, after the top-k mask and renormalisation</strong>. The paper's equation 12 averages the same tensor. Therefore</p>
+<div class="arithmatex">\[\mathcal{L}_{\text{paper}}=\frac{\mathcal{L}_{\text{upstream}}-1}{E^2}\]</div>
+<p><strong>The paper and the released code state one objective, differing only by an affine map</strong>, with the same minimiser and proportional gradients. The earlier claim that they differ was wrong.</p>
+<p>What was wrong is this package: <code>gshard_balance</code> had been written against the <strong>raw softmax</strong>, which is neither. It now reads the gate; the probability-reading form is kept as <code>gshard_probs_balance</code>. Consequently:</p>
+<ul>
+<li>The <code>gshard</code> row of that table measured <code>gshard_probs</code> and <strong>is relabelled accordingly</strong>; the five finished records have had their <code>balance</code> field corrected in place.</li>
+<li>The fourth prediction is <strong>not withdrawn</strong>: it asks whether an objective reading the gate lifts the collapse, which remains open. The <code>master</code> arm is running.</li>
+<li>The dividing line is restated: <strong>whether the term reads the probabilities or the gate</strong>, not Switch versus GShard.</li>
+</ul>
+<h3 id="fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result">Fifth pre-registration (evening of 2026-09-09, declared before any structural result)<a class="headerlink" href="#fifth-pre-registration-evening-of-2026-09-09-declared-before-any-structural-result" title="Permanent link">&para;</a></h3>
+<p>The same line-by-line comparison found three structural differences that no experiment had covered. All three are switches, defaulting to the old behaviour so the 77 records already in <code>results/</code> stay reproducible, and each becomes its own arm:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">difference from upstream</th>
+<th style="text-align: center;">switch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>stages</code></td>
+<td style="text-align: center;">upstream puts one block after every backbone stage, four in all; this package puts one</td>
+<td style="text-align: center;"><code>--at backbone_stages</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>norm</code></td>
+<td style="text-align: center;">upstream normalises the mixed output with <code>BatchNorm+SiLU</code> (the paper's eq. 2 <code>Norm</code>)</td>
+<td style="text-align: center;"><code>--out-norm</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense</code></td>
+<td style="text-align: center;">upstream runs every expert in training, the unrouted ones weighted zero, so their normalisation statistics keep moving</td>
+<td style="text-align: center;"><code>--dense-training</code></td>
+</tr>
+</tbody>
+</table>
+<p>The predictions:</p>
+<ol>
+<li><strong>Block count is the dominant term: the <code>stages</code> arm's paired mAP50 mean beats the single-block arm</strong>, by more than any change of balancing objective achieves. Four blocks carry four times the capacity and graft surface of one; if that does not move the metric either, the "graft location and capacity" explanation should retire.</li>
+<li><strong>The <code>dense</code> arm's dominant expert holds a smaller top-1 share than its sparse counterpart.</strong> In this package an unrouted expert's normalisation statistics freeze; upstream keeps them moving. If the collapse owes anything to that, this arm should reduce the share.</li>
+<li><strong>The <code>norm</code> arm moves accuracy by less than ±0.003</strong>, the scale of the seed spread. It is a question of structural completeness, not an expected source of accuracy.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
+<h3 id="correction-late-2026-09-09-still-before-any-structural-arm-result">Correction (late 2026-09-09, still before any structural-arm result)<a class="headerlink" href="#correction-late-2026-09-09-still-before-any-structural-arm-result" title="Permanent link">&para;</a></h3>
+<p>The previous section relabelled five records' <code>balance</code> as <code>gshard_probs</code>. <strong>That relabelling was also wrong</strong>, and so is every result from the <code>--balance</code>, <code>--out-norm</code> and <code>--dense-training</code> switches. Both are corrected here.</p>
+<p>The trainer rebuilds the model from <code>model.yaml</code>. An objective or a switch set on the blocks after <code>YOLO(cfg)</code> returns lands on an object that is then discarded — no error, no trace. So none of the three switches reached the model that trained: a run asking for <code>master</code> optimised the constructor default, a run asking for the output norm trained without one, and the record repeated the command line, which said something else.</p>
+<p>The evidence is the weights, not the logs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"best.pt"</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s2">"model"</span><span class="p">]</span>
+<span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">balance</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">esmoe</span><span class="o">.</span><span class="n">blocks</span><span class="p">(</span><span class="n">model</span><span class="p">)]</span>  <span class="c1"># ['switch_balance']</span>
+</code></pre></div>
+<p>A block pickled before a setting existed carries no attribute for it, and the absence is itself the answer. Therefore:</p>
+<ul>
+<li>Those five records trained <code>switch_balance</code>: same configuration and same seed as the default arm, run a second time. They are relabelled <code>switch</code> and join the default arm as repeats — a direct measure of run-to-run spread on one card, which is exactly what three-seed intervals lack.</li>
+<li>The two runs labelled <code>master</code> optimised <strong>GShard read off the gate</strong> (the md5 of <code>esmoe/module.py</code> matches the commit that switched to the gate, and <code>esmoe_aux</code> sits at 0.0101, which is <span class="arithmatex">\(N\sum u^2 = 1\)</span> under a uniform gate times the 0.01 weight). They are recorded as <code>gshard</code>.</li>
+<li>The fourth round's prediction stands and is still unanswered: whether an objective that reads the gate relieves the collapse. These two runs answer it, not the two that were thought to.</li>
+</ul>
+<p><strong>The fix, and the audit.</strong> <code>graft()</code> now writes the settings into the config (<code>[4, 2, null, {balance: …, out_norm: …, dense_training: …}]</code>), and <code>ESMoE</code> takes them as an options mapping and resolves an objective by name — so a rebuild cannot drop them. <code>scripts/train.py</code> records the block settings read off the trained model instead of repeating the request, and refuses to start when the two disagree; <code>tests/test_ultralytics.py</code> trains a model to hold that path.</p>
+<p>The audit does not rely on memory: <code>scripts/blockspec.py</code> reads each checkpoint's block settings on the host that holds it, and <code>scripts/backfill.py --settings</code> rewrites the records to match, naming the change inside the record. All 120 records here were checked against their checkpoints and <strong>none needed correcting</strong> — the published data is sound; what was wrong were the new arms, none of them merged yet.</p>
+<p><strong>The general lesson</strong>: a <code>--flag</code> in a record does not mean the flag reached the model. Read the record off the trained model; do not repeat the command line.</p>
+<h2 id="fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run">Fourth-round verdict (2026-09-10, the gate-reading objective has run)<a class="headerlink" href="#fourth-round-verdict-2026-09-10-the-gate-reading-objective-has-run" title="Permanent link">&para;</a></h2>
+<p>The fourth round asked whether an objective that can see the collapse relieves it. Two v5n runs (seeds 0 and 1) are in, and the answer is <strong>no</strong> -- and it moved the other way.</p>
+<p>The same <code>scripts/routing.py</code> over the 548 VisDrone validation images:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">checkpoints</th>
+<th style="text-align: center;">top-two usage, of 2.0</th>
+<th style="text-align: center;">lowest usage</th>
+<th style="text-align: center;">dead experts</th>
+<th style="text-align: center;">probability entropy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Switch (every earlier record)</td>
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">1.265–1.777 (mean 1.468)</td>
+<td style="text-align: center;">0.0365</td>
+<td style="text-align: center;">0 of 46</td>
+<td style="text-align: center;">90%–97%</td>
+</tr>
+<tr>
+<td style="text-align: center;">GShard on the gate</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1.610–1.898 (mean 1.754)</td>
+<td style="text-align: center;">0.0091</td>
+<td style="text-align: center;">1 of 2</td>
+<td style="text-align: center;">97%–98%</td>
+</tr>
+</tbody>
+</table>
+<p>Both checkpoints sit in the upper half of the Switch range or above it, and seed 1's 1.898 is the most concentrated dispatch among all 48 checkpoints. Seed 0 holds the <strong>first dead expert in the project</strong> (usage 0.0091); none of the 46 earlier checkpoints has one. Meanwhile the probability entropy is <em>higher</em>, 97%–98% against 90%–97%: <strong>flatter probabilities, more concentrated dispatch</strong>, which is exactly the dissociation this line of work has been chasing.</p>
+<p>The paired accuracy is +0.0018 over two seeds (1/2 wins), inside the run-to-run spread and therefore not evidence of anything.</p>
+<p><strong>The confound was stated backwards here, and this corrects it.</strong> The first version read: the two terms differ in scale at one weight, so this arm carried about half the pressure. That compares the terms' <strong>values</strong> at their optimum, which says nothing about pressure. What decides how much a weight buys is the <strong>gradient</strong> the term puts on the router's logits. Measured at the mean routing probabilities each checkpoint actually converged to (<code>scripts/pressure.py</code>, output in <code>results/pressure.md</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">objective</th>
+<th style="text-align: center;">gradient relative to Switch, across the v5n checkpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>gshard</code>, reading the gate</td>
+<td style="text-align: center;">0.59x – 1.48x</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master</code>, the paper's eq. 13</td>
+<td style="text-align: center;">about 1/11 to 1/134, which is the <code>1/E^2</code> factor</td>
+</tr>
+</tbody>
+</table>
+<p><strong>At the same <code>weight=0.01</code> the gate-reading term pushes as hard as the arm it is compared against</strong>, not half as hard. The "it had less pressure" escape therefore does not hold, and the verdict is firmer for it: <strong>under comparable balancing pressure, reading the gate did not relieve the collapse and the dispatch came out more concentrated.</strong></p>
+<p>What does remain is the sample: two seeds against forty-six, one backbone against seven.</p>
+<p><strong>The fourth prediction is not borne out, and is recorded as such.</strong> <code>master</code> genuinely does sit an order of magnitude lower, so answering "is the paper's scale enough" needs its weight raised by <code>1/E^2</code> and a run of its own, which was not made.</p>
+<h2 id="run-to-run-spread-at-one-configuration-2026-09-09-not-planned">Run-to-run spread at one configuration (2026-09-09, not planned)<a class="headerlink" href="#run-to-run-spread-at-one-configuration-2026-09-09-not-planned" title="Permanent link">&para;</a></h2>
+<p>The six mislabelled runs of the previous section trained exactly what the default arm trains: same configuration, same seed, same card, run a second time. They are therefore not extra samples but a direct measure of something nothing here had measured -- <strong>how far apart two runs of one configuration land.</strong></p>
+<p><code>scripts/report.py</code> computes the table at the end of <code>results/summary.md</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">stack</th>
+<th style="text-align: center;">epochs</th>
+<th style="text-align: center;">repeats</th>
+<th style="text-align: center;">mean gap</th>
+<th style="text-align: center;">largest gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">120</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0.0045</td>
+<td style="text-align: center;">0.0130</td>
+</tr>
+<tr>
+<td style="text-align: center;">metaxc500 / metax3.3</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+<tr>
+<td style="text-align: center;">4090d / torch2.6</td>
+<td style="text-align: center;">20</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0.0000</td>
+<td style="text-align: center;">0.0000</td>
+</tr>
+</tbody>
+</table>
+<p>That is the denominator for every conclusion here. Across seven generations the default arm's mean paired delta is v5n +0.0055, v8n +0.0025, v9t +0.0025, v10n −0.0002, 11n +0.0013, 12n −0.0018, 26n −0.0034 -- <strong>six of the seven inside the mean gap between two runs of one configuration (0.0045)</strong>; only v5n's +0.0055 clears it, and it still sits well inside the largest gap observed, 0.0130.</p>
+<p>Three things follow, and all three are stated rather than softened:</p>
+<ol>
+<li><strong><code>deterministic=True</code> does not hold on this accelerator.</strong> The trainer fixes the seed and sets the deterministic flag; on the 4090 a repeat reproduces bit for bit (one pair, 20 epochs), on the MetaX C500 it does not (five pairs, 120 epochs). The divergence accumulates with training: at one epoch the gap is zero.</li>
+<li><strong>The generation with the largest positive effect sits on the noisier machine.</strong> v5n's +0.0055 and +0.0041 both come from the MetaX cards; the four measured on the 4090 (v8n, 11n, 12n, 26n) rest on a single same-configuration repeat so far.</li>
+<li><strong>This does not overturn the consistency of the signs, but it does overturn reading the magnitudes.</strong> "Positive on this generation, negative on that one" is carried by the sign counts across seeds. "The block is worth +0.0055" is not: two runs of one configuration already differ by 0.0130.</li>
+</ol>
+<p>Accuracy claims here therefore stop at direction, with the sample size and interval stated alongside; anywhere an earlier judgment line reasoned from a magnitude, it is downgraded to direction. <strong>This is the most useful negative result of the project, and it is a by-product of an implementation defect -- without those six runs being mislabelled, nobody would have paid for a repeat of an identical configuration.</strong></p>
+<h2 id="fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run">Fifth-round verdicts (2026-09-10, the three structural arms have run)<a class="headerlink" href="#fifth-round-verdicts-2026-09-10-the-three-structural-arms-have-run" title="Permanent link">&para;</a></h2>
+<p>Three arms at three seeds each, paired against a baseline of the same seed on the same card:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">relation to upstream</th>
+<th style="text-align: center;">paired mAP50</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: center;">wins</th>
+<th style="text-align: center;">mAP50-95</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>norm</code> (v5n)</td>
+<td style="text-align: center;">always on upstream, off here</td>
+<td style="text-align: center;"><strong>+0.0038</strong></td>
+<td style="text-align: center;">[−0.0033, +0.0109]</td>
+<td style="text-align: center;"><strong>3/3</strong></td>
+<td style="text-align: center;">+0.0022 (3/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>dense</code> (v5n)</td>
+<td style="text-align: center;">always on upstream, off here</td>
+<td style="text-align: center;"><strong>+0.0031</strong></td>
+<td style="text-align: center;">[−0.0006, +0.0068]</td>
+<td style="text-align: center;"><strong>3/3</strong></td>
+<td style="text-align: center;">+0.0034 (3/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>stages</code> (v10n, four blocks)</td>
+<td style="text-align: center;">upstream's layout, one block here</td>
+<td style="text-align: center;"><strong>−0.0071</strong></td>
+<td style="text-align: center;">[−0.0162, +0.0019]</td>
+<td style="text-align: center;"><strong>0/3</strong></td>
+<td style="text-align: center;">−0.0048 (0/3)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>In one line: both of upstream's block-internal defaults are positive and 3/3; upstream's block-count layout is negative and 0/3.</strong> Of the things this package had not copied, the good ones were inside the block and the bad one was the count.</p>
+<h3 id="predictions-settled_2">Predictions settled<a class="headerlink" href="#predictions-settled_2" title="Permanent link">&para;</a></h3>
+<p><strong>Fifth (the <code>stages</code> arm beats the single-block arm, by more than any balancing objective achieved) — refuted, and the other way round.</strong> Four blocks did not lift the metric; they are the only cell of twenty-one that is 0/3 with both metrics negative. The prediction itself said "if it cannot move the metric either, then the graft-location-and-capacity explanation should retire". By its own terms, <strong>it retires.</strong> The parameter count is higher (3.15M against 3.03M), so this is not a capacity shortfall.</p>
+<p>The confound is measured, not assumed: four blocks sum four auxiliary terms, so at one weight <code>esmoe_aux</code> goes from 0.020 to 0.080, exactly fourfold. Separating "block count" from "fourfold balancing pressure" needs the four-block arm at <code>weight=0.0025</code>; that arm is queued and the verdict waits on it.</p>
+<p><strong>Sixth (the <code>dense</code> arm's leading expert holds a smaller top-1 share) — partly, and not on the quantity that was registered.</strong> Per seed: −0.277, +0.095, −0.017, a mean of −0.066 at <strong>2/3</strong>, carried almost entirely by seed 0. On the share the top two experts take instead, dense is lower on 3/3 (1.392/1.403/1.555 against 1.431/1.610/1.646). <strong>What was registered was the top-1 share, and on that quantity this is not established</strong>; "dense spreads the dispatch" holds on the other measure.</p>
+<p><strong>Seventh (<code>norm</code> moves accuracy by less than ±0.003) — refuted, in the positive direction.</strong> +0.0038 is outside the band. More interesting is what came with it: the <code>norm</code> arm's leading expert holds a <strong>larger</strong> top-1 share than the sparse arm by 0.089, on 3/3 seeds. <strong>More concentrated, and more accurate.</strong></p>
+<h3 id="one-thing-that-matters-more-than-the-three-predictions">One thing that matters more than the three predictions<a class="headerlink" href="#one-thing-that-matters-more-than-the-three-predictions" title="Permanent link">&para;</a></h3>
+<p>Put "how concentrated the dispatch is" beside "how much the pairing moved", over the 58 runs that have both a routing analysis and a paired delta:</p>
+<div class="arithmatex">\[r = +0.160\]</div>
+<p>The leading expert's top-1 share runs from 0.49 to 0.92 and the paired mAP50 delta from −0.0113 to +0.0109, and the two are <strong>almost unrelated — with what relationship there is pointing the wrong way.</strong> <code>norm</code> is more concentrated and more accurate; <code>dense</code> is more spread and more accurate. Both are instances of the same thing.</p>
+<p><strong>This unsettles the premise of the whole line of questioning.</strong> Four rounds here asked how to relieve routing collapse, assuming collapse costs accuracy. Under these conditions that assumption has no support: <strong>collapse and accuracy are unrelated in this data.</strong> Whether a balancing term belongs, and how large it should be, therefore cannot be argued from "it prevents collapse"; it has to be settled by what the term does to the metric — and that effect currently sits inside the run-to-run spread.</p>
+<p>The correlation is recomputed by <code>scripts/routing.py --summarise</code> at the top of <code>results/routing.md</code>; it is not transcribed.</p>
+<h3 id="results-from-the-alignment-arms">Results from the alignment arms<a class="headerlink" href="#results-from-the-alignment-arms" title="Permanent link">&para;</a></h3>
+<p>Filled in as the runs land, from the same numbers as <code>results/summary.md</code>.</p>
+<div id="esmoe-alignment"></div>
+
+<h2 id="sixth-round-verdicts-2026-09-11-no-balancing-term-and-four-blocks-at-a-quarter-weight">Sixth-round verdicts (2026-09-11, no balancing term and four blocks at a quarter weight)<a class="headerlink" href="#sixth-round-verdicts-2026-09-11-no-balancing-term-and-four-blocks-at-a-quarter-weight" title="Permanent link">&para;</a></h2>
+<p>The fifth round left two things open: whether the four-block deficit comes from the block count or from four times the auxiliary term, and what a balancing term is for once concentration turns out not to predict accuracy. The fourth round also still owed an answer: does the paper's objective relieve the collapse once its pressure is raised to match. Five arms at three seeds each, paired on the same card and seed:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">question</th>
+<th style="text-align: center;">paired mAP50</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: center;">wins</th>
+<th style="text-align: center;">mAP50-95</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">four blocks, weight 0.0025 each (v10n)</td>
+<td style="text-align: center;">still worse when the auxiliary total matches one block?</td>
+<td style="text-align: center;"><strong>−0.0113</strong></td>
+<td style="text-align: center;">[−0.0242, +0.0015]</td>
+<td style="text-align: center;"><strong>0/3</strong></td>
+<td style="text-align: center;">−0.0075 (0/3, interval [−0.0132, −0.0018])</td>
+</tr>
+<tr>
+<td style="text-align: center;">four blocks (v5n, third seed added)</td>
+<td style="text-align: center;">still worse on another backbone?</td>
+<td style="text-align: center;"><strong>−0.0049</strong></td>
+<td style="text-align: center;">[−0.0118, +0.0019]</td>
+<td style="text-align: center;"><strong>0/3</strong></td>
+<td style="text-align: center;">−0.0035 (0/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;">no balancing term (v5n)</td>
+<td style="text-align: center;">what does the term do</td>
+<td style="text-align: center;">+0.0005</td>
+<td style="text-align: center;">[−0.0080, +0.0090]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;">+0.0006 (1/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;">no balancing term (v10n)</td>
+<td style="text-align: center;">same</td>
+<td style="text-align: center;">−0.0027</td>
+<td style="text-align: center;">[−0.0170, +0.0116]</td>
+<td style="text-align: center;">1/3</td>
+<td style="text-align: center;">−0.0025 (1/3)</td>
+</tr>
+<tr>
+<td style="text-align: center;">paper's eq. 13 at weight 0.32 (v5n)</td>
+<td style="text-align: center;">does the paper's objective relieve collapse at full pressure</td>
+<td style="text-align: center;">+0.0021</td>
+<td style="text-align: center;">[−0.0018, +0.0059]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">+0.0009 (2/3)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="four-blocks-lose-on-the-count-not-on-the-auxiliary-total">Four blocks lose on the count, not on the auxiliary total<a class="headerlink" href="#four-blocks-lose-on-the-count-not-on-the-auxiliary-total" title="Permanent link">&para;</a></h3>
+<p>With each block at 0.0025, <code>esmoe_aux</code> ends training at 0.020, the same as the single-block arm; four blocks at 0.01 end at 0.080. Matching the total did not bring four blocks back. Seed for seed they came out lower than four blocks at 0.01 (−0.0003, −0.0008, −0.0114), and the mAP50-95 interval no longer crosses zero. On v5n the third seed is 0/3 as well. Over two backbones and two weights, all nine seeds of the four-block layout are negative. <strong>The fourfold-pressure confound is ruled out; the deficit comes from the number of blocks.</strong></p>
+<h3 id="without-the-term-experts-die">Without the term, experts die<a class="headerlink" href="#without-the-term-experts-die" title="Permanent link">&para;</a></h3>
+<p>Dead experts per checkpoint (an expert in the top-2 on fewer than 1% of images):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">balancing term</th>
+<th style="text-align: center;">weight per block</th>
+<th style="text-align: center;">blocks</th>
+<th style="text-align: center;">checkpoints</th>
+<th style="text-align: center;">with a dead expert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Switch (this package's default)</td>
+<td style="text-align: center;">0.01</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">60</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr>
+<td style="text-align: center;">Switch</td>
+<td style="text-align: center;">0.01</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr>
+<td style="text-align: center;">Switch</td>
+<td style="text-align: center;">0.0025</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;"><strong>6</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">GShard on the gate (upstream)</td>
+<td style="text-align: center;">0.01</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr>
+<td style="text-align: center;">paper's eq. 13</td>
+<td style="text-align: center;">0.32</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;"><strong>3</strong></td>
+</tr>
+</tbody>
+</table>
+<p>All six checkpoints trained without the term lose two experts outright. The other two take the top-2 on every one of the 548 images (their usage sums to exactly 2.0), so the block reduces to a weighted pair of fixed experts. On v10n the leading expert's top-1 share is 0.964, 1.000 and 1.000. The Switch term at 0.01 leaves no dead expert in 66 checkpoints; at 0.0025 per block one appears. <strong>What the term secures here is that every expert keeps receiving images, not an even dispatch</strong>: with it, the dispatch is still concentrated (rounds four and five).</p>
+<p>For accuracy, the arm without the term shares its baselines with the default arm, so the per-seed difference is the term's contribution. On mAP50: v5n −0.0083, +0.0005, −0.0072; v10n −0.0016, −0.0062, −0.0002, lower on 5 of 6. mAP50-95 is lower on 5 of 6 as well. The means are only −0.0050 and −0.0027, though, while the v5n default arm's seed 2 differs from its own repeat by 0.0130. <strong>The direction leans lower; the size is inside the noise; no accuracy claim is made.</strong></p>
+<h3 id="why-the-papers-family-of-objectives-does-not-prevent-it">Why the paper's family of objectives does not prevent it<a class="headerlink" href="#why-the-papers-family-of-objectives-does-not-prevent-it" title="Permanent link">&para;</a></h3>
+<p>Of the six checkpoints trained on a gate-reading objective, five have a dead expert. Pressure is not the reason. Eq. 13 and GShard on the gate differ by an affine map with slope <code>1/E^2</code>, so eq. 13 at 0.32 has exactly the gradient of gate-reading GShard at 0.02, twice the fourth-round arm. By <code>results/pressure.md</code> that is 1.2 to 3.0 times the Switch term at 0.01 across the v5n checkpoints, and still 3 of 3 have a dead expert.</p>
+<p>The reason is the form of the gate. Eq. 8 and eq. 9 are the same number, and eq. 9 contains only the logits inside the top-K subset:</p>
+<div class="arithmatex">\[\Omega_{\text{train},i}=\frac{e^{L_i}}{\sum_{j\in I_K}e^{L_j}},\qquad i\in I_K\]</div>
+<p><strong>A balancing term that reads only the gate therefore has exactly zero gradient for the logit of any expert not currently in the top-K</strong>, however much probability that expert still carries. Once an expert drops out of the top-K on every image, the term can no longer reach it. The Switch term reads the full softmax, has a gradient of the same order for experts outside the subset, and that gradient pulls them back towards the top-K. The numerical check is <code>test_a_gate_reading_balance_cannot_reach_an_expert_outside_the_top_k</code> in <code>tests/test_paper_parity.py</code>.</p>
+<p>Upstream's own recipe shows the same. The previous stage trained YOLO-Master-EsMoE-N natively in the upstream repository at d5afc4b (2026-07-28), where the balancing term also reads the gate (<code>ES_MOE._compute_load_balancing_loss</code> takes the output of <code>_soft_top_k</code>). In the first three of its four blocks, two experts each had a usage of exactly zero, while the last block used all four; pruning the dead experts moved mAP50 from 0.4271 to 0.4269 and cut latency by 24.5% (<code>DISCUSSION_POST.md</code> in <a href="https://github.com/Lfan-ke/yolomoe-ln">yolomoe-ln</a>). That run used imgsz 1024, 100 epochs, a single seed and YOLO-Master's own architecture, which is not this project's protocol, so it stands as corroboration of the mechanism and enters no accuracy comparison.</p>
+<h3 id="predictions-settled_3">Predictions settled<a class="headerlink" href="#predictions-settled_3" title="Permanent link">&para;</a></h3>
+<p><strong>Fourth (the paper's term clearly lowers the leading expert's top-1 share, by more than gate-reading GShard does) — holds as worded; the mechanism behind it does not.</strong> What was registered was <code>master</code> at 0.01, and that arm never actually ran (see the correction before round four). Raising the pressure as the end of the fourth-round verdict called for, the top-1 share drops on 2 of 3 seeds, a mean of 0.697 against the default arm's 0.812, down 0.115, while gate-reading GShard rises by 0.034. The same checkpoints have a dead expert on 3 of 3, though, and the top two take more of the dispatch on 3 of 3 (1.704, 2.000, 1.692 against 1.431, 1.610, 1.646). The share fell because the dispatch went from one dominant expert to two fixed ones, not because it evened out. With its third seed, gate-reading GShard lost two experts too.</p>
+<p><strong>The fifth round's open confound (is the four-block deficit the fourfold auxiliary term) — ruled out.</strong></p>
+<p><strong>The second half of the fifth round's "one thing that matters more" is revised.</strong> The first half stands: concentration does not predict accuracy, and with this round included r = +0.044 over the 81 runs that have both a routing analysis and a paired delta (+0.160 over 58 in the fifth round). The second half, "whether a balancing term belongs cannot be argued from preventing collapse", went too far. Collapse has two layers: a dominant expert, and dead experts. The first is unrelated to accuracy and the term does not prevent it. The second the Switch term does prevent, 0 of 66 against 6 of 6 without it. Its effect on accuracy is still inside the noise.</p>
+<h2 id="round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison">Round seven, pre-registered (2026-09-11, before any full-protocol result of the same-configuration comparison)<a class="headerlink" href="#round-seven-pre-registered-2026-09-11-before-any-full-protocol-result-of-the-same-configuration-comparison" title="Permanent link">&para;</a></h2>
+<p>A comparison with YOLO-Master under one configuration: the same model (upstream's <code>yolo-master-n.yaml</code>, one block after each backbone stage, four in all) and the same protocol (full VisDrone, imgsz 800, 120 epochs, batch 32, <code>patience=0</code>, every other argument at its default), trained once on upstream's fork (locked baseline <code>acce839c</code>) and once on official ultralytics 8.4.101 with this package. Four arms, with one seed's four arms on one card:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">framework</th>
+<th style="text-align: center;">model</th>
+<th style="text-align: center;">training</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">upstream fork</td>
+<td style="text-align: center;">yolo-master-n, four <code>ES_MOE</code></td>
+<td style="text-align: center;">upstream defaults</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0</td>
+<td style="text-align: center;">upstream fork</td>
+<td style="text-align: center;">the same model without the four blocks</td>
+<td style="text-align: center;">upstream defaults</td>
+</tr>
+<tr>
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">official 8.4.101 + esmoe</td>
+<td style="text-align: center;">the same model, four <code>ESMoE</code> (gate-reading GShard, output norm, every expert run in training, inference pruning at 0.4)</td>
+<td style="text-align: center;"><code>recipe="upstream"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">official 8.4.101</td>
+<td style="text-align: center;">the same model without the four blocks</td>
+<td style="text-align: center;">defaults</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Known at declaration:</strong></p>
+<ul>
+<li>The fork's trainer differs from the official one for every model in two places: the last batch of each epoch always steps the optimizer, and the first non-finite gradient restores the last healthy checkpoint, replays that epoch and turns mixed precision off for the rest of the run.</li>
+<li>B matches A layer for layer (2,814,406 parameters at 10 classes). <code>recipe="upstream"</code> reproduces the three things upstream's trainer does to a routed model: the auxiliary term divided by a running mean of its magnitude and capped at 3.0, router parameters at half the learning rate and outside Muon, and experts frozen for the first 3 epochs. It matches upstream's source step by step (<code>tests/test_recipe.py</code>).</li>
+<li>On MetaX C500, A and A0 of seeds 0 and 1 both rolled back in their first epoch and trained in FP32 from then on; B and C stayed in mixed precision in their smoke runs. A alone takes 37 GB in FP32, so each card runs A alone, then A0 beside C, then B alone.</li>
+</ul>
+<p><strong>Unknown:</strong> every 120-epoch metric of all four arms; seed 2's card is waiting for the platform to repair it.</p>
+<p><strong>Lines.</strong> Every paired difference is taken inside one card, over three seeds. Repeated runs of one configuration differ by 0.0045 on average and 0.0130 at most.</p>
+<ul>
+<li><strong>Equivalent</strong>: the paired mAP50 mean of A − B is at most 0.0045 in absolute value and its 95% interval spans zero.</li>
+<li><strong>Not equivalent</strong>: the mean of A − B exceeds 0.0130 in absolute value, or all three seeds share a sign and the interval excludes zero.</li>
+<li><strong>Undecided</strong>: anything else.</li>
+<li>(A − A0) − (B − C) is judged on the same three lines and answers whether the block does the same in both frameworks.</li>
+</ul>
+<p><strong>Predictions:</strong></p>
+<ol>
+<li><strong>The two implementations are equivalent</strong>: A − B lands on "equivalent". If it lands on "not equivalent", the difference comes from this package's block or from its reproduction of the recipe, and each gets checked in turn.</li>
+<li><strong>The block does the same in both frameworks</strong>: (A − A0) − (B − C) lands on "equivalent", and A − A0 and B − C have means of the same sign.</li>
+<li><strong>The four-block layout brings no gain at this budget</strong>: by the lines at the top of this page, both B − C and A − A0 are "ineffective". The basis is rounds five and six, where four blocks were negative on all 9 seeds across v5n and v10n. If A − A0 reaches "effective" and B − C does not, the four-block deficit depends on how the block trains, and the fifth and sixth rounds' conclusion has to be limited to <code>recipe="esmoe"</code>.</li>
+<li><strong>The gate-reading balancing term still leaves dead experts here</strong>: at least two thirds of B's checkpoints have a block with a dead expert (in the top-2 for under 1% of images). The basis is round six, where 5 of 6 checkpoints trained on a gate-reading objective had one; upstream's normalisation enlarges the term but leaves its gradient for an expert outside the top-K at zero. If B has no dead expert at all, running every expert in training or the expert warm-up closed that gap, and round six's mechanism needs adding to.</li>
+</ol>
+<p>Wrong predictions get recorded as wrong.</p>
+<h3 id="addendum-the-training-loop-step-for-step-2026-09-11-still-before-any-full-protocol-result">Addendum: the training loop step for step (2026-09-11, still before any full-protocol result)<a class="headerlink" href="#addendum-the-training-loop-step-for-step-2026-09-11-still-before-any-full-protocol-result" title="Permanent link">&para;</a></h3>
+<p>On CPU in FP32, upstream's trainer and this package each trained for 5 epochs: 192 VisDrone images, 12 iterations an epoch, MuSGD. Both started from the same weights, and every batch's data fingerprint matched. The script is <code>scripts/recipe_parity.py</code> and the results are in <code>results/recipe_parity.md</code>.</p>
+<ul>
+<li><strong>The block itself.</strong> With the same weights and input, <code>ES_MOE</code> and <code>ESMoE</code> differ by 1.9e-6 in training output (magnitude 7.07), and by 1e-11, 2e-9 and 6e-10 in the gradients to the input, the router and the experts.</li>
+<li><strong>Without blocks.</strong> A0 and C have bit-identical losses through epochs 0 and 1, and their parameters part at the end of epoch 1. That matches upstream's forced step on the last batch of an epoch: during warm-up the accumulation count changes, so that step stops lining up with the official one.</li>
+<li><strong>With blocks.</strong> A and B give every parameter group the same learning rate at every step and freeze the experts alike (0 of 64 trainable for the first 3 epochs, 64 after), yet their losses already differ by 1.8% in epoch 0.</li>
+<li><strong>Control.</strong> Scaling one router layer's weights by 1 + 1e-6 in the same implementation and training again moves A from itself by 2.3% and B from itself by 1.5%, the same order as A against B. Iteration 0's loss jumps between two sets of values: with router scores nearly tied, a rounding-sized difference flips the top-2 choice.</li>
+</ul>
+<p>Conclusion: to the resolution a CPU trajectory allows, B differs from A by no more than rounding does. The full-protocol lines for A − B stand.</p>
+<h3 id="addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running">Addendum: a flaw in the B arm's evaluation path, and the protocol the metrics are re-measured under (2026-09-12, seed 2 still running)<a class="headerlink" href="#addendum-a-flaw-in-the-b-arms-evaluation-path-and-the-protocol-the-metrics-are-re-measured-under-2026-09-12-seed-2-still-running" title="Permanent link">&para;</a></h3>
+<p>The B arm's in-training validation collapsed to about 0.043 mAP50 on all three cards while its training losses matched A's and C's. The cause is in this package's block: inference pruning compared <code>dynamic_threshold</code> against the raw probabilities, before the top-k renormalisation, where upstream compares it against the share after. With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so validation pruned nearly every image to a single expert while training mixed two. The same weights read 0.374 mAP50 in upstream's order and 0.375 unpruned. Fixed in <code>d6f4dcc</code>; the default <code>dynamic_threshold=0.0</code> never takes that path, so the records from rounds one to six and the check of the released model are unaffected.</p>
+<p>The four arms' metrics are therefore re-measured by <code>scripts/measure.py</code>: each run's model is rebuilt from the config it trained, loaded with the EMA weights in its <code>last.pt</code>, and evaluated with one set of validation settings. <code>last.pt</code> rather than <code>best.pt</code>, because B's <code>best</code> was selected by the broken metric; all four arms ran <code>patience=0</code> for the full 120 epochs, so their final weights are comparable. The records themselves are not rewritten -- what each trainer measured stays beside the new number as <code>metrics_by_trainer</code>.</p>
+<p><strong>Known at the time of writing</strong>: seed 0 (card c) A 0.36370, A0 0.35419, B 0.37390, C 0.35972; seed 1 (card d) A 0.37034, A0 0.35339, B 0.37240, C 0.35890. Seed 2's B arm is still training. Measuring the same weights twice differs by about 0.0002.</p>
+<p><strong>The lines stand</strong> as pre-registered above, and the four predictions are reconciled against them. Prediction 4 reads routing statistics off the checkpoints and does not depend on the evaluation path.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "search.suggest"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+      
+        <script src="../../javascripts/data.js"></script>
+      
+        <script src="../../javascripts/charts.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/diagrams.js"></script>
+      
+    
+  </body>
+</html>
