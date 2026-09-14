@@ -6,6 +6,7 @@ all land in results/<experiment_id>.json.
 """
 
 import argparse
+import csv
 import hashlib
 import importlib.util
 import json
@@ -72,6 +73,22 @@ def digest(path: Path) -> str | None:
     if not path.is_file():
         return None
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def resumed(checkpoint: str, run: Path) -> dict:
+    """Where a crashed run picks up: the epochs its checkpoint holds and the seconds they took.
+
+    The trainer finishes a resumed run in the directory its checkpoint was saved from, whatever name
+    this invocation asks for, so only a checkpoint of this run, lying in this run's directory, is accepted.
+    """
+    path, run = Path(checkpoint).resolve(), run.resolve()
+    state = torch.load(path, map_location="cpu", weights_only=False)
+    if path.parents[1] != run or Path(state["train_args"]["save_dir"]).resolve() != run:
+        raise SystemExit(f"--resume takes a checkpoint saved by {run}, not {path}")
+    done = state["epoch"] + 1
+    with (run / "results.csv").open(encoding="utf-8") as f:
+        seconds = {int(row["epoch"]): float(row["time"]) for row in csv.DictReader(f)}
+    return {"checkpoint": str(path), "sha256": digest(path), "epochs_done": done, "seconds_before": seconds[done]}
 
 
 def dataset_facts(data: str) -> dict:
@@ -250,6 +267,7 @@ def build_parser() -> argparse.ArgumentParser:
     # ultralytics 把 0 读作 "no patience" 并禁用早停，这正是复现协议要的固定周期。
     p.add_argument("--patience", type=int, default=0)
     p.add_argument("--tag", default="")
+    p.add_argument("--resume", default="", help="this run's last.pt after a crash: finish the run, do not start over")
     return p
 
 
@@ -281,6 +299,8 @@ def main():
     arch = architecture(args)
     name = run_name(args, fork=stack != "ultralytics")
     experiment_id = f"{name}-{time.strftime('%Y%m%d%H%M%S')}"
+    resume = resumed(args.resume, ROOT / "runs" / name) if args.resume else None
+    done, before = (resume["epochs_done"], resume["seconds_before"]) if resume else (0, 0.0)
     seen = watch(model)
 
     started = time.time()
@@ -303,6 +323,7 @@ def main():
             project=str(ROOT / "runs"),
             name=name,
             exist_ok=True,
+            resume=resume["checkpoint"] if resume else False,
         )
     except Exception as exc:  # a failed run is still a record, not a silent gap
         status, error = "failed", repr(exc)
@@ -351,10 +372,12 @@ def main():
             "amp": bool(args.amp),
             "amp_at_end": seen["amp"],
             "batch_at_end": seen["batch"],
-            "epochs_replayed": max(seen["epochs_started"] - args.epochs, 0),
-            "wall_seconds": round(elapsed, 1),
-            "gpu_hours": round(elapsed / 3600, 3),
+            "epochs_replayed": max(seen["epochs_started"] - (args.epochs - done), 0),
+            # A resumed run cost its checkpoint's epochs too; hours count both, so runs stay comparable.
+            "wall_seconds": round(elapsed + before, 1),
+            "gpu_hours": round((elapsed + before) / 3600, 3),
         },
+        **({"resumed": resume} if resume else {}),
         "seed": args.seed,
         "metrics": metrics,
         "params": get_num_params(model.model),
