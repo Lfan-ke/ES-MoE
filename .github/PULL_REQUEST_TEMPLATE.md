@@ -1,5 +1,4 @@
-<!-- The four sections below are the review contract for this project. Keep them all, even if a
-     section is one line ("no ablation: docs only"). -->
+<!-- Keep all four sections. One line is enough where a section does not apply ("not applicable: docs only"). -->
 
 ### Change summary
 
@@ -7,14 +6,18 @@
 
 ### Test evidence
 
-<!-- Commands and results. `uv run pytest -q` at minimum; add the notebook check if you touched the
-     quick start, and say which ultralytics version you ran against. -->
+<!-- Commands and results, and the ultralytics version they ran against. -->
 
 ### Ablation data
 
-<!-- Only for changes that can move a metric: same data, same budget, same seeds, paired against the
-     baseline. Write "not applicable" for anything else. -->
+<!-- Required when the change can move a metric: the run records in `results/`, same data, budget and seeds as the baseline, paired per seed. -->
 
 ### Known limitations
 
 <!-- What this change does not cover, and what would falsify it. -->
+
+### Checklist
+
+- [ ] `ruff format`, `ruff check` and `pytest` pass; so does `scripts/check_notebook.py` if `notebooks/` changed.
+- [ ] A change to training behaviour comes with a test that fails without it, or a check in `scripts/verify.py`.
+- [ ] No credentials, local paths or weights are committed.

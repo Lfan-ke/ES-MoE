@@ -6,8 +6,7 @@ labels: compatibility
 assignees: ''
 ---
 
-<!-- This project only claims to work with stock ultralytics, so upstream releases are the usual
-     cause of breakage. Reports here are welcome even without a fix. -->
+<!-- The plugin only claims stock ultralytics, so upstream releases are the usual cause. A report without a fix is welcome. -->
 
 ### Versions
 
@@ -18,8 +17,11 @@ assignees: ''
 
 ### What breaks
 
-<!-- Which of the three integration points fails: model construction from a grafted config, the
-     auxiliary loss reaching the trainer, or the CLI. Include the error. -->
+- [ ] Building a model from a grafted config
+- [ ] The auxiliary loss reaching the trainer
+- [ ] The `esmoe` command line
+
+<!-- Paste the error. -->
 
 ### Minimal reproduction
 

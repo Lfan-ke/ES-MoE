@@ -6,9 +6,11 @@ labels: bug
 assignees: ''
 ---
 
+<!-- Every section is needed unless it says optional. -->
+
 ### Environment
 
-<!-- Paste the output of `esmoe info`. Almost every report needs these three versions. -->
+<!-- Paste the output of `esmoe info`. -->
 
 ```
 esmoe
@@ -17,7 +19,14 @@ torch
 ```
 
 - **OS**:
-- **GPU / CPU only**:
+- **Device**:
+  - [ ] NVIDIA GPU
+  - [ ] Other accelerator:
+  - [ ] CPU only
+- **Recipe**:
+  - [ ] `recipe="esmoe"` (default)
+  - [ ] `recipe="upstream"`
+  - [ ] Not training
 
 ### Steps to reproduce
 
@@ -33,4 +42,9 @@ torch
 
 <!-- Full traceback if there is one, or the log lines around the failure. -->
 
-### Anything else
+### Anything else (optional)
+
+### Checklist
+
+- [ ] Reproduced on the latest release on PyPI.
+- [ ] Searched the existing issues.
