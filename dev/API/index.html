@@ -806,7 +806,7 @@
 <h2 id="equip">equip<a class="headerlink" href="#equip" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -&gt; YOLO
 </code></pre>
-<p>注册、接入、构建、接损失一次完成。<code>out</code> 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。<code>weight</code> 与 <code>recipe</code> 转给 <code>attach_aux_loss</code>，<code>graft_kwargs</code> 原样转给 <code>graft</code>。</p>
+<p>注册、嫁接、构建、接损失一次完成。<code>out</code> 指定落盘的嫁接后配置；不给则写到临时目录（YOLO 只按路径加载模型）。<code>weight</code> 与 <code>recipe</code> 转给 <code>attach_aux_loss</code>，<code>graft_kwargs</code> 原样转给 <code>graft</code>。</p>
 <h2 id="inject_esmoe">inject_esmoe<a class="headerlink" href="#inject_esmoe" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.inject_esmoe() -&gt; type[ESMoE]
 </code></pre>
@@ -822,10 +822,10 @@
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -&gt; model
 </code></pre>
 <p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重与训练方式。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 <code>compile=True</code> 时关掉 <code>find_unused_parameters</code>，多卡照样能训。</p>
-<p><code>recipe</code> 决定块和辅助项怎么训：</p>
+<p><code>recipe</code> 决定块和辅助损失怎么训：</p>
 <ul>
-<li><code>"esmoe"</code>（默认；同配置对照之外的运行都用它）：辅助项乘 <code>weight</code> 后按每张图计入，与任务损失的计法一致。</li>
-<li><code>"upstream"</code>：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 <code>weight</code>，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 <code>model.train()</code> 训练的 YOLO 模型生效。常数与出处见 <code>esmoe.upstream</code>。</li>
+<li><code>"esmoe"</code>（默认；同配置对照之外的运行都用它）：辅助损失乘 <code>weight</code> 后按每张图计入，与任务损失的计法一致。</li>
+<li><code>"upstream"</code>：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助损失除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 <code>weight</code>，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 <code>model.train()</code> 训练的 YOLO 模型生效。常数与出处见 <code>esmoe.upstream</code>。</li>
 </ul>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
@@ -861,7 +861,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 <td style="text-align: center;"><code>balance</code></td>
 <td style="text-align: center;"><code>switch_balance</code></td>
 <td style="text-align: center;"><code>gshard_balance</code></td>
-<td style="text-align: center;">均衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字、<code>模块:限定名</code></td>
+<td style="text-align: center;">平衡目标，<code>(probs, gate) -&gt; scalar</code>，或 <code>esmoe.BALANCES</code> 里的名字、<code>模块:限定名</code></td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>out_norm</code></td>
@@ -889,8 +889,8 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 </tr>
 </tbody>
 </table>
-<p>后两项只影响推理，前三项影响训练。<code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 的默认值是为了让 <code>results/</code> 里既有的运行原样复现，不是对上游的取舍判断。<code>balance</code> 的默认值由数据定：读门控的目标（上游的 <code>gshard</code>、论文的 <code>master</code>）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，同配置对照的 6 个 B checkpoint 全部有；Switch 读完整 softmax，66 个 checkpoint 上一个没有（<a href="../JUDGMENT/">判读线</a>第六至八轮）。</p>
-<p><code>block.spec()</code> 返回该块当下带着的五个设置，用了自定义专家时再加一项 <code>expert</code>；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一 checkpoint 读回当时真正生效的设置。</p>
+<p>后两项只影响推理，前三项影响训练。<code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 的默认值是为了让 <code>results/</code> 里既有的运行原样复现，不是对上游的取舍判断。<code>balance</code> 的默认值由数据定：读门控的目标（上游的 <code>gshard</code>、论文的 <code>master</code>）对没进 top-k 的专家梯度恒为零，实测 6 个检查点里 5 个出现死专家，同配置对照的 6 个 B 检查点全部有；Switch 读完整 softmax，66 个检查点上一个没有（<a href="../JUDGMENT/">判读线</a>第六至八轮）。</p>
+<p><code>block.spec()</code> 返回该块当下带着的五个设置，用了自定义专家时再加一项 <code>expert</code>；<code>block.configure(**settings)</code> 在<strong>不经训练器</strong>的场合（推理、导出、单测）改它们。<code>esmoe.blocks(model)</code> 按模块顺序遍历模型中的每一个块。<code>scripts/blockspec.py</code> 从任一检查点读回当时真正生效的设置。</p>
 
 
 
