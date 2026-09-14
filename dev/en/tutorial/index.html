@@ -912,7 +912,7 @@ original one reference by reference.</p>
 double-count a stale graph.</p>
 <h2 id="a-comparison-you-can-defend">A comparison you can defend<a class="headerlink" href="#a-comparison-you-can-defend" title="Permanent link">&para;</a></h2>
 <pre><code>uv run python scripts/capture_env.py             # freeze versions and hardware into results/env/
-EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
+EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>
 <p>Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,
