@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ultralytics-yolo" class="md-skip">
+        <a href="#给-ultralytics-yolo-装上稀疏专家混合" class="md-skip">
           跳转至
         </a>
       
@@ -98,9 +98,7 @@
     
       
 
-  
-
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
     <a href="." title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
@@ -249,6 +247,115 @@
       
         
           
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="." class="md-tabs__link">
+        
+  
+  
+    
+  
+  概览
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="tutorial/" class="md-tabs__link">
+          
+  
+  
+  使用
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="design/" class="md-tabs__link">
+          
+  
+  
+  设计
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="experiments/" class="md-tabs__link">
+          
+  
+  
+  实验
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="RELEASE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  发布说明
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -262,8 +369,10 @@
                     
 
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="." title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
@@ -354,7 +463,7 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#安装" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -365,7 +474,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#使用" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用
@@ -376,7 +485,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#兼容性" class="md-nav__link">
     <span class="md-ellipsis">
       
         兼容性
@@ -387,21 +496,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#出厂配置" class="md-nav__link">
     <span class="md-ellipsis">
       
         出厂配置
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        证据与边界
       
     </span>
   </a>
@@ -418,6 +516,58 @@
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    使用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    使用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -442,9 +592,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -469,9 +620,97 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    设计
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    设计
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES-MoE 与 YOLO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
   
@@ -496,6 +735,14 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
@@ -503,15 +750,67 @@
   
   
   
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实验
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    实验
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="results/" class="md-nav__link">
+      <a href="experiments/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    实验结果
+    实验总览
   
 
     
@@ -523,9 +822,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -550,22 +850,23 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
   
     <li class="md-nav__item">
-      <a href="limitations/" class="md-nav__link">
+      <a href="results/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    已知局限
+    实验结果
   
 
     
@@ -577,9 +878,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -601,6 +903,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -659,7 +969,7 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#安装" class="md-nav__link">
     <span class="md-ellipsis">
       
         安装
@@ -670,7 +980,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#使用" class="md-nav__link">
     <span class="md-ellipsis">
       
         使用
@@ -681,7 +991,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#兼容性" class="md-nav__link">
     <span class="md-ellipsis">
       
         兼容性
@@ -692,21 +1002,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#出厂配置" class="md-nav__link">
     <span class="md-ellipsis">
       
         出厂配置
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        证据与边界
       
     </span>
   </a>
@@ -735,29 +1034,44 @@
 
 <div class="es-hero">
 <div class="es-hero__eyebrow">4 选 2 专家路由</div>
-<h1 class="es-hero__claim" id="ultralytics-yolo">给 Ultralytics YOLO 装上<em>稀疏专家混合</em><a class="headerlink" href="#ultralytics-yolo" title="Permanent link">&para;</a></h1>
-<p class="es-hero__lede">一行接入，路由的负载均衡损失进入反向传播。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
+<h1 class="es-hero__claim" id="给-ultralytics-yolo-装上稀疏专家混合">给 Ultralytics YOLO 装上<em>稀疏专家混合</em><a class="headerlink" href="#给-ultralytics-yolo-装上稀疏专家混合" title="Permanent link">&para;</a></h1>
+<p class="es-hero__lede">一个调用接进官方 ultralytics，路由的平衡项进入反向传播。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 <ul class="es-proof">
-<li><strong>一个调用装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
-<li><strong>辅助损失进入反向传播</strong><span><code>results.csv</code> 中 <code>esmoe_aux</code> 自成一列，由单测断言；配置里写了键不算。</span></li>
-<li><strong>按仓库协议量过</strong><span>七代主干 × 三臂，每格三个 seed 起，共 77 轮：默认接法在 SPPF 系末端为正（v5n +0.0055、v8n +0.0025、v9t +0.0025），末端换成注意力块后贴零（v10n −0.0002、11n +0.0013），到 12n、26n 转负；<code>rewire</code> 把 12n、26n 拉回持平。判定全文见<a href="JUDGMENT/">判读线</a>。</span></li>
+<li><strong>一个调用装上</strong><span><code>equip</code> 把块接进配置、重编号层引用、接好损失；YOLOv5 至 YOLO26 七代官方主干与 YOLO-Master 分支都能用。</span></li>
+<li><strong>辅助损失进入反向传播</strong><span>训练表里 <code>esmoe_aux</code> 自成一列，由单元测试与 <code>scripts/verify.py</code> 的十项真训练检查断言。</span></li>
+<li><strong>与 YOLO-Master 作用一致</strong><span>同一个 yolo-master-n、同一份协议：块在上游分支上加 +0.0104，在官方 ultralytics 加本包上加 +0.0095（FP32，各 3/3），两者之差落在等效档。</span></li>
 </ul>
 </div>
+<div class="es-stats">
+<div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
+<div><strong>8</strong><span>个主干上跑过完整协议</span></div>
+<div><strong>319</strong><span>项测试，含与上游、论文逐位比对</span></div>
+<div><strong>11</strong><span>次先于结果提交的预登记</span></div>
+</div>
+<div class="es-cards">
+<a href="tutorial/"><strong>教程</strong><span>安装、三个调用、嫁接与重编号、对照实验怎么做</span></a>
+<a href="API/"><strong>API</strong><span>equip、graft、attach_aux_loss 与 ESMoE 的全部参数</span></a>
+<a href="design/"><strong>ES-MoE 与 YOLO</strong><span>块比普通 YOLO 多了什么，训练与推理各怎么算，与 YOLO-Master 逐项对照</span></a>
+<a href="experiments/"><strong>实验</strong><span>数据集、协议、流程、八轮实验与同配置对照，全部交互式图表</span></a>
+<a href="charts/"><strong>效果图</strong><span>七代主干上逐 seed 的配对差</span></a>
+<a href="JUDGMENT/"><strong>判读线</strong><span>每一轮先写判据与预测，再写判定</span></a>
+</div>
+
 <p><a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb">在 Colab 里打开快速上手</a>：安装、接入、训练，在日志里看到 <code>esmoe_aux</code> 列，全程在免费 GPU 上完成。</p>
-<h2 id="_1">安装<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h2 id="安装">安装<a class="headerlink" href="#安装" title="Permanent link">&para;</a></h2>
 <pre><code>pip install esmoe
 </code></pre>
 <p>分发名、导入名与命令行名都是 <code>esmoe</code>。</p>
-<h2 id="_2">使用<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="使用">使用<a class="headerlink" href="#使用" title="Permanent link">&para;</a></h2>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)   # 注册 + 嫁接 + 构建 + 接损失
 model.train(data="coco8.yaml", epochs=10)
 </code></pre>
 <p>分步调用、命令行与手写配置见<a href="tutorial/">教程</a>。</p>
-<h2 id="_3">兼容性<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="兼容性">兼容性<a class="headerlink" href="#兼容性" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -765,11 +1079,34 @@ model.train(data="coco8.yaml", epochs=10)
 <th style="text-align: center;">构建与前向</th>
 <th style="text-align: center;">嫁接进配置</th>
 <th style="text-align: center;">训练中的辅助损失</th>
+<th style="text-align: center;">满协议运行</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align: center;">YOLOv5</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+</tr>
+<tr>
 <td style="text-align: center;">YOLOv8</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv9</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
+</tr>
+<tr>
+<td style="text-align: center;">YOLOv10</td>
+<td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
@@ -779,9 +1116,11 @@ model.train(data="coco8.yaml", epochs=10)
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
 </tr>
 <tr>
 <td style="text-align: center;">YOLO12</td>
+<td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
@@ -791,24 +1130,20 @@ model.train(data="coco8.yaml", epochs=10)
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
+<td style="text-align: center;">是</td>
 </tr>
 <tr>
-<td style="text-align: center;">YOLO-Master（fork）</td>
+<td style="text-align: center;">YOLO-Master（分支）</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
 <td style="text-align: center;">是</td>
+<td style="text-align: center;">否</td>
 </tr>
 </tbody>
 </table>
-<p>由 <code>tests/test_ultralytics.py</code> 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 <code>train/esmoe_aux</code> 非零。yolov5n / yolov9t / yolov10n 的嫁接与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：<code>scripts/fork_smoke.py</code> 嫁接进其 <code>yolo-master-n.yaml</code>、真实训练一轮且 <code>esmoe_aux</code> 非零，其自有 <code>ES_MOE</code> 配置与本块注册共存。</p>
-<h2 id="_4">出厂配置<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>由 <code>tests/test_ultralytics.py</code> 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理。训练一列由四代主干上真实的 1-epoch VisDrone 训练与七代主干上 120 epoch 的协议运行共同支撑，日志里 <code>train/esmoe_aux</code> 均非零；每一行的嫁接与前向都在 CI 里跑。YOLO-Master 一行跑在该分支自带的 ultralytics 上：<code>scripts/fork_smoke.py</code> 嫁接进它的 <code>yolo-master-n.yaml</code>、真实训练一轮且 <code>esmoe_aux</code> 非零，它自己的 <code>ES_MOE</code> 配置与本块共存。分支上的同配置对照训练的是上游自己的块，本包的块在官方 ultralytics 上训练，所以最后一列为否。</p>
+<h2 id="出厂配置">出厂配置<a class="headerlink" href="#出厂配置" title="Permanent link">&para;</a></h2>
 <p><code>ESMoE(num_experts=4, top_k=2)</code> 配 <code>attach_aux_loss(weight=0.01)</code>。在统一预算下，它胜过 2 / 4 / 8 专家与 top-1 的各个变体，并在全量 VisDrone 上以三个 seed 确认：配对 3/3 胜，mAP50 +0.0021，参数增加 10.4%。论证见<a href="SELECTION/">选型</a>。</p>
-<h2 id="_5">证据与边界<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="tutorial/">教程</a>：从安装到对照实验</li>
-<li><a href="SELECTION/">选型</a>：为什么是 4 专家 top-2 与 0.01 的权重</li>
-<li><a href="limitations/">已知局限</a>：引用任何数字之前先读</li>
-</ul>
 
 
 
@@ -839,6 +1174,30 @@ model.train(data="coco8.yaml", epochs=10)
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
+        
+        
+          
+          <a href="tutorial/" class="md-footer__link md-footer__link--next" aria-label="下一页: 教程">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              <div class="md-ellipsis">
+                教程
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
@@ -864,7 +1223,7 @@ model.train(data="coco8.yaml", epochs=10)
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "search.suggest"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
@@ -874,6 +1233,8 @@ model.train(data="coco8.yaml", epochs=10)
         <script src="javascripts/data.js"></script>
       
         <script src="javascripts/charts.js"></script>
+      
+        <script src="javascripts/figures.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -1,0 +1,1555 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+      
+      
+      
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/experiments/">
+      
+      
+        <link rel="prev" href="../SELECTION/">
+      
+      
+        <link rel="next" href="../charts/">
+      
+      
+        
+          <link rel="alternate" href="../../experiments/" hreflang="zh">
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Experiments - ES-MoE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+3:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Source Sans 3";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#experiments" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ES-MoE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Experiments
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../experiments/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorial/" class="md-tabs__link">
+          
+  
+  
+  Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../design/" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../RELEASE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Release notes
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    ES-MoE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES-MoE and YOLO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training protocol
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-one-experiment-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How one experiment runs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eight-rounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eight rounds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#same-configuration-as-yolo-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Same configuration as YOLO-Master
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repeated-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeated runs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routing-and-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing and balancing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recompute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recompute
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Effect chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../JUDGMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Judgment lines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dataset
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training protocol
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-one-experiment-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How one experiment runs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eight-rounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eight rounds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#same-configuration-as-yolo-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Same configuration as YOLO-Master
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repeated-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeated runs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#routing-and-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routing and balancing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recompute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recompute
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="experiments">Experiments<a class="headerlink" href="#experiments" title="Permanent link">&para;</a></h1>
+<p>Every experiment in the repository in one place: the data, the training protocol, the steps one experiment goes through, what each of the eight rounds asked, and the results of the same-configuration comparison with YOLO-Master, the repeated runs, and the routing and balancing analysis. The figures are interactive: hover for detail, click a legend entry to toggle a series, save a PNG from the top-right corner. <code>scripts/charts.py</code> computes every number from the records in <a href="https://github.com/Lfan-ke/ES-MoE/tree/main/results"><code>results/</code></a>, the same source as the tables in <a href="../results/">Results</a> and the verdicts in <a href="../JUDGMENT/">Judgment lines</a>.</p>
+<div class="es-stats">
+<div><strong>142</strong><span>full-protocol training runs</span></div>
+<div><strong>600</strong><span>card-hours</span></div>
+<div><strong>8</strong><span>backbones, seven YOLO generations and yolo-master-n</span></div>
+<div><strong>11</strong><span>pre-registrations committed before their results</span></div>
+</div>
+<h2 id="dataset">Dataset<a class="headerlink" href="#dataset" title="Permanent link">&para;</a></h2>
+<p>VisDrone2019-DET: drone imagery, 10 classes. Training uses the train split only; every mAP, area bucket and routing statistic is computed on the 548 validation images. The test split is fingerprinted and never evaluated.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">split</th>
+<th style="text-align: center;">images</th>
+<th style="text-align: center;">boxes</th>
+<th style="text-align: center;">per image</th>
+<th style="text-align: center;">image bytes</th>
+<th style="text-align: center;">median box side (original / letterboxed to 800 px)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">train</td>
+<td style="text-align: center;">6,471</td>
+<td style="text-align: center;">343,205</td>
+<td style="text-align: center;">53.0</td>
+<td style="text-align: center;">1.55 GB</td>
+<td style="text-align: center;">26.1 / 13.9 px</td>
+</tr>
+<tr>
+<td style="text-align: center;">val</td>
+<td style="text-align: center;">548</td>
+<td style="text-align: center;">38,759</td>
+<td style="text-align: center;">70.7</td>
+<td style="text-align: center;">0.08 GB</td>
+<td style="text-align: center;">22.8 / 14.1 px</td>
+</tr>
+<tr>
+<td style="text-align: center;">test</td>
+<td style="text-align: center;">1,610</td>
+<td style="text-align: center;">75,102</td>
+<td style="text-align: center;">46.6</td>
+<td style="text-align: center;">0.31 GB</td>
+<td style="text-align: center;">21.9 / 12.3 px</td>
+</tr>
+</tbody>
+</table>
+<div class="esmoe-figure" data-figure="dataset-splits"></div>
+
+<p>A drone image holds 53 objects on average, and most of them are small: by COCO's area buckets, 208 thousand of the 343 thousand training boxes are small (under 32²). That is why the protocol letterboxes to 800 px rather than 640.</p>
+<div class="esmoe-figure esmoe-figure--tall" data-figure="dataset-classes"></div>
+
+<div class="es-duo">
+<div class="esmoe-figure" data-figure="dataset-resolutions"></div>
+<div class="esmoe-figure" data-figure="dataset-sides"></div>
+</div>
+<p>The train split comes in 11 resolutions, from 960×540 to 2000×1500; val has three. The right-hand figure shows box sides after letterboxing to 800 px: the median sits between 12 and 14 px in all three splits. <code>scripts/dataset.py</code> reads these statistics from the dataset archive into <code>results/dataset.json</code>; its small, medium and large counts on val (26,586 / 11,105 / 1,068) match the ground truth in <code>results/buckets.md</code>.</p>
+<h2 id="training-protocol">Training protocol<a class="headerlink" href="#training-protocol" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">item</th>
+<th style="text-align: center;">value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">data</td>
+<td style="text-align: center;">the full VisDrone2019-DET train split (<code>fraction=1.0</code>), 548 validation images</td>
+</tr>
+<tr>
+<td style="text-align: center;">input size</td>
+<td style="text-align: center;"><code>imgsz=800</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">length</td>
+<td style="text-align: center;">120 epochs, <code>patience=0</code> (no early stop)</td>
+</tr>
+<tr>
+<td style="text-align: center;">batch</td>
+<td style="text-align: center;">32</td>
+</tr>
+<tr>
+<td style="text-align: center;">initialisation</td>
+<td style="text-align: center;">from scratch, no pretrained weights</td>
+</tr>
+<tr>
+<td style="text-align: center;">seeds</td>
+<td style="text-align: center;">three or more per cell; every arm of a seed trains on the same card and pairs with that seed's baseline</td>
+</tr>
+<tr>
+<td style="text-align: center;">precision</td>
+<td style="text-align: center;">mixed by default; the eighth round against YOLO-Master runs FP32 throughout (<code>--amp 0</code>)</td>
+</tr>
+<tr>
+<td style="text-align: center;">evaluation</td>
+<td style="text-align: center;">ultralytics' validator; for the same-configuration comparison <code>scripts/measure.py</code> rebuilds each model from its own config and measures the EMA weights of <code>last.pt</code> with one set of arguments</td>
+</tr>
+<tr>
+<td style="text-align: center;">hardware</td>
+<td style="text-align: center;">MetaX C500 (105 runs, 531 card-hours) and RTX 4090 (37 runs, 69 card-hours)</td>
+</tr>
+</tbody>
+</table>
+<p>One full-protocol run takes 4 to 10 hours on a MetaX C500 and sees about 777 thousand images. The figure shows how the 142 runs spread over backbones.</p>
+<div class="esmoe-figure" data-figure="protocol-backbones"></div>
+
+<h2 id="how-one-experiment-runs">How one experiment runs<a class="headerlink" href="#how-one-experiment-runs" title="Permanent link">&para;</a></h2>
+<pre class="mermaid-chart"><code>flowchart TB
+    Q["queue.sh&lt;br/&gt;schedules"] --&gt; T["train.py&lt;br/&gt;trains, writes a record"]
+    T --&gt; R[("results/*.json&lt;br/&gt;one per run")]
+    T --&gt; W[("checkpoints&lt;br/&gt;checkpoints branch")]
+    W --&gt; M["measure.py&lt;br/&gt;one measurement"]
+    W --&gt; B["buckets.py&lt;br/&gt;area buckets"]
+    W --&gt; RT["routing.py&lt;br/&gt;router statistics"]
+    RT --&gt; P["pressure.py&lt;br/&gt;balancing pressure"]
+    R --&gt; RP["report.py&lt;br/&gt;paired tables, noise floor"]
+    M --&gt; RP
+    M --&gt; SC["same_config.py&lt;br/&gt;four arms"]
+    R --&gt; CL["closure.py&lt;br/&gt;delivery audit"]
+    RP --&gt; J["Judgment lines&lt;br/&gt;per-round verdicts"]
+    SC --&gt; J
+    B --&gt; J
+    P --&gt; J
+    RP --&gt; CH["charts.py&lt;br/&gt;the figures here"]
+    SC --&gt; CH</code></pre>
+<p>Before a round starts, the question, the criteria and the prediction are committed to <a href="../JUDGMENT/">Judgment lines</a>, with the git timestamp as evidence; the verdict is written after the results, and a prediction the data overturned stays in its original words.</p>
+<h2 id="eight-rounds">Eight rounds<a class="headerlink" href="#eight-rounds" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">round</th>
+<th style="text-align: center;">question</th>
+<th style="text-align: center;">outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">Do the default wiring and <code>rewire</code> help on four backbones?</td>
+<td style="text-align: center;">default effective on v8n and 11n, not on 12n and 26n; <code>rewire</code> clears the line on v8n, 11n, 12n</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">Adding v5n, v9t and v10n, how does the effect follow the backbone?</td>
+<td style="text-align: center;">it groups by the end of the backbone: SPPF-ended positive, attention-ended flat, area attention and E2E heads negative</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">Does upstream's GShard term undo routing collapse?</td>
+<td style="text-align: center;">the settings never reached the trained model; the five records join the default arm as repeated runs and give the mixed-precision noise floor 0.0045 / 0.0130</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">Does a term that reads the gate undo the collapse?</td>
+<td style="text-align: center;">no: dispatch concentrates further and the first dead expert appears</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">What do output normalisation, dense training and the four-block layout each do?</td>
+<td style="text-align: center;">output normalisation +0.0038 and dense training +0.0031, both 3/3; four blocks −0.0071, 0/3</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">Is the four-block loss about block count or total auxiliary loss, and what does the balance term guard against?</td>
+<td style="text-align: center;">block count; the term keeps experts alive, and a term reading the gate has zero gradient outside the top-k</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">Same configuration as YOLO-Master, each framework's default precision</td>
+<td style="text-align: center;">the block acts the same in both frameworks (difference of differences −0.0004, equivalent); adding the block helps on both sides</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">Does it hold with all four arms in FP32, and how large is the FP32 noise floor?</td>
+<td style="text-align: center;">difference of differences +0.0009, still equivalent; both blocks effective by the judgment lines; FP32 floor 0.0038 / 0.0103, the same order as mixed precision</td>
+</tr>
+</tbody>
+</table>
+<p>The per-seed paired deltas of the seven-generation matrix are on <a href="../charts/">Effect chart</a>.</p>
+<h2 id="same-configuration-as-yolo-master">Same configuration as YOLO-Master<a class="headerlink" href="#same-configuration-as-yolo-master" title="Permanent link">&para;</a></h2>
+<p>One <code>yolo-master-n</code>, one protocol, trained on YOLO-Master's fork and on official ultralytics with this package. The four arms of a seed share a card, so every difference is taken inside a card.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">arm</th>
+<th style="text-align: center;">framework</th>
+<th style="text-align: center;">blocks</th>
+<th style="text-align: center;">training</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">YOLO-Master's fork (pinned <code>acce839c</code>)</td>
+<td style="text-align: center;">four <code>ES_MOE</code></td>
+<td style="text-align: center;">upstream trainer</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0</td>
+<td style="text-align: center;">YOLO-Master's fork</td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">upstream trainer</td>
+</tr>
+<tr>
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">official ultralytics 8.4.101 + esmoe</td>
+<td style="text-align: center;">four <code>ESMoE</code></td>
+<td style="text-align: center;"><code>recipe="upstream"</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">official ultralytics 8.4.101</td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">official trainer</td>
+</tr>
+</tbody>
+</table>
+<div class="esmoe-figure" data-figure="same-config-arms" data-metrics="both"></div>
+
+<p>Each difference answers one question: A − B compares the two implementations as a whole; A − A0 and B − C are what the block adds inside each framework; the difference of differences (A − A0) − (B − C) is how much the block's effect differs between frameworks, with the frameworks' own differences cancelled. In the figure the line is the 95% interval, the large dot the mean and the small dots the three seeds.</p>
+<div class="esmoe-figure esmoe-figure--tall" data-figure="same-config-differences" data-metrics="both"></div>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">precision</th>
+<th style="text-align: center;">A − B</th>
+<th style="text-align: center;">A − A0</th>
+<th style="text-align: center;">B − C</th>
+<th style="text-align: center;">difference of differences</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">mixed (round 7)</td>
+<td style="text-align: center;">−0.0069, undecided</td>
+<td style="text-align: center;">+0.0122, effective</td>
+<td style="text-align: center;">+0.0126, effective</td>
+<td style="text-align: center;">−0.0004, equivalent</td>
+</tr>
+<tr>
+<td style="text-align: center;">FP32 (round 8)</td>
+<td style="text-align: center;">+0.0046, undecided</td>
+<td style="text-align: center;">+0.0104, effective</td>
+<td style="text-align: center;">+0.0095, effective</td>
+<td style="text-align: center;">+0.0009, equivalent</td>
+</tr>
+</tbody>
+</table>
+<p>Both rounds put the difference of differences in the equivalent band: the same block adds the same amount on YOLO-Master's fork and on official ultralytics. In round 7 the upstream trainer switched A and A0 to FP32 in the first epoch while B and C stayed mixed, so round 8 repeated all four arms in FP32; the conclusion holds.</p>
+<div class="esmoe-figure" data-figure="same-config-hours"></div>
+
+<p>Under mixed precision the B arm is faster than A; in FP32 both take about 10.6 hours, so the time gap comes from precision, not from the implementation.</p>
+<h2 id="repeated-runs">Repeated runs<a class="headerlink" href="#repeated-runs" title="Permanent link">&para;</a></h2>
+<p>Train one configuration twice with the same seed on the same card: how far apart does mAP50 land? That gap is the denominator of every effect. A difference smaller than it is reported as a direction, not a magnitude.</p>
+<div class="esmoe-figure" data-figure="noise-floor"></div>
+
+<p>Five mixed-precision pairs differ by 0.0045 on average and 0.0130 at most; five FP32 pairs by 0.0038 and 0.0103, the same order. Rounds 7 and 8 take their lines from these numbers: a mean within the average gap with an interval that crosses zero is equivalent; a mean beyond the largest gap, or three seeds of one sign with an interval clear of zero, is not.</p>
+<h2 id="routing-and-balancing">Routing and balancing<a class="headerlink" href="#routing-and-balancing" title="Permanent link">&para;</a></h2>
+<p>The routing analysis reads each checkpoint's routing probabilities on the 548 validation images: how often each expert is the top-1 choice, how often it is in the top-2, and which experts are dead (in the top-2 for under 1% of images).</p>
+<div class="esmoe-figure" data-figure="routing-scatter"></div>
+
+<p>Over the 81 checkpoints that have both a routing analysis and a paired delta, the leading expert's top-1 share and the paired mAP50 delta are nearly unrelated (r = +0.044): a concentrated dispatch does not cost accuracy. Large dots are four-block layouts.</p>
+<div class="es-duo">
+<div class="esmoe-figure" data-figure="dead-experts"></div>
+<div class="esmoe-figure" data-figure="pressure"></div>
+</div>
+<p>Left: with the Switch term at weight 0.01, none of the 60 single-block checkpoints has a dead expert, and of the 9 four-block ones only the run with the per-block weight cut to 0.0025 does; all 6 without a balance term do. Terms that read the gate (upstream's GShard and the paper's eq. 13) give experts outside the top-k no gradient, and 5 of their 6 checkpoints have dead experts. Right: the gradient each term puts on the router logits per unit weight (median, log scale). The gate-reading form matches Switch in magnitude and eq. 13 sits one to two orders lower, so dead experts are not a matter of too little pressure.</p>
+<div class="esmoe-figure esmoe-figure--tall" data-figure="same-config-dead"></div>
+
+<p>The B arm of the same-configuration comparison, block by block and expert by expert: colour is the share of images that put the expert in the top-2, and a red cell is a dead expert. The first three blocks lose experts in all six checkpoints; only the fourth keeps all four working.</p>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Numbers come from VisDrone2019-DET, nano-scale backbones trained from scratch, one machine and one card each. They are not COCO numbers and are not compared with the official VisDrone leaderboard.</li>
+<li>Three seeds do not support a significance test: 3/3 wins give a sign-test p of 0.125. Most mean paired deltas sit within the noise floor, so conclusions are stated as directions.</li>
+<li>Two cells have fewer than three seeds: <code>yolov5n-e4k2w0.01-rewire</code> on the metax3.7 host has seed 0 only (the same arm has all three seeds on metax3.3), and <code>yolov10n-e4k2w0.01-norm</code> has seed 0 only (output normalisation is read from the three seeds on v5n). Neither enters a mean.</li>
+<li>The area buckets (under 32², 32² to 96², 96² and up, on boxes in the original image) are the COCO definition, evaluated with <code>maxDets=500</code>, and are kept apart from the training records' metrics at <code>max_det=300</code>.</li>
+</ul>
+<h2 id="recompute">Recompute<a class="headerlink" href="#recompute" title="Permanent link">&para;</a></h2>
+<pre><code>uv run python scripts/dataset.py VisDrone_dataset.zip   # dataset statistics
+uv run python scripts/report.py                         # paired tables and noise floor
+uv run python scripts/same_config.py                    # four arms
+uv run python scripts/charts.py                         # data for this page and the effect chart
+</code></pre>
+<p>Checkpoints, training arguments and per-epoch curves are on the <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> branch</a>; the area buckets and routing statistics can be recomputed from there.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../SELECTION/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Selection">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Selection
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../charts/" class="md-footer__link md-footer__link--next" aria-label="Next: Effect chart">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Effect chart
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+      
+        <script src="../../javascripts/data.js"></script>
+      
+        <script src="../../javascripts/charts.js"></script>
+      
+        <script src="../../javascripts/figures.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/diagrams.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1424 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+      
+      
+      
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/design/">
+      
+      
+        <link rel="prev" href="../API/">
+      
+      
+        <link rel="next" href="../SELECTION/">
+      
+      
+        
+          <link rel="alternate" href="../../design/" hreflang="zh">
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>ES-MoE and YOLO - ES-MoE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+3:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Source Sans 3";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#es-moe-and-yolo" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../" title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ES-MoE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ES-MoE and YOLO
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../design/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorial/" class="md-tabs__link">
+          
+  
+  
+  Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Design
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../experiments/" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../RELEASE/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Release notes
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    ES-MoE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES-MoE and YOLO
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ES-MoE and YOLO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An ordinary YOLO and one with an ES-MoE block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inside-the-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inside the block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-and-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training and inference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#against-yolo-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against YOLO-Master
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#against-the-paper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against the paper
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Effect chart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../JUDGMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Judgment lines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An ordinary YOLO and one with an ES-MoE block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inside-the-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inside the block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-and-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training and inference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#against-yolo-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against YOLO-Master
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#against-the-paper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Against the paper
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="es-moe-and-yolo">ES-MoE and YOLO<a class="headerlink" href="#es-moe-and-yolo" title="Permanent link">&para;</a></h1>
+<p>Three things on this page: what an ES-MoE block adds to an ordinary YOLO, how the block computes in training and in inference, and how this package compares, item by item, with YOLO-Master's <code>ES_MOE</code> and with the claims of the paper.</p>
+<h2 id="an-ordinary-yolo-and-one-with-an-es-moe-block">An ordinary YOLO and one with an ES-MoE block<a class="headerlink" href="#an-ordinary-yolo-and-one-with-an-es-moe-block" title="Permanent link">&para;</a></h2>
+<p>Every layer of an ordinary YOLO has a fixed structure and fixed weights once trained, and every image goes through the same computation. An ES-MoE block puts several expert branches side by side at one position, and a small router picks k of them for each image; which ones it picks changes with the input.</p>
+<pre class="mermaid-chart"><code>flowchart LR
+    subgraph Y["ordinary YOLO"]
+        direction LR
+        y1["backbone"] --&gt; y2["SPPF / last stage"] --&gt; y3["neck"] --&gt; y4["head"]
+    end
+    subgraph E["with an ES-MoE block"]
+        direction LR
+        e1["backbone"] --&gt; e2["SPPF / last stage"] --&gt; e5["ES-MoE block&lt;br/&gt;2 of 4 experts"] --&gt; e3["neck"] --&gt; e4["head"]
+    end</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">ordinary YOLO</th>
+<th style="text-align: center;">with an ES-MoE block</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">computation per image</td>
+<td style="text-align: center;">fixed, the same for every image</td>
+<td style="text-align: center;">the router picks k experts per image, so it follows the input</td>
+</tr>
+<tr>
+<td style="text-align: center;">kernels</td>
+<td style="text-align: center;">fixed per layer</td>
+<td style="text-align: center;">the side-by-side experts use different kernels (3, 5, 7, 9), hence different receptive fields</td>
+</tr>
+<tr>
+<td style="text-align: center;">training loss</td>
+<td style="text-align: center;">box, cls, dfl</td>
+<td style="text-align: center;">plus a balance term (the auxiliary loss) that reaches backward()</td>
+</tr>
+<tr>
+<td style="text-align: center;">parameters (YOLOv8n, 80 classes)</td>
+<td style="text-align: center;">3,157,200</td>
+<td style="text-align: center;">3,471,732, with one block at the end of the backbone</td>
+</tr>
+<tr>
+<td style="text-align: center;">placement</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">one block at the end of the backbone by default; <code>at="backbone_stages"</code> puts one after every stage</td>
+</tr>
+</tbody>
+</table>
+<h2 id="inside-the-block">Inside the block<a class="headerlink" href="#inside-the-block" title="Permanent link">&para;</a></h2>
+<pre class="mermaid-chart"><code>flowchart TB
+    X["input x&lt;br/&gt;B × C × H × W"] --&gt; G["global average pool"]
+    G --&gt; MLP["two-layer bottleneck&lt;br/&gt;C → C/8 → E"]
+    MLP --&gt; SM["softmax (logits clamped to ±30, in FP32)"]
+    SM --&gt; TK["keep the top k, renormalise into gate g"]
+    X --&gt; E1["expert 1&lt;br/&gt;3×3 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E2["expert 2&lt;br/&gt;5×5 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E3["expert 3&lt;br/&gt;7×7 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E4["expert 4&lt;br/&gt;9×9 depthwise → 1×1 → BN → SiLU"]
+    TK --&gt; MIX["y = Σ gᵢ · expertᵢ(x)"]
+    E1 --&gt; MIX
+    E2 --&gt; MIX
+    E3 --&gt; MIX
+    E4 --&gt; MIX
+    MIX --&gt; N["optional BN + SiLU (out_norm)"]
+    SM --&gt; AUX["balance term × weight&lt;br/&gt;added to the loss"]
+    TK --&gt; AUX</code></pre>
+<p>The router picks per image, not per pixel. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The output is the gated sum of the chosen experts, with the gate renormalised over the k chosen so it sums to one.</p>
+<h2 id="training-and-inference">Training and inference<a class="headerlink" href="#training-and-inference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">training</th>
+<th style="text-align: center;">inference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">which experts compute</td>
+<td style="text-align: center;">only the chosen ones by default; with <code>dense_training=True</code> all of them, the unchosen multiplied by zero, as upstream does</td>
+<td style="text-align: center;">only the chosen ones</td>
+</tr>
+<tr>
+<td style="text-align: center;">pruning</td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">with <code>dynamic_threshold</code> above zero, an expert whose renormalised share falls below it is skipped too (the leader always stays)</td>
+</tr>
+<tr>
+<td style="text-align: center;">balance term</td>
+<td style="text-align: center;">computed and added to the loss</td>
+<td style="text-align: center;">not computed</td>
+</tr>
+<tr>
+<td style="text-align: center;">export</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">every expert enters a traced graph, so the exported model still routes per input</td>
+</tr>
+</tbody>
+</table>
+<p>In backpropagation the gradient returns through y = Σ gᵢ · expertᵢ(x) along two paths:</p>
+<ul>
+<li><strong>To the experts</strong>: scaled by the gate gᵢ. An expert not chosen for an image has a zero gate there, and a zero gradient.</li>
+<li><strong>To the router</strong>: the detection loss shifts weight among the chosen experts through ∂L/∂gᵢ. Choosing is a discrete step with no gradient, and the renormalised gate depends only on the chosen logits, so an expert outside the top k gets nothing from the detection loss.</li>
+</ul>
+<p>That is what the balance term is for: it has to read the full softmax probabilities to give the unchosen experts a gradient. This package's default Switch form reads the probabilities; upstream's term and the paper's eq. 13 read the renormalised gate and give experts outside the top k exactly zero. Without a balance term, or with one that reads the gate, experts die; see <a href="../experiments/#routing-and-balancing">Experiments</a>.</p>
+<h2 id="against-yolo-master">Against YOLO-Master<a class="headerlink" href="#against-yolo-master" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">item</th>
+<th style="text-align: center;">YOLO-Master <code>ES_MOE</code></th>
+<th style="text-align: center;">esmoe <code>ESMoE</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">installation</td>
+<td style="text-align: center;">use the ultralytics fork YOLO-Master maintains</td>
+<td style="text-align: center;"><code>pip install esmoe</code>, on official ultralytics</td>
+</tr>
+<tr>
+<td style="text-align: center;">backbones</td>
+<td style="text-align: center;">the fork's own configs such as <code>yolo-master-n</code></td>
+<td style="text-align: center;">official YOLOv5n, v8n, v9t, v10n, 11n, 12n and 26n, plus <code>yolo-master-n</code> on the fork</td>
+</tr>
+<tr>
+<td style="text-align: center;">adding it</td>
+<td style="text-align: center;">write the model config by hand</td>
+<td style="text-align: center;"><code>equip</code> registers, grafts, builds and wires the loss in one call; <code>graft</code> renumbers layer references; <code>esmoe graft</code> on the command line</td>
+</tr>
+<tr>
+<td style="text-align: center;">placement</td>
+<td style="text-align: center;">one block after every backbone stage, four in all</td>
+<td style="text-align: center;">one at the end of the backbone by default; <code>at="backbone_stages"</code> reproduces the four; layer indices work too</td>
+</tr>
+<tr>
+<td style="text-align: center;">experts</td>
+<td style="text-align: center;">depthwise-separable convolutions, kernels 3, 5, 7, 9</td>
+<td style="text-align: center;">the same; <code>expert=</code> takes any callable</td>
+</tr>
+<tr>
+<td style="text-align: center;">router</td>
+<td style="text-align: center;">global pool + two-layer bottleneck (reduction 8), logits clamped to ±30</td>
+<td style="text-align: center;">the same</td>
+</tr>
+<tr>
+<td style="text-align: center;">gate</td>
+<td style="text-align: center;">softmax → top-k → renormalise</td>
+<td style="text-align: center;">the same (the paper's eq. 8 and eq. 9 are tested equivalent)</td>
+</tr>
+<tr>
+<td style="text-align: center;">output normalisation</td>
+<td style="text-align: center;">BN + SiLU</td>
+<td style="text-align: center;"><code>out_norm=True</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">experts in training</td>
+<td style="text-align: center;">all of them compute</td>
+<td style="text-align: center;"><code>dense_training=True</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">inference pruning</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
+<td style="text-align: center;">the same rule, 0.0 (off) by default, configurable</td>
+</tr>
+<tr>
+<td style="text-align: center;">balance term</td>
+<td style="text-align: center;">GShard on the gate; the trainer normalises it by its own running magnitude and caps it at 3.0</td>
+<td style="text-align: center;">four to choose from (Switch, GShard on the gate, GShard on the probabilities, the paper's eq. 13), Switch at weight 0.01 by default; <code>recipe="upstream"</code> reproduces the upstream trainer's normalisation, cap, half learning rate for the router and three frozen-expert epochs</td>
+</tr>
+<tr>
+<td style="text-align: center;">custom balance terms</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">any <code>(probs, gate) -&gt; scalar</code> function, stored in the config by qualified name</td>
+</tr>
+<tr>
+<td style="text-align: center;">where settings live</td>
+<td style="text-align: center;">constructor arguments</td>
+<td style="text-align: center;">in the model config line, so they survive the trainer's rebuild; <code>scripts/blockspec.py</code> reads them back from a checkpoint</td>
+</tr>
+<tr>
+<td style="text-align: center;">export</td>
+<td style="text-align: center;">every expert enters a traced ONNX / TorchScript graph</td>
+<td style="text-align: center;">the same, and the exported model is verified to route per input</td>
+</tr>
+<tr>
+<td style="text-align: center;">multi-GPU</td>
+<td style="text-align: center;">DDP</td>
+<td style="text-align: center;">DDP and <code>compile=True</code> settings verified; an unrouted expert stays in the graph at zero weight</td>
+</tr>
+<tr>
+<td style="text-align: center;">verification</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">319 tests, including parity tests that rewrite upstream's and the paper's operators from source and compare bit for bit; ten real-training checks in <code>scripts/verify.py</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">accuracy against each other</td>
+<td style="text-align: center;">the block adds +0.0104 on the fork (FP32, 3/3)</td>
+<td style="text-align: center;">the block adds +0.0095 on official ultralytics (FP32, 3/3); the gap between the two, +0.0009, is equivalent</td>
+</tr>
+</tbody>
+</table>
+<p>YOLO-Master's released model, rebuilt with this package, matches the fork bit for bit on all four COCO val2017 metrics.</p>
+<h2 id="against-the-paper">Against the paper<a class="headerlink" href="#against-the-paper" title="Permanent link">&para;</a></h2>
+<p>The claims in the YOLO-Master paper (<a href="https://arxiv.org/abs/2512.23273">arXiv 2512.23273</a>) that the experiments here can test, with what was observed. The conditions are on <a href="../experiments/#scope">Experiments</a>: VisDrone, nano-scale backbones, 120 epochs from scratch.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">the paper's claim</th>
+<th style="text-align: center;">observed here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">soft top-k (eq. 8) in training, hard top-k (eq. 9) in inference</td>
+<td style="text-align: center;">mathematically equivalent, verified by tests: a softmax over the top-k subset equals a full softmax masked and renormalised</td>
+</tr>
+<tr>
+<td style="text-align: center;">the balance term (eq. 12, 13) prevents expert collapse</td>
+<td style="text-align: center;">eq. 13 and upstream's gate-reading GShard differ by an affine map; a term that reads the gate has zero gradient outside the top k, and 5 of 6 such checkpoints have dead experts; the default Switch form has 1 in 69</td>
+</tr>
+<tr>
+<td style="text-align: center;">the router makes experts specialise by scale</td>
+<td style="text-align: center;">across 108 block analyses, the correlation of routing probability with object size runs from −0.49 to +0.59 and flips sign across seeds; the leading expert's kernel takes all four values</td>
+</tr>
+<tr>
+<td style="text-align: center;">simple regions activate fewer experts</td>
+<td style="text-align: center;">in training exactly k are active; only inference-time pruning with <code>dynamic_threshold</code> changes with the input</td>
+</tr>
+<tr>
+<td style="text-align: center;">the block goes into both backbone and neck (§3.1)</td>
+<td style="text-align: center;">the paper's Table 5 makes backbone-only the default (62.1 against 54.9 for both), which is this package's default too</td>
+</tr>
+<tr>
+<td style="text-align: center;">one block per backbone stage, four in all</td>
+<td style="text-align: center;">under this package's default recipe four blocks trail one (v10n −0.0071, v5n −0.0049, both 0/3); with upstream's full recipe the four blocks are effective in both frameworks</td>
+</tr>
+<tr>
+<td style="text-align: center;">output normalisation (the Norm in eq. 2)</td>
+<td style="text-align: center;">+0.0038 on v5n (3/3); offered as the <code>out_norm</code> switch</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../API/" class="md-footer__link md-footer__link--prev" aria-label="Previous: API">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                API
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../SELECTION/" class="md-footer__link md-footer__link--next" aria-label="Next: Selection">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Selection
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+      
+        <script src="../../javascripts/data.js"></script>
+      
+        <script src="../../javascripts/charts.js"></script>
+      
+        <script src="../../javascripts/figures.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/diagrams.js"></script>
+      
+    
+  </body>
+</html>
