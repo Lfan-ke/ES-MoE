@@ -34,8 +34,18 @@ hooks:
 extra_css:
   - stylesheets/extra.css
 
+extra:
+  version:
+    provider: mike
+    default: latest
+
 plugins:
   - search
+  # Ahead of i18n, which reads site_url: mike serves a version from <site_url>/<version>/. `latest` is
+  # a copy, so the unversioned addresses redirected into it land on pages rather than on redirects.
+  # The version selector stays on: Material draws its own only while mike's is enabled.
+  - mike:
+      alias_type: copy
   - i18n:
       docs_structure: suffix
       languages:

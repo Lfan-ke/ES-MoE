@@ -4,14 +4,23 @@ on:
   push:
     branches: [main]
     paths: ["docs/**", ".github/docs/**", "results/*.md", "pyproject.toml", ".github/workflows/docs.yml"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # main is `dev`; a release gets its own version and takes `latest`, which the site opens on.
+      VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -21,8 +30,21 @@ jobs:
           enable-cache: true
           python-version: "3.12"
       - run: uv sync --group dev
-      - name: Deploy to gh-pages
+      - name: Deploy the version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          uv run mkdocs gh-deploy --force -f .github/docs/mkdocs.yml
+          git fetch origin gh-pages:gh-pages
+          if [ "$VERSION" = dev ]; then
+            uv run mike deploy -F .github/docs/mkdocs.yml --push dev
+          else
+            uv run mike deploy -F .github/docs/mkdocs.yml --push --update-aliases "${VERSION#v}" latest
+            uv run mike set-default -F .github/docs/mkdocs.yml --push latest
+          fi
+      - name: Point the unversioned addresses at latest
+        run: |
+          git worktree add ../pages gh-pages
+          uv run python .github/docs/stubs.py ../pages
+          cd ../pages
+          git add -A
+          git diff --cached --quiet || { git commit -qm "Point unversioned addresses at latest"; git push origin gh-pages; }
