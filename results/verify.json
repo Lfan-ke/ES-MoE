@@ -1,5 +1,5 @@
 {
-  "esmoe": "1.0.0",
+  "esmoe": "1.0.1",
   "torch": "2.13.0+cpu",
   "device": "cpu",
   "checks": [
@@ -46,7 +46,7 @@
     {
       "check": "ddp worker file trains in a fresh interpreter",
       "passed": true,
-      "detail": "worker _temp_7vrappp53120026227472.py logged aux [0.02097]"
+      "detail": "worker _temp_15iim2e42260704072144.py logged aux [0.02097]"
     },
     {
       "check": "two ranks share the router gradient",
