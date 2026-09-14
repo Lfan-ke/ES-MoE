@@ -130,7 +130,7 @@ the matrix runs to seven backbone generations × three arms, three seeds or more
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
-adds 4.5% to 12.5% parameters depending on the backbone (+10.4% on YOLOv8n) and 4% to 10% card-hours per run.
+adds 4.5% to 12.5% parameters depending on the backbone (+10.4% on YOLOv8n), and the default arm takes 4% to 10% more card-hours per run.
 
 <p align="center"><img alt="Paired mAP50 delta by backbone generation" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/effect.svg" width="720"></p>
 
