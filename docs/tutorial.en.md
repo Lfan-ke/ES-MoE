@@ -111,7 +111,7 @@ Read the paired table, not the two means. Per-arm standard deviations overlap in
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
 same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
 seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
-reliable per-run improvement. [Limitations](limitations.md) states the rest.
+reliable per-run improvement. [Experiments](experiments.md) has the full measurements.
 
 ## Extending
 
@@ -146,7 +146,7 @@ Telling a collapse apart is not the same as pushing against it. The gate holds o
 
     esmoe.equip("yolo11n.yaml", balance="gshard")
 
-A custom objective goes into the config too: define the function at module level in an importable module and pass it to `equip` or `graft`. The config stores `module:qualname`, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in `__main__` cannot be imported back by name and is refused when grafting. Custom experts work the same way (`expert=MyExpert`). The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
+A custom objective goes into the config too: define the function at module level in an importable module and pass it to `equip` or `graft`. The config stores `module:qualname`, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in `__main__` cannot be imported back by name and is refused when grafting. Custom experts work the same way (`expert=MyExpert`). The measurements are on [Experiments](experiments.md) and [Judgment lines](JUDGMENT.md).
 
 ### The configuration that matches upstream
 
@@ -177,6 +177,9 @@ The block matches upstream's remaining parameters too: `out_channels` (the input
 
 **These settings have to travel in the config; setting them on the blocks afterwards does not work.** The trainer rebuilds the model from `model.yaml`, and anything set after `YOLO(cfg)` returns disappears with the instance that is discarded -- no error, no trace. `equip` and `graft` write them into the config, so a rebuild keeps them; `ESMoE.configure(...)` is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: `uv run python scripts/blockspec.py`.
 
-## Where the edges are
+## Things to know
 
-Channels are inferred on the first forward, a process trains one auxiliary setting at a time, and `loss_items` changed shape across ultralytics releases. Those and the rest are in [Limitations](limitations.md), which is also the page to read before quoting any number.
+- Channels are inferred on the first forward: script, export or load a `state_dict` before any forward and the block has no expert weights to load into yet.
+- `attach_aux_loss` keeps its weight and recipe per process, so a process trains one auxiliary setting at a time; a checkpoint loaded in a process that never called it trains without the auxiliary loss.
+- `loss_items` changed shape around ultralytics 8.4.13x; both shapes are handled.
+- How the block computes in training and inference is on [ES-MoE and YOLO](design.md); how every number was measured is on [Experiments](experiments.md).

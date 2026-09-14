@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 # Four point-release notes were merged into one page; their old addresses keep answering.
 MOVED = {f"RELEASE_v0.1.{patch}": "RELEASE" for patch in range(4)}
 # Retired pages keep their address and land on the page that carries the content now.
-MOVED.update({"MIDTERM": "results", "BASELINE": "SELECTION", "PR_DRAFT": "RELEASE"})
+MOVED.update({"MIDTERM": "results", "BASELINE": "SELECTION", "PR_DRAFT": "RELEASE", "limitations": "design"})
 
 ALIAS = """<!doctype html>
 <html lang="zh"><head><meta charset="utf-8">

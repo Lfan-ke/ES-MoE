@@ -22,11 +22,16 @@ theme:
       scheme: slate
       toggle: { icon: material/weather-sunny, name: Light mode }
   features:
+    - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.footer
+    - navigation.tracking
     - toc.follow
     - content.code.copy
+    - content.tooltips
     - search.suggest
+    - search.highlight
 
 hooks:
   - urls.py
@@ -63,19 +68,27 @@ plugins:
             选型: Selection
             实验结果: Results
             效果图: Effect chart
-            已知局限: Limitations
+            使用: Usage
+            设计: Design
+            实验: Experiments
+            实验总览: Experiments
+            ES-MoE 与 YOLO: ES-MoE and YOLO
             判读线: Judgment lines
             发布说明: Release notes
 
 nav:
   - 概览: index.md
-  - 教程: tutorial.md
-  - API: API.md
-  - 选型: SELECTION.md
-  - 实验结果: results.md
-  - 效果图: charts.md
-  - 已知局限: limitations.md
-  - 判读线: JUDGMENT.md
+  - 使用:
+      - 教程: tutorial.md
+      - API: API.md
+  - 设计:
+      - ES-MoE 与 YOLO: design.md
+      - 选型: SELECTION.md
+  - 实验:
+      - 实验总览: experiments.md
+      - 效果图: charts.md
+      - 实验结果: results.md
+      - 判读线: JUDGMENT.md
   - 发布说明: RELEASE.md
 
 markdown_extensions:
@@ -83,7 +96,12 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - tables
-  - toc: { permalink: true, toc_depth: 3 }
+  - toc:
+      permalink: true
+      toc_depth: 3
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.snippets:
       base_path: ['.']
   - pymdownx.arithmatex:
@@ -98,6 +116,7 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js
   - javascripts/data.js
   - javascripts/charts.js
+  - javascripts/figures.js
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
   - javascripts/diagrams.js

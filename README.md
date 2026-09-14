@@ -171,7 +171,7 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). Read the [limitations](https://lfan-ke.github.io/ES-MoE/en/limitations/) before quoting any number. The 142
+metrics, artifact, status, limitation). How each number was measured is on the [experiments](https://lfan-ke.github.io/ES-MoE/en/experiments/) page. The 142
 protocol checkpoints, with each run's arguments and per-epoch curve, live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
 branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
 

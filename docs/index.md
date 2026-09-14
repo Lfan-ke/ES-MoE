@@ -1,15 +1,31 @@
 <div class="es-hero" markdown>
 <div class="es-hero__eyebrow">4 选 2 专家路由</div>
 <h1 class="es-hero__claim">给 Ultralytics YOLO 装上<em>稀疏专家混合</em></h1>
-<p class="es-hero__lede">一行接入，路由的负载均衡损失进入反向传播。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
+<p class="es-hero__lede">一个调用接进官方 ultralytics，路由的平衡项进入反向传播。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 
 <ul class="es-proof">
-<li><strong>一个调用装上</strong><span><code>equip</code> 把块接进配置、重编号 head、接好损失。</span></li>
-<li><strong>辅助损失进入反向传播</strong><span><code>results.csv</code> 中 <code>esmoe_aux</code> 自成一列，由单测断言；配置里写了键不算。</span></li>
-<li><strong>按仓库协议量过</strong><span>七代主干 × 三臂，每格三个 seed 起，共 77 轮：默认接法在 SPPF 系末端为正（v5n +0.0055、v8n +0.0025、v9t +0.0025），末端换成注意力块后贴零（v10n −0.0002、11n +0.0013），到 12n、26n 转负；<code>rewire</code> 把 12n、26n 拉回持平。判定全文见<a href="JUDGMENT/">判读线</a>。</span></li>
+<li><strong>一个调用装上</strong><span><code>equip</code> 把块接进配置、重编号层引用、接好损失；YOLOv5 至 YOLO26 七代官方主干与 YOLO-Master 分支都能用。</span></li>
+<li><strong>辅助损失进入反向传播</strong><span>训练表里 <code>esmoe_aux</code> 自成一列，由单元测试与 <code>scripts/verify.py</code> 的十项真训练检查断言。</span></li>
+<li><strong>与 YOLO-Master 作用一致</strong><span>同一个 yolo-master-n、同一份协议：块在上游分支上加 +0.0104，在官方 ultralytics 加本包上加 +0.0095（FP32，各 3/3），两者之差落在等效档。</span></li>
 </ul>
+</div>
+
+<div class="es-stats" markdown>
+<div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
+<div><strong>8</strong><span>个主干上跑过完整协议</span></div>
+<div><strong>319</strong><span>项测试，含与上游、论文逐位比对</span></div>
+<div><strong>11</strong><span>次先于结果提交的预登记</span></div>
+</div>
+
+<div class="es-cards">
+<a href="tutorial/"><strong>教程</strong><span>安装、三个调用、嫁接与重编号、对照实验怎么做</span></a>
+<a href="API/"><strong>API</strong><span>equip、graft、attach_aux_loss 与 ESMoE 的全部参数</span></a>
+<a href="design/"><strong>ES-MoE 与 YOLO</strong><span>块比普通 YOLO 多了什么，训练与推理各怎么算，与 YOLO-Master 逐项对照</span></a>
+<a href="experiments/"><strong>实验</strong><span>数据集、协议、流程、八轮实验与同配置对照，全部交互式图表</span></a>
+<a href="charts/"><strong>效果图</strong><span>七代主干上逐 seed 的配对差</span></a>
+<a href="JUDGMENT/"><strong>判读线</strong><span>每一轮先写判据与预测，再写判定</span></a>
 </div>
 
 [在 Colab 里打开快速上手](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb)：安装、接入、训练，在日志里看到 `esmoe_aux` 列，全程在免费 GPU 上完成。
@@ -31,22 +47,19 @@
 
 ## 兼容性
 
-| 主干 | 构建与前向 | 嫁接进配置 | 训练中的辅助损失 |
-|:--:|:--:|:--:|:--:|
-| YOLOv8 | 是 | 是 | 是 |
-| YOLO11 | 是 | 是 | 是 |
-| YOLO12 | 是 | 是 | 是 |
-| YOLO26 | 是 | 是 | 是 |
-| YOLO-Master（fork） | 是 | 是 | 是 |
+| 主干 | 构建与前向 | 嫁接进配置 | 训练中的辅助损失 | 满协议运行 |
+|:--:|:--:|:--:|:--:|:--:|
+| YOLOv5 | 是 | 是 | 是 | 是 |
+| YOLOv8 | 是 | 是 | 是 | 是 |
+| YOLOv9 | 是 | 是 | 是 | 是 |
+| YOLOv10 | 是 | 是 | 是 | 是 |
+| YOLO11 | 是 | 是 | 是 | 是 |
+| YOLO12 | 是 | 是 | 是 | 是 |
+| YOLO26 | 是 | 是 | 是 | 是 |
+| YOLO-Master（分支） | 是 | 是 | 是 | 否 |
 
-由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。yolov5n / yolov9t / yolov10n 的嫁接与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：`scripts/fork_smoke.py` 嫁接进其 `yolo-master-n.yaml`、真实训练一轮且 `esmoe_aux` 非零，其自有 `ES_MOE` 配置与本块注册共存。
+由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理。训练一列由四代主干上真实的 1-epoch VisDrone 训练与七代主干上 120 epoch 的协议运行共同支撑，日志里 `train/esmoe_aux` 均非零；每一行的嫁接与前向都在 CI 里跑。YOLO-Master 一行跑在该分支自带的 ultralytics 上：`scripts/fork_smoke.py` 嫁接进它的 `yolo-master-n.yaml`、真实训练一轮且 `esmoe_aux` 非零，它自己的 `ES_MOE` 配置与本块共存。分支上的同配置对照训练的是上游自己的块，本包的块在官方 ultralytics 上训练，所以最后一列为否。
 
 ## 出厂配置
 
 `ESMoE(num_experts=4, top_k=2)` 配 `attach_aux_loss(weight=0.01)`。在统一预算下，它胜过 2 / 4 / 8 专家与 top-1 的各个变体，并在全量 VisDrone 上以三个 seed 确认：配对 3/3 胜，mAP50 +0.0021，参数增加 10.4%。论证见[选型](SELECTION.md)。
-
-## 证据与边界
-
-- [教程](tutorial.md)：从安装到对照实验
-- [选型](SELECTION.md)：为什么是 4 专家 top-2 与 0.01 的权重
-- [已知局限](limitations.md)：引用任何数字之前先读
