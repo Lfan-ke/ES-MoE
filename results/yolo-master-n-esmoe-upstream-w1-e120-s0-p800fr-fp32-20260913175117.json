@@ -1,0 +1,70 @@
+{
+  "experiment_id": "yolo-master-n-esmoe-upstream-w1-e120-s0-p800fr-fp32-20260913175117",
+  "git_ref": {
+    "toolkit": "22bacf3",
+    "toolkit_version": "0.1.6",
+    "ultralytics": "8.4.101",
+    "framework": "ultralytics",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62",
+    "toolkit_as_launched": "7c66ee2"
+  },
+  "config": {
+    "model_yaml": "configs/yolo-master-n-esmoe.yaml",
+    "sha256": "3d2896f6caca45fbba2c39612e9e9bfd72bab547c478430575ed30aceb726901",
+    "arch": "esmoe-upstream-w1",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": false,
+    "aux_weight": 1.0,
+    "recipe": "upstream",
+    "balance": "gshard",
+    "out_norm": true,
+    "dense_training": true,
+    "sparse_inference": true,
+    "dynamic_threshold": 0.4,
+    "blocks": 4
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 1.0,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
+  },
+  "hardware": {
+    "gpu": "MetaX C500",
+    "torch": "2.8.0+metax3.3.0.2",
+    "python": "3.10.10"
+  },
+  "budget": {
+    "epochs": 120,
+    "batch": 32,
+    "imgsz": 800,
+    "patience": 0,
+    "amp": false,
+    "amp_at_end": false,
+    "batch_at_end": 32,
+    "epochs_replayed": 0,
+    "wall_seconds": 38046.7,
+    "gpu_hours": 10.569
+  },
+  "seed": 0,
+  "metrics": {
+    "metrics/precision(B)": 0.4759937260255206,
+    "metrics/recall(B)": 0.3866276260658307,
+    "metrics/mAP50(B)": 0.36584601956948803,
+    "metrics/mAP50-95(B)": 0.21229605625048178
+  },
+  "params": 2814406,
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolo-master-n-esmoe-upstream-w1-e120-s0-p800fr-fp32/weights/best.pt",
+    "sha256": "974aab9198630d8d1e5fb26afca80d3d47e176daee5f6415a9319954d1d72995"
+  },
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}

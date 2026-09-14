@@ -588,6 +588,11 @@
 
 | variant | seed | mAP50 first | mAP50 repeat | gap |
 |:--:|:--:|:--:|:--:|:--:|
+| yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.3559 | 0.3560 | 0.0001 |
+| yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.3552 | 0.3519 | 0.0033 |
+| yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 2 | 0.3521 | 0.3625 | 0.0103 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.3601 | 0.3636 | 0.0035 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.3651 | 0.3634 | 0.0018 |
 | yolov10n-e4k2w0.01-gshard@e1f0.02i320[metaxc500/metax3.3] | 0 | 0.0000 | 0.0000 | 0.0000 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 0 | 0.3513 | 0.3483 | 0.0029 |
 | yolov10n-e4k2w0.01@e120f1i800[metaxc500/metax3.3] | 1 | 0.3511 | 0.3489 | 0.0023 |
@@ -600,4 +605,6 @@
 |:--:|:--:|:--:|:--:|:--:|
 | 4090d/torch2.6 | e20f0.25i640 | 1 | 0.0000 | 0.0000 |
 | metaxc500/metax3.3 | e120f1i800 | 5 | 0.0045 | 0.0130 |
+| metaxc500/metax3.3 | e120f1i800fp32 | 3 | 0.0046 | 0.0103 |
 | metaxc500/metax3.3 | e1f0.02i320 | 1 | 0.0000 | 0.0000 |
+| metaxc500/metax3.3/yolo-master | e120f1i800fp32 | 2 | 0.0025 | 0.0033 |
