@@ -20,10 +20,11 @@ Current version **1.0.1**: every experimental result on the docs site gets a fig
 ## Repository
 
 - **Package metadata.** The license is the SPDX expression `AGPL-3.0-only`, which PyPI now shows, and Python 3.10 to 3.12 classifiers are added.
-- **Release and CI checks.** A release fails when its tag disagrees with `esmoe.__version__`; CI builds the docs site in strict mode; a manual docs redeploy accepts only a tagged version from main, and only the newest tag moves `latest`.
+- **Release and CI checks.** A release fails when its tag disagrees with `esmoe.__version__`, and CI builds the docs site in strict mode.
+- **Docs versions per x.y.** An x.y.0 release deploys `x.y` and moves `latest` when it is the newest; an x.y.z patch release adds no version, its changes staying on `dev`. The two existing versions are renamed `1.0` and `0.1`.
 - **Tests.** New tests for the chart data, dataset statistics, audit declarations and version consistency, 335 in all.
 - **Checkpoints.** The `checkpoints` branch adds `last.pt` for 43 earlier protocol runs, 72 in all; each was added only after the same run's `best.pt` matched both its record and the hash already on the branch.
-- **Older docs.** The 0.1.6 docs stay online, and every page says it is not the latest release.
+- **Older docs.** The 0.1 docs stay online without their retired pages and superseded claims, and every page says it is not the latest.
 
 ## Earlier: 1.0.0
 
