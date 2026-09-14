@@ -1,0 +1,70 @@
+{
+  "experiment_id": "yolo-master-n-baseline-e120-s2-p800f-fp32-fork-20260914011826",
+  "git_ref": {
+    "toolkit": "d52faa5",
+    "toolkit_version": "0.1.6",
+    "ultralytics": "8.4.101",
+    "framework": "yolo-master@acce839c",
+    "yolo_master_base_ref": "acce839c7e895d6b179de7f7093fa879e237cc7b",
+    "yolo_master_release": "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"
+  },
+  "config": {
+    "model_yaml": "configs/yolo-master-n.yaml",
+    "sha256": "8e14e22c7f9053a8348cc03ff0863701e32c17d39b9ace89b402518a76365207",
+    "arch": "baseline",
+    "num_experts": 4,
+    "top_k": 2,
+    "rewire": false,
+    "aux_weight": 0.0,
+    "balance": "none",
+    "blocks": 0
+  },
+  "dataset": {
+    "yaml": "/data/esmoe-toolkit/configs/visdrone.yaml",
+    "fraction": 1.0,
+    "name": "VisDrone_dataset",
+    "classes": 10,
+    "splits": {
+      "train": 6471,
+      "val": 548,
+      "test": 1610
+    }
+  },
+  "hardware": {
+    "gpu": "MetaX C500",
+    "torch": "2.8.0+metax3.3.0.2",
+    "python": "3.10.10"
+  },
+  "budget": {
+    "epochs": 120,
+    "batch": 32,
+    "imgsz": 800,
+    "patience": 0,
+    "amp": false,
+    "amp_at_end": false,
+    "batch_at_end": 32,
+    "epochs_replayed": 0,
+    "wall_seconds": 19861.3,
+    "gpu_hours": 5.517
+  },
+  "resumed": {
+    "checkpoint": "/data/esmoe-toolkit/runs/yolo-master-n-baseline-e120-s2-p800f-fp32-fork/weights/last.pt",
+    "sha256": "1ba8400a3e623cded023a30e43643b7268f1e3171888d339d9af3ca6c7da0c01",
+    "epochs_done": 114,
+    "seconds_before": 18864.6
+  },
+  "seed": 2,
+  "metrics": {
+    "metrics/precision(B)": 0.47671447201958345,
+    "metrics/recall(B)": 0.38462684119312546,
+    "metrics/mAP50(B)": 0.3597975940588675,
+    "metrics/mAP50-95(B)": 0.20668126565186
+  },
+  "params": 2291406,
+  "artifact": {
+    "path": "/data/esmoe-toolkit/runs/yolo-master-n-baseline-e120-s2-p800f-fp32-fork/weights/best.pt",
+    "sha256": "15941410577285e02b36301f3f8748be43d05aa5c4241251aa5f3daaaa1970d0"
+  },
+  "status": "success",
+  "limitation": "single machine, single GPU; see limitations.md"
+}

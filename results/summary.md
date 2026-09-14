@@ -2,18 +2,33 @@
 
 | run | variant | seed | mAP50 | mAP50-95 | params | wall_s |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| yolo-master-n-baseline-e1-s3-smokef-fp32-fork-20260912095448 | yolo-master-n-baseline@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.0035 | 0.0010 | 2291406 | 222.6 |
 | yolo-master-n-baseline-e120-s0-p800c-20260911165332 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3] | 0 | 0.3597 | 0.2065 | 2291406 | 15410.2 |
 | yolo-master-n-baseline-e120-s0-p800c-fork-20260911165202 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.3542 | 0.2044 | 2291406 | 25014.6 |
+| yolo-master-n-baseline-e120-s0-p800f-fp32-20260913125527 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.3559 | 0.2053 | 2291406 | 17739.9 |
+| yolo-master-n-baseline-e120-s0-p800f-fp32-fork-20260912204616 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 0 | 0.3532 | 0.2037 | 2291406 | 19895.9 |
 | yolo-master-n-baseline-e120-s1-p800d-20260911165331 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3] | 1 | 0.3589 | 0.2048 | 2291406 | 15423.1 |
 | yolo-master-n-baseline-e120-s1-p800d-fork-20260911165201 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3/yolo-master] | 1 | 0.3534 | 0.2027 | 2291406 | 25086.3 |
+| yolo-master-n-baseline-e120-s1-p800f-fp32-20260913130105 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 1 | 0.3490 | 0.2020 | 2291406 | 17828.0 |
+| yolo-master-n-baseline-e120-s1-p800f-fp32-fork-20260912205104 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.3552 | 0.2047 | 2291406 | 19849.1 |
 | yolo-master-n-baseline-e120-s2-p800e-20260911204822 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3] | 2 | 0.3598 | 0.2069 | 2291406 | 15448.8 |
 | yolo-master-n-baseline-e120-s2-p800e-fork-20260911204651 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3/yolo-master] | 2 | 0.3514 | 0.2010 | 2291406 | 25266.5 |
+| yolo-master-n-baseline-e120-s2-p800f-fp32-20260913092752 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 2 | 0.3521 | 0.2017 | 2291406 | 17626.8 |
+| yolo-master-n-baseline-e120-s2-p800f-fp32-fork-20260914011826 | yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 2 | 0.3598 | 0.2067 | 2291406 | 19861.3 |
+| yolo-master-n-esmoe-upstream-w1-e1-s3-smokef-fp32-20260912095449 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3] | 3 | 0.0014 | 0.0003 | 2814406 | 263.7 |
 | yolo-master-n-esmoe-upstream-w1-e120-s0-p800c-20260911234908 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 0 | 0.3739 | 0.2168 | 2814406 | 16519.5 |
+| yolo-master-n-esmoe-upstream-w1-e120-s0-p800f-fp32-20260913021802 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.3601 | 0.2083 | 2814406 | 38233.5 |
 | yolo-master-n-esmoe-upstream-w1-e120-s1-p800d-20260911235018 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 1 | 0.3724 | 0.2163 | 2814406 | 17059.5 |
+| yolo-master-n-esmoe-upstream-w1-e120-s1-p800f-fp32-20260913022205 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 1 | 0.3578 | 0.2067 | 2814406 | 38328.1 |
 | yolo-master-n-esmoe-upstream-w1-e120-s2-p800e-20260912034809 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 2 | 0.3698 | 0.2139 | 2814406 | 16814.1 |
+| yolo-master-n-esmoe-upstream-w1-e120-s2-p800f-fp32-20260912225003 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 2 | 0.3677 | 0.2138 | 2814406 | 38258.6 |
+| yolo-master-n-upstream-e1-s3-smokef-fp32-fork-20260912095449 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.0016 | 0.0003 | 2814406 | 271.3 |
 | yolo-master-n-upstream-e120-s0-p800c-fork-20260911060342 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.3637 | 0.2098 | 2814406 | 38885.7 |
+| yolo-master-n-upstream-e120-s0-p800f-fp32-fork-20260912101056 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 0 | 0.3674 | 0.2127 | 2814406 | 38110.4 |
 | yolo-master-n-upstream-e120-s1-p800d-fork-20260911060354 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 1 | 0.3703 | 0.2146 | 2814406 | 38832.9 |
+| yolo-master-n-upstream-e120-s1-p800f-fp32-fork-20260912101226 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.3651 | 0.2126 | 2814406 | 38257.1 |
 | yolo-master-n-upstream-e120-s2-p800e-fork-20260911100545 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 2 | 0.3615 | 0.2094 | 2814406 | 38429.7 |
+| yolo-master-n-upstream-e120-s2-p800f-fp32-fork-20260912101356 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 2 | 0.3669 | 0.2127 | 2814406 | 38126.9 |
 | yolo11n-baseline-e120-s0-p800-20260902072608 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 0 | 0.3539 | 0.2027 | 2591790 | 5366.7 |
 | yolo11n-baseline-e120-s1-p800-20260902121409 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 1 | 0.3566 | 0.2048 | 2591790 | 5461.5 |
 | yolo11n-baseline-e120-s2-p800-20260902165904 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 2 | 0.3545 | 0.2046 | 2591790 | 5451.4 |
@@ -172,10 +187,17 @@
 
 | variant | seeds | mAP50 | mAP50-95 |
 |:--:|:--:|:--:|:--:|
+| yolo-master-n-baseline@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.0035 | 0.0010 |
 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3] | 3 | 0.3595 ± 0.0005 | 0.2061 ± 0.0011 |
 | yolo-master-n-baseline@e120f1i800[metaxc500/metax3.3/yolo-master] | 3 | 0.3530 ± 0.0015 | 0.2027 ± 0.0017 |
+| yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3] | 3 | 0.3523 ± 0.0035 | 0.2030 ± 0.0020 |
+| yolo-master-n-baseline@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.3560 ± 0.0034 | 0.2050 ± 0.0015 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3] | 1 | 0.0014 | 0.0003 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 3 | 0.3720 ± 0.0021 | 0.2157 ± 0.0016 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 3 | 0.3619 ± 0.0052 | 0.2096 ± 0.0037 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.0016 | 0.0003 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 3 | 0.3652 ± 0.0046 | 0.2113 ± 0.0029 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.3665 ± 0.0012 | 0.2127 ± 0.0000 |
 | yolo11n-baseline@e120f1i800[4090/torch2.6] | 3 | 0.3550 ± 0.0014 | 0.2041 ± 0.0012 |
 | yolo11n-baseline@e20f1i640[4090d/torch2.6] | 3 | 0.1419 ± 0.0032 | 0.0720 ± 0.0021 |
 | yolo11n-e4k2w0.01@e1f0.05i640[4090d/torch2.6] | 1 | 0.0000 | 0.0000 |
@@ -243,11 +265,18 @@
 | variant | seed | baseline | variant | delta |
 |:--:|:--:|:--:|:--:|:--:|
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 0 | 0.3597 | 0.3739 | +0.0142 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.3559 | 0.3601 | +0.0042 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 1 | 0.3589 | 0.3724 | +0.0135 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 1 | 0.3490 | 0.3578 | +0.0088 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 2 | 0.3598 | 0.3698 | +0.0100 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 2 | 0.3521 | 0.3677 | +0.0156 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.0035 | 0.0016 | -0.0019 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.3542 | 0.3637 | +0.0095 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 0 | 0.3532 | 0.3674 | +0.0142 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 1 | 0.3534 | 0.3703 | +0.0170 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.3552 | 0.3651 | +0.0099 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 2 | 0.3514 | 0.3615 | +0.0101 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 2 | 0.3598 | 0.3669 | +0.0071 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 0 | 0.3539 | 0.3567 | +0.0028 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 1 | 0.3566 | 0.3593 | +0.0027 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 2 | 0.3545 | 0.3530 | -0.0015 |
@@ -352,7 +381,10 @@
 | variant | seeds | mean delta | 95% CI | wins |
 |:--:|:--:|:--:|:--:|:--:|
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 3 | +0.0126 | [+0.0070, +0.0181] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 3 | +0.0095 | [-0.0047, +0.0237] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | -0.0019 | - | 0/1 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 3 | +0.0122 | [+0.0019, +0.0225] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | +0.0104 | [+0.0015, +0.0193] | 3/3 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 3 | +0.0013 | [-0.0048, +0.0075] | 2/3 |
 | yolo11n-e4k2w0.01@e20f1i640[4090d/torch2.6] | 3 | -0.0009 | [-0.0126, +0.0108] | 1/3 |
 | yolo11n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | +0.0004 | [-0.0179, +0.0188] | 2/3 |
@@ -395,11 +427,18 @@
 | variant | seed | baseline | variant | delta |
 |:--:|:--:|:--:|:--:|:--:|
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 0 | 0.2065 | 0.2168 | +0.0103 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 0 | 0.2053 | 0.2083 | +0.0030 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 1 | 0.2048 | 0.2163 | +0.0115 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 1 | 0.2020 | 0.2067 | +0.0047 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 2 | 0.2069 | 0.2139 | +0.0070 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 2 | 0.2017 | 0.2138 | +0.0121 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | 0.0010 | 0.0003 | -0.0006 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 0 | 0.2044 | 0.2098 | +0.0054 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 0 | 0.2037 | 0.2127 | +0.0090 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 1 | 0.2027 | 0.2146 | +0.0120 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | 0.2047 | 0.2126 | +0.0079 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 2 | 0.2010 | 0.2094 | +0.0084 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 2 | 0.2067 | 0.2127 | +0.0060 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 0 | 0.2027 | 0.2059 | +0.0032 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 1 | 0.2048 | 0.2038 | -0.0010 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 2 | 0.2046 | 0.2026 | -0.0020 |
@@ -504,7 +543,10 @@
 | variant | seeds | mean delta | 95% CI | wins |
 |:--:|:--:|:--:|:--:|:--:|
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3] | 3 | +0.0096 | [+0.0038, +0.0154] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3] | 3 | +0.0066 | [-0.0055, +0.0186] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e1f1i800fp32[metaxc500/metax3.3/yolo-master] | 1 | -0.0006 | - | 0/1 |
 | yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800[metaxc500/metax3.3/yolo-master] | 3 | +0.0086 | [+0.0005, +0.0167] | 3/3 |
+| yolo-master-n-e4k2w1.0-gshard-norm-dense-t0.4-x4@e120f1i800fp32[metaxc500/metax3.3/yolo-master] | 3 | +0.0076 | [+0.0038, +0.0115] | 3/3 |
 | yolo11n-e4k2w0.01@e120f1i800[4090/torch2.6] | 3 | +0.0001 | [-0.0068, +0.0070] | 1/3 |
 | yolo11n-e4k2w0.01@e20f1i640[4090d/torch2.6] | 3 | -0.0001 | [-0.0076, +0.0074] | 1/3 |
 | yolo11n-e4k2w0.01-rewire@e120f1i800[4090/torch2.6] | 3 | +0.0002 | [-0.0074, +0.0079] | 1/3 |
