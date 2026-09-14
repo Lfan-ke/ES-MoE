@@ -99,6 +99,9 @@ block is holding.
 | YOLO26 | yes | yes | yes | yes |
 | YOLO-Master (fork) | yes | yes | yes | no |
 
+The fork row has no protocol runs of this package: the same-configuration comparison trains upstream's own blocks on
+the fork and this package's blocks on official ultralytics.
+
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
 in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
 runs on four generations (`results/*-compat-*.json`) and by the 120-epoch protocol runs on all seven,

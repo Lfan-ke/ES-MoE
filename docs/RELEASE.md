@@ -23,7 +23,7 @@
 
 ## 此前的 0.1.5
 
-## 新增
+### 新增
 
 - **与上游 `ES_MOE` 的参数对齐。** 块现在接上游构造函数的全部参数：`out_channels`、`top_k=None`（等于用全部专家）、`sparse_inference`（上游的 `use_sparse_inference`）、`dynamic_threshold`（上游 0.4，本包默认 0.0 不剪——`results/` 里每条记录都是这样量出来的）。偶数核逐一降为奇数再按 `max_kernel_size` 截断，剪枝过的 checkpoint 因此装得回去；`num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 在构造时就按同样的边界校验。
 - **四个平衡目标，默认仍是 Switch。** `switch_balance`（默认，与 0.1.4 和 `results/` 里的全部记录一致）、`gshard_balance`（对齐上游：读 top-k 掩码重归一后的门控）、`master_balance`（论文式 13，与 `gshard` 只差仿射 `(L−1)/E²`）、`gshard_probs_balance`（读原始概率，用来隔离「读哪个张量」这一个变量）。默认值由数据定：读门控的目标对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，Switch 在 66 个里一个没有（判读线第六轮）。命令行 `--balance {switch,gshard,master,gshard_probs}`。
@@ -35,7 +35,7 @@
 - **`scripts/blockspec.py`**：从任一 checkpoint 读回当时真正生效的块设置。**`scripts/backfill.py`**：补齐并复核记录里的配置 hash、数据集样本数、GPU-hours、产物校验和，`--settings` 按权重改写记录并把改动写进记录本身。**`scripts/queue.sh`** 入库，与 `scripts/train.py` 的运行命名由测试对表。
 - `scripts/report.py` 的配对差值附 95% 置信区间；`scripts/routing.py` 逐块分析而非只看第一块。
 
-## 修复
+### 修复
 
 - **块设置进不了训练的那个模型。** 训练器照 `model.yaml` 重建模型，`YOLO(cfg)` 之后设到块上的目标函数与开关随那个被丢弃的实例一起消失，不报错也不留痕——`--balance`、`--out-norm`、`--dense-training` 因此全部失效，而记录照命令行写。现在 `graft()` / `equip()` 把设置写进配置，`ESMoE` 接受 options 映射并按名解析目标函数；`scripts/train.py` 记录的块配置从训练完的模型上读，请求与实际不符即在开跑前退出。**用 0.1.4 的 `equip()` + `configure()` 设过这些开关的，训练出来的是构造函数默认值，请按 `scripts/blockspec.py` 复核。**
 - **`dynamic_threshold` 无法追踪。** 掩码原先用 `scatter_` 塞一个 Python 布尔量，追踪器没有对应的算子，`torch.jit.trace` 与建立在它之上的导出全部失败。改成张量运算，逐输入重算。
@@ -45,11 +45,13 @@
 - **`buckets.py` 在部分加速卡上无法评测。** `val()` 在推理模式里融合 conv+bn，有的构建拒绝对 inference tensor 取 view。现在提前融合，数值不变。
 - **路由器 logits 未钳位。** 混合精度下跑飞的 logit 到 softmax 已是 inf，整个门控变 NaN。现按上游做法夹到 `[-30, 30]` 后走 fp32 softmax。
 
-## 反馈与迭代
+## 此前的 0.1.4
+
+### 反馈与迭代
 
 0.1.4 的多数条目来自首轮使用反馈：评测口径改用 COCO 式 32²/96² 分档与 maxDets=500（`scripts/buckets.py`，口径来源已在文档注明）；`--patience` 与 `IMGSZ` 是为对齐仓库复现协议（imgsz 800、120 epoch、patience 0）而加；半精度有限值测试对应「先检查 FP32/AMP 下损失与梯度是否一致有限」的要求。上游侧的反馈同样闭环：`OptimizedMOE` 追踪守卫的修复已被 YOLO-Master 合并（#241）。
 
-## 修复
+### 修复
 
 - `scripts/report.py` 的分组键补进 imgsz。此前同 epoch 不同分辨率的记录会被平均进同一行，正是文档承诺不会发生的事。
 
@@ -59,7 +61,7 @@
 
     用 0.1.0 至 0.1.2 导出过模型的，请重新导出。
 
-## 新增
+### 新增
 
 - `scripts/verify.py`：单测做不到的正确性检查——真实训练一轮并确认辅助项为正、`weight=0` 时损失表不变、checkpoint 往返、断点续训、多个块一起训练、`val` 与 `predict`，以及 ONNX 导出。
 - 一项回归测试：导出一个路由随输入符号变化的块，把两条分支都与 PyTorch 对照。

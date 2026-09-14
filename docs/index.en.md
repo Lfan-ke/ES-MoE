@@ -41,6 +41,10 @@ The separate steps, the CLI and the hand-written config are covered in the [tuto
 
 Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, plus a real 1-epoch training run per generation logging a non-zero `train/esmoe_aux`. Graft and forward are also exercised on yolov5n, yolov9t and yolov10n in CI. The YOLO-Master row runs on the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
+## Shipped default
+
+`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`. Under one budget it beat the 2-, 4- and 8-expert and top-1 variants, and on the full VisDrone training set three seeds confirmed it: 3/3 paired wins, +0.0021 mAP50, for 10.4% more parameters. The argument is on [Selection](SELECTION.md).
+
 ## Evidence
 
 - [Tutorial](tutorial.md): from install to a comparison you can defend.

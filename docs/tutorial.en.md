@@ -36,7 +36,8 @@ $$
 
 where $E$ is the expert count, $\bar{p}_i$ the mean routing probability of expert $i$ over the batch
 and $f_i$ the fraction of samples that actually activated it. It is minimised when routing mass and
-realised load are spread evenly, which is what keeps the router from collapsing onto one expert.
+realised load are spread evenly. Measured, what it prevents is an expert dying, not the dispatch concentrating
+([judgment lines](JUDGMENT.md), round six).
 
 ## The three calls
 
@@ -77,7 +78,7 @@ Renumbering moves references; it does not retarget them. A head branch that name
 
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 
-It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); `rewire` gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; `rewire` pulls 12n and 26n back to parity and trails the default arm only on 11n. Four-generation verdicts: [judgment lines](JUDGMENT.md).
+It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); `rewire` gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; `rewire` pulls 12n and 26n back to parity and trails the default arm only on 11n. Seven-generation verdicts: [judgment lines](JUDGMENT.md).
 
 ## Proving the auxiliary loss is real
 
@@ -141,7 +142,7 @@ The default is **Switch** (`switch_balance`), as in 0.1.4 and in the default arm
 
 What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (`switch`, `gshard_probs`) evaluate identically and cannot tell that apart, while the two that read the gate (`gshard`, `master`) can. Upstream's code and its paper agree here, differing only by an affine map (`L_paper = (L_upstream - 1) / E^2`).
 
-Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints and Switch in none of 66, which is why Switch is the default ([judgment lines](JUDGMENT.md), round six). To use upstream's objective instead:
+Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints, and in all six same-configuration B checkpoints trained with upstream's recipe, while Switch lost none in 66, which is why Switch is the default ([judgment lines](JUDGMENT.md), rounds six to eight). To use upstream's objective instead:
 
     esmoe.equip("yolo11n.yaml", balance="gshard")
 
@@ -150,7 +151,7 @@ A custom objective goes into the config too: define the function at module level
 
 ### The configuration that matches upstream
 
-Upstream's `ES_MOE` and the paper differ from this package's defaults in four places. Turning all four on is the faithful reproduction, and **they all go through `equip`**:
+Upstream's `ES_MOE` differs from this package's defaults in the first five rows below: four affect training, and pruning affects inference only. **They all go through `equip`**, and a run compared against upstream adds its training recipe, `recipe="upstream"` (see [API](API.md)):
 
     model = esmoe.equip(
         "yolo11n.yaml",
@@ -158,6 +159,8 @@ Upstream's `ES_MOE` and the paper differ from this package's defaults in four pl
         balance="gshard",         # the objective that reads the gate
         out_norm=True,            # BatchNorm + SiLU after the weighted sum
         dense_training=True,      # every expert runs while training
+        dynamic_threshold=0.4,    # pruning at inference
+        recipe="upstream",        # what upstream's trainer does to a routed model
     )
 
 | item | upstream / paper | this package's default | how to turn it on |
@@ -171,7 +174,7 @@ Upstream's `ES_MOE` and the paper differ from this package's defaults in four pl
 
 The block matches upstream's remaining parameters too: `out_channels` (the input's width by default), `top_k=None` meaning every expert, even kernels stepped down to odd and capped at `max_kernel_size` so a pruned checkpoint's kernels reload, and the same validation of `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel_size` -- refused at construction rather than halfway through a run.
 
-The last two are off by default so the runs already in `results/` still reproduce; each has its own arm on the [judgment lines](JUDGMENT.md) page. On the command line: `--at`, `--out-norm`, `--dense-training`.
+`out_norm`, `dense_training` and `dynamic_threshold` are off by default so the runs of this package's recipe in `results/` still reproduce; the first two each have an arm on the [judgment lines](JUDGMENT.md) page. On the `esmoe graft` command line: `--at`, `--balance`, `--out-norm`, `--dense-training`; the pruning threshold goes through `equip` or the config.
 
 **These settings have to travel in the config; setting them on the blocks afterwards does not work.** The trainer rebuilds the model from `model.yaml`, and anything set after `YOLO(cfg)` returns disappears with the instance that is discarded -- no error, no trace. `equip` and `graft` write them into the config, so a rebuild keeps them; `ESMoE.configure(...)` is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: `uv run python scripts/blockspec.py`.
 

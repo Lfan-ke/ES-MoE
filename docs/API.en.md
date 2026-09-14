@@ -1,6 +1,6 @@
 # API
 
-Six entry points, all importable from the top-level `esmoe`; the package ships `py.typed`, so the signatures are visible to IDEs and mypy.
+Every entry point below imports from the top-level `esmoe`; the package ships `py.typed`, so the signatures are visible to IDEs and mypy.
 
 ## equip
 
@@ -66,13 +66,13 @@ A mixture-of-experts block, channel-preserving unless `out_channels` says otherw
 The five settings and their defaults (`esmoe.SETTINGS`):
 
 | setting | default here | upstream | what it does |
-|:--:|:--:|:--:|:--|
+|:--:|:--:|:--:|:--:|
 | `balance` | `switch_balance` | `gshard_balance` | the objective, `(probs, gate) -> scalar`, or a name from `esmoe.BALANCES`, or `module:qualname` |
 | `out_norm` | `False` | always on | `BatchNorm + SiLU` after the weighted sum (the paper's eq. 2 `Norm`) |
 | `dense_training` | `False` | always on | run every expert while training; unrouted ones are weighted zero but their normalisation statistics keep moving |
 | `sparse_inference` | `True` | same | skip unrouted experts outside training |
 | `dynamic_threshold` | `0.0` | `0.4` | outside training, drop a routed expert whose share of the mixture -- its weight after the top-k renormalisation -- is below the threshold, keep the leader, renormalise |
 
-The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), round six).
+The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, as did all six same-configuration B checkpoints, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), rounds six to eight).
 
 `block.spec()` returns the five settings a block is holding, plus `expert` when a custom one is in use, and `block.configure(**settings)` changes them on paths that never reach a trainer -- inference, export, a unit test. `esmoe.blocks(model)` walks every block in a model in module order, and `scripts/blockspec.py` reads back from any checkpoint what was actually in force.
