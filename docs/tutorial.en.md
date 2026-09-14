@@ -99,7 +99,7 @@ double-count a stale graph.
 ## A comparison you can defend
 
     uv run python scripts/capture_env.py             # freeze versions and hardware into results/env/
-    EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
+    EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
     uv run python scripts/report.py                  # results/summary.md
 
 Each run writes one JSON record: model config, dataset and fraction, hardware, budget, seed,

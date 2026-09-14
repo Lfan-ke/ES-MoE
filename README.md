@@ -167,7 +167,7 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
     uv sync --group dev
     uv run pytest -q
     uv run python scripts/capture_env.py                  # freeze environment into results/env/
-    EPOCHS=20 FRACTION=0.25 SEEDS="0 1 2" bash scripts/sweep.sh
+    EPOCHS=20 FRACTION=0.25 SEEDS="0 1 2" uv run bash scripts/sweep.sh
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,

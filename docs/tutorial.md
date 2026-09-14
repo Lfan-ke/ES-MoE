@@ -92,7 +92,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 ## 对照实验怎么做
 
     uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
-    EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
+    EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
     uv run python scripts/report.py                  # results/summary.md
 
 每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。`report.py` 按主干、块配置与**预算**三者共同分组，两个不同预算不会被平均进同一行；随后对同 seed 的基线打印逐 seed 的配对差值。
