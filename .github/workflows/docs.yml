@@ -36,13 +36,16 @@ jobs:
           enable-cache: true
           python-version: "3.12"
       - run: uv sync --group dev
-      - name: Check a manual redeploy
-        # A typo would otherwise publish a phantom version, and an older tag would drag `latest` backwards.
-        if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+      - name: Check a manual run
+        # A manual run builds main, which carries the newest series; under any other name those pages would be mislabelled.
+        if: github.event_name == 'workflow_dispatch'
         run: |
-          [ "$GITHUB_REF" = refs/heads/main ] || { echo "redeploy from main only, not $GITHUB_REF"; exit 1; }
+          [ "$GITHUB_REF" = refs/heads/main ] || { echo "manual runs deploy from main only, not $GITHUB_REF"; exit 1; }
+          if [ "$VERSION" = dev ]; then exit 0; fi
           series=$(echo "${VERSION#v}" | cut -d. -f1,2)
+          newest=$(git tag -l 'v*' --sort=-v:refname | head -1 | sed 's/^v//' | cut -d. -f1,2)
           git rev-parse -q --verify "refs/tags/v$series.0" > /dev/null || { echo "no tag v$series.0"; exit 1; }
+          [ "$series" = "$newest" ] || { echo "main carries the $newest docs, not $series"; exit 1; }
       - name: Deploy the version
         run: |
           git config user.name "github-actions[bot]"
