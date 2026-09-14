@@ -906,7 +906,7 @@ original one reference by reference.</p>
 <p><code>collect_aux_loss</code> only sums values published by the latest forward pass, so calling it twice cannot
 double-count a stale graph.</p>
 <h2 id="a-comparison-you-can-defend">A comparison you can defend<a class="headerlink" href="#a-comparison-you-can-defend" title="Permanent link">&para;</a></h2>
-<pre><code>uv run python scripts/capture_env.py             # freeze versions and hardware into env/
+<pre><code>uv run python scripts/capture_env.py             # freeze versions and hardware into results/env/
 EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>

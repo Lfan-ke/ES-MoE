@@ -900,7 +900,7 @@ esmoe.attach_aux_loss(model, weight=0.01)
 </code></pre>
 <p><code>collect_aux_loss</code> 只汇总最近一次前向发布的值，所以连着调用两次不会把陈旧的计算图重复计入。</p>
 <h2 id="_6">一次站得住的对照实验<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<pre><code>uv run python scripts/capture_env.py             # 把版本与硬件冻进 env/
+<pre><code>uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
 EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>
