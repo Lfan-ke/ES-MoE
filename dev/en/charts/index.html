@@ -726,7 +726,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    Overview
   
 
     
@@ -818,10 +818,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recompute" class="md-nav__link">
+  <a href="#area-buckets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recompute
+        Area buckets
       
     </span>
   </a>
@@ -829,10 +829,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-alignment-arms" class="md-nav__link">
+  <a href="#alignment-arms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The alignment arms
+        Alignment arms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recompute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recompute
       
     </span>
   </a>
@@ -976,10 +987,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recompute" class="md-nav__link">
+  <a href="#area-buckets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recompute
+        Area buckets
       
     </span>
   </a>
@@ -987,10 +998,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-alignment-arms" class="md-nav__link">
+  <a href="#alignment-arms" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The alignment arms
+        Alignment arms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recompute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recompute
       
     </span>
   </a>
@@ -1018,25 +1040,42 @@
 
 
 <h1 id="effect-chart">Effect chart<a class="headerlink" href="#effect-chart" title="Permanent link">&para;</a></h1>
-<p>The chart below plots every protocol run in <code>results/</code>: backbone on the x axis, the same-seed paired delta on the y axis. Above the zero line the grafted block won that seed. The bar is the mean of three seeds, the vertical line their range, and the dots the seeds themselves. Switch between mAP50 and mAP50-95 above the chart, hover a cell for its mean, wins and per-seed values, and save a PNG from the corner.</p>
+<p>Per-seed paired deltas of the default and rewire arms in the seven-generation matrix: backbone on the x axis, the same-seed paired delta on the y axis. Above the zero line the grafted block won that seed.</p>
+<figure class="es-fig" id="fig-1">
+<figcaption><b>Fig. 1</b><span>Paired deltas across seven generations</span><em>dots for seeds, bar for the mean, line for the range</em></figcaption>
 <div id="esmoe-effect" class="esmoe-chart"></div>
+<small>Data: <code>results/summary.md</code></small>
+</figure>
 
-<p><code>scripts/charts.py</code> recomputes the numbers from <code>results/*.json</code> into <code>docs/javascripts/data.js</code>, so this figure shares a source with the tables on <a href="../results/">Results</a> and <a href="../JUDGMENT/">Judgment lines</a> and cannot drift away from them.</p>
+<p>The bar is the mean, drawn only with three seeds or more (the v10n default arm has five); the vertical line is the range and the dots are the seeds. Switch between mAP50 and mAP50-95 above the chart, hover a cell for its details, and save a PNG from the corner.</p>
 <h2 id="how-to-read-it">How to read it<a class="headerlink" href="#how-to-read-it" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>The range bar matters more than the mean.</strong> Three seeds routinely straddle the zero line even where the mean is positive, which is exactly why the range is drawn. The judgment lines said it up front: three seeds support no significance test, and even 3/3 gives a sign-test p of 0.125.</li>
-<li><strong>The trend of the means is the project's main finding</strong>: the default graft is positive on SPPF-ended backbones (v5n/v8n/v9t), sits on zero once the backbone ends in attention (v10n/11n), and turns negative on area attention and the E2E head (12n/26n).</li>
-<li><strong>An arm with fewer than three seeds gets no mean</strong>, only its dots, so an unfinished cell cannot be read as a settled one.</li>
-<li><strong>The gap between the arms is wiring, not backbone.</strong> <code>rewire</code> has exactly the same parameter count as the default arm (3,327,330); only whether consumers read the block's output differs.</li>
+<li>Read the range, not only the bar. Three seeds often straddle zero even when the mean is positive; the judgment lines said up front that three seeds support no significance test, and even 3/3 gives a sign-test p of 0.125.</li>
+<li>The trend of the means is the main finding: the default wiring is positive on SPPF-ended backbones (v5n, v8n, v9t), sits on zero once the backbone ends in attention (v10n, 11n), and turns negative with area attention and the E2E head (12n, 26n).</li>
+<li>An arm with fewer than three seeds gets no mean, only its dots.</li>
+<li>The two arms have the same parameter count (3,327,330 on YOLOv8n); only the wiring differs.</li>
 </ul>
+<h2 id="area-buckets">Area buckets<a class="headerlink" href="#area-buckets" title="Permanent link">&para;</a></h2>
+<figure class="es-fig" id="fig-2">
+<figcaption><b>Fig. 2</b><span>Split by object size</span><em>paired deltas in COCO area buckets, bars for the mean of three seeds</em></figcaption>
+<div class="esmoe-figure" data-figure="buckets-generations" data-arms="both"></div>
+<small>Data: <code>results/buckets.md</code></small>
+</figure>
+
+<p>The buckets show no consistent size trade-off: with the default wiring on v8n large objects get worse on all three seeds (APl −0.0104), and <code>rewire</code> turns that positive; on 26n it is small objects that lose (APs −0.0045, 0/3).</p>
+<h2 id="alignment-arms">Alignment arms<a class="headerlink" href="#alignment-arms" title="Permanent link">&para;</a></h2>
+<figure class="es-fig es-fig--tall" id="fig-3">
+<figcaption><b>Fig. 3</b><span>Alignment arms</span><em>upstream's settings inside the block, four blocks and balance terms, each against the same-seed baseline</em></figcaption>
+<div class="esmoe-figure" data-figure="alignment"></div>
+<small>Data: <code>results/summary.md</code></small>
+</figure>
+
+<p>These arms compare block configurations on one backbone, which Fig. 1's generation axis cannot carry. Output normalisation and dense training are both 3/3 on v5n; four blocks are 0/3 on both v10n and v5n. Round-by-round verdicts are on <a href="../experiments/">Experiments</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
 <h2 id="recompute">Recompute<a class="headerlink" href="#recompute" title="Permanent link">&para;</a></h2>
 <pre><code>uv run python scripts/report.py   # paired tables
-uv run python scripts/charts.py   # figure and data
+uv run python scripts/charts.py   # figures and data
 </code></pre>
-<p>The same script also writes <code>docs/assets/effect.svg</code> and <code>docs/assets/alignment.svg</code>, which README and the wiki use, because GitHub strips scripts in both places and an interactive chart would not render. The second figure carries the alignment arms -- upstream's settings inside the block, and its layout of four blocks -- which compare block configurations on one backbone and do not fit the generation axis above.</p>
-<h2 id="the-alignment-arms">The alignment arms<a class="headerlink" href="#the-alignment-arms" title="Permanent link">&para;</a></h2>
-<p><img alt="Paired deltas for the alignment arms" src="../../assets/alignment.svg" /></p>
-<p>Upstream's two settings inside the block and its four-block layout, each against a baseline of the same seed. Generated by <code>scripts/charts.py</code> like everything else here.</p>
+<p><code>scripts/charts.py</code> computes the numbers from <code>results/*.json</code> into <code>docs/javascripts/data.js</code>, the same source as <a href="../results/">Results</a> and <a href="../JUDGMENT/">Judgment lines</a>. The SVGs under <code>docs/assets/</code> are static versions of the same data, used by the README and the wiki.</p>
 
 
 
@@ -1072,7 +1111,7 @@ uv run python scripts/charts.py   # figure and data
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../experiments/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Experiments">
+          <a href="../experiments/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1082,7 +1121,7 @@ uv run python scripts/charts.py   # figure and data
                 Previous
               </span>
               <div class="md-ellipsis">
-                Experiments
+                Overview
               </div>
             </div>
           </a>
@@ -1132,12 +1171,10 @@ uv run python scripts/charts.py   # figure and data
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../../javascripts/data.js"></script>
       
@@ -1145,11 +1182,9 @@ uv run python scripts/charts.py   # figure and data
       
         <script src="../../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../../javascripts/diagrams.js"></script>
+      
+        <script src="../../javascripts/loader.js"></script>
       
     
   </body>

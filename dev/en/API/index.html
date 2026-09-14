@@ -664,6 +664,50 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        blocks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#balancing-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Balancing objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dwexpert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DWExpert
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -861,7 +905,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    Overview
   
 
     
@@ -1107,6 +1151,50 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        blocks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#balancing-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Balancing objectives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dwexpert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DWExpert
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command line
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1138,7 +1226,7 @@
 </code></pre>
 <p>Exposes <code>ESMoE</code> where <code>parse_model</code> resolves layer names, after which any model.yaml can write <code>[-1, 1, ESMoE, [4, 2]]</code>.</p>
 <h2 id="graft">graft<a class="headerlink" href="#graft" title="Permanent link">&para;</a></h2>
-<pre><code>esmoe.graft(base, out=None, *, at="backbone_end", num_experts=4, top_k=2,
+<pre><code>esmoe.graft(base="yolov8n.yaml", out=None, *, at="backbone_end", num_experts=4, top_k=2,
             rewire=False, out_channels=None, **settings) -&gt; dict
 </code></pre>
 <p>Inserts blocks after the layers named by <code>at</code> and renumbers every later reference. <code>at</code> is <code>"backbone_end"</code>, <code>"backbone_stages"</code> (one block after each backbone stage, reproducing the upstream layout), one index or several. With <code>rewire=True</code> every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.</p>
@@ -1147,7 +1235,7 @@
 <h2 id="attach_aux_loss">attach_aux_loss<a class="headerlink" href="#attach_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -&gt; model
 </code></pre>
-<p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
+<p>Puts the auxiliary loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
 <p><code>recipe</code> decides how the block and its term train:</p>
 <ul>
 <li><code>"esmoe"</code> (default, and what every run outside the same-configuration comparison used): the term times <code>weight</code>, counted per image the way the task loss counts.</li>
@@ -1156,7 +1244,7 @@
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.collect_aux_loss(model, device=None) -&gt; Tensor
 </code></pre>
-<p>Sums the routing losses published by the most recent forward, for custom training loops. Calling it twice cannot count a stale value again.</p>
+<p>Sums the auxiliary loss each block last published to the registry, for custom training loops. It reads without clearing, so call <code>clear_aux_loss</code> before each forward.</p>
 <h2 id="clear_aux_loss">clear_aux_loss<a class="headerlink" href="#clear_aux_loss" title="Permanent link">&para;</a></h2>
 <pre><code>esmoe.clear_aux_loss() -&gt; None
 </code></pre>
@@ -1172,7 +1260,7 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
             expert_kernel_sizes=None, expert=DWExpert, **settings)
 </code></pre>
 <p>A mixture-of-experts block, channel-preserving unless <code>out_channels</code> says otherwise. <code>channels</code> is inferred on the first forward when omitted; <code>top_k=None</code> activates every expert. <code>expert</code> is a <code>(c1, c2, k) -&gt; Module</code> factory, or its name (a short name from <code>esmoe.EXPERTS</code>, or <code>module:qualname</code>). <code>options</code> is the mapping a config carries settings in (<code>[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]</code>); it is equivalent to <code>**settings</code> and may also carry <code>expert</code> and <code>out_channels</code>. An <code>out_channels</code> given through <code>options</code> makes the block return a one-element list for the <code>Index</code> layer after it.</p>
-<p>The five settings and their defaults (<code>esmoe.SETTINGS</code>):</p>
+<p>The five settings and their defaults (<code>esmoe.SETTINGS</code>, a read-only mapping):</p>
 <table>
 <thead>
 <tr>
@@ -1217,6 +1305,127 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
 </table>
 <p>The last two affect inference only, the first three affect training. The defaults for <code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> keep the runs already in <code>results/</code> reproducible; they are not a judgement against upstream. The default for <code>balance</code> is settled by data: an objective that reads the gate (upstream's <code>gshard</code>, the paper's <code>master</code>) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, as did all six same-configuration B checkpoints, while Switch reads the full softmax and lost none in 66 (<a href="../JUDGMENT/">judgment lines</a>, rounds six to eight).</p>
 <p><code>block.spec()</code> returns the five settings a block is holding, plus <code>expert</code> when a custom one is in use, and <code>block.configure(**settings)</code> changes them on paths that never reach a trainer -- inference, export, a unit test. <code>esmoe.blocks(model)</code> walks every block in a model in module order, and <code>scripts/blockspec.py</code> reads back from any checkpoint what was actually in force.</p>
+<h2 id="blocks">blocks<a class="headerlink" href="#blocks" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.blocks(model) -&gt; Iterator[ESMoE]
+</code></pre>
+<p>Yields every block in a model in module order. It is a generator, so walking the blocks again takes another call; a <code>YOLO</code> object and its <code>.model</code> both work:</p>
+<pre><code>for block in esmoe.blocks(model):
+    print(block.spec())
+</code></pre>
+<h2 id="balancing-objectives">Balancing objectives<a class="headerlink" href="#balancing-objectives" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.switch_balance(probs, gate) -&gt; Tensor
+esmoe.gshard_balance(probs, gate) -&gt; Tensor
+esmoe.master_balance(probs, gate) -&gt; Tensor
+esmoe.gshard_probs_balance(probs, gate) -&gt; Tensor
+</code></pre>
+<p><code>probs</code> is the router's full softmax and <code>gate</code> the top-k selection renormalised, both shaped <code>(batch, E)</code>. The usage <code>u</code> below is the per-expert mean, normalised to sum to one.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">function</th>
+<th style="text-align: center;">short name</th>
+<th style="text-align: center;">reads</th>
+<th style="text-align: center;">value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>switch_balance</code></td>
+<td style="text-align: center;"><code>switch</code></td>
+<td style="text-align: center;"><code>probs</code> and <code>gate &gt; 0</code></td>
+<td style="text-align: center;"><code>E · Σ mean(probs)ᵢ · mean(gate &gt; 0)ᵢ</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_balance</code></td>
+<td style="text-align: center;"><code>gshard</code></td>
+<td style="text-align: center;"><code>gate</code></td>
+<td style="text-align: center;"><code>E · Σ uᵢ²</code>, the form upstream's <code>ES_MOE</code> uses</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>master_balance</code></td>
+<td style="text-align: center;"><code>master</code></td>
+<td style="text-align: center;"><code>gate</code></td>
+<td style="text-align: center;"><code>(1/E) · Σ (uᵢ − 1/E)²</code>, the paper's eq. 13, equal to <code>(gshard − 1)/E²</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>gshard_probs_balance</code></td>
+<td style="text-align: center;"><code>gshard_probs</code></td>
+<td style="text-align: center;"><code>probs</code></td>
+<td style="text-align: center;"><code>E · Σ uᵢ²</code>, kept to isolate which tensor is read</td>
+</tr>
+</tbody>
+</table>
+<p><code>esmoe.BALANCES</code> maps the short names to the functions. A custom objective takes the same arguments and returns a scalar.</p>
+<h2 id="dwexpert">DWExpert<a class="headerlink" href="#dwexpert" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe.DWExpert(c1, c2, k)
+</code></pre>
+<p>The default expert: a <code>k×k</code> depthwise convolution (<code>groups=c1</code>, no bias), then a <code>1×1</code> pointwise convolution, <code>BatchNorm</code> and <code>SiLU</code>. <code>esmoe.EXPERTS</code> maps short names to expert factories and holds <code>dw</code> only; a custom expert follows <code>(c1, c2, k) -&gt; Module</code>.</p>
+<h2 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h2>
+<pre><code>esmoe graft BASE -o OUT [options]
+esmoe info
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">option</th>
+<th style="text-align: center;">default</th>
+<th style="text-align: center;">what it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>-o</code>, <code>--out</code></td>
+<td style="text-align: center;">required</td>
+<td style="text-align: center;">where to write the config</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>-e</code>, <code>--num-experts</code></td>
+<td style="text-align: center;"><code>4</code></td>
+<td style="text-align: center;">experts per block</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>-k</code>, <code>--top-k</code></td>
+<td style="text-align: center;"><code>2</code></td>
+<td style="text-align: center;">experts active per image</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--at</code></td>
+<td style="text-align: center;"><code>backbone_end</code></td>
+<td style="text-align: center;"><code>backbone_end</code>, <code>backbone_stages</code>, one index, or comma-separated indices</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--rewire</code></td>
+<td style="text-align: center;">off</td>
+<td style="text-align: center;">consumers read the block's output</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--out-channels</code></td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">widen the blocks to this literal width</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--balance</code></td>
+<td style="text-align: center;"><code>switch</code></td>
+<td style="text-align: center;"><code>switch</code>, <code>gshard</code>, <code>master</code>, <code>gshard_probs</code> or <code>module:qualname</code></td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--expert</code></td>
+<td style="text-align: center;"><code>dw</code></td>
+<td style="text-align: center;"><code>module:qualname</code> of a custom expert</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--out-norm</code></td>
+<td style="text-align: center;">off</td>
+<td style="text-align: center;"><code>BatchNorm + SiLU</code> after the weighted sum</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>--dense-training</code></td>
+<td style="text-align: center;">off</td>
+<td style="text-align: center;">run every expert while training</td>
+</tr>
+</tbody>
+</table>
+<p>Only settings given explicitly are written into the config. <code>dynamic_threshold</code> and <code>sparse_inference</code> have no option; pass them through <code>equip</code> or the config. <code>esmoe info</code> prints the esmoe, ultralytics and torch versions.</p>
 
 
 
@@ -1312,12 +1521,10 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../../javascripts/data.js"></script>
       
@@ -1325,11 +1532,9 @@ esmoe.odd_kernels(num_experts, max_kernel_size=15) -&gt; list[int]
       
         <script src="../../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../../javascripts/diagrams.js"></script>
+      
+        <script src="../../javascripts/loader.js"></script>
       
     
   </body>

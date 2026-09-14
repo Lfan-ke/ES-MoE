@@ -719,7 +719,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    Overview
   
 
     
@@ -917,6 +917,17 @@
     <span class="md-ellipsis">
       
         Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
       
     </span>
   </a>
@@ -1169,6 +1180,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#repository" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1386,6 +1408,12 @@
 <ul>
 <li>Both rounds of the same-configuration comparison with YOLO-Master are in: round seven at each framework's default precision, round eight with all four arms in FP32, and the noise floor measured by repeating FP32 runs on the same cards. Verdicts are on the <a href="../JUDGMENT/">judgment lines</a>.</li>
 </ul>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Experiments and design pages.</strong> The site gains an Experiments page (dataset, training protocol, pipeline, the eight rounds, the same-configuration comparison, repeated runs, routing and balancing) and an ES-MoE and YOLO page (the block's structure, training against inference, and item-by-item comparisons with YOLO-Master and its paper), with interactive figures throughout. The former limitations page is folded into the two, and its address redirects to the design page.</li>
+<li><strong>Figure data comes from scripts.</strong> <code>scripts/dataset.py</code> counts the dataset archive into <code>results/dataset.json</code>, and <code>scripts/charts.py</code> also writes the data every figure draws: the four same-configuration arms and their intervals, repeated runs, area buckets, selection, routing statistics, balancing pressure and training cost.</li>
+<li><strong>Artifacts rerun on 1.0.0.</strong> <code>results/verify.json</code> was rerun on 1.0.0 with all ten checks passing, and the quick-start notebook's outputs come from a Linux run of the published 1.0.0.</li>
+</ul>
 <h2 id="repository">Repository<a class="headerlink" href="#repository" title="Permanent link">&para;</a></h2>
 <ul>
 <li>The root holds only the package and what GitHub needs: <code>uv.lock</code> is no longer tracked and CI tests what resolves on the day; the docs config lives in <code>.github/docs/</code>, the contributing guide and code of conduct in <code>.github/</code>, and environment snapshots in <code>results/env/</code>.</li>
@@ -1435,7 +1463,7 @@
 </ul>
 <h2 id="earlier-014">Earlier: 0.1.4<a class="headerlink" href="#earlier-014" title="Permanent link">&para;</a></h2>
 <h3 id="feedback-and-iteration">Feedback and iteration<a class="headerlink" href="#feedback-and-iteration" title="Permanent link">&para;</a></h3>
-<p>Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (<code>scripts/buckets.py</code>, source credited in the docs); <code>--patience</code> and <code>IMGSZ</code> exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests answer the ask to check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the <code>OptimizedMOE</code> tracing guard fix was merged into YOLO-Master (#241).</p>
+<p>Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (<code>scripts/buckets.py</code>, source credited in the docs); <code>--patience</code> and <code>IMGSZ</code> exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the <code>OptimizedMOE</code> tracing guard fix was merged into YOLO-Master (#241).</p>
 <h3 id="fixed_3">Fixed<a class="headerlink" href="#fixed_3" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>scripts/report.py</code> now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.</li>
@@ -1536,12 +1564,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../../javascripts/data.js"></script>
       
@@ -1549,11 +1575,9 @@
       
         <script src="../../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../../javascripts/diagrams.js"></script>
+      
+        <script src="../../javascripts/loader.js"></script>
       
     
   </body>

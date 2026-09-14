@@ -664,10 +664,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        An ordinary YOLO and one with an ES-MoE block
+        Structure
       
     </span>
   </a>
@@ -828,7 +828,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    Overview
   
 
     
@@ -987,10 +987,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        An ordinary YOLO and one with an ES-MoE block
+        Structure
       
     </span>
   </a>
@@ -1062,22 +1062,27 @@
 
 
 <h1 id="es-moe-and-yolo">ES-MoE and YOLO<a class="headerlink" href="#es-moe-and-yolo" title="Permanent link">&para;</a></h1>
-<p>Three things on this page: what an ES-MoE block adds to an ordinary YOLO, how the block computes in training and in inference, and how this package compares, item by item, with YOLO-Master's <code>ES_MOE</code> and with the claims of the paper.</p>
-<h2 id="an-ordinary-yolo-and-one-with-an-es-moe-block">An ordinary YOLO and one with an ES-MoE block<a class="headerlink" href="#an-ordinary-yolo-and-one-with-an-es-moe-block" title="Permanent link">&para;</a></h2>
+<p>Three things on this page: what an ES-MoE block adds to an ordinary YOLO, how the block computes in training and in inference, and how this package compares, item by item, with YOLO-Master's implementation and with the paper. Upstream code is YOLO-Master's fork at <code>acce839c</code>; the paper is <a href="https://arxiv.org/abs/2512.23273">arXiv 2512.23273</a>.</p>
+<h2 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h2>
 <p>Every layer of an ordinary YOLO has a fixed structure and fixed weights once trained, and every image goes through the same computation. An ES-MoE block puts several expert branches side by side at one position, and a small router picks k of them for each image; which ones it picks changes with the input.</p>
+<figure class="es-fig es-fig--diagram">
+<figcaption><span>The block at the end of the backbone</span><em>default wiring and rewire differ only in the tensor the P5 lateral reads</em></figcaption>
+
 <pre class="mermaid-chart"><code>flowchart LR
-    subgraph Y["ordinary YOLO"]
-        direction LR
-        y1["backbone"] --&gt; y2["SPPF / last stage"] --&gt; y3["neck"] --&gt; y4["head"]
-    end
-    subgraph E["with an ES-MoE block"]
-        direction LR
-        e1["backbone"] --&gt; e2["SPPF / last stage"] --&gt; e5["ES-MoE block&lt;br/&gt;2 of 4 experts"] --&gt; e3["neck"] --&gt; e4["head"]
-    end</code></pre>
+    B["backbone"] --&gt; S["SPPF"]
+    S --&gt; E["ES-MoE block&lt;br/&gt;2 of 4 experts"]
+    E --&gt; N1["neck · top-down"]
+    S -. "default" .-&gt; N2["neck · P5 lateral"]
+    E -. "rewire=True" .-&gt; N2
+    N1 --&gt; H["head"]
+    N2 --&gt; H</code></pre>
+
+</figure>
+
 <table>
 <thead>
 <tr>
-<th style="text-align: center;"></th>
+<th style="text-align: center;">item</th>
 <th style="text-align: center;">ordinary YOLO</th>
 <th style="text-align: center;">with an ES-MoE block</th>
 </tr>
@@ -1085,23 +1090,23 @@
 <tbody>
 <tr>
 <td style="text-align: center;">computation per image</td>
-<td style="text-align: center;">fixed, the same for every image</td>
-<td style="text-align: center;">the router picks k experts per image, so it follows the input</td>
+<td style="text-align: center;">fixed</td>
+<td style="text-align: center;">the router picks k experts per image</td>
 </tr>
 <tr>
 <td style="text-align: center;">kernels</td>
 <td style="text-align: center;">fixed per layer</td>
-<td style="text-align: center;">the side-by-side experts use different kernels (3, 5, 7, 9), hence different receptive fields</td>
+<td style="text-align: center;">side-by-side experts with different kernels (3, 5, 7, 9)</td>
 </tr>
 <tr>
 <td style="text-align: center;">training loss</td>
 <td style="text-align: center;">box, cls, dfl</td>
-<td style="text-align: center;">plus a balance term (the auxiliary loss) that reaches backward()</td>
+<td style="text-align: center;">plus a balance term (the auxiliary loss)</td>
 </tr>
 <tr>
 <td style="text-align: center;">parameters (YOLOv8n, 80 classes)</td>
 <td style="text-align: center;">3,157,200</td>
-<td style="text-align: center;">3,471,732, with one block at the end of the backbone</td>
+<td style="text-align: center;">3,471,732</td>
 </tr>
 <tr>
 <td style="text-align: center;">placement</td>
@@ -1111,48 +1116,48 @@
 </tbody>
 </table>
 <h2 id="inside-the-block">Inside the block<a class="headerlink" href="#inside-the-block" title="Permanent link">&para;</a></h2>
+<figure class="es-fig es-fig--diagram">
+<figcaption><span>Forward pass of one block</span><em>router and experts run side by side; the output is the gated sum of the chosen experts</em></figcaption>
+
 <pre class="mermaid-chart"><code>flowchart TB
-    X["input x&lt;br/&gt;B × C × H × W"] --&gt; G["global average pool"]
-    G --&gt; MLP["two-layer bottleneck&lt;br/&gt;C → C/8 → E"]
-    MLP --&gt; SM["softmax (logits clamped to ±30, in FP32)"]
+    X["input x · B×C×H×W"] --&gt; G["global average pool"]
+    G --&gt; MLP["two-layer bottleneck · C → max(C/8, 8) → E"]
+    MLP --&gt; SM["softmax · logits clamped to ±30, in FP32"]
     SM --&gt; TK["keep the top k, renormalise into gate g"]
-    X --&gt; E1["expert 1&lt;br/&gt;3×3 depthwise → 1×1 → BN → SiLU"]
-    X --&gt; E2["expert 2&lt;br/&gt;5×5 depthwise → 1×1 → BN → SiLU"]
-    X --&gt; E3["expert 3&lt;br/&gt;7×7 depthwise → 1×1 → BN → SiLU"]
-    X --&gt; E4["expert 4&lt;br/&gt;9×9 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; EX["expert i · k×k depthwise → 1×1 → BN → SiLU"]
     TK --&gt; MIX["y = Σ gᵢ · expertᵢ(x)"]
-    E1 --&gt; MIX
-    E2 --&gt; MIX
-    E3 --&gt; MIX
-    E4 --&gt; MIX
+    EX --&gt; MIX
     MIX --&gt; N["optional BN + SiLU (out_norm)"]
-    SM --&gt; AUX["balance term × weight&lt;br/&gt;added to the loss"]
+    SM --&gt; AUX["balance term × weight → loss"]
     TK --&gt; AUX</code></pre>
-<p>The router picks per image, not per pixel. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The output is the gated sum of the chosen experts, with the gate renormalised over the k chosen so it sums to one.</p>
+
+</figure>
+
+<p>The router picks per image, not per pixel or region. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The gate is non-zero only on the k chosen experts and renormalised to sum to one.</p>
 <h2 id="training-and-inference">Training and inference<a class="headerlink" href="#training-and-inference" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th style="text-align: center;"></th>
 <th style="text-align: center;">training</th>
-<th style="text-align: center;">inference</th>
+<th style="text-align: center;">validation and inference</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: center;">which experts compute</td>
-<td style="text-align: center;">only the chosen ones by default; with <code>dense_training=True</code> all of them, the unchosen multiplied by zero, as upstream does</td>
+<td style="text-align: center;">only those chosen in the batch by default; with <code>dense_training=True</code> all of them, the unchosen multiplied by zero, as upstream does</td>
 <td style="text-align: center;">only the chosen ones</td>
 </tr>
 <tr>
 <td style="text-align: center;">pruning</td>
 <td style="text-align: center;">none</td>
-<td style="text-align: center;">with <code>dynamic_threshold</code> above zero, an expert whose renormalised share falls below it is skipped too (the leader always stays)</td>
+<td style="text-align: center;">when <code>dynamic_threshold</code> is above zero, <code>sparse_inference</code> is on and k is below the expert count, an expert whose renormalised share falls below the threshold is skipped too; the leader always stays</td>
 </tr>
 <tr>
 <td style="text-align: center;">balance term</td>
-<td style="text-align: center;">computed and added to the loss</td>
-<td style="text-align: center;">not computed</td>
+<td style="text-align: center;">added to the loss and optimised</td>
+<td style="text-align: center;">still computed and counted in the validation loss, never optimised</td>
 </tr>
 <tr>
 <td style="text-align: center;">export</td>
@@ -1161,12 +1166,12 @@
 </tr>
 </tbody>
 </table>
-<p>In backpropagation the gradient returns through y = Σ gᵢ · expertᵢ(x) along two paths:</p>
+<p>Backpropagation returns through y = Σ gᵢ · expertᵢ(x) along two paths:</p>
 <ul>
-<li><strong>To the experts</strong>: scaled by the gate gᵢ. An expert not chosen for an image has a zero gate there, and a zero gradient.</li>
-<li><strong>To the router</strong>: the detection loss shifts weight among the chosen experts through ∂L/∂gᵢ. Choosing is a discrete step with no gradient, and the renormalised gate depends only on the chosen logits, so an expert outside the top k gets nothing from the detection loss.</li>
+<li><strong>To the experts</strong>: scaled by the gate gᵢ. An expert not chosen for an image has a zero gate there, and gets no gradient along this path.</li>
+<li><strong>To the router</strong>: the detection loss shifts the share among the chosen experts through ∂L/∂gᵢ. Choosing is a discrete step with no gradient, and the renormalised gate depends only on the chosen logits, so an expert outside the top k gets nothing from the detection loss.</li>
 </ul>
-<p>That is what the balance term is for: it has to read the full softmax probabilities to give the unchosen experts a gradient. This package's default Switch form reads the probabilities; upstream's term and the paper's eq. 13 read the renormalised gate and give experts outside the top k exactly zero. Without a balance term, or with one that reads the gate, experts die; see <a href="../experiments/#routing-and-balancing">Experiments</a>.</p>
+<p>The balance term therefore has to read the full softmax probabilities for unchosen experts to receive a gradient. This package's default Switch form reads the probabilities; upstream's term and the paper's eq. 13 read the renormalised gate and give experts outside the top k zero gradient. All 6 checkpoints without a balance term have dead experts, and 5 of the 6 with a gate-reading term do; see <a href="../experiments/#routing-and-balancing">Experiments</a>.</p>
 <h2 id="against-yolo-master">Against YOLO-Master<a class="headerlink" href="#against-yolo-master" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1179,13 +1184,13 @@
 <tbody>
 <tr>
 <td style="text-align: center;">installation</td>
-<td style="text-align: center;">use the ultralytics fork YOLO-Master maintains</td>
+<td style="text-align: center;">the ultralytics fork YOLO-Master maintains</td>
 <td style="text-align: center;"><code>pip install esmoe</code>, on official ultralytics</td>
 </tr>
 <tr>
 <td style="text-align: center;">backbones</td>
 <td style="text-align: center;">the fork's own configs such as <code>yolo-master-n</code></td>
-<td style="text-align: center;">official YOLOv5n, v8n, v9t, v10n, 11n, 12n and 26n, plus <code>yolo-master-n</code> on the fork</td>
+<td style="text-align: center;">official YOLOv5n to YOLO26n, seven generations, plus <code>yolo-master-n</code> on the fork</td>
 </tr>
 <tr>
 <td style="text-align: center;">adding it</td>
@@ -1194,27 +1199,27 @@
 </tr>
 <tr>
 <td style="text-align: center;">placement</td>
-<td style="text-align: center;">one block after every backbone stage, four in all</td>
-<td style="text-align: center;">one at the end of the backbone by default; <code>at="backbone_stages"</code> reproduces the four; layer indices work too</td>
+<td style="text-align: center;"><code>yolo-master-n</code> puts one block after the C3k2 at P2 and P3 and after the A2C2f at P4 and P5</td>
+<td style="text-align: center;">one at the end of the backbone by default; <code>at="backbone_stages"</code> puts one after every downsampling stage, which on <code>yolo-master-n</code> matches upstream's positions</td>
 </tr>
 <tr>
 <td style="text-align: center;">experts</td>
-<td style="text-align: center;">depthwise-separable convolutions, kernels 3, 5, 7, 9</td>
+<td style="text-align: center;">depthwise-separable convolutions; kernels 3, 5, 7 for up to 3 experts, then up by 2 each</td>
 <td style="text-align: center;">the same; <code>expert=</code> takes any callable</td>
 </tr>
 <tr>
 <td style="text-align: center;">router</td>
-<td style="text-align: center;">global pool + two-layer bottleneck (reduction 8), logits clamped to ±30</td>
-<td style="text-align: center;">the same</td>
+<td style="text-align: center;">global pool + two 1×1 convolutions, hidden width <code>max(C/8, 8)</code>, logits clamped to ±30</td>
+<td style="text-align: center;">the same (linear layers, numerically equivalent)</td>
 </tr>
 <tr>
 <td style="text-align: center;">gate</td>
-<td style="text-align: center;">softmax → top-k → renormalise</td>
-<td style="text-align: center;">the same (the paper's eq. 8 and eq. 9 are tested equivalent)</td>
+<td style="text-align: center;">soft top-k in training and export, hard top-k in inference</td>
+<td style="text-align: center;">the same, with tests showing the two equal</td>
 </tr>
 <tr>
 <td style="text-align: center;">output normalisation</td>
-<td style="text-align: center;">BN + SiLU</td>
+<td style="text-align: center;">always BN + SiLU</td>
 <td style="text-align: center;"><code>out_norm=True</code></td>
 </tr>
 <tr>
@@ -1224,13 +1229,33 @@
 </tr>
 <tr>
 <td style="text-align: center;">inference pruning</td>
-<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
-<td style="text-align: center;">the same rule, 0.0 (off) by default, configurable</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code>, the leader kept</td>
+<td style="text-align: center;">the same rule, 0.0 (off) by default</td>
 </tr>
 <tr>
 <td style="text-align: center;">balance term</td>
-<td style="text-align: center;">GShard on the gate; the trainer normalises it by its own running magnitude and caps it at 3.0</td>
-<td style="text-align: center;">four to choose from (Switch, GShard on the gate, GShard on the probabilities, the paper's eq. 13), Switch at weight 0.01 by default; <code>recipe="upstream"</code> reproduces the upstream trainer's normalisation, cap, half learning rate for the router and three frozen-expert epochs</td>
+<td style="text-align: center;">GShard on the gate, coefficient 1.0; the trainer normalises it by a running mean, caps it at 3.0 and adds it to each of box, cls and dfl; the running mean is saved in checkpoints</td>
+<td style="text-align: center;">four to choose from, Switch at weight 0.01 by default; <code>recipe="upstream"</code> reproduces the normalisation, cap, addition to all three terms, half learning rate for the router and three frozen-expert epochs; the running mean is not saved, so a resumed run starts it again</td>
+</tr>
+<tr>
+<td style="text-align: center;">multi-GPU</td>
+<td style="text-align: center;">expert usage is all-reduced across cards before squaring; <code>find_unused_parameters=True</code></td>
+<td style="text-align: center;">the balance term is computed per card; under DDP and <code>compile=True</code> an unrouted expert stays in the graph at zero weight</td>
+</tr>
+<tr>
+<td style="text-align: center;">precision fallback</td>
+<td style="text-align: center;">on a non-finite loss or gradient, mixed precision is turned off and the epoch replayed; on NaN a checkpoint is rolled back</td>
+<td style="text-align: center;">the official trainer's behaviour, no fallback</td>
+</tr>
+<tr>
+<td style="text-align: center;">other machinery</td>
+<td style="text-align: center;">expert pruning before export; balance coefficient scheduled by Gini coefficient and mAP saturation; <code>set_top_k</code>, <code>enable_sparse_inference</code></td>
+<td style="text-align: center;">none of these; <code>configure</code> changes a block's settings where no trainer is involved</td>
+</tr>
+<tr>
+<td style="text-align: center;">where settings live</td>
+<td style="text-align: center;">constructor arguments</td>
+<td style="text-align: center;">the model config line, so they survive the trainer's rebuild; <code>scripts/blockspec.py</code> reads them back from a checkpoint</td>
 </tr>
 <tr>
 <td style="text-align: center;">custom balance terms</td>
@@ -1238,70 +1263,67 @@
 <td style="text-align: center;">any <code>(probs, gate) -&gt; scalar</code> function, stored in the config by qualified name</td>
 </tr>
 <tr>
-<td style="text-align: center;">where settings live</td>
-<td style="text-align: center;">constructor arguments</td>
-<td style="text-align: center;">in the model config line, so they survive the trainer's rebuild; <code>scripts/blockspec.py</code> reads them back from a checkpoint</td>
-</tr>
-<tr>
-<td style="text-align: center;">export</td>
-<td style="text-align: center;">every expert enters a traced ONNX / TorchScript graph</td>
-<td style="text-align: center;">the same, and the exported model is verified to route per input</td>
-</tr>
-<tr>
-<td style="text-align: center;">multi-GPU</td>
-<td style="text-align: center;">DDP</td>
-<td style="text-align: center;">DDP and <code>compile=True</code> settings verified; an unrouted expert stays in the graph at zero weight</td>
-</tr>
-<tr>
 <td style="text-align: center;">verification</td>
 <td style="text-align: center;">—</td>
-<td style="text-align: center;">319 tests, including parity tests that rewrite upstream's and the paper's operators from source and compare bit for bit; ten real-training checks in <code>scripts/verify.py</code></td>
+<td style="text-align: center;">tests rewrite upstream's and the paper's operators from source for a numerical comparison; ten real-training checks in <code>scripts/verify.py</code></td>
 </tr>
 <tr>
-<td style="text-align: center;">accuracy against each other</td>
-<td style="text-align: center;">the block adds +0.0104 on the fork (FP32, 3/3)</td>
+<td style="text-align: center;">accuracy</td>
+<td style="text-align: center;">the block adds mAP50 +0.0104 on the fork (FP32, 3/3)</td>
 <td style="text-align: center;">the block adds +0.0095 on official ultralytics (FP32, 3/3); the gap between the two, +0.0009, is equivalent</td>
 </tr>
 </tbody>
 </table>
-<p>YOLO-Master's released model, rebuilt with this package, matches the fork bit for bit on all four COCO val2017 metrics.</p>
+<p>YOLO-Master's released <code>yolo-master-n</code> weights use 3 experts per block with all 3 active. Loaded into this package's blocks, they give the four COCO val2017 metrics the fork gives, equal to five decimals, with 2,694,364 parameters on both sides.</p>
 <h2 id="against-the-paper">Against the paper<a class="headerlink" href="#against-the-paper" title="Permanent link">&para;</a></h2>
-<p>The claims in the YOLO-Master paper (<a href="https://arxiv.org/abs/2512.23273">arXiv 2512.23273</a>) that the experiments here can test, with what was observed. The conditions are on <a href="../experiments/#scope">Experiments</a>: VisDrone, nano-scale backbones, 120 epochs from scratch.</p>
+<p>The claims in the paper that the experiments here can test, next to what was measured. The conditions are on <a href="../experiments/#scope">Experiments</a>: VisDrone, nano-scale backbones, 120 epochs from scratch.</p>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">the paper's claim</th>
-<th style="text-align: center;">observed here</th>
+<th style="text-align: center;">paper</th>
+<th style="text-align: center;">measured</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: center;">soft top-k (eq. 8) in training, hard top-k (eq. 9) in inference</td>
-<td style="text-align: center;">mathematically equivalent, verified by tests: a softmax over the top-k subset equals a full softmax masked and renormalised</td>
+<td style="text-align: center;">the two agree up to ε, verified by tests</td>
 </tr>
 <tr>
 <td style="text-align: center;">the balance term (eq. 12, 13) prevents expert collapse</td>
-<td style="text-align: center;">eq. 13 and upstream's gate-reading GShard differ by an affine map; a term that reads the gate has zero gradient outside the top k, and 5 of 6 such checkpoints have dead experts; the default Switch form has 1 in 69</td>
+<td style="text-align: center;">eq. 13 and upstream's gate-reading GShard differ by an affine map; a term that reads the gate gives experts outside the top k zero gradient, and 5 of 6 such checkpoints have dead experts; Switch at weight 0.01 has none in 66</td>
 </tr>
 <tr>
 <td style="text-align: center;">the router makes experts specialise by scale</td>
-<td style="text-align: center;">across 108 block analyses, the correlation of routing probability with object size runs from −0.49 to +0.59 and flips sign across seeds; the leading expert's kernel takes all four values</td>
+<td style="text-align: center;">528 correlations over 132 block analyses run from −0.49 to +0.59, 283 positive and 245 negative; 76 of 96 multi-seed groups change sign across seeds; the leading expert's kernel takes all four values</td>
 </tr>
 <tr>
-<td style="text-align: center;">simple regions activate fewer experts</td>
-<td style="text-align: center;">in training exactly k are active; only inference-time pruning with <code>dynamic_threshold</code> changes with the input</td>
+<td style="text-align: center;">simple regions activate fewer experts (§2.3)</td>
+<td style="text-align: center;">the router pools the whole image, so regions of one image cannot pick different experts; eq. 7 and 8 fix k, so training always activates exactly k; only inference-time pruning with <code>dynamic_threshold</code> follows the input</td>
 </tr>
 <tr>
-<td style="text-align: center;">the block goes into both backbone and neck (§3.1)</td>
-<td style="text-align: center;">the paper's Table 5 makes backbone-only the default (62.1 against 54.9 for both), which is this package's default too</td>
+<td style="text-align: center;">the block goes into backbone and neck (§3.1)</td>
+<td style="text-align: center;">the paper's Table 5 makes backbone-only the default (62.1, both places 54.9, no dataset named; 62.1 equals the VOC column of Table 1). That layout adds only 0.03M parameters, not the four blocks of upstream's config (+523,000); this package's default is also backbone-only, with one block</td>
 </tr>
 <tr>
-<td style="text-align: center;">one block per backbone stage, four in all</td>
-<td style="text-align: center;">under this package's default recipe four blocks trail one (v10n −0.0071, v5n −0.0049, both 0/3); with upstream's full recipe the four blocks are effective in both frameworks</td>
+<td style="text-align: center;">expert count and k (Tables 6, 7)</td>
+<td style="text-align: center;">the paper picks 4 experts with top-2; this package's selection reached the same configuration under a different budget</td>
 </tr>
 <tr>
-<td style="text-align: center;">output normalisation (the Norm in eq. 2)</td>
+<td style="text-align: center;">loss setup (Table 8, Config 5)</td>
+<td style="text-align: center;">the paper drops DFL and sets the balance coefficient to 1.5; upstream keeps DFL with coefficient 1.0 and normalisation; this package keeps DFL with weight 0.01 by default</td>
+</tr>
+<tr>
+<td style="text-align: center;">an objective that encourages complementary experts (abstract)</td>
+<td style="text-align: center;">the method section defines only eq. 13; upstream's <code>ES_MOE</code> does not use <code>MoELoss</code>, whose diversity term defaults to 0; neither side implements it</td>
+</tr>
+<tr>
+<td style="text-align: center;">output normalisation (Norm in eq. 2)</td>
 <td style="text-align: center;">+0.0038 on v5n (3/3); offered as the <code>out_norm</code> switch</td>
+</tr>
+<tr>
+<td style="text-align: center;">training setup (§4.1)</td>
+<td style="text-align: center;">the paper uses a YOLOv12-N baseline at 640 px, 600 epochs, batch 256; this repository trains from scratch on VisDrone for 120 epochs at 800 px, so the numbers are not directly comparable</td>
 </tr>
 </tbody>
 </table>
@@ -1400,12 +1422,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../../javascripts/data.js"></script>
       
@@ -1413,11 +1433,9 @@
       
         <script src="../../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../../javascripts/diagrams.js"></script>
+      
+        <script src="../../javascripts/loader.js"></script>
       
     
   </body>
