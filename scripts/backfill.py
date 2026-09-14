@@ -1,4 +1,4 @@
-"""Fill the appendix-B record fields into runs recorded before `scripts/train.py` wrote them.
+"""Fill the record fields `scripts/train.py` writes now into runs recorded before it wrote them.
 
 Config hash, dataset split sizes, GPU-hours and artifact checksum. Every value is derived from
 what a record already states or from files still on disk; a field that cannot be derived is left

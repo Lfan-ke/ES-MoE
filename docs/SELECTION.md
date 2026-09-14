@@ -98,5 +98,5 @@ The per-arm standard deviations overlap; only the paired per-seed comparison sup
 ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
 mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
 the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
-configuration differ by 0.0045 on average, as large as the effect. See `limitations.md` for what these
+configuration differ by 0.0045 on average, as large as the effect. See [limitations](limitations.md) for what these
 numbers do not say.

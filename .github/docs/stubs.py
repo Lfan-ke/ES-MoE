@@ -12,18 +12,10 @@ import shutil
 import sys
 from pathlib import Path
 
+from urls import ALIAS as STUB
+
 CONFIG = Path(__file__).with_name("mkdocs.yml")
 KEEP = {".git", ".nojekyll", "index.html", "versions.json"}
-
-STUB = """<!doctype html>
-<html><head><meta charset="utf-8">
-<title>ES-MoE</title>
-<link rel="canonical" href="{target}">
-<meta name="robots" content="noindex,follow">
-<meta http-equiv="refresh" content="0; url={target}">
-<script>location.replace("{target}" + location.search + location.hash)</script>
-</head><body><a href="{target}">ES-MoE</a></body></html>
-"""
 
 
 def site_url() -> str:

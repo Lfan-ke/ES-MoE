@@ -26,7 +26,7 @@ import esmoe
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Public baseline locked by the 2026-08-23 increment-acceptance rules: main at 2026-08-21
+# The public YOLO-Master baseline every comparison is held to: main at 2026-08-21
 # 23:59:59 (UTC+8). The v26.08 tag only documents the release the library version comes from.
 YOLO_MASTER_BASE_REF = "acce839c7e895d6b179de7f7093fa879e237cc7b"
 YOLO_MASTER_RELEASE = "YOLO-Master-v26.08 @ 43d40117c30811204fb9347efeabddce15f11a62"

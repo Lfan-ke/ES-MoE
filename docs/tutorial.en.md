@@ -111,7 +111,7 @@ Read the paired table, not the two means. Per-arm standard deviations overlap in
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
 same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
 seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
-reliable per-run improvement. `limitations.md` states the rest.
+reliable per-run improvement. [Limitations](limitations.md) states the rest.
 
 ## Extending
 
@@ -148,7 +148,6 @@ Telling a collapse apart is not the same as pushing against it. The gate holds o
 
 A custom objective goes into the config too: define the function at module level in an importable module and pass it to `equip` or `graft`. The config stores `module:qualname`, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in `__main__` cannot be imported back by name and is refused when grafting. Custom experts work the same way (`expert=MyExpert`). The trade-off and the measurements are on [Limitations](limitations.md) and [Judgment lines](JUDGMENT.md).
 
-
 ### The configuration that matches upstream
 
 Upstream's `ES_MOE` differs from this package's defaults in the first five rows below: four affect training, and pruning affects inference only. **They all go through `equip`**, and a run compared against upstream adds its training recipe, `recipe="upstream"` (see [API](API.md)):
@@ -177,7 +176,6 @@ The block matches upstream's remaining parameters too: `out_channels` (the input
 `out_norm`, `dense_training` and `dynamic_threshold` are off by default so the runs of this package's recipe in `results/` still reproduce; the first two each have an arm on the [judgment lines](JUDGMENT.md) page. On the `esmoe graft` command line: `--at`, `--balance`, `--out-norm`, `--dense-training`; the pruning threshold goes through `equip` or the config.
 
 **These settings have to travel in the config; setting them on the blocks afterwards does not work.** The trainer rebuilds the model from `model.yaml`, and anything set after `YOLO(cfg)` returns disappears with the instance that is discarded -- no error, no trace. `equip` and `graft` write them into the config, so a rebuild keeps them; `ESMoE.configure(...)` is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: `uv run python scripts/blockspec.py`.
-
 
 ## Where the edges are
 

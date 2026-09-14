@@ -27,7 +27,7 @@ def test_forward_and_nonzero_aux_loss():
     y = net(torch.randn(4, 3, 32, 32))
     assert y.shape == (4, 16, 16, 16)
     aux = collect_aux_loss(net)
-    assert aux.item() > 0  # 8.24 gate: non-zero router aux loss
+    assert aux.item() > 0
     (y.mean() + 0.01 * aux).backward()
     router_grad = sum(p.grad.abs().sum().item() for p in net[2].router.parameters() if p.grad is not None)
     assert router_grad > 0
