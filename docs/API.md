@@ -6,7 +6,7 @@
 
     esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -> YOLO
 
-注册、接入、构建、接损失一次完成。`out` 指定落盘的接入后配置；不给则写到临时目录（YOLO 只按路径加载模型）。`weight` 与 `recipe` 转给 `attach_aux_loss`，`graft_kwargs` 原样转给 `graft`。
+注册、嫁接、构建、接损失一次完成。`out` 指定落盘的嫁接后配置；不给则写到临时目录（YOLO 只按路径加载模型）。`weight` 与 `recipe` 转给 `attach_aux_loss`，`graft_kwargs` 原样转给 `graft`。
 
 ## inject_esmoe
 
@@ -31,10 +31,10 @@
 
 把路由的负载均衡损失接进被优化的训练损失，训练日志多出 `esmoe_aux` 一列。同时把 `model.train()` 的训练器指到 `esmoe.trainer`，DDP worker 因此能自行注册块并恢复权重与训练方式。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 `compile=True` 时关掉 `find_unused_parameters`，多卡照样能训。
 
-`recipe` 决定块和辅助项怎么训：
+`recipe` 决定块和辅助损失怎么训：
 
-- `"esmoe"`（默认；同配置对照之外的运行都用它）：辅助项乘 `weight` 后按每张图计入，与任务损失的计法一致。
-- `"upstream"`：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 `weight`，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 `model.train()` 训练的 YOLO 模型生效。常数与出处见 `esmoe.upstream`。
+- `"esmoe"`（默认；同配置对照之外的运行都用它）：辅助损失乘 `weight` 后按每张图计入，与任务损失的计法一致。
+- `"upstream"`：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助损失除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 `weight`，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 `model.train()` 训练的 YOLO 模型生效。常数与出处见 `esmoe.upstream`。
 
 ## collect_aux_loss
 
@@ -67,12 +67,12 @@
 
 | 设置 | 本包默认 | 上游 | 作用 |
 |:--:|:--:|:--:|:--:|
-| `balance` | `switch_balance` | `gshard_balance` | 均衡目标，`(probs, gate) -> scalar`，或 `esmoe.BALANCES` 里的名字、`模块:限定名` |
+| `balance` | `switch_balance` | `gshard_balance` | 平衡目标，`(probs, gate) -> scalar`，或 `esmoe.BALANCES` 里的名字、`模块:限定名` |
 | `out_norm` | `False` | 恒开 | 加权求和后的 `BatchNorm + SiLU`（论文式 2 的 `Norm`） |
 | `dense_training` | `False` | 恒开 | 训练期跑满专家，未选权重为 0 但归一化统计量继续更新 |
 | `sparse_inference` | `True` | 同 | 推理期跳过未选专家 |
 | `dynamic_threshold` | `0.0` | `0.4` | 推理期剪掉份额低于阈值的专家（份额指 top-k 重归一之后的权重），首位无条件保留，余下重归一 |
 
-后两项只影响推理，前三项影响训练。`out_norm`、`dense_training`、`dynamic_threshold` 的默认值是为了让 `results/` 里既有的运行原样复现，不是对上游的取舍判断。`balance` 的默认值由数据定：读门控的目标（上游的 `gshard`、论文的 `master`）对没进 top-k 的专家梯度恒为零，实测 6 个 checkpoint 里 5 个出现死专家，同配置对照的 6 个 B checkpoint 全部有；Switch 读完整 softmax，66 个 checkpoint 上一个没有（[判读线](JUDGMENT.md)第六至八轮）。
+后两项只影响推理，前三项影响训练。`out_norm`、`dense_training`、`dynamic_threshold` 的默认值是为了让 `results/` 里既有的运行原样复现，不是对上游的取舍判断。`balance` 的默认值由数据定：读门控的目标（上游的 `gshard`、论文的 `master`）对没进 top-k 的专家梯度恒为零，实测 6 个检查点里 5 个出现死专家，同配置对照的 6 个 B 检查点全部有；Switch 读完整 softmax，66 个检查点上一个没有（[判读线](JUDGMENT.md)第六至八轮）。
 
-`block.spec()` 返回该块当下带着的五个设置，用了自定义专家时再加一项 `expert`；`block.configure(**settings)` 在**不经训练器**的场合（推理、导出、单测）改它们。`esmoe.blocks(model)` 按模块顺序遍历模型中的每一个块。`scripts/blockspec.py` 从任一 checkpoint 读回当时真正生效的设置。
+`block.spec()` 返回该块当下带着的五个设置，用了自定义专家时再加一项 `expert`；`block.configure(**settings)` 在**不经训练器**的场合（推理、导出、单测）改它们。`esmoe.blocks(model)` 按模块顺序遍历模型中的每一个块。`scripts/blockspec.py` 从任一检查点读回当时真正生效的设置。

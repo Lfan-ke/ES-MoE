@@ -43,7 +43,7 @@ The selection above was made on a 25% subset. Rerunning the chosen arm against i
 
 Per-seed mAP50 deltas are +0.0001, +0.0032, +0.0029. The mean gain is the same as on the subset,
 and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so quadrupling the data
-did not wash the effect out. One seed is effectively a tie, which is the honest bound on how large
+did not wash the effect out. One seed is effectively a tie, which bounds how large
 the effect is: small, consistent in sign, not reliable per single run.
 
 ## What a longer schedule does to the gap

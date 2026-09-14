@@ -28,7 +28,7 @@ flowchart LR
     A -.-> L["训练总损失"]
 ```
 
-辅助项是 Switch-Transformer 的负载均衡损失：
+辅助损失是 Switch-Transformer 的负载均衡损失：
 
 $$
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
@@ -38,7 +38,7 @@ $$
 
 ## 三个调用
 
-`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把路由损失接进训练。`equip` 把四件事一次做完：注册、接入、构建模型、接上辅助损失。
+`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把路由损失接进训练。`equip` 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。
 
     import esmoe
 
@@ -56,11 +56,11 @@ $$
 
     esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
 
-手写配置时，接入后的层就是一行：
+手写配置时，嫁接后的层就是一行：
 
     [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 
-## 接入时必须重编号
+## 嫁接时必须重编号
 
 YOLO 配置用**绝对层号**引用前面的层：
 
@@ -89,7 +89,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 `collect_aux_loss` 只汇总最近一次前向发布的值，所以连着调用两次不会把陈旧的计算图重复计入。
 
-## 一次站得住的对照实验
+## 对照实验怎么做
 
     uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
     EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
@@ -101,7 +101,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 ## 扩展
 
-专家与均衡目标都是普通的 callable：
+专家与平衡目标都是普通的 callable：
 
     class ThinExpert(nn.Sequential):
         def __init__(self, c1, c2, k):
@@ -114,7 +114,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 `esmoe.blocks(model)` 遍历模型中的每一个块，汇总器与测试都靠它定位。
 
-### 四个内置的均衡目标
+### 四个内置的平衡目标
 
 **默认是 Switch**（`switch_balance`），与 0.1.4 一致，也是 `results/` 里默认臂用的目标：
 
@@ -127,7 +127,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 
 差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（`switch`、`gshard_probs`）取到同一个值，分辨不出；读门控的两个（`gshard`、`master`）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（`L_论文 = (L_上游 − 1)/E²`）。
 
-分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个 checkpoint 里 5 个出现死专家，同配置对照里按上游配方训的 6 个 B checkpoint 全部有，Switch 在 66 个里一个没有，默认值因此是 Switch（[判读线](JUDGMENT.md)第六至八轮）。换成上游的目标：
+分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个检查点里 5 个出现死专家，同配置对照里按上游配方训的 6 个 B 检查点全部有，Switch 在 66 个里一个没有，默认值因此是 Switch（[判读线](JUDGMENT.md)第六至八轮）。换成上游的目标：
 
     esmoe.equip("yolo11n.yaml", balance="gshard")
 
@@ -157,11 +157,11 @@ YOLO 配置用**绝对层号**引用前面的层：
 | 推理期剪枝 | `dynamic_threshold=0.4`，剪掉低置信专家、首位无条件保留、余下重归一 | `0.0`（不剪） | `dynamic_threshold=0.4` |
 | 推理期稀疏 | `use_sparse_inference=True` | 同 | `sparse_inference=False` 则跑满 |
 
-块本身还对齐了上游的其余参数：`out_channels`（默认与输入同宽）、`top_k=None`（等于用全部专家）、偶数核逐一降为奇数再按 `max_kernel_size` 截断（剪枝过的 checkpoint 才装得回去）、以及 `num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 的取值校验——构造时就报错，不留到训练中途。
+块本身还对齐了上游的其余参数：`out_channels`（默认与输入同宽）、`top_k=None`（等于用全部专家）、偶数核逐一降为奇数再按 `max_kernel_size` 截断（剪枝过的检查点才装得回去）、以及 `num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 的取值校验——构造时就报错，不留到训练中途。
 
 `out_norm`、`dense_training`、`dynamic_threshold` 默认关着，是为了让 `results/` 里按本包配方跑的运行仍能原样复现；前两项各有对照臂，见[判读线](JUDGMENT.md)。命令行 `esmoe graft` 对应 `--at`、`--balance`、`--out-norm`、`--dense-training`，剪枝阈值只能从 `equip` 或配置传。
 
-**这些设置必须走配置文件，不能事后设在块上。** 训练器照 `model.yaml` 重建模型，`YOLO(cfg)` 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。`equip` 与 `graft` 把它们写进配置，因此重建多少次都在；`ESMoE.configure(...)` 只适合不经训练器的场合（推理、导出、单元测试）。从任一 checkpoint 读回当时真正生效的设置：`uv run python scripts/blockspec.py`。
+**这些设置必须走配置文件，不能事后设在块上。** 训练器照 `model.yaml` 重建模型，`YOLO(cfg)` 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。`equip` 与 `graft` 把它们写进配置，因此重建多少次都在；`ESMoE.configure(...)` 只适合不经训练器的场合（推理、导出、单元测试）。从任一检查点读回当时真正生效的设置：`uv run python scripts/blockspec.py`。
 
 
 ## 使用中的边界

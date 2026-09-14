@@ -135,7 +135,7 @@ costs +10.4% parameters and about 9% more wall-clock per epoch.
 <p align="center"><img alt="Paired mAP50 delta by backbone generation" src="docs/assets/effect.svg" width="720"></p>
 
 Each dot is one seed, each bar the mean of three. The seeds routinely straddle zero even where the mean does
-not, which is the honest reading of a three-seed protocol: an
+not, which is as far as a three-seed protocol can read: an
 [interactive version](https://lfan-ke.github.io/ES-MoE/en/charts/) carries the per-seed values and the second
 metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is

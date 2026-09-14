@@ -24,14 +24,14 @@
 
     import esmoe
 
-    model = esmoe.equip("yolo11n.yaml", weight=0.01)   # 注册 + 接入 + 构建 + 接损失
+    model = esmoe.equip("yolo11n.yaml", weight=0.01)   # 注册 + 嫁接 + 构建 + 接损失
     model.train(data="coco8.yaml", epochs=10)
 
-分步接入、命令行与手写配置见[教程](tutorial.md)。
+分步调用、命令行与手写配置见[教程](tutorial.md)。
 
 ## 兼容性
 
-| 主干 | 构建与前向 | 配置接入 | 训练中的辅助损失 |
+| 主干 | 构建与前向 | 嫁接进配置 | 训练中的辅助损失 |
 |:--:|:--:|:--:|:--:|
 | YOLOv8 | 是 | 是 | 是 |
 | YOLO11 | 是 | 是 | 是 |
@@ -39,7 +39,7 @@
 | YOLO26 | 是 | 是 | 是 |
 | YOLO-Master（fork） | 是 | 是 | 是 |
 
-由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。yolov5n / yolov9t / yolov10n 的接入与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：`scripts/fork_smoke.py` 接入其 `yolo-master-n.yaml`、真实训练一轮且 `esmoe_aux` 非零，其自有 `ES_MOE` 配置与本块注册共存。
+由 `tests/test_ultralytics.py` 在 ultralytics 8.4.101 与 8.4.132 上验证，两者的 loss items 形态不同，均已处理；另有每代主干各一次真实 1-epoch 训练，日志中 `train/esmoe_aux` 非零。yolov5n / yolov9t / yolov10n 的嫁接与前向也在 CI 覆盖。YOLO-Master 一行跑在该 fork 自带的 ultralytics 上：`scripts/fork_smoke.py` 嫁接进其 `yolo-master-n.yaml`、真实训练一轮且 `esmoe_aux` 非零，其自有 `ES_MOE` 配置与本块注册共存。
 
 ## 出厂配置
 
@@ -47,6 +47,6 @@
 
 ## 证据与边界
 
-- [教程](tutorial.md)：从安装到一次站得住的对照实验
+- [教程](tutorial.md)：从安装到对照实验
 - [选型](SELECTION.md)：为什么是 4 专家 top-2 与 0.01 的权重
 - [已知局限](limitations.md)：引用任何数字之前先读
