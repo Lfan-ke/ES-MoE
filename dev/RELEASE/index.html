@@ -1058,6 +1058,7 @@
 <li><strong>失败的运行在队列日志里记为完成。</strong> <code>scripts/train.py</code> 写完失败记录后以非零码退出，<code>scripts/queue.sh</code> 据此记为 FAILED。</li>
 <li><strong>同一配置再跑一遍，会顶替原来的实验。</strong> <code>scripts/report.py</code> 与 <code>scripts/same_config.py</code> 在同一配置、同一 seed 的记录里保留最早开跑的那条作为实验，后跑的只进噪声底；噪声底按硬件栈与预算分组，预算含精度，FP32 与混合精度分开计算。</li>
 <li><strong>文档站的几处入口。</strong> 中文效果图页显示英文图；实验结果页的目录被嵌入的表格打断；<code>latest</code> 首页切换语言跳到旧版本；404 页取不到搜索与版本列表；各版本 sitemap 的语言链接少一个斜杠。</li>
+<li><strong>交付审计与平衡压力表。</strong> <code>scripts/closure.py</code> 按章节统计判读线页上的登记，正文里提到「预登记」不再重复计数；<code>scripts/pressure.py</code> 按主干分组时把 <code>yolo-master-n</code> 当作一个名字，表按现有全部路由记录重算。</li>
 <li><strong>快速上手的「对齐上游」少了两项。</strong> 补上 <code>balance="gshard"</code> 与 <code>recipe="upstream", weight=1.0</code>；缺 pandas 时一并安装。</li>
 </ul>
 <h2 id="_4">数据<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
