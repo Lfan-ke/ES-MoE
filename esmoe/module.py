@@ -53,7 +53,7 @@ def _utilisation(weights: Tensor) -> Tensor:
 def switch_balance(probs: Tensor, gate: Tensor) -> Tensor:
     """Switch-Transformer load balancing: routing mass times realised load, summed over experts.
 
-    The only one of the three that multiplies the probabilities by a top-k indicator. Since the
+    The only one of the four that multiplies the probabilities by a top-k indicator. Since the
     realised loads sum to k whatever the skew, the term sits at k once the mean probabilities are
     near uniform and stops reporting concentration.
     """

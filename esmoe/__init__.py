@@ -28,12 +28,12 @@ __all__ = [
     "collect_aux_loss",
     "equip",
     "graft",
-    "inject_esmoe",
-    "odd",
-    "odd_kernels",
     "gshard_balance",
     "gshard_probs_balance",
+    "inject_esmoe",
     "master_balance",
+    "odd",
+    "odd_kernels",
     "switch_balance",
 ]
 __version__ = "1.0.0"

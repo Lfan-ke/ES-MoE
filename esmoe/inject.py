@@ -171,7 +171,7 @@ def _loss_with_aux(self, batch, preds=None):
     if not weight or not _uses_esmoe(self):
         return _original(self)(self, batch, preds)
     if preds is None:
-        clear_aux_loss()  # about to forward; drop anything left from an earlier step
+        clear_aux_loss()  # the forward below publishes afresh; a value left from the last step would count twice
     total, items = _original(self)(self, batch, preds)
     aux = collect_aux_loss(self, device=total.device).to(total.dtype)
     if not torch.isfinite(aux):
