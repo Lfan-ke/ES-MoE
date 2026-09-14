@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Deploy main as this released version and move latest to it; empty deploys dev"
+        description: "Redeploy main as this released version (latest moves only for the newest tag); empty deploys dev"
         required: false
         default: ""
 
@@ -36,16 +36,25 @@ jobs:
           enable-cache: true
           python-version: "3.12"
       - run: uv sync --group dev
+      - name: Check a manual redeploy
+        # A typo would otherwise publish a phantom version, and an older tag would drag `latest` backwards.
+        if: github.event_name == 'workflow_dispatch' && inputs.version != ''
+        run: |
+          [ "$GITHUB_REF" = refs/heads/main ] || { echo "redeploy from main only, not $GITHUB_REF"; exit 1; }
+          git rev-parse -q --verify "refs/tags/v${VERSION#v}" > /dev/null || { echo "no tag v${VERSION#v}"; exit 1; }
       - name: Deploy the version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages:gh-pages
+          newest=$(git tag -l 'v*' --sort=-v:refname | head -1)
           if [ "$VERSION" = dev ]; then
             uv run mike deploy -F .github/docs/mkdocs.yml --push dev
-          else
+          elif [ "v${VERSION#v}" = "$newest" ]; then
             uv run mike deploy -F .github/docs/mkdocs.yml --push --update-aliases "${VERSION#v}" latest
             uv run mike set-default -F .github/docs/mkdocs.yml --push latest
+          else
+            uv run mike deploy -F .github/docs/mkdocs.yml --push "${VERSION#v}"
           fi
       - name: Point the unversioned addresses at latest
         run: |

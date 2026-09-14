@@ -32,6 +32,10 @@ jobs:
         run: |
           uv run --no-sync ruff check .
           uv run --no-sync ruff format --check .
+      - name: Build the docs site
+        # A broken page or nav entry would otherwise fail only in the deploy after merge.
+        if: matrix.ultralytics == 'latest' && matrix.python == '3.12'
+        run: uv run --no-sync mkdocs build --strict -f .github/docs/mkdocs.yml
       - name: Test
         run: uv run --no-sync pytest -q
 
