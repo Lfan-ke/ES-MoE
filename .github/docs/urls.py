@@ -2,6 +2,8 @@
 language and lives at the root, and a sitemap.xml in every page directory, because i18n writes the
 language links relative to the current page and the theme fetches the sitemap the same way."""
 
+import gzip
+import re
 from pathlib import Path
 
 # Four point-release notes were merged into one page; their old addresses keep answering.
@@ -59,3 +61,13 @@ def on_post_build(config) -> None:
             if not page:  # the root sitemap is mkdocs' own and already lists both languages
                 continue
             (site.joinpath(*page) / "sitemap.xml").write_text(_sitemap(base, pages_of_language), encoding="utf-8")
+
+    # The root sitemap's language links glue the page path onto site_url, which mike sets without a
+    # trailing slash, so `dev` and `API/` come out as `devAPI/`. site_url itself stays: i18n reruns
+    # mike's urljoin for the English pass, and a slash there would double the version.
+    root = site / "sitemap.xml"
+    if root.exists():
+        text = re.sub(re.escape(base) + r'(?=[^/"<])', base + "/", root.read_text(encoding="utf-8"))
+        root.write_text(text, encoding="utf-8")
+        with gzip.open(root.with_suffix(".xml.gz"), "wb") as packed:
+            packed.write(text.encode("utf-8"))

@@ -38,11 +38,15 @@ def main(pages: Path) -> None:
     base = site_url()
     for page in latest.rglob("index.html"):
         parts = page.relative_to(latest).parts[:-1]
-        if not parts or parts[0] in named:
+        if parts[:1] and parts[0] in named:
             continue
-        stub = pages.joinpath(*parts, "index.html")
-        stub.parent.mkdir(parents=True, exist_ok=True)
-        stub.write_text(STUB.format(target=f"{base}/latest/{'/'.join(parts)}/"), encoding="utf-8")
+        here = pages.joinpath(*parts)
+        here.mkdir(parents=True, exist_ok=True)
+        # Crawlers read the sitemap where it always was; it lists the pages under their versioned address.
+        for sitemap in page.parent.glob("sitemap.xml*"):
+            shutil.copyfile(sitemap, here / sitemap.name)
+        if parts:
+            (here / "index.html").write_text(STUB.format(target=f"{base}/latest/{'/'.join(parts)}/"), encoding="utf-8")
     # GitHub Pages answers every missing address with the root 404; latest's own resolves its assets absolutely.
     shutil.copyfile(latest / "404.html", pages / "404.html")
 
