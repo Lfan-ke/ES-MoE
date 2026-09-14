@@ -125,4 +125,7 @@
 
 ## 安装
 
-    pip install esmoe
+```bash
+pip install esmoe  # or use
+uv add esmoe
+```

@@ -125,4 +125,7 @@ Most of 0.1.4 answers the first round of user feedback: the evaluation caliber m
 
 ## Install
 
-    pip install esmoe
+```bash
+pip install esmoe  # or use
+uv add esmoe
+```
