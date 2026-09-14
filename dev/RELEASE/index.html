@@ -1581,8 +1581,9 @@
 <h2 id="更早的小版本">更早的小版本<a class="headerlink" href="#更早的小版本" title="Permanent link">&para;</a></h2>
 <p>0.1.0 是首个版本，给出 <code>inject_esmoe</code>、<code>graft</code>、<code>attach_aux_loss</code>、<code>collect_aux_loss</code> 四个入口，并附选型与三 seed 证据。0.1.1 修好 <code>equip()</code> 不带 <code>out</code> 时把配置当字典交给 <code>YOLO()</code> 的问题，补上 Colab 快速上手。0.1.2 修好 8.4.13x 之后 <code>loss_names</code> 在 <code>on_train_start</code> 时为空、导致训练日志表头错位的问题，并把包从 <code>src/</code> 移到仓库根目录。</p>
 <h2 id="安装">安装<a class="headerlink" href="#安装" title="Permanent link">&para;</a></h2>
-<pre><code>pip install esmoe
-</code></pre>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>esmoe<span class="w">  </span><span class="c1"># or use</span>
+uv<span class="w"> </span>add<span class="w"> </span>esmoe
+</code></pre></div>
 
 
 
