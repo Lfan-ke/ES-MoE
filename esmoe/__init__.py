@@ -36,4 +36,4 @@ __all__ = [
     "master_balance",
     "switch_balance",
 ]
-__version__ = "0.1.6"
+__version__ = "1.0.0"

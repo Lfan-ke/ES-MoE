@@ -1,12 +1,36 @@
 # Release notes
 
-Current version **0.1.6**.
+Current version **1.0.0**, the first stable release. The public interface in `esmoe.__all__` now follows semantic versioning: incompatible changes come only with a major version.
+
+## Added
+
+- **An interrupted run can finish.** `scripts/train.py --resume <last.pt>` continues from the run's own checkpoint instead of starting over, and accepts only a checkpoint that run saved in its own directory. Records gain `resumed`, with the checkpoint's path and hash, the epochs done and the seconds they took; `budget.gpu_hours` sums both stretches, and `budget.epochs_replayed` counts against the epochs that were left.
+- **Versioned documentation.** Each release has its own copy of the docs, `latest` points at the newest release and `dev` follows main; the old unversioned addresses redirect to `latest`.
 
 ## Fixed
 
+- **`scripts/measure.py` could not rebuild a resumed run.** Resuming rewrites `model` in the run's arguments to the checkpoint, which no model can be built from. The rebuild now uses the config the checkpoint records.
+- **A failed run was logged as done.** `scripts/train.py` exits non-zero after writing a failed record, and `scripts/queue.sh` logs it as FAILED.
+- **Running a configuration again replaced the original experiment.** `scripts/report.py` and `scripts/same_config.py` keep the earliest-started record of a configuration and seed as the experiment and send later ones to the noise floor only; the floor is grouped by hardware stack and budget, precision included, so FP32 and mixed precision are computed apart.
+- **Entry points of the documentation site.** The Chinese charts page showed the English figure; the results page's contents broke at the embedded tables; the language switch on the `latest` home page went to an older version; the 404 page could not load search or the version list; the language links in each version's sitemap lacked a slash.
+- **The quick start's "Match upstream" missed two settings.** It now sets `balance="gshard"` and `recipe="upstream", weight=1.0`, and installs pandas when it is missing.
+
+## Data
+
+- Both rounds of the same-configuration comparison with YOLO-Master are in: round seven at each framework's default precision, round eight with all four arms in FP32, and the noise floor measured by repeating FP32 runs on the same cards. Verdicts are on the [judgment lines](JUDGMENT.md).
+
+## Repository
+
+- The root holds only the package and what GitHub needs: `uv.lock` is no longer tracked and CI tests what resolves on the day; the docs config lives in `.github/docs/`, the contributing guide and code of conduct in `.github/`, and environment snapshots in `results/env/`.
+- The selection page has a Chinese edition (English at `SELECTION.en.md`); the issue and PR templates say what is required and end with a checklist; README uses absolute image and licence links, so the PyPI page shows them.
+
+## Earlier: 0.1.6
+
+### Fixed
+
 - **`dynamic_threshold` pruned the wrong experts.** The threshold was compared against the raw probabilities, before the top-k renormalisation; upstream compares it against the share after (`_soft_top_k` normalises, `_sparse_forward` then prunes). With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so nearly every image was pruned to a single expert while training mixed two. Measured on one trained VisDrone model with four blocks, same weights: mAP50 0.0427 pruned the wrong way, 0.3741 in upstream's order, 0.3748 unpruned. The default `dynamic_threshold=0.0` prunes nothing, so the records in `results/` are unaffected.
 
-## Added
+### Added
 
 - **`recipe="upstream"`.** A new argument of `attach_aux_loss` and `equip` that trains the way YOLO-Master's trainer trains any model with a routed module, for runs compared against it. Three things:
   - the term is divided by a running mean of its magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl;
