@@ -12,7 +12,7 @@
   <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-006DE0?logo=materialformkdocs&logoColor=white"></a>
   <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-F9AB00?logo=googlecolab&logoColor=white"></a>
   <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
+  <a href="https://github.com/Lfan-ke/ES-MoE/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
 </p>
 
 <div align=center>
@@ -108,7 +108,7 @@ runs on four generations (`results/*-compat-*.json`) and by the 120-epoch protoc
 each logging a non-zero `train/esmoe_aux`.
 
 Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
-"we ran the full budget-fair protocol on it"; only the YOLO-Master row is still the former alone. The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
+"we ran the full budget-fair protocol on it". The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
@@ -132,7 +132,7 @@ SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end i
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
 costs +10.4% parameters and about 9% more wall-clock per epoch.
 
-<p align="center"><img alt="Paired mAP50 delta by backbone generation" src="docs/assets/effect.svg" width="720"></p>
+<p align="center"><img alt="Paired mAP50 delta by backbone generation" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/effect.svg" width="720"></p>
 
 Each dot is one seed, each bar the mean of three. The seeds routinely straddle zero even where the mean does
 not, which is as far as a three-seed protocol can read: an
@@ -147,7 +147,7 @@ on, and stays negative with each block's weight cut to a quarter so the auxiliar
 the count is what costs, not the pressure. That holds under this package's recipe: with upstream's whole recipe the
 same four blocks are positive on every seed in both frameworks (same-configuration rounds seven and eight).
 
-<p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="docs/assets/alignment.svg" width="720"></p>
+<p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/alignment.svg" width="720"></p>
 
 How concentrated the dispatch is does not predict accuracy: r = +0.044 over the 81 runs that have both a routing
 analysis and a paired delta. What the balancing term does secure is that no expert dies. Without it all six
