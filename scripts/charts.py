@@ -1,9 +1,19 @@
-"""Draw the paired-effect figures straight from results/*.json.
+"""Draw every figure the docs site, README and wiki show, straight from results/.
 
-Two outputs, one source of numbers. The docs site gets `javascripts/data.js`, which the ECharts
-view reads to draw an interactive version; README and the wiki get `assets/effect.svg`, because
-GitHub strips scripts there and a static figure is the only thing that renders. Both come from
-report.py, so a figure cannot drift away from the tables it illustrates.
+    uv run python scripts/charts.py
+
+Outputs:
+
+- `docs/assets/effect.svg`, `effect-zh.svg`, `alignment.svg`, `alignment-zh.svg`: static figures for
+  README and the wiki, where GitHub strips scripts and only a picture renders.
+- `docs/javascripts/data.js`: `window.ESMOE_EFFECT`, the seven-generation paired deltas and the
+  alignment arms, and `window.ESMOE_DATA`, everything else the ECharts figures draw: dataset
+  statistics (`results/dataset.json`), the protocol matrix, the same-configuration arms, repeated runs,
+  routing records, balancing pressure, area buckets, the selection stage, the release check,
+  step-for-step traces and card-hours.
+
+The numbers come through report.py and same_config.py, or from the tables their sibling scripts write,
+so a figure cannot drift away from the tables it illustrates.
 """
 
 import json
@@ -13,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from report import KEYS, T95, arm, dedupe, interval, load, paired, published, schedule, variant  # noqa: E402
+from report import KEYS, arm, bounds, dedupe, interval, load, paired, published, schedule, variant  # noqa: E402
 from same_config import ARMS as FOUR  # noqa: E402
 from same_config import DELTAS  # noqa: E402
 from same_config import collect as four_arms  # noqa: E402
@@ -25,6 +35,10 @@ DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 DATASET = ROOT / "results" / "dataset.json"
 ROUTING = ROOT / "results" / "routing"
 PRESSURE = ROOT / "results" / "pressure.md"
+BUCKETS = ROOT / "results" / "buckets"
+RELEASE_CHECK = ROOT / "results" / "release_check.md"
+RECIPE_PARITY = ROOT / "results" / "recipe_parity.md"
+AREAS = ("AP", "APs", "APm", "APl")
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
 ORDER = ("yolov5n", "yolov8n", "yolov9t", "yolov10n", "yolo11n", "yolo12n", "yolo26n")
@@ -307,11 +321,12 @@ def data_js(tables):
 
 def summary(values):
     """Mean and the two ends of its 95% interval, as numbers a chart can place."""
-    mean = statistics.mean(values)
-    if len(values) < 2:
-        return {"mean": round(mean, 4), "lo": None, "hi": None}
-    half = T95.get(len(values) - 1, 1.96) * statistics.stdev(values) / len(values) ** 0.5
-    return {"mean": round(mean, 4), "lo": round(mean - half, 4), "hi": round(mean + half, 4)}
+    mean, lo, hi = bounds(values)
+    return {
+        "mean": round(mean, 4),
+        "lo": None if lo is None else round(lo, 4),
+        "hi": None if hi is None else round(hi, 4),
+    }
 
 
 def protocol(records):
@@ -391,11 +406,15 @@ def floor(repeats):
 
 
 def blocks_of(path):
+    """The blocks of a routing record, old single-block records included.
+
+    Mirrors routing.normalise, which cannot be imported here without pulling in torch.
+    """
     record = json.loads(path.read_text(encoding="utf-8"))
     return record.get("blocks", [record])
 
 
-def routing(runs):
+def routing(runs, records):
     """Per checkpoint: how concentrated the dispatch is, how many experts died, and the paired delta."""
     proto = [r for r in runs if PROTOCOL in variant(r)]
     base = {arm(r): r for r in proto if r["config"]["arch"] == "baseline"}
@@ -417,26 +436,45 @@ def routing(runs):
                 "delta": round(r["metrics"][KEYS[0]] - base[arm(r)]["metrics"][KEYS[0]], 4),
             }
         )
-    arms = []
-    for path in sorted(ROUTING.glob("yolo-master-n-esmoe-upstream-w1-e120-*.json")):
-        arms.append(
-            {
-                "precision": "fp32" if "fp32" in path.stem else "mixed",
-                "seed": int(path.stem.split("-s")[1].split("-")[0]),
-                "blocks": [
-                    {"dead": b["dead_experts"], "top1": b["top1_share"], "usage": b["usage"]} for b in blocks_of(path)
-                ],
-            }
-        )
+    # The B arm each comparison was registered on, so a repeat of the same seed cannot add a second row.
+    chosen = sorted(
+        (ROUTING / f"{published(arms['B'])}.json", family, seed) for (family, seed), arms in four_arms(records).items()
+    )
+    arms = [
+        {
+            "precision": family,
+            "seed": seed,
+            "blocks": [
+                {"dead": b["dead_experts"], "top1": b["top1_share"], "usage": b["usage"]} for b in blocks_of(path)
+            ],
+        }
+        for path, family, seed in chosen
+        if path.is_file()
+    ]
     return {"points": points, "same_config": arms}
+
+
+def table_rows(path, width):
+    """Cells of every markdown table row with `width` columns; nothing if the table was never written."""
+    if not path.is_file():
+        return []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    rows = [[cell.strip() for cell in line.strip().strip("|").split("|")] for line in lines if line.startswith("|")]
+    return [cells for cells in rows if len(cells) == width]
+
+
+def parsed(path, rows):
+    """A table that exists but yields no rows changed shape; drawing nothing would hide that."""
+    if path.is_file() and not rows:
+        raise SystemExit(f"{path.relative_to(ROOT)}: no rows parsed; its columns changed")
+    return rows
 
 
 def pressure():
     """The balancing terms' gradient per unit weight, read back from the table pressure.py wrote."""
     rows = []
-    for line in PRESSURE.read_text(encoding="utf-8").splitlines():
-        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) == 7 and cells[1].replace(".", "", 1).isdigit():
+    for cells in table_rows(PRESSURE, 7):
+        if cells[1].replace(".", "", 1).isdigit():
             rows.append(
                 {
                     "checkpoint": cells[0],
@@ -447,7 +485,89 @@ def pressure():
                     "master": float(cells[5]),
                 }
             )
-    return rows
+    return parsed(PRESSURE, rows)
+
+
+def buckets(runs):
+    """Paired COCO-area deltas per arm, paired the way scripts/buckets.py pairs them."""
+    records = {}
+    for path in BUCKETS.glob("*.json"):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        if "coco" in record:
+            records[record["weights"].removesuffix(".pt").removesuffix("-best")] = record
+    pairs = [(run, records[published(run)]) for run in runs if published(run) in records]
+    base = {arm(run): bucket for run, bucket in pairs if run["config"]["arch"] == "baseline"}
+    cells = {}
+    for run, bucket in sorted(pairs, key=lambda pair: (variant(pair[0]), pair[0]["seed"])):
+        reference = base.get(arm(run))
+        if run["config"]["arch"] == "baseline" or not reference:
+            continue
+        cells.setdefault(variant(run), []).append(
+            {"seed": run["seed"], **{k: round(bucket["coco"][k] - reference["coco"][k], 4) for k in AREAS}}
+        )
+    return [{"variant": name, "seeds": seeds} for name, seeds in cells.items()]
+
+
+def selection(runs):
+    """Every paired cell outside the protocol budget and the one-epoch smoke runs: the selection stage."""
+    found = {}
+    for metric, key in METRICS:
+        _, deltas = paired(runs, key)
+        for label, values in deltas.items():
+            budget = label.split("@")[1].split("[")[0]
+            if PROTOCOL in label or budget.startswith("e1f"):
+                continue
+            found.setdefault(label, {"variant": label, "budget": budget})[metric] = [round(v, 4) for v in values]
+    return sorted(found.values(), key=lambda cell: cell["variant"])
+
+
+def by_size():
+    """Router probability against object size, over every block analysed, and which kernel leads."""
+    correlations, leaders = [], {}
+    for path in sorted(ROUTING.glob("*.json")):
+        for block in blocks_of(path):
+            correlations += [round(c, 3) for c in block["prob_vs_scale_corr"]]
+            lead = max(range(len(block["top1_share"])), key=block["top1_share"].__getitem__)
+            kernel = str(block["kernels"][lead])
+            leaders[kernel] = leaders.get(kernel, 0) + 1
+    blocks = sum(leaders.values())
+    return {"blocks": blocks, "correlations": correlations, "leaders": leaders}
+
+
+def release_check():
+    """The released checkpoint measured on the fork and rebuilt with this package, metric by metric."""
+    rows = [
+        {"metric": cells[0], "fork": float(cells[1]), "esmoe": float(cells[2])}
+        for cells in table_rows(RELEASE_CHECK, 5)
+        if cells[0].startswith("metrics/")
+    ]
+    return parsed(RELEASE_CHECK, rows)
+
+
+def recipe_parity():
+    """Step-for-step traces: the gap between two trainers, next to the gap one nudged router layer makes."""
+    sections, current = [], None
+    lines = RECIPE_PARITY.read_text(encoding="utf-8").splitlines() if RECIPE_PARITY.is_file() else []
+    for line in lines:
+        if line.startswith("## "):
+            current = {"pair": line[3:].strip(), "epochs": []}
+            sections.append(current)
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if current is not None and len(cells) == 8 and cells[0].isdigit():
+            current["epochs"].append({"epoch": int(cells[0]), "loss": float(cells[2]), "relative": float(cells[3])})
+    return parsed(RECIPE_PARITY, [section for section in sections if section["epochs"]])
+
+
+def cost(runs):
+    """Card-hours of each grafted protocol run over its same-seed, same-card baseline."""
+    proto = [r for r in runs if PROTOCOL in variant(r) and r["budget"].get("gpu_hours")]
+    base = {arm(r): r["budget"]["gpu_hours"] for r in proto if r["config"]["arch"] == "baseline"}
+    ratios = {}
+    for r in proto:
+        if r["config"]["arch"] != "baseline" and arm(r) in base:
+            ratios.setdefault(variant(r), []).append(round(r["budget"]["gpu_hours"] / base[arm(r)], 3))
+    return [{"variant": name, "ratios": values} for name, values in sorted(ratios.items())]
 
 
 def extras():
@@ -459,9 +579,22 @@ def extras():
         "protocol": protocol(records),
         "same_config": same_config(records),
         "floor": floor(repeats),
-        "routing": routing(runs),
+        "routing": routing(runs, records),
         "pressure": pressure(),
+        "buckets": buckets(runs),
+        "selection": selection(runs),
+        "scale": by_size(),
+        "release_check": release_check(),
+        "recipe_parity": recipe_parity(),
+        "cost": cost(runs),
     }
+
+
+def data_module(tables=None):
+    """The whole of docs/javascripts/data.js, so a test can tell whether the committed file is current."""
+    tables = tables or {metric: collect(key) for metric, key in METRICS}
+    more = json.dumps(extras(), ensure_ascii=False, separators=(",", ":"))
+    return data_js(tables) + f"window.ESMOE_DATA = {more};\n"
 
 
 def main():
@@ -475,8 +608,7 @@ def main():
     for lang, path in ALIGN_OUT.items():
         path.write_text(align_svg(table, lang), encoding="utf-8")
     DATA_OUT.parent.mkdir(parents=True, exist_ok=True)
-    more = json.dumps(extras(), ensure_ascii=False, separators=(",", ":"))
-    DATA_OUT.write_text(data_js(tables) + f"window.ESMOE_DATA = {more};\n", encoding="utf-8")
+    DATA_OUT.write_text(data_module(tables), encoding="utf-8")
     figures = len(SVG_OUT) + len(ALIGN_OUT)
     print(f"wrote {figures} figures and {DATA_OUT.relative_to(ROOT)} covering {len(table)} arms")
     for (backbone, block), values in sorted(table.items()):

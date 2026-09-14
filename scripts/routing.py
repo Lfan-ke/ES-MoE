@@ -167,8 +167,7 @@ def against_accuracy() -> list[str]:
         f"Over the {len(shares)} runs that have both a paired delta and a routing analysis, the leading "
         f"expert's top-1 share runs {min(shares):.2f} to {max(shares):.2f} and the paired mAP50 delta "
         f"{min(deltas):+.4f} to {max(deltas):+.4f}. Their correlation is **r = {r:+.3f}**: on this "
-        "evidence a concentrated dispatch does not cost accuracy, which is worth holding against the "
-        "premise that a balancing term is what the block needs.",
+        "evidence a concentrated dispatch does not cost accuracy.",
         "",
     ]
 

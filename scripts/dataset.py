@@ -3,17 +3,20 @@
     uv run python scripts/dataset.py /data/ds/VisDrone_dataset   # an unpacked copy
     uv run python scripts/dataset.py VisDrone_dataset.zip          # or the archive as downloaded
 
-Writes results/dataset.json, which scripts/charts.py draws on the experiments page. Box sizes are
-read against each image's own resolution, so the COCO buckets here are the ones results/buckets.md
-evaluates on, and the side at 800 px is what the protocol's letterbox actually hands the model.
+Writes results/dataset.json (or `--out`), which scripts/charts.py draws on the experiments page. Box
+sizes are read against each image's own resolution, so the COCO buckets here are the ones
+results/buckets.md evaluates on, and the side at 800 px is what the protocol's letterbox actually
+hands the model.
 """
 
 import argparse
+import bisect
 import json
 import math
 import statistics
 import zipfile
 from collections import Counter
+from contextlib import ExitStack
 from pathlib import Path, PurePosixPath
 
 import yaml
@@ -26,10 +29,10 @@ IMGSZ = 800
 EDGES = (0, 8, 16, 24, 32, 48, 64, 96, 128, 256, 801)
 
 
-def entries(source: Path):
+def entries(source: Path, stack: ExitStack):
     """(path inside the dataset, bytes, opener) for every file, from a directory or a zip alike."""
-    if source.suffix == ".zip":
-        archive = zipfile.ZipFile(source)
+    if source.suffix.lower() == ".zip":
+        archive = stack.enter_context(zipfile.ZipFile(source))
         for info in archive.infolist():
             path = PurePosixPath(info.filename)
             # Archives packed on macOS carry resource forks that look like images and are not.
@@ -43,19 +46,25 @@ def entries(source: Path):
                 yield inside, path.stat().st_size, lambda path=path: path.open("rb")
 
 
+def bin_of(side: float) -> int:
+    """Index into the side histogram. A box a label rounds past the image edge still lands in the top bin."""
+    return min(max(bisect.bisect_right(EDGES, side), 1), len(EDGES) - 1)
+
+
 def describe(source: Path) -> dict:
     images: dict[str, dict] = {split: {} for split in SPLITS}
     labels: dict[str, dict] = {split: {} for split in SPLITS}
-    for path, size, opener in entries(source):
-        if len(path.parts) < 3 or path.parts[-2] not in SPLITS:
-            continue
-        split, kind = path.parts[-2], path.parts[-3]
-        if kind == "images" and path.suffix.lower() in {".jpg", ".jpeg", ".png"}:
-            with opener() as handle, Image.open(handle) as image:
-                images[split][path.stem] = (image.size, size)
-        elif kind == "labels" and path.suffix == ".txt":
-            with opener() as handle:
-                labels[split][path.stem] = handle.read().decode()
+    with ExitStack() as stack:
+        for path, size, opener in entries(source, stack):
+            if len(path.parts) < 3 or path.parts[-2] not in SPLITS:
+                continue
+            split, kind, suffix = path.parts[-2], path.parts[-3], path.suffix.lower()
+            if kind == "images" and suffix in {".jpg", ".jpeg", ".png"}:
+                with opener() as handle, Image.open(handle) as image:
+                    images[split][path.stem] = (image.size, size)
+            elif kind == "labels" and suffix == ".txt":
+                with opener() as handle:
+                    labels[split][path.stem] = handle.read().decode()
 
     splits = {}
     for split in SPLITS:
@@ -71,7 +80,7 @@ def describe(source: Path) -> dict:
                 buckets["small" if side < 32 else "medium" if side < 96 else "large"] += 1
                 sides.append(side)
                 fitted.append(side * fit)
-                bins[next(i for i in range(1, len(EDGES)) if side * fit < EDGES[i])] += 1
+                bins[bin_of(side * fit)] += 1
         splits[split] = {
             "images": len(images[split]),
             "boxes": len(sides),
@@ -88,19 +97,25 @@ def describe(source: Path) -> dict:
     return splits
 
 
+def class_names(data: Path) -> list[str]:
+    """Ultralytics accepts `names` as a list or as an index-to-name mapping."""
+    names = yaml.safe_load(data.read_text(encoding="utf-8"))["names"]
+    return [names[i] for i in sorted(names)] if isinstance(names, dict) else list(names)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("source", type=Path, help="the unpacked dataset root or its zip")
     parser.add_argument("--data", type=Path, default=ROOT / "configs" / "visdrone.yaml")
+    parser.add_argument("--out", type=Path, default=OUT)
     args = parser.parse_args()
-    names = yaml.safe_load(args.data.read_text(encoding="utf-8"))["names"]
     record = {
         "name": "VisDrone2019-DET",
         "imgsz": IMGSZ,
-        "names": [names[i] for i in sorted(names)],
+        "names": class_names(args.data),
         "splits": describe(args.source),
     }
-    OUT.write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+    args.out.write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     for split, facts in record["splits"].items():
         counts = f"{facts['images']:>5} images {facts['boxes']:>7} boxes"
         print(f"{split:<5} {counts}  {facts['area']}  median side {facts['median_side']}")

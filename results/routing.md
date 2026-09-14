@@ -4,7 +4,7 @@ Per checkpoint: the share of images on which each expert is the top-1 choice, th
 
 ## Does concentration cost accuracy?
 
-Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is **r = +0.044**: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.
+Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is **r = +0.044**: on this evidence a concentrated dispatch does not cost accuracy.
 
 ## yolo-master-n-esmoe-upstream-w1-e120-s0-p800c
 

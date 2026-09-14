@@ -136,13 +136,19 @@ def spread(values):
 T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
 
 
+def bounds(values):
+    """Mean of a paired delta and the two ends of its 95% interval; no interval below two values."""
+    mean = statistics.mean(values)
+    if len(values) < 2:
+        return mean, None, None
+    half = T95.get(len(values) - 1, 1.96) * statistics.stdev(values) / len(values) ** 0.5
+    return mean, mean - half, mean + half
+
+
 def interval(values):
     """95% confidence interval for a mean paired delta."""
-    if len(values) < 2:
-        return "-"
-    half = T95.get(len(values) - 1, 1.96) * statistics.stdev(values) / len(values) ** 0.5
-    mean = statistics.mean(values)
-    return f"[{mean - half:+.4f}, {mean + half:+.4f}]"
+    _, lo, hi = bounds(values)
+    return "-" if lo is None else f"[{lo:+.4f}, {hi:+.4f}]"
 
 
 def paired(runs, key):

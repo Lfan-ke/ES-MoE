@@ -195,7 +195,7 @@ def _rank(rank, world, port, cfg, box):
     # Built the way ultralytics builds DDP while `compile` is off; tests/test_distributed.py covers the
     # settings of `compile=True`, where unrouted experts join the graph at zero instead.
     ddp = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
-    torch.manual_seed(rank + 1)  # each rank sees different images
+    torch.manual_seed(rank + 1)  # on identical images, agreeing router gradients would prove nothing
     batch = {
         "img": torch.rand(2, 3, 64, 64),
         "cls": torch.zeros(2, 1),

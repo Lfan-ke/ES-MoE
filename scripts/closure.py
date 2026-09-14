@@ -54,13 +54,22 @@ def seeds(runs) -> tuple[bool, str]:
         if r["config"]["arch"] != "baseline" and arm(r) in base:
             compared.add(variant(r))
     thin = sorted(name for name in compared if len(counts[name]) < 3)
-    page = (ROOT / "docs" / "experiments.md").read_text(encoding="utf-8")
-    declared = all(name.split("@")[0] in page for name in thin)
+    pages = [(ROOT / "docs" / name).read_text(encoding="utf-8") for name in ("experiments.md", "experiments.en.md")]
+    named = declared(thin, pages)
     detail = f"{len(compared)} compared cells, {len(compared) - len(thin)} at three seeds or more"
     if thin:
-        note = "; declared on the experiments page" if declared else "; NOT declared"
+        note = "; declared on the experiments page" if named else "; NOT declared"
         detail += f"; below three: {', '.join(thin)}" + note
-    return not thin or declared, detail
+    return not thin or named, detail
+
+
+def declared(thin, pages) -> bool:
+    """Every thin cell named exactly, in backticks, on every language page.
+
+    A bare substring test lets a longer name that happens to contain a thin cell's name declare that
+    cell too: `yolov5n-e4k2w0.01-rewire` on the page would vouch for `yolov5n-e4k2w0.01`.
+    """
+    return all(f"`{name.split('@')[0]}`" in page for name in thin for page in pages)
 
 
 def preregistration() -> tuple[bool, str]:
