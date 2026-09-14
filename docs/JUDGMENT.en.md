@@ -499,11 +499,37 @@ Metrics are `scripts/measure.py`'s re-measurements, all four arms in FP32 throug
 
 - **Prediction 1 (A − B is equivalent) is not confirmed.** The mean is +0.00462, 0.0001 above the equivalence line of 0.0045; the seeds disagree in sign and the interval straddles zero, so the pre-registered reading is "undetermined". Round seven, under mixed precision, had −0.0069 with all three seeds negative; in FP32 the sign flips and round seven's negative gap does not recur. The two rounds ran on different machines and are compared in direction only.
 - **Prediction 2 (the difference of differences is equivalent, with A − A0 and B − C positive together) holds.**
-- **Prediction 3 (A − A0 and B − C both still effective) is not confirmed.** A − A0 is still effective. B − C is positive on all three seeds, but seed 0 gives only +0.0042 and the interval straddles zero, so it is undetermined. The pre-registered refutation, either one turning ineffective, did not happen.
+- **Prediction 3 (A − A0 and B − C both still effective) holds.** It was registered against the judgment lines at the top of this page (effective = mean paired mAP50 > 0, at least two seeds of three positive, mean paired mAP50-95 ≥ 0): A − A0 has +0.0104, 3/3 and +0.0076 in mAP50-95, B − C has +0.0095, 3/3 and +0.0066, so both are effective. The verdict column above uses the noise-floor bands, under which B − C straddles zero and is undetermined; the two answer different questions and both stand as reported. The first draft of this bullet read the prediction against the bands and called it unconfirmed, which is not the line it was registered against; corrected on 2026-09-14 with the FP32 floor.
 - **Prediction 4 (every one of B's three checkpoints still has a block with a dead expert) holds.** The pattern is round seven's: in each checkpoint three of the four blocks have a dead expert and block 3 never does; eight of the nine blocks with a dead expert always pick the same top-2, and the mean routing entropy over all twelve blocks is 98.8% of the maximum.
 
 **Two more observations**:
 - Training cost. B takes 10.6 hours a run in FP32, the same as A; round seven's gap between A and B (10.8 against 4.7 hours) came from precision, not from the implementation.
 - Area buckets (`results/buckets.md`). In both frameworks the blocks lift large objects most, in each case on two seeds of three. On upstream's side small objects still gain least (+0.0086 against +0.0106 for medium); on this package's side small and medium gain about the same (+0.0069 and +0.0063). In round seven small objects gained least on both sides (+0.0049, +0.0080).
 
-**FP32 noise floor**: once the five repeats have run and been re-measured, the table above is judged again against the mean / largest gap measured in FP32, as pre-registered, and both verdicts are reported where the bands differ.
+### Rejudged against the FP32 noise floor (2026-09-14, after the five repeats were re-measured)
+
+All five repeats ran the full 120 epochs in FP32, and both runs of each pair were re-measured by `scripts/measure.py` from `last.pt`:
+
+| pair | kind | original | repeat | absolute gap |
+|:--:|:--:|:--:|:--:|:--:|
+| B, seed 0 | blocks | 0.3601 | 0.3636 | 0.0035 |
+| A, seed 1 | blocks | 0.3651 | 0.3634 | 0.0018 |
+| C, seed 0 | baseline | 0.3559 | 0.3560 | 0.0001 |
+| A0, seed 1 | baseline | 0.3552 | 0.3519 | 0.0033 |
+| C, seed 2 | baseline | 0.3521 | 0.3625 | 0.0103 |
+
+The five pairs give a mean gap of 0.0038 and a largest gap of 0.0103. `results/summary.md` lists them by hardware stack, 0.0046 / 0.0103 over three pairs on the official stack and 0.0025 / 0.0033 over two on the fork; the verdicts use the pooled five, as pre-registered. The repeat of C at seed 2 logged a nan validation loss at epoch 28, with its training losses and that epoch's mAP50 normal and climbing afterwards; the re-measurement reads `last.pt` and is unaffected.
+
+- **Prediction 1 (both block pairs differ by more than the mean of the three baseline pairs) does not hold.** The block pairs differ by 0.0035 and 0.0018 against a baseline mean of 0.0046, and the largest gap is a baseline's. As pre-registered, the reason given, that rounding flips the top-2 when router scores nearly tie, does not show at full protocol.
+- **Prediction 2 (the FP32 mean gap stays within 0.0090) holds.** At 0.0038 it is on the scale of mixed precision's 0.0045, so the earlier rounds' sharing of one yardstick needs no second look.
+
+Round eight judged against both floors:
+
+| delta (mAP50) | mean | mixed-precision floor 0.0045 / 0.0130 | FP32 floor 0.0038 / 0.0103 | lines at the top of this page |
+|:--:|:--:|:--:|:--:|:--:|
+| A − B | +0.0046 | undetermined | undetermined | — |
+| A − A0 | +0.0104 | effective | effective | effective |
+| B − C | +0.0095 | undetermined | undetermined | effective |
+| (A − A0) − (B − C) | +0.0009 | equivalent | equivalent | — |
+
+Both floors put every delta in the same band. A − B is equivalent under neither: its mean of +0.0046 sits above both lower lines (0.0045, 0.0038) and meets neither condition for non-equivalence.
