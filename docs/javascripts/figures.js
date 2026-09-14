@@ -131,7 +131,6 @@
         animationDuration: 450,
         animationEasing: "cubicOut",
         textStyle: { color: c.ink, fontFamily: FONT, fontSize: size(c, 12) },
-        // Room above the plot for the legend row and, below it, the y-axis title.
         grid: { left: 4, right: c.narrow ? 6 : 14, top: 54, bottom: 4, containLabel: true },
         legend: { show: false },
         toolbox: {
@@ -193,7 +192,6 @@
     return name + (words.length ? " " + words.join(" ") : "") + " · " + where;
   }
 
-  // Dots for seeds and a short bar for their mean, which every per-seed figure shares.
   function seedSeries(name, colour, points, horizontal) {
     return [
       {
@@ -731,7 +729,6 @@
     },
   };
 
-  // A pill switch above a figure; the figure reads the chosen value from its own dataset.
   function switcher(host, key, values, labels, repaint) {
     const bar = document.createElement("div");
     bar.className = "esmoe-metric";

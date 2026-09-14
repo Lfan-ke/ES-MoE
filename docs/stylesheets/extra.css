@@ -280,7 +280,7 @@
   color: var(--md-primary-bg-color);
 }
 
-/* Figures on the experiments page: one height per role so a row of two stays level. */
+/* One height per role, so two figures side by side stay level. */
 .esmoe-figure {
   width: 100%;
   height: 380px;
@@ -304,7 +304,6 @@
   margin: 0.4rem 0 1rem;
 }
 
-/* Headline numbers: the figure is the claim, the caption says what it counts. */
 .md-typeset .es-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
@@ -335,7 +334,6 @@
   opacity: 0.8;
 }
 
-/* Signposts on the home page: each card is a page, and the whole card is the link. */
 .md-typeset .es-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
@@ -386,7 +384,6 @@
   letter-spacing: 0;
 }
 
-/* Layout: figures need the width; the two sidebars stay narrow, small and quiet. */
 .md-grid {
   max-width: 74rem;
 }
@@ -426,7 +423,6 @@ html {
   font-weight: 600;
 }
 
-/* The right-hand outline marks where the reader is with the signal colour, nothing else. */
 .md-sidebar--secondary .md-nav__link--active {
   position: relative;
 }
@@ -442,7 +438,6 @@ html {
   background: var(--es-signal);
 }
 
-/* Scrollbars: thin, tinted to the page, and out of sight until the pointer is over them. */
 * {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--md-default-fg-color) 20%, transparent) transparent;
@@ -475,7 +470,6 @@ html {
   scrollbar-color: color-mix(in srgb, var(--md-default-fg-color) 20%, transparent) transparent;
 }
 
-/* Figure cards: a number, a title and a note above the chart, the data source below it. */
 :root {
   --es-card: #ffffff;
 }
@@ -571,7 +565,6 @@ html {
   max-width: none;
 }
 
-/* Tables: Chinese headers stay whole, identifiers stay on one line. */
 .md-typeset table:not([class]) {
   word-break: keep-all;
 }

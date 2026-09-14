@@ -1,5 +1,4 @@
-// The chart, diagram and formula libraries weigh megabytes; a page fetches only the ones it uses,
-// and pages that instant navigation swaps in get the same treatment as a cold load.
+// The chart, diagram and formula libraries weigh megabytes; a page fetches only the ones it uses.
 (function () {
   const CDN = {
     echarts: "https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js",
