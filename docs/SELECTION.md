@@ -77,9 +77,10 @@ already carries attention (C2PSA) at the end of its backbone, so a routed mixtur
 same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
 and it is offered as a hypothesis, not a finding.
 
-What this bounds: the compatibility matrix in the README is a statement about **mechanics** - the
-block builds, trains and back-propagates its auxiliary loss on four generations. It is not a claim
-that the accuracy effect exists on all of them. The accuracy evidence is YOLOv8n only.
+What this bounds, at this 20-epoch selection stage: the compatibility matrix in the README is a statement
+about **mechanics** - the block builds, trains and back-propagates its auxiliary loss on every generation.
+It is not a claim that the accuracy effect exists on all of them. The accuracy evidence at this stage is
+YOLOv8n only; the seven-generation protocol matrix that followed is on the judgment-lines page.
 
 ## Decision
 
@@ -96,5 +97,6 @@ that the accuracy effect exists on all of them. The accuracy evidence is YOLOv8n
 The per-arm standard deviations overlap; only the paired per-seed comparison supports the
 ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
 mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
-the metric exactly, so the deltas are not run-to-run jitter. See `limitations.md` for what these
+the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
+configuration differ by 0.0045 on average, as large as the effect. See `limitations.md` for what these
 numbers do not say.

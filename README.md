@@ -21,7 +21,7 @@
 
 ---
 
-<sub>Docs: [`English`](https://lfan-ke.github.io/ES-MoE/) · [`中文`](https://lfan-ke.github.io/ES-MoE/zh/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
+<sub>Docs: [`English`](https://lfan-ke.github.io/ES-MoE/en/) · [`中文`](https://lfan-ke.github.io/ES-MoE/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
 
 <br />
 
@@ -133,7 +133,7 @@ costs +10.4% parameters and about 9% more wall-clock per epoch.
 
 Each dot is one seed, each bar the mean of three. The seeds routinely straddle zero even where the mean does
 not, which is the honest reading of a three-seed protocol: an
-[interactive version](https://lfan-ke.github.io/ES-MoE/charts/) carries the per-seed values and the second
+[interactive version](https://lfan-ke.github.io/ES-MoE/en/charts/) carries the per-seed values and the second
 metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
 direction-unstable.
@@ -141,7 +141,8 @@ direction-unstable.
 Further arms ask what upstream's own settings are worth. Two of them are internal to the block and both
 help; upstream's layout of four blocks per backbone is negative on both metrics at 0/3 on both backbones it ran
 on, and stays negative with each block's weight cut to a quarter so the auxiliary total matches one block —
-the count is what costs, not the pressure.
+the count is what costs, not the pressure. That holds under this package's recipe: with upstream's whole recipe the
+same four blocks are positive on every seed in both frameworks (same-configuration rounds seven and eight).
 
 <p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="docs/assets/alignment.svg" width="720"></p>
 
@@ -149,7 +150,8 @@ How concentrated the dispatch is does not predict accuracy: r = +0.044 over the 
 analysis and a paired delta. What the balancing term does secure is that no expert dies. Without it all six
 checkpoints lose two of four experts; the Switch term at 0.01 leaves none dead in 66. The paper's objective and
 upstream's read the gate, which is renormalised over the top-K and so has no gradient for an expert outside it:
-five of six such checkpoints have a dead expert, even at more pressure than Switch.
+five of six such checkpoints have a dead expert, even at more pressure than Switch, and so do all six
+same-configuration B checkpoints, trained with upstream's recipe.
 
 The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
 reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n

@@ -4,23 +4,23 @@
 
 ## 基准范围
 
-- 数字来自 VisDrone2019-DET、imgsz 640、从零训练（无预训练权重）：候选选型用 25% 子集，确认实验用全量训练集。**这不是 COCO 数字**，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。
-- 短预算（从零训数十 epoch）离收敛很远。这里测到的差距只界定同预算下两个块的排序，不预测收敛后的差距。
+- 数字来自 VisDrone2019-DET、从零训练（无预训练权重）。结论取自协议运行：全量训练集、imgsz 800、120 epoch；早期选型用过 imgsz 640 与 25% 子集，只作同预算比较。**这不是 COCO 数字**，也不能读作对 ES-MoE-N 锚点（2.68M / 8.7 GFLOPs / 42.7 mAP，那是 COCO 指标）的复现。
+- 从零训 120 epoch 仍离收敛很远。这里测到的差距只界定同预算下的排序，不预测收敛后的差距。
 - 全部数字来自单机单卡。DDP 的机制已验证（`scripts/verify.py`：真实的 worker 文件在干净解释器里跑通；两个 gloo 进程各算各的辅助项、路由器梯度经 all-reduce 一致），但没有多卡训练出的精度数字。
-- 稀疏分发会把一批里没有任何图路由到的专家留在计算图外。在进程组里，这样的专家以零权重留在图中，DDP 因此不必搜索未用参数：ultralytics 在 `compile=True` 时用的设置（`find_unused_parameters=False`、`static_graph=True`）已用两个 gloo 进程验过，块在 TorchDynamo 下能编译、结果与 eager 一致（`tests/test_distributed.py`）。单进程仍直接跳过这些专家，与既有记录一致。本项目没有用 `compile=True` 实跑过多卡训练。
+- 稀疏分发会把一批里没有任何图路由到的专家留在计算图外。在进程组里，这样的专家以零权重留在图中，DDP 因此不必搜索未用参数：ultralytics 在 `compile=True` 时用的设置（`find_unused_parameters=False`、`static_graph=True`）已用两个 gloo 进程验过，块在 TorchDynamo 下能编译、结果与 eager 一致（`tests/test_distributed.py`）。单进程仍直接跳过这些专家。本项目没有用 `compile=True` 实跑过多卡训练。
 
 ## 方法范围
 
 - `ESMoE` 默认保持通道数（`c1 -> c1`）。上游的 `c1 -> c2` 已支持（`out_channels=`），`graft(..., out_channels=N)` 能把改宽的块嫁接进官方 yaml：官方 `parse_model` 对第三方模块认定输出宽度等于输入，所以块把输出包成单元素列表，交给其后写入的官方 `Index` 层，`parse_model` 读的是这一层声明的宽度。`N` 是字面宽度，不随 yaml 的 width 倍率缩放。
 - 通道在首次前向时推断。若模型在任何前向之前被 script、导出或 `state_dict` 加载，此时尚无专家权重可载入。
 - `attach_aux_loss` 会 patch 任务模型的类，并把权重同时保存在进程作用域：trainer 会重建模型，EMA 副本又在所有 callback 之前生成。因此一个进程一次只训练一种辅助损失设置；在从未调用 `attach_aux_loss` 的进程里加载 checkpoint，训练时不带辅助项。
-- 负载均衡项采用 Switch-Transformer 形式（`num_experts * sum(importance * load)`），**未**做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同。
+- 负载均衡项默认采用 Switch-Transformer 形式（`num_experts * sum(importance * load)`），**未**做幅度的 EMA 归一化，这一点与 YOLO-Master 的 mixture 控制器不同；`recipe="upstream"` 按上游做法加上了这一层。
 
 ## 协议与评测口径
 
 - 早期记录（imgsz 640、20/50/100 epoch）不在仓库的复现协议下，只用于同预算的相对比较与参数筛选。协议合规的全矩阵（imgsz 800、120 epoch、`patience=0`、完整 val 548 张，七代主干 × 三臂 × 三 seed 起）已跑完，下结论以这一组为准。默认臂的符号按**主干末端的结构**分组才是齐的——SPPF 系为正、末端换成注意力块后贴零、E2E 头转负；按版本号排并不单调（v10n −0.0002 低于 11n +0.0013），原「随代际单调衰减」的说法已撤回。逐格判定见[判读线](JUDGMENT.md)。
-- 训练记录里的指标由 ultralytics 自带评测器给出，`max_det` 取其默认值 300；`results/buckets.md` 另以 COCO 口径、maxDets=500 重评了协议合规的全部 107 个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。
-- 面积分档（small < 32²、medium 32²–96²、large ≥ 96²，按原图 GT 框算）是本项目采用的 COCO 式定义，不是 VisDrone 官方定义。v8n 三个 seed 的配对结果：默认接法下大目标一致变差（APl −0.0104，0/3 胜）、小目标召回一致变好（ARs +0.0026，3/3 胜）；`rewire=True` 把 APl 翻正（+0.0063，2/3）、AP50 全胜（3/3），幅度仍小。这一格局是 v8n 特有的：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上大目标方向随 seed 翻转。任何固定尺度的利害表述都过不了四代矩阵。
+- 训练记录里的指标由 ultralytics 自带评测器给出，`max_det` 取其默认值 300；`results/buckets.md` 另以 COCO 口径、maxDets=500 重评了协议合规的全部 131 个 checkpoint，两套数字不要混用，也都不能与 VisDrone 官方榜单直接比较。
+- 面积分档（small < 32²、medium 32²–96²、large ≥ 96²，按原图 GT 框算）是本项目采用的 COCO 式定义，不是 VisDrone 官方定义。v8n 三个 seed 的配对结果：默认接法下大目标一致变差（APl −0.0104，0/3 胜）、小目标召回一致变好（ARs +0.0026，3/3 胜）；`rewire=True` 把 APl 翻正（+0.0063，2/3）、AP50 全胜（3/3），幅度仍小。这一格局是 v8n 特有的：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上大目标方向随 seed 翻转。任何固定尺度的利害表述都过不了七代矩阵。
 
 ## 报告口径
 
@@ -31,11 +31,11 @@
 - **集中程度不预测精度，平衡项防的是专家死掉。** 81 个既有路由分析又有配对差值的运行上，主导专家的 top-1 份额（0.47–1.00）与配对 mAP50 差值（−0.0160–+0.0109）的相关系数是 **r = +0.044**，几乎无关。塌缩的另一层是专家死掉（进入 top-2 的图不足 1%）：权重 0.01 的 Switch 项在 66 个 checkpoint 上一个都没有；去掉平衡项的 6 个 checkpoint 全部死掉两个专家；读门控的目标（上游的，以及论文式 13）6 个里 5 个至少死掉一个，原因是按 top-K 重归一的门控对子集外的专家没有梯度。去掉平衡项对精度的影响在同配置重复运行的噪声之内：同 seed 6 个里 5 个更低，均值 −0.0050 与 −0.0027。该系数由 `scripts/routing.py --summarise` 算出，写在 `results/routing.md` 开头；判定见 `docs/JUDGMENT.md` 第六轮。
 - **同配置重复运行的差别与效应同量级。** 曦云 C500 上，同配置同 seed 跑两遍，120 epoch 后 mAP50 平均差 0.0045、最大差 0.0130（五对）；同样的重复在 4090 上逐位相同（一对，20 epoch）。七代主干的配对差值均值里，六个落在 0.0045 以内，只有 v5n 的 +0.0055 越过平均差、且仍在最大差 0.0130 之内。所以本文只对**方向**下结论，不对幅度下结论。表见 `results/summary.md` 末尾。
 - 每条记录里的指标是训练结束后对 `best.pt` 的那次复验，不是 `results.csv` 最后一行（最后一个 epoch）。两者相差通常在 0.001–0.005，方向一律是复验更高，因为最好的 epoch 少有落在最后。基线臂与 ESMoE 臂走同一条路径，配对差值不受影响。
-- 配对差值同时给 95% 置信区间（三 seed 即两个自由度，区间相应地宽）。除最短预算的那一格外，**所有区间都横跨零**——这就是三个 seed 能支持的精度。
+- 配对差值同时给 95% 置信区间（三 seed 即两个自由度，区间相应地宽）。三臂矩阵里除最短预算的那一格外，**所有区间都横跨零**，这就是三个 seed 能支持的精度。同配置对照里加块的差值有区间不跨零的，见判读线第七、八轮。
 
 ## 与上游和原论文的差异
 
-本包按 YOLO-Master 的 `ES_MOE` 结构复刻，逐项核对后有三处需要写明。
+本包按 YOLO-Master 的 `ES_MOE` 结构复刻，逐项核对后，下面几处需要写明。
 
 **平衡项：论文与上游一致，本包曾经读错了张量。** 上游 `ES_MOE` 把 `N · Σ usage²` 施加在 `DynamicRoutingLayer` 的返回值上，而它训练期返回的是 `_soft_top_k` 的输出——**掩码并重归一之后的门控**；论文式 (12) 的 μ 取的也是门控。两者因此是同一个目标，只差仿射变换：`Σ(μ−1/E)² = Σμ² − 1/E`，即 `L_论文 = (L_上游 − 1)/E²`，最小值点相同、梯度成正比。
 
@@ -45,7 +45,7 @@
 
 **原论文写了多样性目标，上游的块没有用它。** 论文（arXiv 2512.23273）称训练含一个鼓励专家互补的目标；上游代码里确有 `diversity_loss_coeff`，但它属于另一族块、默认值为 `0.0`，而 `ES_MOE` 自身一次都没引用它。也就是说，默认配置里没有任何一项在推动专家分工——这与本包七代实测「路由未学到按尺度分工」是一致的，不是本包独有的现象。
 
-**推理期的稀疏化程度可配，默认不同。** 上游 `dynamic_threshold` 默认 0.4，推理时进一步剪掉低置信专家（首位无条件保留，余下重归一）；本包实现了同一套规则但默认 `0.0`，即不剪——`results/` 里每一条记录都是这样量出来的，改默认会让它们不可比。要复刻上游取 `dynamic_threshold=0.4`。`sparse_inference=False` 对应上游的 `use_sparse_inference=False`。
+**推理期的稀疏化程度可配，默认不同。** 上游 `dynamic_threshold` 默认 0.4，推理时进一步剪掉低置信专家（首位无条件保留，余下重归一）；本包实现了同一套规则但默认 `0.0`，即不剪；同配置对照的 B 臂之外，`results/` 里的记录都是这样量出来的，改默认会让它们不可比。要复刻上游取 `dynamic_threshold=0.4`。`sparse_inference=False` 对应上游的 `use_sparse_inference=False`。
 
 **嫁接位置与论文的最终默认一致，块数不同。** 论文 §3.1 说块同时放进 Backbone 与 Neck，但 §4.3.1 的消融（Table 5）给出：Neck Only 58.2、Both 54.9、**Backbone Only 62.1**，作者据此写明「we adopt backbone-only ES-MoE as our default configuration」。本包只在主干嫁接，与该默认一致；此前写「论文放两处而我们只放一处」是漏读了那张表，予以更正。
 

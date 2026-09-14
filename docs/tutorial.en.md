@@ -130,7 +130,7 @@ them.
 
 ### Four balancing objectives ship with the block
 
-The default is **Switch** (`switch_balance`), as in 0.1.4 and in every record under `results/`:
+The default is **Switch** (`switch_balance`), as in 0.1.4 and in the default arms under `results/`:
 
 | objective | formula | reads |
 |:--:|:--:|:--:|

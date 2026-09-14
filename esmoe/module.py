@@ -157,7 +157,7 @@ SETTINGS = MappingProxyType(
     {
         # Upstream reads the gate (`gshard_balance`), which carries no gradient for an expert outside
         # the top-k. Switch reads the full softmax and is the one that kept every expert alive in the
-        # runs (docs/JUDGMENT.md, round six), besides being what every recorded run trained.
+        # runs (docs/JUDGMENT.md, round six), besides being what the matrix's default arms trained.
         "balance": switch_balance,
         "out_norm": False,  # upstream: always on
         "dense_training": False,  # upstream: always on
@@ -206,7 +206,7 @@ class ESMoE(nn.Module):
         dynamic_threshold: Outside training, drop a routed expert whose share of the mixture --
             its weight once the top-k is renormalised, not its raw probability -- falls below
             this, keeping the top one whatever its share, and renormalise what remains. Upstream
-            defaults to 0.4; 0 here leaves evaluation as every recorded run measured it.
+            defaults to 0.4; 0 here leaves evaluation as the runs of this package's own recipe measured it.
         options: The same settings as a mapping, plus ``expert`` and ``out_channels``, which is how
             a model.yaml carries them. The trainer rebuilds the model from that yaml, so a setting
             applied to the instance afterwards is discarded; one written into the config survives
@@ -322,7 +322,7 @@ class ESMoE(nn.Module):
         # search for unused ones only while `compile` is off; with it on, an expert no image in the
         # batch routed to fails the reducer on the next step. Such an expert joins at zero, the
         # gradient DDP would have written for it anyway. A single process keeps skipping it, so the
-        # optimiser keeps leaving it untouched, as it did for every recorded run.
+        # optimiser keeps leaving it untouched.
         joined = self.training and not every and dist.is_available() and dist.is_initialized()
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)

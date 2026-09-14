@@ -3,8 +3,8 @@
 Read from the fork's `nn/mixture_loss.py` (`_collect_mixture_aux_loss`, `CompositeCriterion`),
 `engine/trainer.py` (`build_optimizer`) and `engine/extensions/mixture.py` (`begin_epoch`). The fork
 applies all three to any model with a routed module, whatever its arguments say, so a comparison
-with it has to apply them as well. None of this is the package's default: every recorded run
-trained without it.
+with it has to apply them as well. None of this is the package's default: only the same-configuration
+B arms trained with it.
 """
 
 import torch

@@ -55,13 +55,13 @@ def attach_aux_loss(model, weight: float = 0.01, recipe: str = "esmoe"):
     Without this the aux term exists but never reaches ``backward``: a config key and a printed
     number prove nothing on their own.
 
-    ``recipe`` says how the model trains around the term. ``"esmoe"``, which every recorded run
-    used, adds ``weight`` times the term per image, the way the task loss counts. ``"upstream"`` is
-    what YOLO-Master's trainer does to any model with a routed block, for runs compared against it:
-    the term over a running mean of its magnitude, times ``weight``, capped at 3.0 and added to each
-    native loss term; router parameters at half the learning rate and outside Muon; experts frozen
-    for the first three epochs (`esmoe.upstream`). The last two live in the trainer, so they need
-    the one ``model.train()`` picks here.
+    ``recipe`` says how the model trains around the term. ``"esmoe"``, which every run outside the
+    same-configuration comparison used, adds ``weight`` times the term per image, the way the task
+    loss counts. ``"upstream"`` is what YOLO-Master's trainer does to any model with a routed block,
+    for runs compared against it: the term over a running mean of its magnitude, times ``weight``,
+    capped at 3.0 and added to each native loss term; router parameters at half the learning rate
+    and outside Muon; experts frozen for the first three epochs (`esmoe.upstream`). The last two
+    live in the trainer, so they need the one ``model.train()`` picks here.
     """
     core = _core(model)
     if next(blocks(core), None) is None:

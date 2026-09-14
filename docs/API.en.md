@@ -33,7 +33,7 @@ Puts the router load-balancing loss into the optimised training loss; training l
 
 `recipe` decides how the block and its term train:
 
-- `"esmoe"` (default, and what every recorded run used): the term times `weight`, counted per image the way the task loss counts.
+- `"esmoe"` (default, and what every run outside the same-configuration comparison used): the term times `weight`, counted per image the way the task loss counts.
 - `"upstream"`: the three things YOLO-Master's trainer does to any model with a routed module, for runs compared against it. The term is divided by a running mean of its own magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl; router parameters get a group of their own at half the learning rate, outside Muon; expert parameters stay frozen for the first 3 epochs. The last two happen in the trainer, so they apply to a YOLO model trained through `model.train()`. Constants and sources are in `esmoe.upstream`.
 
 ## collect_aux_loss
