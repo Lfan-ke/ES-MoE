@@ -161,12 +161,12 @@ Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `doc
 
     uv sync --group dev
     uv run pytest -q
-    uv run python scripts/capture_env.py                  # freeze environment into env/
+    uv run python scripts/capture_env.py                  # freeze environment into results/env/
     EPOCHS=20 FRACTION=0.25 SEEDS="0 1 2" bash scripts/sweep.sh
     uv run python scripts/report.py                       # results/summary.md
 
 Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). Read `limitations.md` before quoting any number. The 125
+metrics, artifact, status, limitation). Read the [limitations](https://lfan-ke.github.io/ES-MoE/en/limitations/) before quoting any number. The 125
 protocol checkpoints, with each run's arguments and per-epoch curve, live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
 branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
 

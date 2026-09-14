@@ -3,6 +3,9 @@ site_url: https://lfan-ke.github.io/ES-MoE/
 site_description: Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.
 repo_url: https://github.com/Lfan-ke/ES-MoE
 edit_uri: blob/main/docs/
+# Kept under .github so the root holds only the package; both paths are relative to this file.
+docs_dir: ../../docs
+site_dir: ../../site
 
 theme:
   name: material
@@ -26,7 +29,7 @@ theme:
     - search.suggest
 
 hooks:
-  - hooks/urls.py
+  - urls.py
 
 extra_css:
   - stylesheets/extra.css
