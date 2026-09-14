@@ -2,8 +2,7 @@
 
 ## Supported versions
 
-The latest release on PyPI. This project is a research-grade plugin; older versions receive no
-backports.
+The latest release on PyPI. Older versions receive no backports.
 
 ## Reporting a vulnerability
 
