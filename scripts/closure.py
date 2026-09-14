@@ -45,7 +45,7 @@ def pairing(runs) -> tuple[bool, str]:
 
 
 def seeds(runs) -> tuple[bool, str]:
-    """Three seeds per compared cell, or the shortfall is named on the limitations page."""
+    """Three seeds per compared cell, or the shortfall is named on the experiments page."""
     counts, compared = defaultdict(set), set()
     base = {arm(r) for r in runs if r["config"]["arch"] == "baseline"}
     for r in runs:
@@ -54,11 +54,11 @@ def seeds(runs) -> tuple[bool, str]:
         if r["config"]["arch"] != "baseline" and arm(r) in base:
             compared.add(variant(r))
     thin = sorted(name for name in compared if len(counts[name]) < 3)
-    page = (ROOT / "docs" / "limitations.md").read_text(encoding="utf-8")
+    page = (ROOT / "docs" / "experiments.md").read_text(encoding="utf-8")
     declared = all(name.split("@")[0] in page for name in thin)
     detail = f"{len(compared)} compared cells, {len(compared) - len(thin)} at three seeds or more"
     if thin:
-        note = "; declared in limitations" if declared else "; NOT declared"
+        note = "; declared on the experiments page" if declared else "; NOT declared"
         detail += f"; below three: {', '.join(thin)}" + note
     return not thin or declared, detail
 

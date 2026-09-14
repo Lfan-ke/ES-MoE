@@ -386,7 +386,7 @@ def main():
             "sha256": digest(weights),
         },
         "status": status,
-        "limitation": error or "single machine, single GPU; see docs/limitations.md",
+        "limitation": error or "single machine, single GPU; see docs/experiments.md",
     }
     out = ROOT / "results" / f"{experiment_id}.json"
     out.parent.mkdir(exist_ok=True)
