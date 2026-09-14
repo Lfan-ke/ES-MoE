@@ -15,8 +15,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from report import KEYS, dedupe, interval, load, paired  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
-SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg", "zh": ROOT / "docs" / "assets" / "effect.zh.svg"}
-ALIGN_OUT = {"en": ROOT / "docs" / "assets" / "alignment.svg", "zh": ROOT / "docs" / "assets" / "alignment.zh.svg"}
+SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg", "zh": ROOT / "docs" / "assets" / "effect-zh.svg"}
+ALIGN_OUT = {"en": ROOT / "docs" / "assets" / "alignment.svg", "zh": ROOT / "docs" / "assets" / "alignment-zh.svg"}
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.

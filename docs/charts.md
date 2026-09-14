@@ -22,6 +22,6 @@
 
 ## 对照臂
 
-![对照臂配对差值](assets/alignment.zh.svg)
+![对照臂配对差值](assets/alignment-zh.svg)
 
 上游块内的两个设置与它的四块布局，各对同 seed 基线量出。同样由 `scripts/charts.py` 生成。
