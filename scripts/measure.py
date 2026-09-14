@@ -22,7 +22,17 @@ ROOT = Path(__file__).resolve().parents[1]
 KEYS = ("metrics/precision(B)", "metrics/recall(B)", "metrics/mAP50(B)", "metrics/mAP50-95(B)")
 
 
-def rebuild(run: Path, cfg: Path, nc: int, out: Path):
+def trained_config(named: str, core) -> Path:
+    """The config a run trained: the one its arguments name, unless they name a checkpoint.
+
+    A resumed run's arguments name the checkpoint it resumed from; the config is the one that
+    checkpoint's model was built from.
+    """
+    path = Path(named)
+    return Path(core.yaml["yaml_file"]) if path.suffix == ".pt" else path
+
+
+def rebuild(run: Path, named: str, nc: int, out: Path):
     """The run's EMA weights on a model built from its config.
 
     A checkpoint written inside `torch.inference_mode` carries tensors that cannot be fused, which
@@ -34,6 +44,7 @@ def rebuild(run: Path, cfg: Path, nc: int, out: Path):
 
     saved = torch.load(run / "weights" / "last.pt", map_location="cpu", weights_only=False)
     core = saved.get("ema") or saved["model"]
+    cfg = trained_config(named, core)
     state = {k: torch.from_numpy(v.detach().cpu().float().numpy().copy()) for k, v in core.state_dict().items()}
     model = DetectionModel(str(cfg), ch=3, nc=nc, verbose=False)
     # The fork's trainer registers `_mixture_loss_ema_buf` on the model it trains, a running scale
@@ -48,7 +59,7 @@ def rebuild(run: Path, cfg: Path, nc: int, out: Path):
     path = out / "rebuilt" / f"{run.name}.pt"
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save({"model": model, "train_args": {}}, path)
-    return path, sum(p.numel() for p in model.parameters()), dropped
+    return path, cfg, sum(p.numel() for p in model.parameters()), dropped
 
 
 def measure(run: Path, args, out: Path) -> dict:
@@ -56,10 +67,9 @@ def measure(run: Path, args, out: Path) -> dict:
     from ultralytics import YOLO
 
     trained = yaml.safe_load((run / "args.yaml").read_text(encoding="utf-8"))
-    cfg = Path(trained["model"])
     data = Path(args.data or trained["data"])
     nc = len(yaml.safe_load(data.read_text(encoding="utf-8"))["names"])
-    path, parameters, dropped = rebuild(run, cfg, nc, out)
+    path, cfg, parameters, dropped = rebuild(run, trained["model"], nc, out)
     metrics = YOLO(str(path)).val(
         data=str(data),
         imgsz=args.imgsz or trained["imgsz"],
