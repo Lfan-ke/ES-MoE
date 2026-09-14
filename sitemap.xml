@@ -43,11 +43,18 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/charts/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/limitations/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/design/</loc>
         <lastmod>2026-09-14</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/limitations/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/limitations/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/design/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/design/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/experiments/</loc>
+        <lastmod>2026-09-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/experiments/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/results/</loc>
@@ -106,11 +113,18 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/charts/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/en/limitations/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/en/design/</loc>
         <lastmod>2026-09-14</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/limitations/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/limitations/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/design/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/design/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/en/experiments/</loc>
+        <lastmod>2026-09-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/1.0.0/en/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/1.0.0/experiments/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/1.0.0/en/results/</loc>
