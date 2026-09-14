@@ -8,6 +8,7 @@ says so rather than reporting a pass.
 """
 
 import json
+import re
 import subprocess
 import sys
 from collections import defaultdict
@@ -71,8 +72,10 @@ def preregistration() -> tuple[bool, str]:
         text=True,
     )
     commits = [line for line in out.stdout.splitlines() if line.strip()]
-    rounds = page.read_text(encoding="utf-8").count("预登记")
-    corrections = page.read_text(encoding="utf-8").count("### 更正")
+    text = page.read_text(encoding="utf-8")
+    # A registration is a section that says what it was declared before; prose citing one is not another.
+    rounds = len(re.findall(r"^#{2,3} (?!更正).*(?:预登记|声明于|之前）)", text, re.MULTILINE))
+    corrections = text.count("### 更正")
     detail = f"{rounds} registrations and {corrections} published corrections over {len(commits)} commits"
     return bool(commits and rounds), detail
 

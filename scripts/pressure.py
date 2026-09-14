@@ -9,6 +9,7 @@ converged to, at several spreads, because the answer depends on where the router
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -85,7 +86,7 @@ def main() -> int:
     by_backbone: dict[str, list[float]] = {}
     for stem, _, found in rows:
         if found[0]:
-            by_backbone.setdefault(stem.split("-")[0], []).append(found[2] / found[0])
+            by_backbone.setdefault(re.match(r"yolo-master-n|[^-]+", stem).group(0), []).append(found[2] / found[0])
     lines += ["", "| backbone | checkpoints | gate/switch |", "|:--|--:|--:|"]
     for name, ratios in sorted(by_backbone.items()):
         lines.append(f"| {name} | {len(ratios)} | {min(ratios):.2f}x - {max(ratios):.2f}x |")
