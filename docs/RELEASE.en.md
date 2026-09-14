@@ -22,7 +22,7 @@ Current version **1.0.0**, the first stable release. The public interface in `es
 ## Repository
 
 - The root holds only the package and what GitHub needs: `uv.lock` is no longer tracked and CI tests what resolves on the day; the docs config lives in `.github/docs/`, the contributing guide and code of conduct in `.github/`, and environment snapshots in `results/env/`.
-- The selection page has a Chinese edition (English at `SELECTION.en.md`); the issue and PR templates say what is required and end with a checklist; README uses absolute image and licence links, so the PyPI page shows them.
+- The selection page has a Chinese edition (English at `SELECTION.en.md`); the issue and PR templates say what is required and end with a checklist; README uses absolute image and licence links, so the PyPI page shows them; README and the tutorial call `scripts/sweep.sh` through `uv run bash`, so its `python3` is the project's environment; CITATION names the author `Cheng, Leo`, which is how GitHub's APA and BibTeX citations read.
 
 ## Earlier: 0.1.6
 

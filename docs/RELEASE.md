@@ -22,7 +22,7 @@
 ## 仓库
 
 - 根目录只留包与 GitHub 需要的文件：`uv.lock` 不再入库，CI 按当天解析到的依赖测试；文档站配置移到 `.github/docs/`；贡献指南与行为准则移到 `.github/`；环境快照移到 `results/env/`。
-- 选型页补中文版（英文在 `SELECTION.en.md`）；issue 与 PR 模板加上必填说明与确认清单；README 的图片与许可证改用绝对链接，PyPI 页面上也能显示。
+- 选型页补中文版（英文在 `SELECTION.en.md`）；issue 与 PR 模板加上必填说明与确认清单；README 的图片与许可证改用绝对链接，PyPI 页面上也能显示；README 与教程里的 `scripts/sweep.sh` 改为 `uv run bash` 调用，脚本里的 `python3` 取到的是项目环境；CITATION 的作者写成 `Cheng, Leo`，GitHub 生成的 APA 与 BibTeX 引用都是这一写法。
 
 ## 此前的 0.1.6
 
