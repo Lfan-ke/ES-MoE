@@ -845,7 +845,7 @@
 </tr>
 <tr>
 <td style="text-align: left;">「最大的提升出现在 VisDrone（+2.1）……印证了本设计对小目标的作用」</td>
-<td style="text-align: left;">架构之争本项目没有测。但<strong>分尺度的方向可以对</strong>：VisDrone 上按 COCO 式分档，两条为正的臂的增益都落在<strong>中、大目标</strong>，小目标近乎持平——<code>norm</code> 的 APs +0.0001／APm +0.0042／APl +0.0137，<code>dense</code> 的 APs +0.0000／APm +0.0052／APl +0.0081，默认臂 APs +0.0031／APl +0.0048。四块臂在 v10n 上各档为负（APs −0.0029、APm −0.0048、APl −0.0016），在 v5n 上小、中目标为负（APs −0.0038、APm −0.0047），大目标 +0.0046。<strong>在本口径下，这个块在 VisDrone 上买到的不是小目标。</strong></td>
+<td style="text-align: left;">架构之争本项目没有测。但<strong>分尺度的方向可以对</strong>：VisDrone 上按 COCO 式分档，两条为正的臂的增益都落在<strong>中、大目标</strong>，小目标近乎持平——<code>norm</code> 的 APs +0.0001／APm +0.0042／APl +0.0137，<code>dense</code> 的 APs +0.0000／APm +0.0052／APl +0.0081，默认臂 APs +0.0031／APl +0.0048。四块臂在 v10n 上各档为负（APs −0.0029、APm −0.0048、APl −0.0016），在 v5n 上小、中目标为负（APs −0.0038、APm −0.0047），大目标 +0.0046。<strong>在本口径下，这几条臂在 VisDrone 上买到的主要不是小目标。</strong> 同配置对照的两轮里（上游配方、主干四块），两个框架加块后小目标也涨，三个 seed 都为正（APs +0.0049、+0.0080，FP32 下 +0.0086、+0.0069），但都不及大目标。</td>
 </tr>
 </tbody>
 </table>
