@@ -34,7 +34,7 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-      # The locked environment carries a torch/torchvision pair the test matrix already proves;
+      # The synced environment carries the torch/torchvision pair the test matrix already proves;
       # installing the fork with --no-deps swaps only the ultralytics code underneath it.
       - run: uv sync --group dev
       - name: Swap in YOLO-Master's vendored ultralytics

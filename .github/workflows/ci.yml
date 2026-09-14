@@ -13,8 +13,9 @@ jobs:
       matrix:
         python: ["3.10", "3.12"]
         # The project claims to work across ultralytics releases that report loss items differently,
-        # so the older shape is tested on every push rather than trusted.
-        ultralytics: [locked, "8.4.101"]
+        # so the older shape is tested on every push rather than trusted. No lock file is tracked, so
+        # `latest` is whatever resolves that day and a breaking ultralytics release fails here first.
+        ultralytics: [latest, "8.4.101"]
     name: test (py${{ matrix.python }}, ultralytics ${{ matrix.ultralytics }})
     steps:
       - uses: actions/checkout@v7
@@ -24,10 +25,10 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: uv sync --group dev
       - name: Pin ultralytics
-        if: matrix.ultralytics != 'locked'
+        if: matrix.ultralytics != 'latest'
         run: uv pip install "ultralytics==${{ matrix.ultralytics }}"
       - name: Lint
-        if: matrix.ultralytics == 'locked'
+        if: matrix.ultralytics == 'latest'
         run: |
           uv run --no-sync ruff check .
           uv run --no-sync ruff format --check .
