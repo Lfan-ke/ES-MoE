@@ -1,13 +1,40 @@
 # Release notes
 
-Current version **1.0.0**, the first stable release. The public interface in `esmoe.__all__` now follows semantic versioning: incompatible changes come only with a major version.
+Current version **1.0.1**: every experimental result on the docs site gets a figure, the comparison with upstream and the paper is checked item by item against their sources, and the package metadata and release checks are completed. The public interface is the same as in 1.0.0.
 
-## Added
+## Fixed
+
+- **The delivery audit accepts only exact declarations.** `scripts/closure.py` decided whether a cell short of three seeds had been declared by substring, so a longer arm name made a shorter one count as declared; it now requires the full arm name in backticks on both language versions of the experiments page.
+- **Dataset statistics hold up.** `scripts/dataset.py` no longer stops on a box that runs slightly past the image edge, reads class names given as a list or a mapping, closes the archive when done, matches `.txt` and `.zip` in any case, and gains `--out`.
+- **Figures read only registered runs.** `scripts/charts.py` draws the same-configuration routing figure from each seed's registered B arm, so a repeat of that seed cannot add a row, and it stops when a result table it reads is missing or parses to nothing.
+- **Several things on the docs site.** The root 404 page was in English; old addresses under `latest/` redirected to the numbered copy; flowcharts stayed light in the dark scheme; charts were cramped on phones; pages of versions other than the latest gave no sign of it.
+
+## Documentation
+
+- **Every result has a figure.** The 25 interactive figures on the experiments page cover the dataset, the training protocol, selection, the seven backbone generations, area buckets, the alignment arms, the same-configuration comparison, the step-for-step trace, the released model, repeated runs, routing and balancing, and training cost; the selection, results and effect-chart pages embed the matching figures. Charts follow the dark scheme and tighten on narrow screens.
+- **Against upstream and the paper.** The "ES-MoE and YOLO" page was rewritten after checking every row against YOLO-Master `acce839c` and the paper: over ten corrections, including the block-analysis count, how closely the released model was reproduced, and whether the balance term counts in validation, plus comparisons for multi-GPU balancing, the precision fallback, pruning before export and the paper's loss setup.
+- **API and tutorial.** The API page adds the four balancing objectives, `DWExpert`, `blocks()` and the command line; the tutorial's custom training loop calls `clear_aux_loss()`; README gives the parameter and card-hour overhead as ranges across backbones.
+- **Figure data comes from scripts.** `scripts/dataset.py` counts the dataset archive into `results/dataset.json`, and `scripts/charts.py` writes the data every figure draws.
+- **Artifacts rerun on 1.0.1.** `results/verify.json` passes all ten checks, and the quick-start notebook's outputs come from a Linux run of the published 1.0.1.
+
+## Repository
+
+- **Package metadata.** The license is the SPDX expression `AGPL-3.0-only`, which PyPI now shows, and Python 3.10 to 3.12 classifiers are added.
+- **Release and CI checks.** A release fails when its tag disagrees with `esmoe.__version__`; CI builds the docs site in strict mode; a manual docs redeploy accepts only a tagged version from main, and only the newest tag moves `latest`.
+- **Tests.** New tests for the chart data, dataset statistics, audit declarations and version consistency, 335 in all.
+- **Checkpoints.** The `checkpoints` branch adds `last.pt` for 43 earlier protocol runs, 72 in all; each was added only after the same run's `best.pt` matched both its record and the hash already on the branch.
+- **Older docs.** The 0.1.6 docs stay online, and every page says it is not the latest release.
+
+## Earlier: 1.0.0
+
+The first stable release. The public interface in `esmoe.__all__` now follows semantic versioning: incompatible changes come only with a major version.
+
+### Added
 
 - **An interrupted run can finish.** `scripts/train.py --resume <last.pt>` continues from the run's own checkpoint instead of starting over, and accepts only a checkpoint that run saved in its own directory. Records gain `resumed`, with the checkpoint's path and hash, the epochs done and the seconds they took; `budget.gpu_hours` sums both stretches, and `budget.epochs_replayed` counts against the epochs that were left.
 - **Versioned documentation.** Each release has its own copy of the docs, `latest` points at the newest release and `dev` follows main; the old unversioned addresses redirect to `latest`.
 
-## Fixed
+### Fixed
 
 - **`scripts/measure.py` could not rebuild a resumed run.** Resuming rewrites `model` in the run's arguments to the checkpoint, which no model can be built from. The rebuild now uses the config the checkpoint records.
 - **A failed run was logged as done.** `scripts/train.py` exits non-zero after writing a failed record, and `scripts/queue.sh` logs it as FAILED.
@@ -16,17 +43,11 @@ Current version **1.0.0**, the first stable release. The public interface in `es
 - **The delivery audit and the balancing-pressure table.** `scripts/closure.py` counts registrations by section, so prose that mentions a pre-registration no longer counts again; `scripts/pressure.py` keeps `yolo-master-n` whole when grouping by backbone, and the table is regenerated from every routing record.
 - **The quick start's "Match upstream" missed two settings.** It now sets `balance="gshard"` and `recipe="upstream", weight=1.0`, and installs pandas when it is missing.
 
-## Data
+### Data
 
 - Both rounds of the same-configuration comparison with YOLO-Master are in: round seven at each framework's default precision, round eight with all four arms in FP32, and the noise floor measured by repeating FP32 runs on the same cards. Verdicts are on the [judgment lines](JUDGMENT.md).
 
-## Documentation
-
-- **Experiments and design pages.** The site gains an Experiments page (dataset, training protocol, pipeline, the eight rounds, the same-configuration comparison, repeated runs, routing and balancing) and an ES-MoE and YOLO page (the block's structure, training against inference, and item-by-item comparisons with YOLO-Master and its paper), with interactive figures throughout. The former limitations page is folded into the two, and its address redirects to the design page.
-- **Figure data comes from scripts.** `scripts/dataset.py` counts the dataset archive into `results/dataset.json`, and `scripts/charts.py` also writes the data every figure draws: the four same-configuration arms and their intervals, repeated runs, area buckets, selection, routing statistics, balancing pressure and training cost.
-- **Artifacts rerun on 1.0.0.** `results/verify.json` was rerun on 1.0.0 with all ten checks passing, and the quick-start notebook's outputs come from a Linux run of the published 1.0.0.
-
-## Repository
+### Repository
 
 - The root holds only the package and what GitHub needs: `uv.lock` is no longer tracked and CI tests what resolves on the day; the docs config lives in `.github/docs/`, the contributing guide and code of conduct in `.github/`, and environment snapshots in `results/env/`.
 - The selection page has a Chinese edition (English at `SELECTION.en.md`); the issue and PR templates say what is required and end with a checklist; README uses absolute image and licence links, so the PyPI page shows them; README and the tutorial call `scripts/sweep.sh` through `uv run bash`, so its `python3` is the project's environment; CITATION names the author `Cheng, Leo`, which is how GitHub's APA and BibTeX citations read.
