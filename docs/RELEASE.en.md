@@ -13,6 +13,7 @@ Current version **1.0.0**, the first stable release. The public interface in `es
 - **A failed run was logged as done.** `scripts/train.py` exits non-zero after writing a failed record, and `scripts/queue.sh` logs it as FAILED.
 - **Running a configuration again replaced the original experiment.** `scripts/report.py` and `scripts/same_config.py` keep the earliest-started record of a configuration and seed as the experiment and send later ones to the noise floor only; the floor is grouped by hardware stack and budget, precision included, so FP32 and mixed precision are computed apart.
 - **Entry points of the documentation site.** The Chinese charts page showed the English figure; the results page's contents broke at the embedded tables; the language switch on the `latest` home page went to an older version; the 404 page could not load search or the version list; the language links in each version's sitemap lacked a slash.
+- **The delivery audit and the balancing-pressure table.** `scripts/closure.py` counts registrations by section, so prose that mentions a pre-registration no longer counts again; `scripts/pressure.py` keeps `yolo-master-n` whole when grouping by backbone, and the table is regenerated from every routing record.
 - **The quick start's "Match upstream" missed two settings.** It now sets `balance="gshard"` and `recipe="upstream", weight=1.0`, and installs pandas when it is missing.
 
 ## Data

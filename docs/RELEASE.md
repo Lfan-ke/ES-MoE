@@ -13,6 +13,7 @@
 - **失败的运行在队列日志里记为完成。** `scripts/train.py` 写完失败记录后以非零码退出，`scripts/queue.sh` 据此记为 FAILED。
 - **同一配置再跑一遍，会顶替原来的实验。** `scripts/report.py` 与 `scripts/same_config.py` 在同一配置、同一 seed 的记录里保留最早开跑的那条作为实验，后跑的只进噪声底；噪声底按硬件栈与预算分组，预算含精度，FP32 与混合精度分开计算。
 - **文档站的几处入口。** 中文效果图页显示英文图；实验结果页的目录被嵌入的表格打断；`latest` 首页切换语言跳到旧版本；404 页取不到搜索与版本列表；各版本 sitemap 的语言链接少一个斜杠。
+- **交付审计与平衡压力表。** `scripts/closure.py` 按章节统计判读线页上的登记，正文里提到「预登记」不再重复计数；`scripts/pressure.py` 按主干分组时把 `yolo-master-n` 当作一个名字，表按现有全部路由记录重算。
 - **快速上手的「对齐上游」少了两项。** 补上 `balance="gshard"` 与 `recipe="upstream", weight=1.0`；缺 pandas 时一并安装。
 
 ## 数据
