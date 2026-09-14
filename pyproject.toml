@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,14 +8,17 @@ version = "1.0.0"
 description = "Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "AGPL-3.0-only" }
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
 authors = [{ name = "Leo Cheng" }]
 keywords = ["yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = ["torch>=2.0", "ultralytics>=8.3"]

@@ -35,6 +35,12 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
+      - name: Check the tag names the package version
+        # A tag that disagrees with the code would publish one version under another's name.
+        if: github.ref_type == 'tag'
+        run: |
+          version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' esmoe/__init__.py)
+          [ "${GITHUB_REF_NAME#v}" = "$version" ] || { echo "tag $GITHUB_REF_NAME, esmoe $version"; exit 1; }
       - run: uv build
       - uses: actions/upload-artifact@v7
         with:
