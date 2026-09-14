@@ -10,17 +10,17 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/dev/en/SELECTION/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/dev/en/design/">
       
       
-        <link rel="prev" href="../design/">
+        <link rel="prev" href="../API/">
       
       
-        <link rel="next" href="../experiments/">
+        <link rel="next" href="../SELECTION/">
       
       
         
-          <link rel="alternate" href="../../SELECTION/" hreflang="zh">
+          <link rel="alternate" href="../../design/" hreflang="zh">
         
           <link rel="alternate" href="./" hreflang="en">
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>Selection - ES-MoE</title>
+        <title>ES-MoE and YOLO - ES-MoE</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#selection-which-es-moe-configuration-ships-as-the-default" class="md-skip">
+        <a href="#es-moe-and-yolo" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Selection
+              ES-MoE and YOLO
             
           </span>
         </div>
@@ -168,7 +168,7 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../SELECTION/" hreflang="zh" class="md-select__link">
+            <a href="../../design/" hreflang="zh" class="md-select__link">
               中文
             </a>
           </li>
@@ -303,7 +303,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../design/" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -601,34 +601,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../design/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ES-MoE and YOLO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -648,7 +620,7 @@
   <span class="md-ellipsis">
     
   
-    Selection
+    ES-MoE and YOLO
   
 
     
@@ -666,7 +638,7 @@
   <span class="md-ellipsis">
     
   
-    Selection
+    ES-MoE and YOLO
   
 
     
@@ -692,10 +664,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#provenance" class="md-nav__link">
+  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Provenance
+        An ordinary YOLO and one with an ES-MoE block
       
     </span>
   </a>
@@ -703,10 +675,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#candidates-at-seed-0" class="md-nav__link">
+  <a href="#inside-the-block" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Candidates at seed 0
+        Inside the block
       
     </span>
   </a>
@@ -714,10 +686,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-across-seeds" class="md-nav__link">
+  <a href="#training-and-inference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation across seeds
+        Training and inference
       
     </span>
   </a>
@@ -725,10 +697,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-on-the-full-dataset" class="md-nav__link">
+  <a href="#against-yolo-master" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation on the full dataset
+        Against YOLO-Master
       
     </span>
   </a>
@@ -736,43 +708,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-a-longer-schedule-does-to-the-gap" class="md-nav__link">
+  <a href="#against-the-paper" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What a longer schedule does to the gap
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#across-backbones" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Across backbones
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-much-this-claim-is-worth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How much this claim is worth
+        Against the paper
       
     </span>
   </a>
@@ -783,6 +722,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Selection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1020,10 +987,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#provenance" class="md-nav__link">
+  <a href="#an-ordinary-yolo-and-one-with-an-es-moe-block" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Provenance
+        An ordinary YOLO and one with an ES-MoE block
       
     </span>
   </a>
@@ -1031,10 +998,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#candidates-at-seed-0" class="md-nav__link">
+  <a href="#inside-the-block" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Candidates at seed 0
+        Inside the block
       
     </span>
   </a>
@@ -1042,10 +1009,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-across-seeds" class="md-nav__link">
+  <a href="#training-and-inference" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation across seeds
+        Training and inference
       
     </span>
   </a>
@@ -1053,10 +1020,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-on-the-full-dataset" class="md-nav__link">
+  <a href="#against-yolo-master" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation on the full dataset
+        Against YOLO-Master
       
     </span>
   </a>
@@ -1064,43 +1031,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-a-longer-schedule-does-to-the-gap" class="md-nav__link">
+  <a href="#against-the-paper" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What a longer schedule does to the gap
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#across-backbones" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Across backbones
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-much-this-claim-is-worth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How much this claim is worth
+        Against the paper
       
     </span>
   </a>
@@ -1127,257 +1061,250 @@
   
 
 
-<h1 id="selection-which-es-moe-configuration-ships-as-the-default">Selection: which ES-MoE configuration ships as the default<a class="headerlink" href="#selection-which-es-moe-configuration-ships-as-the-default" title="Permanent link">&para;</a></h1>
-<p>Budget: VisDrone2019-DET <code>fraction=0.25</code>, imgsz 640, 20 epochs from scratch, batch 32, YOLOv8n,
-one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
-moves. Raw records are in <code>results/</code>, rendered by <code>scripts/report.py</code> into <code>results/summary.md</code>.</p>
-<h2 id="provenance">Provenance<a class="headerlink" href="#provenance" title="Permanent link">&para;</a></h2>
-<p>Public baseline <code>acce839c7e895d6b179de7f7093fa879e237cc7b</code> (YOLO-Master main at 2026-08-21
-23:59:59 +0800), release reference <code>YOLO-Master-v26.08</code> -&gt; <code>43d40117c...</code>; both carry
-<code>ultralytics 8.4.101</code>, which is exactly the stock version this toolkit runs against, so the plug-in
-path is measured on the same library version as the baseline. Records produced before the toolkit started stamping its own revision
-carry <code>git_ref = "0.1.0"</code>; every later record stamps the commit, ultralytics version and both
-locked baselines.</p>
-<h2 id="candidates-at-seed-0">Candidates at seed 0<a class="headerlink" href="#candidates-at-seed-0" title="Permanent link">&para;</a></h2>
+<h1 id="es-moe-and-yolo">ES-MoE and YOLO<a class="headerlink" href="#es-moe-and-yolo" title="Permanent link">&para;</a></h1>
+<p>Three things on this page: what an ES-MoE block adds to an ordinary YOLO, how the block computes in training and in inference, and how this package compares, item by item, with YOLO-Master's <code>ES_MOE</code> and with the claims of the paper.</p>
+<h2 id="an-ordinary-yolo-and-one-with-an-es-moe-block">An ordinary YOLO and one with an ES-MoE block<a class="headerlink" href="#an-ordinary-yolo-and-one-with-an-es-moe-block" title="Permanent link">&para;</a></h2>
+<p>Every layer of an ordinary YOLO has a fixed structure and fixed weights once trained, and every image goes through the same computation. An ES-MoE block puts several expert branches side by side at one position, and a small router picks k of them for each image; which ones it picks changes with the input.</p>
+<pre class="mermaid-chart"><code>flowchart LR
+    subgraph Y["ordinary YOLO"]
+        direction LR
+        y1["backbone"] --&gt; y2["SPPF / last stage"] --&gt; y3["neck"] --&gt; y4["head"]
+    end
+    subgraph E["with an ES-MoE block"]
+        direction LR
+        e1["backbone"] --&gt; e2["SPPF / last stage"] --&gt; e5["ES-MoE block&lt;br/&gt;2 of 4 experts"] --&gt; e3["neck"] --&gt; e4["head"]
+    end</code></pre>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">variant</th>
-<th style="text-align: center;">experts</th>
-<th style="text-align: center;">top_k</th>
-<th style="text-align: center;">aux weight</th>
-<th style="text-align: center;">params</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">delta vs baseline</th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">ordinary YOLO</th>
+<th style="text-align: center;">with an ES-MoE block</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">3.01M</td>
-<td style="text-align: center;">0.0933</td>
-<td style="text-align: center;">-</td>
+<td style="text-align: center;">computation per image</td>
+<td style="text-align: center;">fixed, the same for every image</td>
+<td style="text-align: center;">the router picks k experts per image, so it follows the input</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e2k1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.16M</td>
-<td style="text-align: center;">0.0903</td>
-<td style="text-align: center;">-0.0031</td>
+<td style="text-align: center;">kernels</td>
+<td style="text-align: center;">fixed per layer</td>
+<td style="text-align: center;">the side-by-side experts use different kernels (3, 5, 7, 9), hence different receptive fields</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k1</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0928</td>
-<td style="text-align: center;">-0.0006</td>
+<td style="text-align: center;">training loss</td>
+<td style="text-align: center;">box, cls, dfl</td>
+<td style="text-align: center;">plus a balance term (the auxiliary loss) that reaches backward()</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0950</td>
-<td style="text-align: center;">+0.0017</td>
+<td style="text-align: center;">parameters (YOLOv8n, 80 classes)</td>
+<td style="text-align: center;">3,157,200</td>
+<td style="text-align: center;">3,471,732, with one block at the end of the backbone</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2, aux off</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0938</td>
-<td style="text-align: center;">+0.0005</td>
-</tr>
-<tr>
-<td style="text-align: center;">esmoe-e8k2</td>
-<td style="text-align: center;">8</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.78M</td>
-<td style="text-align: center;">0.0934</td>
-<td style="text-align: center;">+0.0000</td>
+<td style="text-align: center;">placement</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">one block at the end of the backbone by default; <code>at="backbone_stages"</code> puts one after every stage</td>
 </tr>
 </tbody>
 </table>
-<h2 id="confirmation-across-seeds">Confirmation across seeds<a class="headerlink" href="#confirmation-across-seeds" title="Permanent link">&para;</a></h2>
+<h2 id="inside-the-block">Inside the block<a class="headerlink" href="#inside-the-block" title="Permanent link">&para;</a></h2>
+<pre class="mermaid-chart"><code>flowchart TB
+    X["input x&lt;br/&gt;B × C × H × W"] --&gt; G["global average pool"]
+    G --&gt; MLP["two-layer bottleneck&lt;br/&gt;C → C/8 → E"]
+    MLP --&gt; SM["softmax (logits clamped to ±30, in FP32)"]
+    SM --&gt; TK["keep the top k, renormalise into gate g"]
+    X --&gt; E1["expert 1&lt;br/&gt;3×3 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E2["expert 2&lt;br/&gt;5×5 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E3["expert 3&lt;br/&gt;7×7 depthwise → 1×1 → BN → SiLU"]
+    X --&gt; E4["expert 4&lt;br/&gt;9×9 depthwise → 1×1 → BN → SiLU"]
+    TK --&gt; MIX["y = Σ gᵢ · expertᵢ(x)"]
+    E1 --&gt; MIX
+    E2 --&gt; MIX
+    E3 --&gt; MIX
+    E4 --&gt; MIX
+    MIX --&gt; N["optional BN + SiLU (out_norm)"]
+    SM --&gt; AUX["balance term × weight&lt;br/&gt;added to the loss"]
+    TK --&gt; AUX</code></pre>
+<p>The router picks per image, not per pixel. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The output is the gated sum of the chosen experts, with the gate renormalised over the k chosen so it sums to one.</p>
+<h2 id="training-and-inference">Training and inference<a class="headerlink" href="#training-and-inference" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">arch</th>
-<th style="text-align: center;">seeds</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">mAP50-95</th>
-<th style="text-align: center;">paired mean delta</th>
-<th style="text-align: center;">wins</th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">training</th>
+<th style="text-align: center;">inference</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.0909 ± 0.0022</td>
-<td style="text-align: center;">0.0405 ± 0.0013</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
+<td style="text-align: center;">which experts compute</td>
+<td style="text-align: center;">only the chosen ones by default; with <code>dense_training=True</code> all of them, the unchosen multiplied by zero, as upstream does</td>
+<td style="text-align: center;">only the chosen ones</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.0930 ± 0.0022</td>
-<td style="text-align: center;">0.0410 ± 0.0013</td>
-<td style="text-align: center;">+0.0021 mAP50</td>
-<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">pruning</td>
+<td style="text-align: center;">none</td>
+<td style="text-align: center;">with <code>dynamic_threshold</code> above zero, an expert whose renormalised share falls below it is skipped too (the leader always stays)</td>
+</tr>
+<tr>
+<td style="text-align: center;">balance term</td>
+<td style="text-align: center;">computed and added to the loss</td>
+<td style="text-align: center;">not computed</td>
+</tr>
+<tr>
+<td style="text-align: center;">export</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">every expert enters a traced graph, so the exported model still routes per input</td>
 </tr>
 </tbody>
 </table>
-<h2 id="confirmation-on-the-full-dataset">Confirmation on the full dataset<a class="headerlink" href="#confirmation-on-the-full-dataset" title="Permanent link">&para;</a></h2>
-<p>The selection above was made on a 25% subset. Rerunning the chosen arm against its baseline on the
-<strong>full</strong> VisDrone training set, same 20-epoch budget, three seeds:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">arch</th>
-<th style="text-align: center;">seeds</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">mAP50-95</th>
-<th style="text-align: center;">paired mean delta</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.1496 ± 0.0022</td>
-<td style="text-align: center;">0.0759 ± 0.0016</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.1517 ± 0.0011</td>
-<td style="text-align: center;">0.0778 ± 0.0005</td>
-<td style="text-align: center;">+0.0021 mAP50, +0.0019 mAP50-95</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-</tbody>
-</table>
-<p>Per-seed mAP50 deltas are +0.0001, +0.0032, +0.0029. The mean gain is the same as on the subset,
-and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so quadrupling the data
-did not wash the effect out. One seed is effectively a tie, which bounds how large
-the effect is: small, consistent in sign, not reliable per single run.</p>
-<h2 id="what-a-longer-schedule-does-to-the-gap">What a longer schedule does to the gap<a class="headerlink" href="#what-a-longer-schedule-does-to-the-gap" title="Permanent link">&para;</a></h2>
-<p>The same pair at three budgets on the full training set, three seeds each:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">budget</th>
-<th style="text-align: center;">baseline mAP50</th>
-<th style="text-align: center;">esmoe mAP50</th>
-<th style="text-align: center;">paired deltas</th>
-<th style="text-align: center;">mean</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">20 epochs</td>
-<td style="text-align: center;">0.1496</td>
-<td style="text-align: center;">0.1517</td>
-<td style="text-align: center;">+0.0001, +0.0032, +0.0029</td>
-<td style="text-align: center;">+0.0021</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">50 epochs</td>
-<td style="text-align: center;">0.2131</td>
-<td style="text-align: center;">0.2143</td>
-<td style="text-align: center;">-0.0003, +0.0009, +0.0032</td>
-<td style="text-align: center;">+0.0013</td>
-<td style="text-align: center;">2/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">100 epochs</td>
-<td style="text-align: center;">0.3004</td>
-<td style="text-align: center;">0.3050</td>
-<td style="text-align: center;">+0.0104, -0.0011, +0.0044</td>
-<td style="text-align: center;">+0.0046</td>
-<td style="text-align: center;">2/3</td>
-</tr>
-</tbody>
-</table>
-<p>The mean is positive at every budget, but it does not move in one direction with the schedule, and
-the spread between seeds widens as the schedule grows: at 100 epochs the three paired deltas span
-+0.0104 to -0.0011. Read together, these runs support a small positive mean effect and rule out a
-reliable per-run improvement. They do not support a claim about where the effect goes at
-convergence, in either direction.</p>
-<h2 id="across-backbones">Across backbones<a class="headerlink" href="#across-backbones" title="Permanent link">&para;</a></h2>
-<p>The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">backbone</th>
-<th style="text-align: center;">baseline mAP50</th>
-<th style="text-align: center;">esmoe mAP50</th>
-<th style="text-align: center;">paired deltas</th>
-<th style="text-align: center;">mean</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">YOLOv8n</td>
-<td style="text-align: center;">0.1496</td>
-<td style="text-align: center;">0.1517</td>
-<td style="text-align: center;">+0.0001, +0.0032, +0.0029</td>
-<td style="text-align: center;">+0.0021</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">YOLO11n</td>
-<td style="text-align: center;">0.1419</td>
-<td style="text-align: center;">0.1410</td>
-<td style="text-align: center;">+0.0045, -0.0033, -0.0040</td>
-<td style="text-align: center;">-0.0009</td>
-<td style="text-align: center;">1/3</td>
-</tr>
-</tbody>
-</table>
-<p><strong>The gain does not transfer.</strong> On YOLO11n the block is a wash at best: one seed gains, two lose, and
-the mean is slightly negative on both mAP50 and mAP50-95. A plausible reading is that YOLO11n
-already carries attention (C2PSA) at the end of its backbone, so a routed mixture inserted at the
-same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
-and it is offered as a hypothesis, not a finding.</p>
-<p>What this bounds, at this 20-epoch selection stage: the compatibility matrix in the README is a statement
-about <strong>mechanics</strong> - the block builds, trains and back-propagates its auxiliary loss on every generation.
-It is not a claim that the accuracy effect exists on all of them. The accuracy evidence at this stage is
-YOLOv8n only; the seven-generation protocol matrix that followed is on the judgment-lines page.</p>
-<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><code>ESMoE(num_experts=4, top_k=2)</code> with <code>attach_aux_loss(weight=0.01)</code> is the shipped default.</p>
+<p>In backpropagation the gradient returns through y = Σ gᵢ · expertᵢ(x) along two paths:</p>
 <ul>
-<li>Routing to a single expert loses to the baseline (e2k1, e4k1). The gain needs a mixture, not a
-  switch, at this budget.</li>
-<li>Doubling the expert count to 8 buys nothing measurable and costs 13% more parameters than e4k2.</li>
-<li>Turning the auxiliary loss off costs 0.0012 mAP50 at the same parameter count, which is the
-  concrete argument for wiring it into the optimised loss rather than merely computing it.</li>
+<li><strong>To the experts</strong>: scaled by the gate gᵢ. An expert not chosen for an image has a zero gate there, and a zero gradient.</li>
+<li><strong>To the router</strong>: the detection loss shifts weight among the chosen experts through ∂L/∂gᵢ. Choosing is a discrete step with no gradient, and the renormalised gate depends only on the chosen logits, so an expert outside the top k gets nothing from the detection loss.</li>
 </ul>
-<h2 id="how-much-this-claim-is-worth">How much this claim is worth<a class="headerlink" href="#how-much-this-claim-is-worth" title="Permanent link">&para;</a></h2>
-<p>The per-arm standard deviations overlap; only the paired per-seed comparison supports the
-ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
-mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
-the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
-configuration differ by 0.0045 on average, as large as the effect. How the experiments were run is on
-<a href="../experiments/#scope">Experiments</a>.</p>
+<p>That is what the balance term is for: it has to read the full softmax probabilities to give the unchosen experts a gradient. This package's default Switch form reads the probabilities; upstream's term and the paper's eq. 13 read the renormalised gate and give experts outside the top k exactly zero. Without a balance term, or with one that reads the gate, experts die; see <a href="../experiments/#routing-and-balancing">Experiments</a>.</p>
+<h2 id="against-yolo-master">Against YOLO-Master<a class="headerlink" href="#against-yolo-master" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">item</th>
+<th style="text-align: center;">YOLO-Master <code>ES_MOE</code></th>
+<th style="text-align: center;">esmoe <code>ESMoE</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">installation</td>
+<td style="text-align: center;">use the ultralytics fork YOLO-Master maintains</td>
+<td style="text-align: center;"><code>pip install esmoe</code>, on official ultralytics</td>
+</tr>
+<tr>
+<td style="text-align: center;">backbones</td>
+<td style="text-align: center;">the fork's own configs such as <code>yolo-master-n</code></td>
+<td style="text-align: center;">official YOLOv5n, v8n, v9t, v10n, 11n, 12n and 26n, plus <code>yolo-master-n</code> on the fork</td>
+</tr>
+<tr>
+<td style="text-align: center;">adding it</td>
+<td style="text-align: center;">write the model config by hand</td>
+<td style="text-align: center;"><code>equip</code> registers, grafts, builds and wires the loss in one call; <code>graft</code> renumbers layer references; <code>esmoe graft</code> on the command line</td>
+</tr>
+<tr>
+<td style="text-align: center;">placement</td>
+<td style="text-align: center;">one block after every backbone stage, four in all</td>
+<td style="text-align: center;">one at the end of the backbone by default; <code>at="backbone_stages"</code> reproduces the four; layer indices work too</td>
+</tr>
+<tr>
+<td style="text-align: center;">experts</td>
+<td style="text-align: center;">depthwise-separable convolutions, kernels 3, 5, 7, 9</td>
+<td style="text-align: center;">the same; <code>expert=</code> takes any callable</td>
+</tr>
+<tr>
+<td style="text-align: center;">router</td>
+<td style="text-align: center;">global pool + two-layer bottleneck (reduction 8), logits clamped to ±30</td>
+<td style="text-align: center;">the same</td>
+</tr>
+<tr>
+<td style="text-align: center;">gate</td>
+<td style="text-align: center;">softmax → top-k → renormalise</td>
+<td style="text-align: center;">the same (the paper's eq. 8 and eq. 9 are tested equivalent)</td>
+</tr>
+<tr>
+<td style="text-align: center;">output normalisation</td>
+<td style="text-align: center;">BN + SiLU</td>
+<td style="text-align: center;"><code>out_norm=True</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">experts in training</td>
+<td style="text-align: center;">all of them compute</td>
+<td style="text-align: center;"><code>dense_training=True</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">inference pruning</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
+<td style="text-align: center;">the same rule, 0.0 (off) by default, configurable</td>
+</tr>
+<tr>
+<td style="text-align: center;">balance term</td>
+<td style="text-align: center;">GShard on the gate; the trainer normalises it by its own running magnitude and caps it at 3.0</td>
+<td style="text-align: center;">four to choose from (Switch, GShard on the gate, GShard on the probabilities, the paper's eq. 13), Switch at weight 0.01 by default; <code>recipe="upstream"</code> reproduces the upstream trainer's normalisation, cap, half learning rate for the router and three frozen-expert epochs</td>
+</tr>
+<tr>
+<td style="text-align: center;">custom balance terms</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">any <code>(probs, gate) -&gt; scalar</code> function, stored in the config by qualified name</td>
+</tr>
+<tr>
+<td style="text-align: center;">where settings live</td>
+<td style="text-align: center;">constructor arguments</td>
+<td style="text-align: center;">in the model config line, so they survive the trainer's rebuild; <code>scripts/blockspec.py</code> reads them back from a checkpoint</td>
+</tr>
+<tr>
+<td style="text-align: center;">export</td>
+<td style="text-align: center;">every expert enters a traced ONNX / TorchScript graph</td>
+<td style="text-align: center;">the same, and the exported model is verified to route per input</td>
+</tr>
+<tr>
+<td style="text-align: center;">multi-GPU</td>
+<td style="text-align: center;">DDP</td>
+<td style="text-align: center;">DDP and <code>compile=True</code> settings verified; an unrouted expert stays in the graph at zero weight</td>
+</tr>
+<tr>
+<td style="text-align: center;">verification</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">319 tests, including parity tests that rewrite upstream's and the paper's operators from source and compare bit for bit; ten real-training checks in <code>scripts/verify.py</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">accuracy against each other</td>
+<td style="text-align: center;">the block adds +0.0104 on the fork (FP32, 3/3)</td>
+<td style="text-align: center;">the block adds +0.0095 on official ultralytics (FP32, 3/3); the gap between the two, +0.0009, is equivalent</td>
+</tr>
+</tbody>
+</table>
+<p>YOLO-Master's released model, rebuilt with this package, matches the fork bit for bit on all four COCO val2017 metrics.</p>
+<h2 id="against-the-paper">Against the paper<a class="headerlink" href="#against-the-paper" title="Permanent link">&para;</a></h2>
+<p>The claims in the YOLO-Master paper (<a href="https://arxiv.org/abs/2512.23273">arXiv 2512.23273</a>) that the experiments here can test, with what was observed. The conditions are on <a href="../experiments/#scope">Experiments</a>: VisDrone, nano-scale backbones, 120 epochs from scratch.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">the paper's claim</th>
+<th style="text-align: center;">observed here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">soft top-k (eq. 8) in training, hard top-k (eq. 9) in inference</td>
+<td style="text-align: center;">mathematically equivalent, verified by tests: a softmax over the top-k subset equals a full softmax masked and renormalised</td>
+</tr>
+<tr>
+<td style="text-align: center;">the balance term (eq. 12, 13) prevents expert collapse</td>
+<td style="text-align: center;">eq. 13 and upstream's gate-reading GShard differ by an affine map; a term that reads the gate has zero gradient outside the top k, and 5 of 6 such checkpoints have dead experts; the default Switch form has 1 in 69</td>
+</tr>
+<tr>
+<td style="text-align: center;">the router makes experts specialise by scale</td>
+<td style="text-align: center;">across 108 block analyses, the correlation of routing probability with object size runs from −0.49 to +0.59 and flips sign across seeds; the leading expert's kernel takes all four values</td>
+</tr>
+<tr>
+<td style="text-align: center;">simple regions activate fewer experts</td>
+<td style="text-align: center;">in training exactly k are active; only inference-time pruning with <code>dynamic_threshold</code> changes with the input</td>
+</tr>
+<tr>
+<td style="text-align: center;">the block goes into both backbone and neck (§3.1)</td>
+<td style="text-align: center;">the paper's Table 5 makes backbone-only the default (62.1 against 54.9 for both), which is this package's default too</td>
+</tr>
+<tr>
+<td style="text-align: center;">one block per backbone stage, four in all</td>
+<td style="text-align: center;">under this package's default recipe four blocks trail one (v10n −0.0071, v5n −0.0049, both 0/3); with upstream's full recipe the four blocks are effective in both frameworks</td>
+</tr>
+<tr>
+<td style="text-align: center;">output normalisation (the Norm in eq. 2)</td>
+<td style="text-align: center;">+0.0038 on v5n (3/3); offered as the <code>out_norm</code> switch</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1413,7 +1340,7 @@ configuration differ by 0.0045 on average, as large as the effect. How the exper
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../design/" class="md-footer__link md-footer__link--prev" aria-label="Previous: ES-MoE and YOLO">
+          <a href="../API/" class="md-footer__link md-footer__link--prev" aria-label="Previous: API">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1423,20 +1350,20 @@ configuration differ by 0.0045 on average, as large as the effect. How the exper
                 Previous
               </span>
               <div class="md-ellipsis">
-                ES-MoE and YOLO
+                API
               </div>
             </div>
           </a>
         
         
           
-          <a href="../experiments/" class="md-footer__link md-footer__link--next" aria-label="Next: Experiments">
+          <a href="../SELECTION/" class="md-footer__link md-footer__link--next" aria-label="Next: Selection">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Experiments
+                Selection
               </div>
             </div>
             <div class="md-footer__button md-icon">

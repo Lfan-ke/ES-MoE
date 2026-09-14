@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="zh" class="no-js">
   <head>
     
       <meta charset="utf-8">
@@ -10,35 +10,35 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/dev/en/SELECTION/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/dev/design/">
       
       
-        <link rel="prev" href="../design/">
+        <link rel="prev" href="../API/">
       
       
-        <link rel="next" href="../experiments/">
+        <link rel="next" href="../SELECTION/">
       
       
         
-          <link rel="alternate" href="../../SELECTION/" hreflang="zh">
+          <link rel="alternate" href="./" hreflang="zh">
         
-          <link rel="alternate" href="./" hreflang="en">
+          <link rel="alternate" href="../en/design/" hreflang="en">
         
       
       
-      <link rel="icon" href="../../assets/logo.svg">
+      <link rel="icon" href="../assets/logo.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Selection - ES-MoE</title>
+        <title>ES-MoE 与 YOLO - ES-MoE</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -57,9 +57,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -84,8 +84,8 @@
     <div data-md-component="skip">
       
         
-        <a href="#selection-which-es-moe-configuration-ships-as-the-default" class="md-skip">
-          Skip to content
+        <a href="#es-moe-与-yolo" class="md-skip">
+          跳转至
         </a>
       
     </div>
@@ -101,10 +101,10 @@
       
 
 <header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../" title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="ES-MoE" class="md-header__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Selection
+              ES-MoE 与 YOLO
             
           </span>
         </div>
@@ -161,20 +161,20 @@
       <div class="md-header__option">
   <div class="md-select">
     
-    <button class="md-header__button md-icon" aria-label="Select language">
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
     </button>
     <div class="md-select__inner">
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../../SELECTION/" hreflang="zh" class="md-select__link">
+            <a href="./" hreflang="zh" class="md-select__link">
               中文
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="en" class="md-select__link">
+            <a href="../en/design/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
@@ -195,16 +195,16 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
-      <nav class="md-search__options" aria-label="Search">
+      <nav class="md-search__options" aria-label="查找">
         
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
@@ -217,7 +217,7 @@
       <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
-            Initializing search
+            正在初始化搜索引擎
           </div>
           <ol class="md-search-result__list" role="presentation"></ol>
         </div>
@@ -229,7 +229,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/Lfan-ke/ES-MoE" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -250,7 +250,7 @@
         
           
             
-<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
       
@@ -260,13 +260,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
     
   
-  Overview
+  概览
 
       </a>
     </li>
@@ -285,7 +285,7 @@
           
   
   
-  Usage
+  使用
 
         </a>
       </li>
@@ -303,11 +303,11 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../design/" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
           
   
   
-  Design
+  设计
 
         </a>
       </li>
@@ -327,7 +327,7 @@
           
   
   
-  Experiments
+  实验
 
         </a>
       </li>
@@ -347,7 +347,7 @@
   
     
   
-  Release notes
+  发布说明
 
       </a>
     </li>
@@ -374,18 +374,18 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../" title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
+    <a href=".." title="ES-MoE" class="md-nav__button md-logo" aria-label="ES-MoE" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../assets/logo.svg" alt="logo">
 
     </a>
     ES-MoE
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/Lfan-ke/ES-MoE" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/Lfan-ke/ES-MoE" title="前往仓库" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -405,14 +405,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Overview
+    概览
   
 
     
@@ -455,7 +455,7 @@
   <span class="md-ellipsis">
     
   
-    Usage
+    使用
   
 
     
@@ -471,7 +471,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Usage
+    使用
   
 
           </label>
@@ -491,7 +491,7 @@
   <span class="md-ellipsis">
     
   
-    Tutorial
+    教程
   
 
     
@@ -575,7 +575,7 @@
   <span class="md-ellipsis">
     
   
-    Design
+    设计
   
 
     
@@ -591,39 +591,11 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    设计
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../design/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ES-MoE and YOLO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -648,7 +620,7 @@
   <span class="md-ellipsis">
     
   
-    Selection
+    ES-MoE 与 YOLO
   
 
     
@@ -666,7 +638,7 @@
   <span class="md-ellipsis">
     
   
-    Selection
+    ES-MoE 与 YOLO
   
 
     
@@ -678,7 +650,7 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+<nav class="md-nav md-nav--secondary" aria-label="目录">
   
   
   
@@ -687,15 +659,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      目录
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#provenance" class="md-nav__link">
+  <a href="#普通-yolo-与加了-es-moe-块的-yolo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Provenance
+        普通 YOLO 与加了 ES-MoE 块的 YOLO
       
     </span>
   </a>
@@ -703,10 +675,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#candidates-at-seed-0" class="md-nav__link">
+  <a href="#块的内部" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Candidates at seed 0
+        块的内部
       
     </span>
   </a>
@@ -714,10 +686,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-across-seeds" class="md-nav__link">
+  <a href="#训练与推理" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation across seeds
+        训练与推理
       
     </span>
   </a>
@@ -725,10 +697,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-on-the-full-dataset" class="md-nav__link">
+  <a href="#与-yolo-master-的对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation on the full dataset
+        与 YOLO-Master 的对照
       
     </span>
   </a>
@@ -736,43 +708,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-a-longer-schedule-does-to-the-gap" class="md-nav__link">
+  <a href="#与论文正文的对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What a longer schedule does to the gap
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#across-backbones" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Across backbones
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-much-this-claim-is-worth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How much this claim is worth
+        与论文正文的对照
       
     </span>
   </a>
@@ -783,6 +722,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SELECTION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    选型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -825,7 +792,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    实验
   
 
     
@@ -841,7 +808,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Experiments
+    实验
   
 
           </label>
@@ -861,7 +828,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    实验总览
   
 
     
@@ -889,7 +856,7 @@
   <span class="md-ellipsis">
     
   
-    Effect chart
+    效果图
   
 
     
@@ -917,7 +884,7 @@
   <span class="md-ellipsis">
     
   
-    Results
+    实验结果
   
 
     
@@ -945,7 +912,7 @@
   <span class="md-ellipsis">
     
   
-    Judgment lines
+    判读线
   
 
     
@@ -980,7 +947,7 @@
   <span class="md-ellipsis">
     
   
-    Release notes
+    发布说明
   
 
     
@@ -1006,7 +973,7 @@
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+<nav class="md-nav md-nav--secondary" aria-label="目录">
   
   
   
@@ -1015,15 +982,15 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      目录
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#provenance" class="md-nav__link">
+  <a href="#普通-yolo-与加了-es-moe-块的-yolo" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Provenance
+        普通 YOLO 与加了 ES-MoE 块的 YOLO
       
     </span>
   </a>
@@ -1031,10 +998,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#candidates-at-seed-0" class="md-nav__link">
+  <a href="#块的内部" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Candidates at seed 0
+        块的内部
       
     </span>
   </a>
@@ -1042,10 +1009,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-across-seeds" class="md-nav__link">
+  <a href="#训练与推理" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation across seeds
+        训练与推理
       
     </span>
   </a>
@@ -1053,10 +1020,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#confirmation-on-the-full-dataset" class="md-nav__link">
+  <a href="#与-yolo-master-的对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation on the full dataset
+        与 YOLO-Master 的对照
       
     </span>
   </a>
@@ -1064,43 +1031,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-a-longer-schedule-does-to-the-gap" class="md-nav__link">
+  <a href="#与论文正文的对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What a longer schedule does to the gap
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#across-backbones" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Across backbones
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#decision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-much-this-claim-is-worth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How much this claim is worth
+        与论文正文的对照
       
     </span>
   </a>
@@ -1127,257 +1061,250 @@
   
 
 
-<h1 id="selection-which-es-moe-configuration-ships-as-the-default">Selection: which ES-MoE configuration ships as the default<a class="headerlink" href="#selection-which-es-moe-configuration-ships-as-the-default" title="Permanent link">&para;</a></h1>
-<p>Budget: VisDrone2019-DET <code>fraction=0.25</code>, imgsz 640, 20 epochs from scratch, batch 32, YOLOv8n,
-one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
-moves. Raw records are in <code>results/</code>, rendered by <code>scripts/report.py</code> into <code>results/summary.md</code>.</p>
-<h2 id="provenance">Provenance<a class="headerlink" href="#provenance" title="Permanent link">&para;</a></h2>
-<p>Public baseline <code>acce839c7e895d6b179de7f7093fa879e237cc7b</code> (YOLO-Master main at 2026-08-21
-23:59:59 +0800), release reference <code>YOLO-Master-v26.08</code> -&gt; <code>43d40117c...</code>; both carry
-<code>ultralytics 8.4.101</code>, which is exactly the stock version this toolkit runs against, so the plug-in
-path is measured on the same library version as the baseline. Records produced before the toolkit started stamping its own revision
-carry <code>git_ref = "0.1.0"</code>; every later record stamps the commit, ultralytics version and both
-locked baselines.</p>
-<h2 id="candidates-at-seed-0">Candidates at seed 0<a class="headerlink" href="#candidates-at-seed-0" title="Permanent link">&para;</a></h2>
+<h1 id="es-moe-与-yolo">ES-MoE 与 YOLO<a class="headerlink" href="#es-moe-与-yolo" title="Permanent link">&para;</a></h1>
+<p>本页讲三件事：ES-MoE 块比普通 YOLO 多了什么，块在训练和推理时各怎么算，以及本包与 YOLO-Master 的 <code>ES_MOE</code>、与论文正文逐项对照的结果。</p>
+<h2 id="普通-yolo-与加了-es-moe-块的-yolo">普通 YOLO 与加了 ES-MoE 块的 YOLO<a class="headerlink" href="#普通-yolo-与加了-es-moe-块的-yolo" title="Permanent link">&para;</a></h2>
+<p>普通 YOLO 的每一层结构和权重训练完就固定了，每张图都走同一套计算。ES-MoE 块在同一个位置并排放几个专家分支，由一个小路由器按图挑其中 k 个参与计算，挑谁随输入而变。</p>
+<pre class="mermaid-chart"><code>flowchart LR
+    subgraph Y["普通 YOLO"]
+        direction LR
+        y1["主干"] --&gt; y2["SPPF / 末端层"] --&gt; y3["颈部"] --&gt; y4["检测头"]
+    end
+    subgraph E["加 ES-MoE 块"]
+        direction LR
+        e1["主干"] --&gt; e2["SPPF / 末端层"] --&gt; e5["ES-MoE 块&lt;br/&gt;4 个专家选 2 个"] --&gt; e3["颈部"] --&gt; e4["检测头"]
+    end</code></pre>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">variant</th>
-<th style="text-align: center;">experts</th>
-<th style="text-align: center;">top_k</th>
-<th style="text-align: center;">aux weight</th>
-<th style="text-align: center;">params</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">delta vs baseline</th>
+<th style="text-align: center;">对比项</th>
+<th style="text-align: center;">普通 YOLO</th>
+<th style="text-align: center;">加 ES-MoE 块</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">3.01M</td>
-<td style="text-align: center;">0.0933</td>
-<td style="text-align: center;">-</td>
+<td style="text-align: center;">每张图的计算</td>
+<td style="text-align: center;">固定，所有图相同</td>
+<td style="text-align: center;">路由器按图选 k 个专家，随输入变化</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e2k1</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.16M</td>
-<td style="text-align: center;">0.0903</td>
-<td style="text-align: center;">-0.0031</td>
+<td style="text-align: center;">卷积核</td>
+<td style="text-align: center;">逐层写死</td>
+<td style="text-align: center;">并排的专家核大小不同（3、5、7、9），感受野不同</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k1</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0928</td>
-<td style="text-align: center;">-0.0006</td>
+<td style="text-align: center;">训练损失</td>
+<td style="text-align: center;">box、cls、dfl</td>
+<td style="text-align: center;">另加一项平衡项（辅助损失），进入反向传播</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0950</td>
-<td style="text-align: center;">+0.0017</td>
+<td style="text-align: center;">参数量（YOLOv8n，80 类配置）</td>
+<td style="text-align: center;">3,157,200</td>
+<td style="text-align: center;">3,471,732，块只加在主干末端一处</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2, aux off</td>
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.00</td>
-<td style="text-align: center;">3.33M</td>
-<td style="text-align: center;">0.0938</td>
-<td style="text-align: center;">+0.0005</td>
-</tr>
-<tr>
-<td style="text-align: center;">esmoe-e8k2</td>
-<td style="text-align: center;">8</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.01</td>
-<td style="text-align: center;">3.78M</td>
-<td style="text-align: center;">0.0934</td>
-<td style="text-align: center;">+0.0000</td>
+<td style="text-align: center;">放在哪</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">默认主干末端一块；<code>at="backbone_stages"</code> 在每个 stage 后各放一块</td>
 </tr>
 </tbody>
 </table>
-<h2 id="confirmation-across-seeds">Confirmation across seeds<a class="headerlink" href="#confirmation-across-seeds" title="Permanent link">&para;</a></h2>
+<h2 id="块的内部">块的内部<a class="headerlink" href="#块的内部" title="Permanent link">&para;</a></h2>
+<pre class="mermaid-chart"><code>flowchart TB
+    X["输入特征 x&lt;br/&gt;B × C × H × W"] --&gt; G["全局平均池化"]
+    G --&gt; MLP["两层小网络&lt;br/&gt;C → C/8 → E"]
+    MLP --&gt; SM["softmax（logits 先夹到 ±30，按 FP32 算）"]
+    SM --&gt; TK["取前 k 个，重归一成门控 g"]
+    X --&gt; E1["专家 1&lt;br/&gt;3×3 逐通道 → 1×1 → BN → SiLU"]
+    X --&gt; E2["专家 2&lt;br/&gt;5×5 逐通道 → 1×1 → BN → SiLU"]
+    X --&gt; E3["专家 3&lt;br/&gt;7×7 逐通道 → 1×1 → BN → SiLU"]
+    X --&gt; E4["专家 4&lt;br/&gt;9×9 逐通道 → 1×1 → BN → SiLU"]
+    TK --&gt; MIX["y = Σ gᵢ · 专家ᵢ(x)"]
+    E1 --&gt; MIX
+    E2 --&gt; MIX
+    E3 --&gt; MIX
+    E4 --&gt; MIX
+    MIX --&gt; N["可选：BN + SiLU（out_norm）"]
+    SM --&gt; AUX["平衡项 × weight&lt;br/&gt;加进总损失"]
+    TK --&gt; AUX</code></pre>
+<p>路由按整张图选，不按像素选。每个专家是深度可分离卷积：k×k 逐通道卷积负责空间，1×1 逐点卷积负责混通道。输出是被选中专家输出的加权和，门控在选中的 k 个上重归一、和为 1。</p>
+<h2 id="训练与推理">训练与推理<a class="headerlink" href="#训练与推理" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: center;">arch</th>
-<th style="text-align: center;">seeds</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">mAP50-95</th>
-<th style="text-align: center;">paired mean delta</th>
-<th style="text-align: center;">wins</th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;">训练</th>
+<th style="text-align: center;">推理</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.0909 ± 0.0022</td>
-<td style="text-align: center;">0.0405 ± 0.0013</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
+<td style="text-align: center;">计算哪些专家</td>
+<td style="text-align: center;">默认只算被选中的；<code>dense_training=True</code> 时全部计算、未选中的乘 0，与上游一致</td>
+<td style="text-align: center;">只算被选中的专家</td>
 </tr>
 <tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.0930 ± 0.0022</td>
-<td style="text-align: center;">0.0410 ± 0.0013</td>
-<td style="text-align: center;">+0.0021 mAP50</td>
-<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">剪枝</td>
+<td style="text-align: center;">不剪</td>
+<td style="text-align: center;"><code>dynamic_threshold</code> 大于 0 时，重归一后份额低于阈值的专家也跳过（首位保留）</td>
+</tr>
+<tr>
+<td style="text-align: center;">平衡项</td>
+<td style="text-align: center;">计算并加进总损失</td>
+<td style="text-align: center;">不计算</td>
+</tr>
+<tr>
+<td style="text-align: center;">导出</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">追踪时全部专家都进图，导出的模型仍按输入路由</td>
 </tr>
 </tbody>
 </table>
-<h2 id="confirmation-on-the-full-dataset">Confirmation on the full dataset<a class="headerlink" href="#confirmation-on-the-full-dataset" title="Permanent link">&para;</a></h2>
-<p>The selection above was made on a 25% subset. Rerunning the chosen arm against its baseline on the
-<strong>full</strong> VisDrone training set, same 20-epoch budget, three seeds:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">arch</th>
-<th style="text-align: center;">seeds</th>
-<th style="text-align: center;">mAP50</th>
-<th style="text-align: center;">mAP50-95</th>
-<th style="text-align: center;">paired mean delta</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">baseline</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.1496 ± 0.0022</td>
-<td style="text-align: center;">0.0759 ± 0.0016</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td style="text-align: center;">esmoe-e4k2</td>
-<td style="text-align: center;">0,1,2</td>
-<td style="text-align: center;">0.1517 ± 0.0011</td>
-<td style="text-align: center;">0.0778 ± 0.0005</td>
-<td style="text-align: center;">+0.0021 mAP50, +0.0019 mAP50-95</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-</tbody>
-</table>
-<p>Per-seed mAP50 deltas are +0.0001, +0.0032, +0.0029. The mean gain is the same as on the subset,
-and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so quadrupling the data
-did not wash the effect out. One seed is effectively a tie, which bounds how large
-the effect is: small, consistent in sign, not reliable per single run.</p>
-<h2 id="what-a-longer-schedule-does-to-the-gap">What a longer schedule does to the gap<a class="headerlink" href="#what-a-longer-schedule-does-to-the-gap" title="Permanent link">&para;</a></h2>
-<p>The same pair at three budgets on the full training set, three seeds each:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">budget</th>
-<th style="text-align: center;">baseline mAP50</th>
-<th style="text-align: center;">esmoe mAP50</th>
-<th style="text-align: center;">paired deltas</th>
-<th style="text-align: center;">mean</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">20 epochs</td>
-<td style="text-align: center;">0.1496</td>
-<td style="text-align: center;">0.1517</td>
-<td style="text-align: center;">+0.0001, +0.0032, +0.0029</td>
-<td style="text-align: center;">+0.0021</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">50 epochs</td>
-<td style="text-align: center;">0.2131</td>
-<td style="text-align: center;">0.2143</td>
-<td style="text-align: center;">-0.0003, +0.0009, +0.0032</td>
-<td style="text-align: center;">+0.0013</td>
-<td style="text-align: center;">2/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">100 epochs</td>
-<td style="text-align: center;">0.3004</td>
-<td style="text-align: center;">0.3050</td>
-<td style="text-align: center;">+0.0104, -0.0011, +0.0044</td>
-<td style="text-align: center;">+0.0046</td>
-<td style="text-align: center;">2/3</td>
-</tr>
-</tbody>
-</table>
-<p>The mean is positive at every budget, but it does not move in one direction with the schedule, and
-the spread between seeds widens as the schedule grows: at 100 epochs the three paired deltas span
-+0.0104 to -0.0011. Read together, these runs support a small positive mean effect and rule out a
-reliable per-run improvement. They do not support a claim about where the effect goes at
-convergence, in either direction.</p>
-<h2 id="across-backbones">Across backbones<a class="headerlink" href="#across-backbones" title="Permanent link">&para;</a></h2>
-<p>The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: center;">backbone</th>
-<th style="text-align: center;">baseline mAP50</th>
-<th style="text-align: center;">esmoe mAP50</th>
-<th style="text-align: center;">paired deltas</th>
-<th style="text-align: center;">mean</th>
-<th style="text-align: center;">wins</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: center;">YOLOv8n</td>
-<td style="text-align: center;">0.1496</td>
-<td style="text-align: center;">0.1517</td>
-<td style="text-align: center;">+0.0001, +0.0032, +0.0029</td>
-<td style="text-align: center;">+0.0021</td>
-<td style="text-align: center;">3/3</td>
-</tr>
-<tr>
-<td style="text-align: center;">YOLO11n</td>
-<td style="text-align: center;">0.1419</td>
-<td style="text-align: center;">0.1410</td>
-<td style="text-align: center;">+0.0045, -0.0033, -0.0040</td>
-<td style="text-align: center;">-0.0009</td>
-<td style="text-align: center;">1/3</td>
-</tr>
-</tbody>
-</table>
-<p><strong>The gain does not transfer.</strong> On YOLO11n the block is a wash at best: one seed gains, two lose, and
-the mean is slightly negative on both mAP50 and mAP50-95. A plausible reading is that YOLO11n
-already carries attention (C2PSA) at the end of its backbone, so a routed mixture inserted at the
-same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
-and it is offered as a hypothesis, not a finding.</p>
-<p>What this bounds, at this 20-epoch selection stage: the compatibility matrix in the README is a statement
-about <strong>mechanics</strong> - the block builds, trains and back-propagates its auxiliary loss on every generation.
-It is not a claim that the accuracy effect exists on all of them. The accuracy evidence at this stage is
-YOLOv8n only; the seven-generation protocol matrix that followed is on the judgment-lines page.</p>
-<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
-<p><code>ESMoE(num_experts=4, top_k=2)</code> with <code>attach_aux_loss(weight=0.01)</code> is the shipped default.</p>
+<p>反向传播时，梯度沿 y = Σ gᵢ · 专家ᵢ(x) 分两路回去：</p>
 <ul>
-<li>Routing to a single expert loses to the baseline (e2k1, e4k1). The gain needs a mixture, not a
-  switch, at this budget.</li>
-<li>Doubling the expert count to 8 buys nothing measurable and costs 13% more parameters than e4k2.</li>
-<li>Turning the auxiliary loss off costs 0.0012 mAP50 at the same parameter count, which is the
-  concrete argument for wiring it into the optimised loss rather than merely computing it.</li>
+<li><strong>到专家</strong>：梯度乘上门控 gᵢ。没被选中的专家在这张图上门控为 0，梯度也为 0。</li>
+<li><strong>到路由器</strong>：检测损失通过 ∂L/∂gᵢ 调整被选中专家之间的权重。选谁是离散操作，没有梯度；重归一后的门控只依赖被选中那几个的 logits，所以没进前 k 的专家从检测损失拿不到梯度。</li>
 </ul>
-<h2 id="how-much-this-claim-is-worth">How much this claim is worth<a class="headerlink" href="#how-much-this-claim-is-worth" title="Permanent link">&para;</a></h2>
-<p>The per-arm standard deviations overlap; only the paired per-seed comparison supports the
-ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
-mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
-the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
-configuration differ by 0.0045 on average, as large as the effect. How the experiments were run is on
-<a href="../experiments/#scope">Experiments</a>.</p>
+<p>这就是平衡项存在的原因：它要读完整的 softmax 概率，才能让没被选中的专家也收到梯度。本包默认的 Switch 形式读概率；上游与论文式 13 读重归一后的门控，对前 k 之外的专家梯度恒为零，实测去掉平衡项或只读门控时会出现死专家，见<a href="../experiments/#路由与平衡项">实验</a>。</p>
+<h2 id="与-yolo-master-的对照">与 YOLO-Master 的对照<a class="headerlink" href="#与-yolo-master-的对照" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">项</th>
+<th style="text-align: center;">YOLO-Master <code>ES_MOE</code></th>
+<th style="text-align: center;">esmoe <code>ESMoE</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">安装方式</td>
+<td style="text-align: center;">使用 YOLO-Master 维护的 ultralytics 分支</td>
+<td style="text-align: center;"><code>pip install esmoe</code>，装在官方 ultralytics 上</td>
+</tr>
+<tr>
+<td style="text-align: center;">支持的主干</td>
+<td style="text-align: center;">分支自带的 <code>yolo-master-n</code> 等配置</td>
+<td style="text-align: center;">官方 YOLOv5n、v8n、v9t、v10n、11n、12n、26n 七代，以及 YOLO-Master 分支上的 <code>yolo-master-n</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">接入</td>
+<td style="text-align: center;">手写模型配置</td>
+<td style="text-align: center;"><code>equip</code> 一个调用完成注册、嫁接、构建与接损失；<code>graft</code> 自动重编号层引用；命令行 <code>esmoe graft</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">块的位置</td>
+<td style="text-align: center;">主干每个 stage 后一块，共四块</td>
+<td style="text-align: center;">默认主干末端一块；<code>at="backbone_stages"</code> 复刻四块；也可给层号</td>
+</tr>
+<tr>
+<td style="text-align: center;">专家</td>
+<td style="text-align: center;">深度可分离卷积，核 3、5、7、9</td>
+<td style="text-align: center;">相同；<code>expert=</code> 可换成任意可调用对象</td>
+</tr>
+<tr>
+<td style="text-align: center;">路由器</td>
+<td style="text-align: center;">全局池化 + 两层瓶颈（reduction 8），logits 夹到 ±30</td>
+<td style="text-align: center;">相同</td>
+</tr>
+<tr>
+<td style="text-align: center;">门控</td>
+<td style="text-align: center;">softmax → top-k → 重归一</td>
+<td style="text-align: center;">相同（论文式 8 与式 9 已由测试验证等价）</td>
+</tr>
+<tr>
+<td style="text-align: center;">输出归一化</td>
+<td style="text-align: center;">有 BN + SiLU</td>
+<td style="text-align: center;"><code>out_norm=True</code> 打开</td>
+</tr>
+<tr>
+<td style="text-align: center;">训练期专家</td>
+<td style="text-align: center;">全部计算</td>
+<td style="text-align: center;"><code>dense_training=True</code> 对齐</td>
+</tr>
+<tr>
+<td style="text-align: center;">推理剪枝</td>
+<td style="text-align: center;"><code>dynamic_threshold=0.4</code></td>
+<td style="text-align: center;">同一规则，默认 0.0 不剪，可配</td>
+</tr>
+<tr>
+<td style="text-align: center;">平衡项</td>
+<td style="text-align: center;">GShard，读门控；训练器按自身幅值的滑动平均归一并封顶 3.0</td>
+<td style="text-align: center;">四种可选（Switch、GShard 读门控、GShard 读概率、论文式 13），默认 Switch、权重 0.01；<code>recipe="upstream"</code> 复刻上游训练器的归一、封顶、路由器半学习率与前三个 epoch 冻结专家</td>
+</tr>
+<tr>
+<td style="text-align: center;">自定义平衡目标</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">任意 <code>(probs, gate) -&gt; 标量</code> 函数，按模块限定名写进配置</td>
+</tr>
+<tr>
+<td style="text-align: center;">设置的保存</td>
+<td style="text-align: center;">配置参数</td>
+<td style="text-align: center;">设置写进模型配置行，训练器重建模型后仍生效；<code>scripts/blockspec.py</code> 可从检查点读回</td>
+</tr>
+<tr>
+<td style="text-align: center;">导出</td>
+<td style="text-align: center;">ONNX / TorchScript 追踪时全部专家进图</td>
+<td style="text-align: center;">相同，另验证导出后的模型仍按输入路由</td>
+</tr>
+<tr>
+<td style="text-align: center;">多卡</td>
+<td style="text-align: center;">DDP</td>
+<td style="text-align: center;">DDP 与 <code>compile=True</code> 的设置已验证，未被路由的专家以零权重留在图里</td>
+</tr>
+<tr>
+<td style="text-align: center;">验证</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">319 项测试，其中与上游、论文的对照测试按源码重写算子逐位比较；<code>scripts/verify.py</code> 十项真训练检查</td>
+</tr>
+<tr>
+<td style="text-align: center;">精度对照</td>
+<td style="text-align: center;">块在分支上 +0.0104（FP32，3/3）</td>
+<td style="text-align: center;">块在官方 ultralytics 上 +0.0095（FP32，3/3）；两者之差 +0.0009，等效</td>
+</tr>
+</tbody>
+</table>
+<p>YOLO-Master 发布的模型用本包重建之后，在 COCO val2017 上的四项指标与分支上逐位一致。</p>
+<h2 id="与论文正文的对照">与论文正文的对照<a class="headerlink" href="#与论文正文的对照" title="Permanent link">&para;</a></h2>
+<p>YOLO-Master 论文（<a href="https://arxiv.org/abs/2512.23273">arXiv 2512.23273</a>）中能在本仓库的实验里检验的主张，逐条列出观测结果。实验条件见<a href="../experiments/#口径">实验</a>：VisDrone、nano 量级主干、从零训练 120 epoch。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">论文的主张</th>
+<th style="text-align: center;">本仓库的观测</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">soft top-k（式 8）训练、hard top-k（式 9）推理</td>
+<td style="text-align: center;">数学等价，已由测试验证：对 top-k 子集做 softmax 等于全体 softmax 后掩码重归一</td>
+</tr>
+<tr>
+<td style="text-align: center;">平衡项（式 12、13）防止专家塌缩</td>
+<td style="text-align: center;">式 13 与上游的 GShard 读门控，二者只差一个仿射变换；读门控的目标对前 k 之外的专家梯度为零，6 个检查点里 5 个出现死专家；本包默认的 Switch 形式在 69 个检查点里只有 1 个</td>
+</tr>
+<tr>
+<td style="text-align: center;">路由引导专家按尺度分工</td>
+<td style="text-align: center;">108 次块分析里，路由概率与目标尺寸的相关在 −0.49 到 +0.59 之间，跨 seed 变号；主导专家的核在四种里都出现过</td>
+</tr>
+<tr>
+<td style="text-align: center;">简单区域激活更少专家</td>
+<td style="text-align: center;">训练期激活数恒为 k；随输入变化的只有推理期的 <code>dynamic_threshold</code> 剪枝</td>
+</tr>
+<tr>
+<td style="text-align: center;">块同时放进主干与颈部（§3.1）</td>
+<td style="text-align: center;">论文 Table 5 把只放主干定为默认（62.1 对两处都放的 54.9），本包默认与之一致</td>
+</tr>
+<tr>
+<td style="text-align: center;">主干每 stage 一块、共四块</td>
+<td style="text-align: center;">在本包默认配方下，四块比单块差（v10n −0.0071、v5n −0.0049，均 0/3）；换成上游的完整配方后，四块在两个框架里都判有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">输出归一化（式 2 的 Norm）</td>
+<td style="text-align: center;">v5n 上 +0.0038（3/3）；本包作为 <code>out_norm</code> 开关提供</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1401,7 +1328,7 @@ configuration differ by 0.0045 on average, as large as the effect. How the exper
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
-  Back to top
+  回到页面顶部
 </button>
         
       </main>
@@ -1410,33 +1337,33 @@ configuration differ by 0.0045 on average, as large as the effect. How the exper
   
     
       
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      <nav class="md-footer__inner md-grid" aria-label="页脚" >
         
           
-          <a href="../design/" class="md-footer__link md-footer__link--prev" aria-label="Previous: ES-MoE and YOLO">
+          <a href="../API/" class="md-footer__link md-footer__link--prev" aria-label="上一页: API">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
             </div>
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Previous
+                上一页
               </span>
               <div class="md-ellipsis">
-                ES-MoE and YOLO
+                API
               </div>
             </div>
           </a>
         
         
           
-          <a href="../experiments/" class="md-footer__link md-footer__link--next" aria-label="Next: Experiments">
+          <a href="../SELECTION/" class="md-footer__link md-footer__link--next" aria-label="下一页: 选型">
             <div class="md-footer__title">
               <span class="md-footer__direction">
-                Next
+                下一页
               </span>
               <div class="md-ellipsis">
-                Experiments
+                选型
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1473,24 +1400,24 @@ configuration differ by 0.0045 on average, as large as the effect. How the exper
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
-        <script src="../../javascripts/data.js"></script>
+        <script src="../javascripts/data.js"></script>
       
-        <script src="../../javascripts/charts.js"></script>
+        <script src="../javascripts/charts.js"></script>
       
-        <script src="../../javascripts/figures.js"></script>
+        <script src="../javascripts/figures.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
       
-        <script src="../../javascripts/diagrams.js"></script>
+        <script src="../javascripts/diagrams.js"></script>
       
     
   </body>

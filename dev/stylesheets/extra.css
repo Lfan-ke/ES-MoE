@@ -158,7 +158,7 @@
 /* Proof strip: three claims, each with the evidence that backs it. */
 .md-typeset ul.es-proof {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   gap: 1rem;
   margin: 1.8rem 0 0;
   padding: 0;
@@ -278,4 +278,110 @@
   border-color: var(--md-primary-fg-color);
   background: var(--md-primary-fg-color);
   color: var(--md-primary-bg-color);
+}
+
+/* Figures on the experiments page: one height per role so a row of two stays level. */
+.esmoe-figure {
+  width: 100%;
+  height: 380px;
+  margin: 1.2rem 0 1.6rem;
+  border: 1px solid var(--es-edge);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--md-default-bg-color) 92%, var(--es-route) 8%);
+}
+
+.esmoe-figure--tall {
+  height: 460px;
+}
+
+.es-duo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+}
+
+.es-duo .esmoe-figure {
+  margin: 0.4rem 0 1rem;
+}
+
+/* Headline numbers: the figure is the claim, the caption says what it counts. */
+.md-typeset .es-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.8rem;
+  margin: 1.4rem 0 2rem;
+}
+
+.md-typeset .es-stats > div {
+  padding: 0.9rem 1rem 0.8rem;
+  border: 1px solid var(--es-edge);
+  border-radius: 0.7rem;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--es-signal) 10%, transparent), transparent 60%);
+}
+
+.md-typeset .es-stats strong {
+  display: block;
+  font-family: "Space Grotesk", var(--md-text-font);
+  font-size: 1.9rem;
+  line-height: 1.05;
+  font-weight: 600;
+  color: var(--es-signal);
+}
+
+.md-typeset .es-stats span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  opacity: 0.8;
+}
+
+/* Signposts on the home page: each card is a page, and the whole card is the link. */
+.md-typeset .es-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.9rem;
+  margin: 1.2rem 0 2rem;
+}
+
+.md-typeset .es-cards > a {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--es-edge);
+  border-radius: 0.7rem;
+  color: inherit;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.md-typeset .es-cards > a:hover,
+.md-typeset .es-cards > a:focus-visible {
+  border-color: var(--es-route);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--es-route) 18%, transparent);
+}
+
+.md-typeset .es-cards strong {
+  display: block;
+  font-family: "Space Grotesk", var(--md-text-font);
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: var(--md-typeset-a-color);
+}
+
+.md-typeset .es-cards span {
+  font-size: 0.76rem;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-typeset .es-cards > a {
+    transition: none;
+  }
+  .md-typeset .es-cards > a:hover {
+    transform: none;
+  }
+}
+
+[lang="zh"] .md-typeset .es-stats strong,
+[lang="zh"] .md-typeset .es-cards strong {
+  letter-spacing: 0;
 }
