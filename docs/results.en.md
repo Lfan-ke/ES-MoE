@@ -23,7 +23,7 @@ so every difference is paired inside one.
 The metrics are re-measured by `scripts/measure.py`: each run's model rebuilt from the config it
 trained, loaded with the EMA weights in its `last.pt`, and evaluated with one set of validation
 settings, so neither framework's own validation enters the comparison; what each trainer measured
-stays in its record as `metrics_by_trainer`. Verdicts follow round seven of the
+stays in its record as `metrics_by_trainer`. Verdicts follow rounds seven (mixed precision) and eight (FP32) of the
 [judgment lines](JUDGMENT.md).
 
 --8<-- "results/same_config.md"

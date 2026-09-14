@@ -485,3 +485,25 @@ Seed 2's A0 was stopped three times on gpu2 by the same device fault (`Xnack Err
 **Known at the time of writing**: at 114 epochs the trainer measured 0.3574 mAP50. The other eleven round-eight runs are done, at mAP50 as their trainers measured it: A 0.3682 / 0.3674 / 0.3686, A0 0.3568 / 0.3580 (seeds 0 and 1), B 0.3627 / 0.3613 / 0.3699, C 0.3600 / 0.3508 / 0.3564. None has been re-measured by `scripts/measure.py` yet.
 
 **The lines, the use of the two noise floors and the predictions are unchanged.**
+
+### Round eight's verdict (2026-09-14, three seeds; the FP32 floor waits on the repeats)
+
+Metrics are `scripts/measure.py`'s re-measurements, all four arms in FP32 throughout, with paired deltas taken within a card (machine f's three C500s, one seed per card). Seed 2's A0 finished from its 114-epoch checkpoint; see the addendum above.
+
+| delta (mAP50) | mean | 95% CI | positive | verdict (mixed-precision floor) |
+|:--:|:--:|:--:|:--:|:--:|
+| A − B | +0.0046 | [−0.0071, +0.0164] | 2/3 | **undetermined** |
+| A − A0 | +0.0104 | [+0.0015, +0.0193] | 3/3 | effective |
+| B − C | +0.0095 | [−0.0047, +0.0237] | 3/3 | **undetermined** |
+| (A − A0) − (B − C) | +0.0009 | [−0.0221, +0.0239] | 2/3 | equivalent |
+
+- **Prediction 1 (A − B is equivalent) is not confirmed.** The mean is +0.00462, 0.0001 above the equivalence line of 0.0045; the seeds disagree in sign and the interval straddles zero, so the pre-registered reading is "undetermined". Round seven, under mixed precision, had −0.0069 with all three seeds negative; in FP32 the sign flips and round seven's negative gap does not recur. The two rounds ran on different machines and are compared in direction only.
+- **Prediction 2 (the difference of differences is equivalent, with A − A0 and B − C positive together) holds.**
+- **Prediction 3 (A − A0 and B − C both still effective) is not confirmed.** A − A0 is still effective. B − C is positive on all three seeds, but seed 0 gives only +0.0042 and the interval straddles zero, so it is undetermined. The pre-registered refutation, either one turning ineffective, did not happen.
+- **Prediction 4 (every one of B's three checkpoints still has a block with a dead expert) holds.** The pattern is round seven's: in each checkpoint three of the four blocks have a dead expert and block 3 never does; eight of the nine blocks with a dead expert always pick the same top-2, and the mean routing entropy over all twelve blocks is 98.8% of the maximum.
+
+**Two more observations**:
+- Training cost. B takes 10.6 hours a run in FP32, the same as A; round seven's gap between A and B (10.8 against 4.7 hours) came from precision, not from the implementation.
+- Area buckets (`results/buckets.md`). In both frameworks the blocks lift large objects most, in each case on two seeds of three. On upstream's side small objects still gain least (+0.0086 against +0.0106 for medium); on this package's side small and medium gain about the same (+0.0069 and +0.0063). In round seven small objects gained least on both sides (+0.0049, +0.0080).
+
+**FP32 noise floor**: once the five repeats have run and been re-measured, the table above is judged again against the mean / largest gap measured in FP32, as pre-registered, and both verdicts are reported where the bands differ.
