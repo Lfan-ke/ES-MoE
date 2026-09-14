@@ -95,11 +95,11 @@ def arm_process(weight: float, recipe: str = "esmoe") -> None:
     _patch(tasks.BaseModel)
 
 
-def weight() -> float | None:
+def armed_weight() -> float | None:
     return _WEIGHT
 
 
-def recipe() -> str:
+def armed_recipe() -> str:
     return _RECIPE
 
 

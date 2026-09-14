@@ -257,7 +257,7 @@ def test_a_fresh_interpreter_can_import_the_worker_trainer():
         "import ultralytics.nn.tasks as tasks, esmoe.inject as inject\n"
         "assert tasks.ESMoE is inject.ESMoE, 'block not registered in the worker'\n"
         "assert tasks.BaseModel.loss is inject._loss_with_aux, 'loss not patched in the worker'\n"
-        "assert inject.weight() == 0.02, inject.weight()\n"
+        "assert inject.armed_weight() == 0.02, inject.armed_weight()\n"
         "print(T.__mro__[1].__name__)\n"
     )
     done = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, env=os.environ.copy())

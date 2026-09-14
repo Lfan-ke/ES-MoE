@@ -189,7 +189,7 @@ def test_a_worker_process_inherits_the_recipe(tmp_path):
     probe = (
         f"from {cls.__module__} import {cls.__name__} as T\n"
         "import esmoe.inject as inject\n"
-        "assert inject.recipe() == 'upstream', inject.recipe()\n"
+        "assert inject.armed_recipe() == 'upstream', inject.armed_recipe()\n"
         "assert T.build_optimizer.__module__ == 'esmoe.trainer'\n"
     )
     done = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, env=os.environ.copy())

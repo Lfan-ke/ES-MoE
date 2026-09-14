@@ -41,9 +41,9 @@ def wrap(base: type) -> type:
 def _init_for(base: type):
     def __init__(self, *args, **kwargs):
         base.__init__(self, *args, **kwargs)
-        weight = float(os.environ.get(ENV_WEIGHT, 0) or inject.weight() or 0)
+        weight = float(os.environ.get(ENV_WEIGHT, 0) or inject.armed_weight() or 0)
         if weight:
-            recipe = os.environ.get(ENV_RECIPE) or inject.recipe()
+            recipe = os.environ.get(ENV_RECIPE) or inject.armed_recipe()
             inject.arm_process(weight, recipe)
             for event, callback in inject.trainer_callbacks(weight, recipe):
                 self.add_callback(event, callback)
@@ -54,7 +54,7 @@ def _init_for(base: type):
 def _build_optimizer_for(base: type):
     def build_optimizer(self, model, name="auto", lr=0.001, momentum=0.9, decay=1e-5, iterations=1e5):
         optimizer = base.build_optimizer(self, model, name, lr, momentum, decay, iterations)
-        if inject.recipe() == "upstream":
+        if inject.armed_recipe() == "upstream":
             self._esmoe_routers = upstream.split_routers(optimizer, model, decay)
         return optimizer
 
