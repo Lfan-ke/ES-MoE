@@ -292,16 +292,9 @@ class ESMoE(nn.Module):
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         if self.dynamic_threshold and not self.training and self.sparse_inference and self.top_k < self.num_experts:
-            # Upstream's inference-time pruning: below the threshold an expert is dropped, except
-            # the leading one, and the survivors are renormalised so the mixture still sums to one.
-            # The threshold reads the share of the mixture an expert holds, never its raw
-            # probability: upstream renormalises the top-k in the routing layer and prunes after.
-            # Read before the renormalisation, 0.4 drops the runner-up of a top-2 on nearly every
-            # input, because four probabilities summing to one rarely leave 0.4 on the second.
-            # Upstream prunes only on its sparse path, which it takes only when top-k leaves an expert
-            # out; with every expert active, as in the model it released, it evaluates all of them.
-            # The mask is tensor arithmetic rather than a scatter of a Python bool, which a tracer
-            # refuses, and it is recomputed per input so an exported graph stays faithful.
+            # Upstream's pruning reads an expert's share after the top-k renormalisation, never its raw
+            # probability: read before, 0.4 drops the runner-up of a top-2 on nearly every input. It
+            # prunes only when top-k leaves an expert out. Tensor arithmetic, which a tracer accepts.
             leader = F.one_hot(chosen[:, 0], probs.shape[1]).to(torch.bool)
             gate = gate * ((gate >= self.dynamic_threshold) | leader)
             gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)

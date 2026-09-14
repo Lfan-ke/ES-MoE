@@ -192,8 +192,8 @@ def _rank(rank, world, port, cfg, box):
     arm_process(0.01)
     model = DetectionModel(cfg, ch=3, nc=2, verbose=False)
     model.args = get_cfg(DEFAULT_CFG)
-    # Sparse dispatch leaves the experts a batch did not route to out of the graph, so DDP has to be
-    # told to expect unused parameters - which is how ultralytics constructs it as well.
+    # Built the way ultralytics builds DDP while `compile` is off; tests/test_distributed.py covers the
+    # settings of `compile=True`, where unrouted experts join the graph at zero instead.
     ddp = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True)
     torch.manual_seed(rank + 1)  # each rank sees different images
     batch = {

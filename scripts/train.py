@@ -264,7 +264,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--fraction", type=float, default=1.0)
     p.add_argument("--amp", type=int, default=1)
-    # ultralytics 把 0 读作 "no patience" 并禁用早停，这正是复现协议要的固定周期。
+    # ultralytics reads 0 as no patience and never stops early: the protocol's fixed schedule.
     p.add_argument("--patience", type=int, default=0)
     p.add_argument("--tag", default="")
     p.add_argument("--resume", default="", help="this run's last.pt after a crash: finish the run, do not start over")
@@ -386,7 +386,7 @@ def main():
             "sha256": digest(weights),
         },
         "status": status,
-        "limitation": error or "single machine, single GPU; see limitations.md",
+        "limitation": error or "single machine, single GPU; see docs/limitations.md",
     }
     out = ROOT / "results" / f"{experiment_id}.json"
     out.parent.mkdir(exist_ok=True)

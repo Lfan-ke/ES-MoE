@@ -1,11 +1,10 @@
-"""站点该应答却不会自己生成的地址:/zh/(中文是默认语言,住在根目录),以及每个页面目录下的 sitemap.xml
-——i18n 把语言切换链接写成相对当前页的,主题就按相对路径去取同名 sitemap。"""
+"""Addresses the site has to answer but does not generate: `/zh/`, because Chinese is the default
+language and lives at the root, and a sitemap.xml in every page directory, because i18n writes the
+language links relative to the current page and the theme fetches the sitemap the same way."""
 
 from pathlib import Path
 
-SKIP = {"en", "zh", "assets", "search", "stylesheets", "javascripts"}
-
-# 四份小版本说明并成了一份,老地址继续应答。
+# Four point-release notes were merged into one page; their old addresses keep answering.
 MOVED = {f"RELEASE_v0.1.{patch}": "RELEASE" for patch in range(4)}
 # Retired pages keep their address and land on the page that carries the content now.
 MOVED.update({"MIDTERM": "results", "BASELINE": "SELECTION", "PR_DRAFT": "RELEASE"})
@@ -33,7 +32,8 @@ def _sitemap(base: str, pages: list[tuple[str, ...]]) -> str:
 
 
 def on_post_build(config) -> None:
-    # i18n 每种语言各跑一遍 post_build,英文那遍的 site_dir 是 site/en;两遍都写向站点根,最后一遍补齐。
+    # i18n runs post_build once per language, the English pass with site_dir at site/en; both write
+    # from the site root, and the last pass completes it.
     site = Path(config["site_dir"])
     site = site.parent if site.name == "en" else site
     base = config["site_url"].rstrip("/")
@@ -56,6 +56,6 @@ def on_post_build(config) -> None:
     (site / "en").mkdir(exist_ok=True)
     for pages_of_language in (chinese, english):
         for page in pages_of_language:
-            if not page:  # 站点根的 sitemap 由 mkdocs 自己写,里面两种语言都有,别覆盖
+            if not page:  # the root sitemap is mkdocs' own and already lists both languages
                 continue
             (site.joinpath(*page) / "sitemap.xml").write_text(_sitemap(base, pages_of_language), encoding="utf-8")
