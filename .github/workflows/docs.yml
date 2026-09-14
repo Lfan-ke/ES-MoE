@@ -7,6 +7,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Deploy main as this released version and move latest to it; empty deploys dev"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -19,8 +24,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      # main is `dev`; a release gets its own version and takes `latest`, which the site opens on.
-      VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || 'dev' }}
+      # main is `dev`; a release gets its own version and takes `latest`, which the site opens on. A manual run
+      # can redeploy a released version from main when only its documentation changed.
+      VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version || 'dev' }}
     steps:
       - uses: actions/checkout@v7
         with:
