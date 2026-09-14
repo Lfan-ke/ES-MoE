@@ -6,18 +6,25 @@ GitHub strips scripts there and a static figure is the only thing that renders. 
 report.py, so a figure cannot drift away from the tables it illustrates.
 """
 
+import json
 import statistics
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from report import KEYS, dedupe, interval, load, paired  # noqa: E402
+from report import KEYS, T95, arm, dedupe, interval, load, paired, published, schedule, variant  # noqa: E402
+from same_config import ARMS as FOUR  # noqa: E402
+from same_config import DELTAS  # noqa: E402
+from same_config import collect as four_arms  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SVG_OUT = {"en": ROOT / "docs" / "assets" / "effect.svg", "zh": ROOT / "docs" / "assets" / "effect-zh.svg"}
 ALIGN_OUT = {"en": ROOT / "docs" / "assets" / "alignment.svg", "zh": ROOT / "docs" / "assets" / "alignment-zh.svg"}
 DATA_OUT = ROOT / "docs" / "javascripts" / "data.js"
+DATASET = ROOT / "results" / "dataset.json"
+ROUTING = ROOT / "results" / "routing"
+PRESSURE = ROOT / "results" / "pressure.md"
 
 # Oldest to newest: the axis order is the claim, so it is fixed rather than sorted.
 ORDER = ("yolov5n", "yolov8n", "yolov9t", "yolov10n", "yolo11n", "yolo12n", "yolo26n")
@@ -298,6 +305,165 @@ def data_js(tables):
     )
 
 
+def summary(values):
+    """Mean and the two ends of its 95% interval, as numbers a chart can place."""
+    mean = statistics.mean(values)
+    if len(values) < 2:
+        return {"mean": round(mean, 4), "lo": None, "hi": None}
+    half = T95.get(len(values) - 1, 1.96) * statistics.stdev(values) / len(values) ** 0.5
+    return {"mean": round(mean, 4), "lo": round(mean - half, 4), "hi": round(mean + half, 4)}
+
+
+def protocol(records):
+    """How much the protocol matrix is: runs and card-hours, by backbone and by card."""
+    runs = [r for r in records if PROTOCOL in variant(r)]
+    by_backbone, by_card = {}, {}
+    for r in runs:
+        for table, name in ((by_backbone, arm(r)[0]), (by_card, r["hardware"]["gpu"])):
+            cell = table.setdefault(name, {"runs": 0, "hours": 0.0})
+            cell["runs"] += 1
+            cell["hours"] = round(cell["hours"] + r["budget"].get("gpu_hours", 0.0), 2)
+    return {
+        "records": len(records),
+        "runs": len(runs),
+        "hours": round(sum(r["budget"].get("gpu_hours", 0.0) for r in runs), 1),
+        "epochs": 120,
+        "imgsz": 800,
+        "batch": 32,
+        "backbones": by_backbone,
+        "cards": by_card,
+    }
+
+
+def same_config(records):
+    """The four arms per precision and seed, and each difference with its interval."""
+    seeds = four_arms(records)
+    found = {}
+    for metric, key in METRICS:
+        rows, groups = [], {}
+        for (family, seed), arms in seeds.items():
+            value = {name: arms[name]["metrics"][key] for name in FOUR}
+            rows.append(
+                {
+                    "precision": family,
+                    "seed": seed,
+                    **{name: round(value[name], 4) for name in FOUR},
+                    "hours": {name: arms[name]["budget"]["gpu_hours"] for name in FOUR},
+                }
+            )
+            for name, fn in DELTAS.items():
+                groups.setdefault((family, name), []).append(fn(value))
+        found[metric] = {
+            "rows": rows,
+            "differences": [
+                {
+                    "precision": family,
+                    "name": name,
+                    "values": [round(v, 4) for v in values],
+                    "positive": sum(1 for v in values if v > 0),
+                    **summary(values),
+                }
+                for (family, name), values in groups.items()
+            ],
+        }
+    return found
+
+
+def floor(repeats):
+    """Every protocol-budget run that was trained twice, and how far apart the two landed."""
+    pairs = []
+    for (label, seed), first, again in repeats:
+        budget = schedule(first)
+        if not budget.startswith("e120f1i800"):
+            continue
+        a, b = first["metrics"][KEYS[0]], again["metrics"][KEYS[0]]
+        pairs.append(
+            {
+                "label": label,
+                "seed": seed,
+                "precision": "fp32" if budget.endswith("fp32") else "mixed",
+                "first": round(a, 4),
+                "repeat": round(b, 4),
+                "gap": round(abs(a - b), 4),
+            }
+        )
+    return pairs
+
+
+def blocks_of(path):
+    record = json.loads(path.read_text(encoding="utf-8"))
+    return record.get("blocks", [record])
+
+
+def routing(runs):
+    """Per checkpoint: how concentrated the dispatch is, how many experts died, and the paired delta."""
+    proto = [r for r in runs if PROTOCOL in variant(r)]
+    base = {arm(r): r for r in proto if r["config"]["arch"] == "baseline"}
+    points = []
+    for r in proto:
+        path = ROUTING / f"{published(r)}-best.json"
+        if r["config"]["arch"] == "baseline" or arm(r) not in base or not path.is_file():
+            continue
+        cfg, blocks = r["config"], blocks_of(path)
+        points.append(
+            {
+                "run": published(r),
+                "backbone": arm(r)[0],
+                "variant": variant(r).split("@")[0],
+                "balance": "none" if cfg.get("aux_weight", 0.01) == 0 else cfg.get("balance") or "switch",
+                "blocks": len(blocks),
+                "top1": round(statistics.mean(max(b["top1_share"]) for b in blocks), 3),
+                "dead": sum(len(b["dead_experts"]) for b in blocks),
+                "delta": round(r["metrics"][KEYS[0]] - base[arm(r)]["metrics"][KEYS[0]], 4),
+            }
+        )
+    arms = []
+    for path in sorted(ROUTING.glob("yolo-master-n-esmoe-upstream-w1-e120-*.json")):
+        arms.append(
+            {
+                "precision": "fp32" if "fp32" in path.stem else "mixed",
+                "seed": int(path.stem.split("-s")[1].split("-")[0]),
+                "blocks": [
+                    {"dead": b["dead_experts"], "top1": b["top1_share"], "usage": b["usage"]} for b in blocks_of(path)
+                ],
+            }
+        )
+    return {"points": points, "same_config": arms}
+
+
+def pressure():
+    """The balancing terms' gradient per unit weight, read back from the table pressure.py wrote."""
+    rows = []
+    for line in PRESSURE.read_text(encoding="utf-8").splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) == 7 and cells[1].replace(".", "", 1).isdigit():
+            rows.append(
+                {
+                    "checkpoint": cells[0],
+                    "spread": float(cells[1]),
+                    "switch": float(cells[2]),
+                    "gshard_probs": float(cells[3]),
+                    "gshard": float(cells[4]),
+                    "master": float(cells[5]),
+                }
+            )
+    return rows
+
+
+def extras():
+    """Everything the experiments page draws beyond the seven-generation figure, in one object."""
+    records = load()
+    runs, repeats = dedupe(records)
+    return {
+        "dataset": json.loads(DATASET.read_text(encoding="utf-8")) if DATASET.is_file() else None,
+        "protocol": protocol(records),
+        "same_config": same_config(records),
+        "floor": floor(repeats),
+        "routing": routing(runs),
+        "pressure": pressure(),
+    }
+
+
 def main():
     tables = {metric: collect(key) for metric, key in METRICS}
     table = tables["mAP50"]
@@ -309,7 +475,8 @@ def main():
     for lang, path in ALIGN_OUT.items():
         path.write_text(align_svg(table, lang), encoding="utf-8")
     DATA_OUT.parent.mkdir(parents=True, exist_ok=True)
-    DATA_OUT.write_text(data_js(tables), encoding="utf-8")
+    more = json.dumps(extras(), ensure_ascii=False, separators=(",", ":"))
+    DATA_OUT.write_text(data_js(tables) + f"window.ESMOE_DATA = {more};\n", encoding="utf-8")
     figures = len(SVG_OUT) + len(ALIGN_OUT)
     print(f"wrote {figures} figures and {DATA_OUT.relative_to(ROOT)} covering {len(table)} arms")
     for (backbone, block), values in sorted(table.items()):
