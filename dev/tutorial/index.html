@@ -923,7 +923,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
 <h3 id="_8">四个内置的均衡目标<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p><strong>默认是 Switch</strong>（<code>switch_balance</code>），与 0.1.4 和 <code>results/</code> 里的全部记录一致：</p>
+<p><strong>默认是 Switch</strong>（<code>switch_balance</code>），与 0.1.4 一致，也是 <code>results/</code> 里默认臂用的目标：</p>
 <table>
 <thead>
 <tr>

@@ -824,7 +824,7 @@
 <p>Puts the router load-balancing loss into the optimised training loss; training logs gain an <code>esmoe_aux</code> column. Also routes <code>model.train()</code> through <code>esmoe.trainer</code>, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under <code>compile=True</code> too, where ultralytics turns <code>find_unused_parameters</code> off.</p>
 <p><code>recipe</code> decides how the block and its term train:</p>
 <ul>
-<li><code>"esmoe"</code> (default, and what every recorded run used): the term times <code>weight</code>, counted per image the way the task loss counts.</li>
+<li><code>"esmoe"</code> (default, and what every run outside the same-configuration comparison used): the term times <code>weight</code>, counted per image the way the task loss counts.</li>
 <li><code>"upstream"</code>: the three things YOLO-Master's trainer does to any model with a routed module, for runs compared against it. The term is divided by a running mean of its own magnitude (decay 0.99, starting at 1.0), multiplied by <code>weight</code>, capped at 3.0 and added once to each of box, cls and dfl; router parameters get a group of their own at half the learning rate, outside Muon; expert parameters stay frozen for the first 3 epochs. The last two happen in the trainer, so they apply to a YOLO model trained through <code>model.train()</code>. Constants and sources are in <code>esmoe.upstream</code>.</li>
 </ul>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>

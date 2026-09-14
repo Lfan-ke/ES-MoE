@@ -824,7 +824,7 @@
 <p>把路由的负载均衡损失接进被优化的训练损失，训练日志多出 <code>esmoe_aux</code> 一列。同时把 <code>model.train()</code> 的训练器指到 <code>esmoe.trainer</code>，DDP worker 因此能自行注册块并恢复权重与训练方式。进程组里没被路由到的专家以零权重留在图中，所以 ultralytics 在 <code>compile=True</code> 时关掉 <code>find_unused_parameters</code>，多卡照样能训。</p>
 <p><code>recipe</code> 决定块和辅助项怎么训：</p>
 <ul>
-<li><code>"esmoe"</code>（默认，已记录的运行都用它）：辅助项乘 <code>weight</code> 后按每张图计入，与任务损失的计法一致。</li>
+<li><code>"esmoe"</code>（默认；同配置对照之外的运行都用它）：辅助项乘 <code>weight</code> 后按每张图计入，与任务损失的计法一致。</li>
 <li><code>"upstream"</code>：YOLO-Master 训练器对任何含路由模块的模型都会做的三件事，供与上游同配置对比。辅助项除以自身幅值的滑动平均（衰减 0.99，初值 1.0）再乘 <code>weight</code>，封顶 3.0，加到 box、cls、dfl 三项上各一次；路由器参数单独成组，学习率减半、不进 Muon；前 3 个 epoch 冻结专家参数。后两件在训练器里完成，只对经 <code>model.train()</code> 训练的 YOLO 模型生效。常数与出处见 <code>esmoe.upstream</code>。</li>
 </ul>
 <h2 id="collect_aux_loss">collect_aux_loss<a class="headerlink" href="#collect_aux_loss" title="Permanent link">&para;</a></h2>
