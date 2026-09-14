@@ -3,7 +3,7 @@ message: If you use esmoe in your research, please cite it as below.
 title: "esmoe: an expert-sparse MoE block for Ultralytics YOLO"
 type: software
 authors:
-  - given-names: Kelei
+  - given-names: Leo
     family-names: Cheng
 repository-code: "https://github.com/Lfan-ke/ES-MoE"
 url: "https://lfan-ke.github.io/ES-MoE/"
