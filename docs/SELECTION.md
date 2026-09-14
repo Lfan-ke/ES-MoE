@@ -1,102 +1,73 @@
-# Selection: which ES-MoE configuration ships as the default
+# 选型
 
-Budget: VisDrone2019-DET `fraction=0.25`, imgsz 640, 20 epochs from scratch, batch 32, YOLOv8n,
-one RTX 4090 D. Every arm sees the same data, schedule and augmentation; only the block config
-moves. Raw records are in `results/`, rendered by `scripts/report.py` into `results/summary.md`.
+预算：VisDrone2019-DET `fraction=0.25`、imgsz 640、从零训练 20 epoch、batch 32、YOLOv8n，一张 RTX 4090 D。各臂的数据、训练日程和数据增强完全相同，只改块的配置。原始记录在 `results/`，由 `scripts/report.py` 汇总成 `results/summary.md`。
 
-## Provenance
+## 来源
 
-Public baseline `acce839c7e895d6b179de7f7093fa879e237cc7b` (YOLO-Master main at 2026-08-21
-23:59:59 +0800), release reference `YOLO-Master-v26.08` -> `43d40117c...`; both carry
-`ultralytics 8.4.101`, which is exactly the stock version this toolkit runs against, so the plug-in
-path is measured on the same library version as the baseline. Records produced before the toolkit started stamping its own revision
-carry `git_ref = "0.1.0"`; every later record stamps the commit, ultralytics version and both
-locked baselines.
+公开基线 `acce839c7e895d6b179de7f7093fa879e237cc7b`（YOLO-Master main，2026-08-21 23:59:59 +0800），发布参照 `YOLO-Master-v26.08` → `43d40117c...`。两者都基于 `ultralytics 8.4.101`，与本工具包对接的官方版本相同，所以插件路径和基线是在同一个库版本上测的。工具包开始写入自身版本之前产生的记录带 `git_ref = "0.1.0"`；此后每条记录都写入提交号、ultralytics 版本和两个锁定的基线。
 
-## Candidates at seed 0
+## seed 0 上的候选
 
-| variant | experts | top_k | aux weight | params | mAP50 | delta vs baseline |
+| 变体 | 专家数 | top_k | 辅助损失权重 | 参数量 | mAP50 | 与基线之差 |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | baseline | - | - | - | 3.01M | 0.0933 | - |
 | esmoe-e2k1 | 2 | 1 | 0.01 | 3.16M | 0.0903 | -0.0031 |
 | esmoe-e4k1 | 4 | 1 | 0.01 | 3.33M | 0.0928 | -0.0006 |
 | esmoe-e4k2 | 4 | 2 | 0.01 | 3.33M | 0.0950 | +0.0017 |
-| esmoe-e4k2, aux off | 4 | 2 | 0.00 | 3.33M | 0.0938 | +0.0005 |
+| esmoe-e4k2，关掉辅助损失 | 4 | 2 | 0.00 | 3.33M | 0.0938 | +0.0005 |
 | esmoe-e8k2 | 8 | 2 | 0.01 | 3.78M | 0.0934 | +0.0000 |
 
-## Confirmation across seeds
+## 三个 seed 的确认
 
-| arch | seeds | mAP50 | mAP50-95 | paired mean delta | wins |
+| 臂 | seed | mAP50 | mAP50-95 | 配对差均值 | 胜场 |
 |:--:|:--:|:--:|:--:|:--:|:--:|
 | baseline | 0,1,2 | 0.0909 ± 0.0022 | 0.0405 ± 0.0013 | - | - |
-| esmoe-e4k2 | 0,1,2 | 0.0930 ± 0.0022 | 0.0410 ± 0.0013 | +0.0021 mAP50 | 3/3 |
+| esmoe-e4k2 | 0,1,2 | 0.0930 ± 0.0022 | 0.0410 ± 0.0013 | mAP50 +0.0021 | 3/3 |
 
-## Confirmation on the full dataset
+## 全量数据上的确认
 
-The selection above was made on a 25% subset. Rerunning the chosen arm against its baseline on the
-**full** VisDrone training set, same 20-epoch budget, three seeds:
+上面的选择是在 25% 子集上做的。在**全量** VisDrone 训练集上，同样 20 epoch、三个 seed，把选中的臂和基线重跑一遍：
 
-| arch | seeds | mAP50 | mAP50-95 | paired mean delta | wins |
+| 臂 | seed | mAP50 | mAP50-95 | 配对差均值 | 胜场 |
 |:--:|:--:|:--:|:--:|:--:|:--:|
 | baseline | 0,1,2 | 0.1496 ± 0.0022 | 0.0759 ± 0.0016 | - | - |
-| esmoe-e4k2 | 0,1,2 | 0.1517 ± 0.0011 | 0.0778 ± 0.0005 | +0.0021 mAP50, +0.0019 mAP50-95 | 3/3 |
+| esmoe-e4k2 | 0,1,2 | 0.1517 ± 0.0011 | 0.0778 ± 0.0005 | mAP50 +0.0021，mAP50-95 +0.0019 | 3/3 |
 
-Per-seed mAP50 deltas are +0.0001, +0.0032, +0.0029. The mean gain is the same as on the subset,
-and the mAP50-95 gain is four times larger there (+0.0019 against +0.0005), so quadrupling the data
-did not wash the effect out. One seed is effectively a tie, which bounds how large
-the effect is: small, consistent in sign, not reliable per single run.
+逐 seed 的 mAP50 差为 +0.0001、+0.0032、+0.0029。均值增益与子集上相同，mAP50-95 的增益是子集上的四倍（+0.0019 对 +0.0005），数据量翻四倍没有把效应冲淡。其中一个 seed 基本打平，由此可以给效应划界：幅度小，符号一致，单次运行不可靠。
 
-## What a longer schedule does to the gap
+## 训练更久，差距怎么变
 
-The same pair at three budgets on the full training set, three seeds each:
+同一对臂在全量训练集上跑三档预算，各三个 seed：
 
-| budget | baseline mAP50 | esmoe mAP50 | paired deltas | mean | wins |
+| 预算 | 基线 mAP50 | esmoe mAP50 | 配对差 | 均值 | 胜场 |
 |:--:|:--:|:--:|:--:|:--:|:--:|
-| 20 epochs | 0.1496 | 0.1517 | +0.0001, +0.0032, +0.0029 | +0.0021 | 3/3 |
-| 50 epochs | 0.2131 | 0.2143 | -0.0003, +0.0009, +0.0032 | +0.0013 | 2/3 |
-| 100 epochs | 0.3004 | 0.3050 | +0.0104, -0.0011, +0.0044 | +0.0046 | 2/3 |
+| 20 epoch | 0.1496 | 0.1517 | +0.0001, +0.0032, +0.0029 | +0.0021 | 3/3 |
+| 50 epoch | 0.2131 | 0.2143 | -0.0003, +0.0009, +0.0032 | +0.0013 | 2/3 |
+| 100 epoch | 0.3004 | 0.3050 | +0.0104, -0.0011, +0.0044 | +0.0046 | 2/3 |
 
-The mean is positive at every budget, but it does not move in one direction with the schedule, and
-the spread between seeds widens as the schedule grows: at 100 epochs the three paired deltas span
-+0.0104 to -0.0011. Read together, these runs support a small positive mean effect and rule out a
-reliable per-run improvement. They do not support a claim about where the effect goes at
-convergence, in either direction.
+每档的均值都为正，但不随训练轮数单向变化；seed 之间的离散随预算变大，100 epoch 时三个配对差从 +0.0104 到 -0.0011。合起来看，这些运行支持一个小的正向平均效应，排除了单次运行稳定提升的说法；至于收敛时效应往哪个方向走，它们两边都不支持。
 
-## Across backbones
+## 换主干
 
-The same paired comparison on YOLO11n, full training set, 20 epochs, three seeds:
+同样的配对比较放到 YOLO11n 上，全量训练集、20 epoch、三个 seed：
 
-| backbone | baseline mAP50 | esmoe mAP50 | paired deltas | mean | wins |
+| 主干 | 基线 mAP50 | esmoe mAP50 | 配对差 | 均值 | 胜场 |
 |:--:|:--:|:--:|:--:|:--:|:--:|
 | YOLOv8n | 0.1496 | 0.1517 | +0.0001, +0.0032, +0.0029 | +0.0021 | 3/3 |
 | YOLO11n | 0.1419 | 0.1410 | +0.0045, -0.0033, -0.0040 | -0.0009 | 1/3 |
 
-**The gain does not transfer.** On YOLO11n the block is a wash at best: one seed gains, two lose, and
-the mean is slightly negative on both mAP50 and mAP50-95. A plausible reading is that YOLO11n
-already carries attention (C2PSA) at the end of its backbone, so a routed mixture inserted at the
-same place buys less than it does on YOLOv8n - but this experiment does not test that explanation,
-and it is offered as a hypothesis, not a finding.
+**增益没有迁移过去。** 在 YOLO11n 上这个块至多打平：一个 seed 涨，两个跌，mAP50 与 mAP50-95 的均值都略为负。一种可能的解释是 YOLO11n 的主干末端已经带注意力（C2PSA），同一位置再插一个路由混合，得到的比 YOLOv8n 少；但这个实验没有检验这一解释，它只是假设，不是结论。
 
-What this bounds, at this 20-epoch selection stage: the compatibility matrix in the README is a statement
-about **mechanics** - the block builds, trains and back-propagates its auxiliary loss on every generation.
-It is not a claim that the accuracy effect exists on all of them. The accuracy evidence at this stage is
-YOLOv8n only; the seven-generation protocol matrix that followed is on the judgment-lines page.
+这一阶段（20 epoch 选型）能界定的是：README 里的兼容矩阵是**机制**层面的陈述，块在每一代上都能建、能训，辅助损失能反向传播；它不表示精度效应在每一代上都存在。这一阶段的精度证据只有 YOLOv8n，之后七代主干的协议矩阵见[判读线](JUDGMENT.md)。
 
-## Decision
+## 决定
 
-`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)` is the shipped default.
+默认发 `ESMoE(num_experts=4, top_k=2)` 配 `attach_aux_loss(weight=0.01)`。
 
-- Routing to a single expert loses to the baseline (e2k1, e4k1). The gain needs a mixture, not a
-  switch, at this budget.
-- Doubling the expert count to 8 buys nothing measurable and costs 13% more parameters than e4k2.
-- Turning the auxiliary loss off costs 0.0012 mAP50 at the same parameter count, which is the
-  concrete argument for wiring it into the optimised loss rather than merely computing it.
+- 只路由到一个专家的配置输给基线（e2k1、e4k1）。在这个预算下，增益要靠混合，单选一个专家不行。
+- 专家数翻倍到 8 没有可测的增益，参数量却比 e4k2 多 13%。
+- 参数量不变、关掉辅助损失，mAP50 少 0.0012。因此要把辅助损失接进被优化的损失，而不是只算出来。
 
-## How much this claim is worth
+## 这个结论有多大分量
 
-The per-arm standard deviations overlap; only the paired per-seed comparison supports the
-ranking, and it does so on three seeds at one short budget. The absolute gain (+2.3% relative
-mAP50) comes with +10.4% parameters. Rerunning an identical config at the same seed reproduced
-the metric exactly on the RTX 4090 at 20 epochs; on the MetaX C500 at 120 epochs two runs of one
-configuration differ by 0.0045 on average, as large as the effect. See [limitations](limitations.md) for what these
-numbers do not say.
+各臂的标准差互相重叠，只有逐 seed 的配对比较撑得住这个排序，而且只在一个短预算、三个 seed 上。绝对增益（mAP50 相对提升 2.3%）的代价是参数量多 10.4%。同配置同 seed 重跑，在 RTX 4090 上 20 epoch 时指标逐位相同；在曦云 C500 上 120 epoch 时，同一配置两次运行平均差 0.0045，与效应同量级。这些数字说明不了的，见[已知局限](limitations.md)。

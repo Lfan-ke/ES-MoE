@@ -159,7 +159,7 @@ same-configuration B checkpoints, trained with upstream's recipe.
 The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
 reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n
 (+0.0036) and pulls 12n and 26n back to near parity (+0.0001 and −0.0005); only on 11n does it trail the default.
-Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `docs/SELECTION.md`,
+Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `docs/SELECTION.en.md`,
 `results/buckets.md`, `results/routing.md`, `results/report.md`.
 
 ## Develop and reproduce
