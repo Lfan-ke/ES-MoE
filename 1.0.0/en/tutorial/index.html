@@ -571,10 +571,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-grafting-has-to-get-right" class="md-nav__link">
+  <a href="#grafting-and-renumbering" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What grafting has to get right
+        Grafting and renumbering
       
     </span>
   </a>
@@ -582,10 +582,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#proving-the-auxiliary-loss-is-real" class="md-nav__link">
+  <a href="#checking-the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Proving the auxiliary loss is real
+        Checking the auxiliary loss
       
     </span>
   </a>
@@ -593,10 +593,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#a-comparison-you-can-defend" class="md-nav__link">
+  <a href="#running-a-comparison" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A comparison you can defend
+        Running a comparison
       
     </span>
   </a>
@@ -616,10 +616,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#four-balancing-objectives-ship-with-the-block" class="md-nav__link">
+  <a href="#built-in-balancing-objectives" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Four balancing objectives ship with the block
+        Built-in balancing objectives
       
     </span>
   </a>
@@ -627,10 +627,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-configuration-that-matches-upstream" class="md-nav__link">
+  <a href="#matching-upstream" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The configuration that matches upstream
+        Matching upstream
       
     </span>
   </a>
@@ -878,7 +878,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    Overview
   
 
     
@@ -1059,10 +1059,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-grafting-has-to-get-right" class="md-nav__link">
+  <a href="#grafting-and-renumbering" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What grafting has to get right
+        Grafting and renumbering
       
     </span>
   </a>
@@ -1070,10 +1070,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#proving-the-auxiliary-loss-is-real" class="md-nav__link">
+  <a href="#checking-the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Proving the auxiliary loss is real
+        Checking the auxiliary loss
       
     </span>
   </a>
@@ -1081,10 +1081,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#a-comparison-you-can-defend" class="md-nav__link">
+  <a href="#running-a-comparison" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A comparison you can defend
+        Running a comparison
       
     </span>
   </a>
@@ -1104,10 +1104,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#four-balancing-objectives-ship-with-the-block" class="md-nav__link">
+  <a href="#built-in-balancing-objectives" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Four balancing objectives ship with the block
+        Built-in balancing objectives
       
     </span>
   </a>
@@ -1115,10 +1115,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-configuration-that-matches-upstream" class="md-nav__link">
+  <a href="#matching-upstream" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The configuration that matches upstream
+        Matching upstream
       
     </span>
   </a>
@@ -1181,10 +1181,10 @@
     E3 --&gt; S
     E4 --&gt; S
     S --&gt; Y["output&lt;br/&gt;(n, c, h, w)"]
-    P -.-&gt; A["load-balancing loss"]
+    P -.-&gt; A["auxiliary loss"]
     T -.-&gt; A
     A -.-&gt; L["training loss"]</code></pre>
-<p>The auxiliary term is the Switch-Transformer load-balancing loss,</p>
+<p>The default balancing objective is the Switch-Transformer load-balancing form; times its weight, it is the auxiliary loss:</p>
 <div class="arithmatex">\[
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
 \]</div>
@@ -1193,7 +1193,7 @@ and <span class="arithmatex">\(f_i\)</span> the fraction of samples that actuall
 realised load are spread evenly. Measured, what it prevents is an expert dying, not the dispatch concentrating
 (<a href="../JUDGMENT/">judgment lines</a>, round six).</p>
 <h2 id="the-three-calls">The three calls<a class="headerlink" href="#the-three-calls" title="Permanent link">&para;</a></h2>
-<p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the router loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
+<p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the auxiliary loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
@@ -1211,7 +1211,7 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>Written by hand, the grafted layer is one line:</p>
 <pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 </code></pre>
-<h2 id="what-grafting-has-to-get-right">What grafting has to get right<a class="headerlink" href="#what-grafting-has-to-get-right" title="Permanent link">&para;</a></h2>
+<h2 id="grafting-and-renumbering">Grafting and renumbering<a class="headerlink" href="#grafting-and-renumbering" title="Permanent link">&para;</a></h2>
 <p>A YOLO config addresses earlier layers by absolute index:</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
 </code></pre>
@@ -1222,8 +1222,8 @@ original one reference by reference.</p>
 <p>Renumbering moves references; it does not retarget them. A head branch that names the old backbone end by index - YOLOv8's P5 lateral <code>[-1, 9] Concat</code> does - therefore keeps reading SPPF after the insertion, and the block reaches P5 only through the top-down path. To have the block take over every consumer of the backbone end, pass <code>rewire=True</code> (<code>--rewire</code> on the CLI):</p>
 <pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 </code></pre>
-<p>It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); <code>rewire</code> gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; <code>rewire</code> pulls 12n and 26n back to parity and trails the default arm only on 11n. Seven-generation verdicts: <a href="../JUDGMENT/">judgment lines</a>.</p>
-<h2 id="proving-the-auxiliary-loss-is-real">Proving the auxiliary loss is real<a class="headerlink" href="#proving-the-auxiliary-loss-is-real" title="Permanent link">&para;</a></h2>
+<p>It is off by default to keep existing run records comparable. Under one budget (YOLOv8n, imgsz 800, 120 epochs, three seeds) the default wiring gives +0.0025 mAP50 (2/3 wins) with APl −0.0104 (0/3); <code>rewire</code> gives +0.0036 mAP50 (3/3 wins) with APl +0.0063 (2/3) - on v8n, bypassing the P5 lateral is where the large-object loss came from. That mechanism does not pin down across generations: on 26n the default wiring consistently loses small objects instead (APs −0.0045, 0/3) and on 12n the direction is unstable; <code>rewire</code> pulls 12n and 26n back to parity and trails the default on v5n, v9t, v10n and 11n. Seven-generation verdicts: <a href="../JUDGMENT/">judgment lines</a>.</p>
+<h2 id="checking-the-auxiliary-loss">Checking the auxiliary loss<a class="headerlink" href="#checking-the-auxiliary-loss" title="Permanent link">&para;</a></h2>
 <p>A configuration key named <code>aux_loss</code> proves nothing. What proves it:</p>
 <ol>
 <li><code>results.csv</code> gains an <code>esmoe_aux</code> column, non-zero and moving;</li>
@@ -1231,12 +1231,15 @@ original one reference by reference.</p>
 <li>the same test asserts the router receives gradient.</li>
 </ol>
 <p>If you want the number yourself in a custom loop:</p>
-<pre><code>aux = esmoe.collect_aux_loss(model)
+<pre><code>esmoe.clear_aux_loss()
+task_loss = criterion(model(images), targets)
+aux = esmoe.collect_aux_loss(model)
 (task_loss + 0.01 * aux).backward()
 </code></pre>
-<p><code>collect_aux_loss</code> only sums values published by the latest forward pass, so calling it twice cannot
-double-count a stale graph.</p>
-<h2 id="a-comparison-you-can-defend">A comparison you can defend<a class="headerlink" href="#a-comparison-you-can-defend" title="Permanent link">&para;</a></h2>
+<p><code>collect_aux_loss</code> reads without clearing: it sums the value each block last published to the registry. Call
+<code>clear_aux_loss()</code> before each forward, so a block that does not run in a step leaves no value from the step before;
+the loss patch <code>attach_aux_loss</code> installs does this itself.</p>
+<h2 id="running-a-comparison">Running a comparison<a class="headerlink" href="#running-a-comparison" title="Permanent link">&para;</a></h2>
 <pre><code>uv run python scripts/capture_env.py             # freeze versions and hardware into results/env/
 EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
@@ -1247,9 +1250,9 @@ budget, never averaging two different budgets into one row, then prints per-seed
 against the baseline of the same seed.</p>
 <p>Read the paired table, not the two means. Per-arm standard deviations overlap in this kind of
 experiment; what carries the claim is that the same seed, same data and same schedule moved in the
-same direction three times. On the full VisDrone training set the shipped configuration wins 3/3
-seeds by +0.0021 mAP50, and one of those seeds is nearly a tie: a small, consistent effect, not a
-reliable per-run improvement. <a href="../experiments/">Experiments</a> has the full measurements.</p>
+same direction three times. At the selection budget (full VisDrone, 640 px, 20 epochs) the default configuration
+wins 3/3 seeds by +0.0021 mAP50, and one of those seeds is nearly a tie; at the protocol budget (800 px, 120 epochs)
+YOLOv8n gives +0.0025, 2/3. A small, consistent effect, not a reliable per-run improvement. <a href="../experiments/">Experiments</a> has the full measurements.</p>
 <h2 id="extending">Extending<a class="headerlink" href="#extending" title="Permanent link">&para;</a></h2>
 <p>Experts and the balancing objective are plain callables:</p>
 <pre><code>class ThinExpert(nn.Sequential):
@@ -1263,8 +1266,8 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </code></pre>
 <p><code>esmoe.blocks(model)</code> iterates every block in a model, which is how the collector and the tests find
 them.</p>
-<h3 id="four-balancing-objectives-ship-with-the-block">Four balancing objectives ship with the block<a class="headerlink" href="#four-balancing-objectives-ship-with-the-block" title="Permanent link">&para;</a></h3>
-<p>The default is <strong>Switch</strong> (<code>switch_balance</code>), as in 0.1.4 and in the default arms under <code>results/</code>:</p>
+<h3 id="built-in-balancing-objectives">Built-in balancing objectives<a class="headerlink" href="#built-in-balancing-objectives" title="Permanent link">&para;</a></h3>
+<p>The default is <strong>Switch</strong> (<code>switch_balance</code>), as in every earlier release and in the default arms under <code>results/</code>:</p>
 <table>
 <thead>
 <tr>
@@ -1296,12 +1299,12 @@ them.</p>
 </tr>
 </tbody>
 </table>
-<p>What separates them is not a coefficient but what they read. Where the mean probabilities are uniform and the top-k dispatch has collapsed onto one expert -- the shape every run here lands in -- the two that read the probabilities (<code>switch</code>, <code>gshard_probs</code>) evaluate identically and cannot tell that apart, while the two that read the gate (<code>gshard</code>, <code>master</code>) can. Upstream's code and its paper agree here, differing only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>).</p>
+<p>What separates them is not a coefficient but what they read. Where the mean probabilities are near uniform and the top-k dispatch concentrates on a few experts, the two that read the probabilities sit at fixed values (<code>k</code> for <code>switch</code>, 1 for <code>gshard_probs</code>) and cannot tell that apart, while the two that read the gate (<code>gshard</code>, <code>master</code>) can. The measured checkpoints are close to that shape: routing entropy runs at 90% to 100% of its maximum while the leading expert's top-1 share runs from 0.47 to 1.00. Upstream's code and its paper agree here, differing only by an affine map (<code>L_paper = (L_upstream - 1) / E^2</code>).</p>
 <p>Telling a collapse apart is not the same as pushing against it. The gate holds only the scores inside the top-k subset, so an objective that reads the gate has exactly zero gradient for an expert outside the top-k: once an expert drops out of the top-k on every image, the term can no longer reach it. Measured, the gate-reading objectives lost an expert in five of six checkpoints, and in all six same-configuration B checkpoints trained with upstream's recipe, while Switch lost none in 66, which is why Switch is the default (<a href="../JUDGMENT/">judgment lines</a>, rounds six to eight). To use upstream's objective instead:</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
 <p>A custom objective goes into the config too: define the function at module level in an importable module and pass it to <code>equip</code> or <code>graft</code>. The config stores <code>module:qualname</code>, and the trainer and every DDP worker import the same function back from that name when they rebuild the model. A lambda, a nested function or a function defined in <code>__main__</code> cannot be imported back by name and is refused when grafting. Custom experts work the same way (<code>expert=MyExpert</code>). The measurements are on <a href="../experiments/">Experiments</a> and <a href="../JUDGMENT/">Judgment lines</a>.</p>
-<h3 id="the-configuration-that-matches-upstream">The configuration that matches upstream<a class="headerlink" href="#the-configuration-that-matches-upstream" title="Permanent link">&para;</a></h3>
+<h3 id="matching-upstream">Matching upstream<a class="headerlink" href="#matching-upstream" title="Permanent link">&para;</a></h3>
 <p>Upstream's <code>ES_MOE</code> differs from this package's defaults in the first five rows below: four affect training, and pruning affects inference only. <strong>They all go through <code>equip</code></strong>, and a run compared against upstream adds its training recipe, <code>recipe="upstream"</code> (see <a href="../API/">API</a>):</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
@@ -1324,7 +1327,7 @@ them.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">balancing term</td>
+<td style="text-align: center;">balancing objective</td>
 <td style="text-align: center;"><code>N*sum(u^2)</code> on the gate</td>
 <td style="text-align: center;">Switch (<code>switch_balance</code>)</td>
 <td style="text-align: center;"><code>balance="gshard"</code></td>
@@ -1466,12 +1469,10 @@ them.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../../javascripts/data.js"></script>
       
@@ -1479,11 +1480,9 @@ them.</p>
       
         <script src="../../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../../javascripts/diagrams.js"></script>
+      
+        <script src="../../javascripts/loader.js"></script>
       
     
   </body>

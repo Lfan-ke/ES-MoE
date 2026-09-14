@@ -2236,7 +2236,7 @@
 </tr>
 </tbody>
 </table>
-<p>两个 checkpoint 都落在 Switch 那组的上半段或之上；seed 1 的 1.898 是全部 48 个 checkpoint 里最集中的一个。seed 0 出现了本课题<strong>第一个死专家</strong>（用量 0.0091），此前 46 个 checkpoint 一个都没有。同时概率熵反而更高（97%–98% 对 90%–97%）——<strong>路由概率更平，分派却更集中</strong>，正是这条线一直在追的那个背离。</p>
+<p>两个 checkpoint 都落在 Switch 那组的上半段或之上；seed 1 的 1.898 是全部 48 个 checkpoint 里最集中的一个。seed 0 出现了本项目<strong>第一个死专家</strong>（用量 0.0091），此前 46 个 checkpoint 一个都没有。同时概率熵反而更高（97%–98% 对 90%–97%）——<strong>路由概率更平，分派却更集中</strong>，正是这条线一直在追的那个背离。</p>
 <p>配对精度是 +0.0018（两 seed，1/2 胜），落在同配置重复运行的离散度之内，说明不了什么。</p>
 <p><strong>混淆项曾被我写反，此处更正。</strong> 起初写的是「两项在同一权重下尺度差一倍，这一臂只承受一半压力」——那是拿两项在最优点的<strong>取值</strong>去比，而取值说明不了压力。真正决定一个权重买到多少的是该项加在路由 logits 上的<strong>梯度</strong>。按各 checkpoint 实际收敛到的平均路由概率量（<code>scripts/pressure.py</code>，结果在 <code>results/pressure.md</code>）：</p>
 <table>
@@ -2304,7 +2304,7 @@
 <li><strong>正效应最大的那一代，恰好在噪声最大的那台机器上。</strong> v5n 的 +0.0055 与 +0.0041 都出自曦云；4090 上的四代（v8n、11n、12n、26n）目前只有一对同配置重复可依。</li>
 <li><strong>这不推翻符号的一致性，但推翻幅度的可读性。</strong> 「某代为正、某代为负」这一层由多 seed 的符号统计支撑；「+0.0055 是这个块带来的」这一层不成立——单次运行的差别就能有 0.0130。</li>
 </ol>
-<p>因此本项目对精度的表述只保留到方向一层，且明确标注样本量与置信区间；此前判读线里凡以幅度为据的推断，一律降级为方向。<strong>这是本课题最有价值的负结果，而它来自一个实现缺陷的副产品——若非那六轮被误标，同配置的重复根本不会有人去跑。</strong></p>
+<p>因此本项目对精度的表述只保留到方向一层，且明确标注样本量与置信区间；此前判读线里凡以幅度为据的推断，一律降级为方向。<strong>这组负结果来自一个实现缺陷：那六次运行被误标，才有了同配置的重复运行。</strong></p>
 <h2 id="第五轮判定2026-09-10三条结构臂产出后">第五轮判定（2026-09-10，三条结构臂产出后）<a class="headerlink" href="#第五轮判定2026-09-10三条结构臂产出后" title="Permanent link">&para;</a></h2>
 <p>三条臂各三个 seed 跑完，同卡同 seed 配对：</p>
 <table>
@@ -2483,7 +2483,7 @@
 <p>原因在门控的形式。式 8 与式 9 是同一个数，而式 9 只含 top-K 子集里的 logit：</p>
 <div class="arithmatex">\[\Omega_{\text{train},i}=\frac{e^{L_i}}{\sum_{j\in I_K}e^{L_j}},\qquad i\in I_K\]</div>
 <p>所以<strong>只读门控的平衡项，对当下没进 top-K 的专家，logit 梯度恒为零</strong>，不论这个专家还剩多少概率。一个专家在所有图上都掉出 top-K 以后，这一项再也够不着它。Switch 项读完整的 softmax，对子集外的专家有同量级的梯度，方向是把它拉回 top-K。数值断言见 <code>tests/test_paper_parity.py</code> 的 <code>test_a_gate_reading_balance_cannot_reach_an_expert_outside_the_top_k</code>。</p>
-<p>上游自己的配方里也是这样。上一阶段在上游仓库 d5afc4b（2026-07-28）原生训练的 YOLO-Master-EsMoE-N 上，平衡项同样读门控（<code>ES_MOE._compute_load_balancing_loss</code> 取 <code>_soft_top_k</code> 的输出），四个块里前三个各有两个专家利用率恰为 0，最后一个四个都用上；剪掉死专家后 mAP50 从 0.4271 到 0.4269，延迟降 24.5%（<a href="https://github.com/Lfan-ke/yolomoe-ln">yolomoe-ln</a> 的 <code>DISCUSSION_POST.md</code>）。那次训练是 imgsz 1024、100 epoch、单次运行、YOLO-Master 自己的架构，与本项目协议不同，只作机制佐证，不进入任何精度比较。</p>
+<p>上游自己的配方里也是这样。此前在上游仓库 d5afc4b（2026-07-28）原生训练的 YOLO-Master-EsMoE-N 上，平衡项同样读门控（<code>ES_MOE._compute_load_balancing_loss</code> 取 <code>_soft_top_k</code> 的输出），四个块里前三个各有两个专家利用率恰为 0，最后一个四个都用上；剪掉死专家后 mAP50 从 0.4271 到 0.4269，延迟降 24.5%（<a href="https://github.com/Lfan-ke/yolomoe-ln">yolomoe-ln</a> 的 <code>DISCUSSION_POST.md</code>）。那次训练是 imgsz 1024、100 epoch、单次运行、YOLO-Master 自己的架构，与本项目协议不同，只作机制佐证，不进入任何精度比较。</p>
 <h3 id="预测对账_3">预测对账<a class="headerlink" href="#预测对账_3" title="Permanent link">&para;</a></h3>
 <p><strong>第四条（论文的平衡项会明显降低主导专家的 top-1 份额，降幅大于读门控 GShard）——按字面成立，背后的机制假设不成立。</strong> 登记的是权重 0.01 的 <code>master</code>，那一档从未真正跑过（见第四轮前的更正）；按第四轮判定末尾的做法把压力抬足后，top-1 份额 2/3 个 seed 下降，均值 0.697 对默认臂 0.812，降 0.115，而读门控 GShard 反升 0.034。但同一批 checkpoint 3/3 有死专家，前两名用量 3/3 更高（1.704、2.000、1.692 对 1.431、1.610、1.646）。份额降下来，是因为分派从一个专家主导变成两个专家固定包揽，不是变均匀。读门控 GShard 补齐 seed 2 后也死掉两个专家。</p>
 <p><strong>第五轮留下的混淆项（四块的负效应是否来自四倍辅助项）——排除。</strong></p>
@@ -2925,12 +2925,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../javascripts/data.js"></script>
       
@@ -2938,11 +2936,9 @@
       
         <script src="../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../javascripts/diagrams.js"></script>
+      
+        <script src="../javascripts/loader.js"></script>
       
     
   </body>

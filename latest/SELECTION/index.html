@@ -703,10 +703,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#seed-0-上的候选" class="md-nav__link">
+  <a href="#候选" class="md-nav__link">
     <span class="md-ellipsis">
       
-        seed 0 上的候选
+        候选
       
     </span>
   </a>
@@ -714,10 +714,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#三个-seed-的确认" class="md-nav__link">
+  <a href="#三个-seed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        三个 seed 的确认
+        三个 seed
       
     </span>
   </a>
@@ -725,10 +725,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#全量数据上的确认" class="md-nav__link">
+  <a href="#全量数据" class="md-nav__link">
     <span class="md-ellipsis">
       
-        全量数据上的确认
+        全量数据
       
     </span>
   </a>
@@ -736,10 +736,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#训练更久差距怎么变" class="md-nav__link">
+  <a href="#训练长度" class="md-nav__link">
     <span class="md-ellipsis">
       
-        训练更久，差距怎么变
+        训练长度
       
     </span>
   </a>
@@ -769,10 +769,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#这个结论有多大分量" class="md-nav__link">
+  <a href="#分量" class="md-nav__link">
     <span class="md-ellipsis">
       
-        这个结论有多大分量
+        分量
       
     </span>
   </a>
@@ -1031,10 +1031,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#seed-0-上的候选" class="md-nav__link">
+  <a href="#候选" class="md-nav__link">
     <span class="md-ellipsis">
       
-        seed 0 上的候选
+        候选
       
     </span>
   </a>
@@ -1042,10 +1042,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#三个-seed-的确认" class="md-nav__link">
+  <a href="#三个-seed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        三个 seed 的确认
+        三个 seed
       
     </span>
   </a>
@@ -1053,10 +1053,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#全量数据上的确认" class="md-nav__link">
+  <a href="#全量数据" class="md-nav__link">
     <span class="md-ellipsis">
       
-        全量数据上的确认
+        全量数据
       
     </span>
   </a>
@@ -1064,10 +1064,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#训练更久差距怎么变" class="md-nav__link">
+  <a href="#训练长度" class="md-nav__link">
     <span class="md-ellipsis">
       
-        训练更久，差距怎么变
+        训练长度
       
     </span>
   </a>
@@ -1097,10 +1097,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#这个结论有多大分量" class="md-nav__link">
+  <a href="#分量" class="md-nav__link">
     <span class="md-ellipsis">
       
-        这个结论有多大分量
+        分量
       
     </span>
   </a>
@@ -1131,7 +1131,7 @@
 <p>预算：VisDrone2019-DET <code>fraction=0.25</code>、imgsz 640、从零训练 20 epoch、batch 32、YOLOv8n，一张 RTX 4090 D。各臂的数据、训练日程和数据增强完全相同，只改块的配置。原始记录在 <code>results/</code>，由 <code>scripts/report.py</code> 汇总成 <code>results/summary.md</code>。</p>
 <h2 id="来源">来源<a class="headerlink" href="#来源" title="Permanent link">&para;</a></h2>
 <p>公开基线 <code>acce839c7e895d6b179de7f7093fa879e237cc7b</code>（YOLO-Master main，2026-08-21 23:59:59 +0800），发布参照 <code>YOLO-Master-v26.08</code> → <code>43d40117c...</code>。两者都基于 <code>ultralytics 8.4.101</code>，与本工具包对接的官方版本相同，所以插件路径和基线是在同一个库版本上测的。工具包开始写入自身版本之前产生的记录带 <code>git_ref = "0.1.0"</code>；此后每条记录都写入提交号、ultralytics 版本和两个锁定的基线。</p>
-<h2 id="seed-0-上的候选">seed 0 上的候选<a class="headerlink" href="#seed-0-上的候选" title="Permanent link">&para;</a></h2>
+<h2 id="候选">候选<a class="headerlink" href="#候选" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1201,7 +1201,13 @@
 </tr>
 </tbody>
 </table>
-<h2 id="三个-seed-的确认">三个 seed 的确认<a class="headerlink" href="#三个-seed-的确认" title="Permanent link">&para;</a></h2>
+<figure class="es-fig" id="fig-1">
+<figcaption><b>图 1</b><span>候选配置的配对差</span><em>25% 训练集、20 epoch，柱为 seed 0，点为逐 seed</em></figcaption>
+<div class="esmoe-figure" data-figure="selection-candidates"></div>
+<small>数据：<code>results/summary.md</code></small>
+</figure>
+
+<h2 id="三个-seed">三个 seed<a class="headerlink" href="#三个-seed" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1232,7 +1238,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="全量数据上的确认">全量数据上的确认<a class="headerlink" href="#全量数据上的确认" title="Permanent link">&para;</a></h2>
+<h2 id="全量数据">全量数据<a class="headerlink" href="#全量数据" title="Permanent link">&para;</a></h2>
 <p>上面的选择是在 25% 子集上做的。在<strong>全量</strong> VisDrone 训练集上，同样 20 epoch、三个 seed，把选中的臂和基线重跑一遍：</p>
 <table>
 <thead>
@@ -1265,7 +1271,7 @@
 </tbody>
 </table>
 <p>逐 seed 的 mAP50 差为 +0.0001、+0.0032、+0.0029。均值增益与子集上相同，mAP50-95 的增益是子集上的四倍（+0.0019 对 +0.0005），数据量翻四倍没有把效应冲淡。其中一个 seed 基本打平，由此可以给效应划界：幅度小，符号一致，单次运行不可靠。</p>
-<h2 id="训练更久差距怎么变">训练更久，差距怎么变<a class="headerlink" href="#训练更久差距怎么变" title="Permanent link">&para;</a></h2>
+<h2 id="训练长度">训练长度<a class="headerlink" href="#训练长度" title="Permanent link">&para;</a></h2>
 <p>同一对臂在全量训练集上跑三档预算，各三个 seed：</p>
 <table>
 <thead>
@@ -1306,8 +1312,14 @@
 </tbody>
 </table>
 <p>每档的均值都为正，但不随训练轮数单向变化；seed 之间的离散随预算变大，100 epoch 时三个配对差从 +0.0104 到 -0.0011。合起来看，这些运行支持一个小的正向平均效应，排除了单次运行稳定提升的说法；至于收敛时效应往哪个方向走，它们两边都不支持。</p>
+<figure class="es-fig" id="fig-2">
+<figcaption><b>图 2</b><span>训练长度与换主干</span><em>全量训练集，点为逐 seed，短横为均值</em></figcaption>
+<div class="esmoe-figure" data-figure="selection-budget"></div>
+<small>数据：<code>results/summary.md</code></small>
+</figure>
+
 <h2 id="换主干">换主干<a class="headerlink" href="#换主干" title="Permanent link">&para;</a></h2>
-<p>同样的配对比较放到 YOLO11n 上，全量训练集、20 epoch、三个 seed：</p>
+<p>同样的配对比较放到 YOLO11n 上，全量训练集、20 epoch、三个 seed（图 2 最右一格）：</p>
 <table>
 <thead>
 <tr>
@@ -1347,8 +1359,8 @@
 <li>专家数翻倍到 8 没有可测的增益，参数量却比 e4k2 多 13%。</li>
 <li>参数量不变、关掉辅助损失，mAP50 少 0.0012。因此要把辅助损失接进被优化的损失，而不是只算出来。</li>
 </ul>
-<h2 id="这个结论有多大分量">这个结论有多大分量<a class="headerlink" href="#这个结论有多大分量" title="Permanent link">&para;</a></h2>
-<p>各臂的标准差互相重叠，只有逐 seed 的配对比较撑得住这个排序，而且只在一个短预算、三个 seed 上。绝对增益（mAP50 相对提升 2.3%）的代价是参数量多 10.4%。同配置同 seed 重跑，在 RTX 4090 上 20 epoch 时指标逐位相同；在曦云 C500 上 120 epoch 时，同一配置两次运行平均差 0.0045，与效应同量级。实验口径见<a href="../experiments/#口径">实验</a>。</p>
+<h2 id="分量">分量<a class="headerlink" href="#分量" title="Permanent link">&para;</a></h2>
+<p>各臂的标准差互相重叠，只有逐 seed 的配对比较撑得住这个排序，而且只在一个短预算、三个 seed 上。绝对增益（mAP50 相对提升 2.3%）的代价是参数量多 10.4%。同配置同 seed 重跑，在 RTX 4090 D 上 20 epoch 时指标完全相同；在曦云 C500 上 120 epoch 时，同一配置两次运行平均差 0.0045，与效应同量级。实验口径见<a href="../experiments/#口径">实验</a>。</p>
 
 
 
@@ -1444,12 +1456,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../javascripts/data.js"></script>
       
@@ -1457,11 +1467,9 @@
       
         <script src="../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../javascripts/diagrams.js"></script>
+      
+        <script src="../javascripts/loader.js"></script>
       
     
   </body>

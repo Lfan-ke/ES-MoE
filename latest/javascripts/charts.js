@@ -280,10 +280,5 @@
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", draw);
-  } else {
-    draw();
-  }
-  if (window.document$) window.document$.subscribe(draw); // Material's instant navigation
+  (window.ESMOE = window.ESMOE || {}).effect = draw;
 })();

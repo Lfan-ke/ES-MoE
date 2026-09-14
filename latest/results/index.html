@@ -835,10 +835,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#与-yolo-master-同配置对照" class="md-nav__link">
+  <a href="#同配置对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        与 YOLO-Master 同配置对照
+        同配置对照
       
     </span>
   </a>
@@ -868,10 +868,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#平衡项的实际压力" class="md-nav__link">
+  <a href="#平衡压力" class="md-nav__link">
     <span class="md-ellipsis">
       
-        平衡项的实际压力
+        平衡压力
       
     </span>
   </a>
@@ -879,10 +879,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#交付核验" class="md-nav__link">
+  <a href="#发布核验" class="md-nav__link">
     <span class="md-ellipsis">
       
-        交付核验
+        发布核验
       
     </span>
   </a>
@@ -987,10 +987,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#与-yolo-master-同配置对照" class="md-nav__link">
+  <a href="#同配置对照" class="md-nav__link">
     <span class="md-ellipsis">
       
-        与 YOLO-Master 同配置对照
+        同配置对照
       
     </span>
   </a>
@@ -1020,10 +1020,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#平衡项的实际压力" class="md-nav__link">
+  <a href="#平衡压力" class="md-nav__link">
     <span class="md-ellipsis">
       
-        平衡项的实际压力
+        平衡压力
       
     </span>
   </a>
@@ -1031,10 +1031,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#交付核验" class="md-nav__link">
+  <a href="#发布核验" class="md-nav__link">
     <span class="md-ellipsis">
       
-        交付核验
+        发布核验
       
     </span>
   </a>
@@ -1063,7 +1063,13 @@
 
 <h1 id="实验结果">实验结果<a class="headerlink" href="#实验结果" title="Permanent link">&para;</a></h1>
 <p>每一行对应 <a href="https://github.com/Lfan-ke/ES-MoE/tree/main/results"><code>results/</code></a> 里的一条实验记录，本页由 <code>scripts/report.py</code> 从这些记录生成。分组键是主干、块配置与预算三者，两个不同预算不会落进同一个均值。要看的是配对表而不是两组均值，实验口径与交互式图表见<a href="../experiments/">实验</a>；逐格判定见<a href="../JUDGMENT/">判读线</a>。</p>
-<p>协议矩阵每一轮的 <code>best.pt</code> 与完整训练参数存放在 <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> 分支</a>（Git LFS，与主分支隔离，数量以该分支 README 为准）：分档与路由的每个数字都能从那里的检查点重算。</p>
+<p>协议矩阵每一次运行的 <code>best.pt</code> 与完整训练参数存放在 <a href="https://github.com/Lfan-ke/ES-MoE/tree/checkpoints"><code>checkpoints</code> 分支</a>（Git LFS，与主分支隔离，数量以该分支 README 为准）：分档与路由的每个数字都能从那里的检查点重算。</p>
+<figure class="es-fig" id="fig-1">
+<figcaption><b>图 1</b><span>七代主干的配对差</span><em>下表各格的逐 seed 值与均值</em></figcaption>
+<div class="esmoe-figure" data-figure="generations" data-metrics="both"></div>
+<small>数据：<code>results/summary.md</code></small>
+</figure>
+
 <h4 id="runs">Runs<a class="headerlink" href="#runs" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -5501,9 +5507,15 @@
 </tr>
 </tbody>
 </table>
-<h2 id="与-yolo-master-同配置对照">与 YOLO-Master 同配置对照<a class="headerlink" href="#与-yolo-master-同配置对照" title="Permanent link">&para;</a></h2>
+<h2 id="同配置对照">同配置对照<a class="headerlink" href="#同配置对照" title="Permanent link">&para;</a></h2>
 <p>同一个模型、同一份协议，在上游分支与官方 ultralytics 加本包上各训一遍，四臂按 seed 分卡：A 是上游分支跑它自己的 <code>yolo-master-n</code>（四个 <code>ES_MOE</code>），A0 是同一分支去掉四个块，B 是官方 8.4.101 加本包四个 <code>ESMoE</code> 并按 <code>recipe="upstream"</code> 训练，C 是官方去块。每个 seed 的四臂在同一张卡上，配对差都在卡内求。</p>
-<p>指标由 <code>scripts/measure.py</code> 统一重测：按各 run 自己的配置重建模型、装回 <code>last.pt</code> 的 EMA 权重、同一套验证参数各测一遍，不让两个框架各自的验证口径混进比较；训练器当时测到的值保留在记录的 <code>metrics_by_trainer</code> 里。判读按<a href="../JUDGMENT/">判读线</a>第七轮（混合精度）与第八轮（FP32）。</p>
+<p>指标由 <code>scripts/measure.py</code> 统一重测：按各次运行自己的配置重建模型、装回 <code>last.pt</code> 的 EMA 权重、同一套验证参数各测一遍，不让两个框架各自的验证口径混进比较；训练器当时测到的值保留在记录的 <code>metrics_by_trainer</code> 里。判读按<a href="../JUDGMENT/">判读线</a>第七轮（混合精度）与第八轮（FP32）。</p>
+<figure class="es-fig" id="fig-2">
+<figcaption><b>图 2</b><span>四个差与 95% 区间</span><em>大点为均值，小点为 seed，灰带为噪声底</em></figcaption>
+<div class="esmoe-figure" data-figure="same-config-differences" data-metrics="both"></div>
+<small>数据：<code>results/same_config.md</code></small>
+</figure>
+
 <h4 id="metricsmap50b">metrics/mAP50(B)<a class="headerlink" href="#metricsmap50b" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
@@ -6153,6 +6165,17 @@
 </tbody>
 </table>
 <h2 id="面积分档">面积分档<a class="headerlink" href="#面积分档" title="Permanent link">&para;</a></h2>
+<div class="es-duo">
+<figure class="es-fig" id="fig-3">
+<figcaption><b>图 3</b><span>七代主干</span><em>面积分档的配对差</em></figcaption>
+<div class="esmoe-figure" data-figure="buckets-generations" data-arms="both"></div>
+</figure>
+<figure class="es-fig" id="fig-4">
+<figcaption><b>图 4</b><span>同配置对照</span><em>A − A0 与 B − C</em></figcaption>
+<div class="esmoe-figure" data-figure="buckets-same-config"></div>
+</figure>
+</div>
+
 <p>COCO-style buckets (small &lt; 32², medium 32²–96², large ≥ 96²) on ground-truth boxes in the original image, maxDets = 500. This is a definition adopted for this project; VisDrone's official protocol reports no size split.</p>
 <p>A row named for a run alone was measured from that run's final EMA weights, as <code>scripts/measure.py</code> rebuilds them; the rest are measured from the run's <code>best.pt</code>.</p>
 <p>Ground truth: 26586 small, 11105 medium, 1068 large boxes.</p>
@@ -10646,9 +10669,20 @@
 </tbody>
 </table>
 <h2 id="路由行为">路由行为<a class="headerlink" href="#路由行为" title="Permanent link">&para;</a></h2>
+<div class="es-duo">
+<figure class="es-fig" id="fig-5">
+<figcaption><b>图 5</b><span>分派集中度与配对差</span><em>大点为四块布局</em></figcaption>
+<div class="esmoe-figure" data-figure="routing-scatter"></div>
+</figure>
+<figure class="es-fig" id="fig-6">
+<figcaption><b>图 6</b><span>各平衡项下的死专家</span><em>按检查点计</em></figcaption>
+<div class="esmoe-figure" data-figure="dead-experts"></div>
+</figure>
+</div>
+
 <p>Per checkpoint: the share of images on which each expert is the top-1 choice, the share on which it is in the top-2, the mean routing probability, and the correlation of that probability with the mean object size and the object count of the image.</p>
 <h4 id="does-concentration-cost-accuracy">Does concentration cost accuracy?<a class="headerlink" href="#does-concentration-cost-accuracy" title="Permanent link">&para;</a></h4>
-<p>Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is <strong>r = +0.044</strong>: on this evidence a concentrated dispatch does not cost accuracy, which is worth holding against the premise that a balancing term is what the block needs.</p>
+<p>Over the 81 runs that have both a paired delta and a routing analysis, the leading expert's top-1 share runs 0.47 to 1.00 and the paired mAP50 delta -0.0160 to +0.0109. Their correlation is <strong>r = +0.044</strong>: on this evidence a concentrated dispatch does not cost accuracy.</p>
 <h4 id="yolo-master-n-esmoe-upstream-w1-e120-s0-p800c">yolo-master-n-esmoe-upstream-w1-e120-s0-p800c<a class="headerlink" href="#yolo-master-n-esmoe-upstream-w1-e120-s0-p800c" title="Permanent link">&para;</a></h4>
 <p>548 images through block 0 (64 channels), kernels [3, 5, 7, 9], top-2, dead experts: [0, 2], mean entropy 1.3658 of 1.3863, distinct top-2 pairs seen: 1 of 6.</p>
 <table>
@@ -17600,8 +17634,14 @@
 </tr>
 </tbody>
 </table>
-<h2 id="平衡项的实际压力">平衡项的实际压力<a class="headerlink" href="#平衡项的实际压力" title="Permanent link">&para;</a></h2>
-<p>各目标在同一权重下加到路由 logits 上的梯度，按各检查点实际收敛到的平均路由概率量出，由 <code>scripts/pressure.py</code> 生成。</p>
+<h2 id="平衡压力">平衡压力<a class="headerlink" href="#平衡压力" title="Permanent link">&para;</a></h2>
+<p>各平衡目标在同一权重下加到路由 logits 上的梯度，按各检查点实际收敛到的平均路由概率量出，由 <code>scripts/pressure.py</code> 生成。</p>
+<figure class="es-fig" id="fig-7">
+<figcaption><b>图 7</b><span>平衡项的梯度</span><em>同一权重下，各检查点的中位数</em></figcaption>
+<div class="esmoe-figure" data-figure="pressure"></div>
+<small>数据：<code>results/pressure.md</code></small>
+</figure>
+
 <p>Mean |d term / d logit| at the mean routing probabilities each checkpoint converged to,
 over 548 rows scattered by the spread column. Generated by <code>scripts/pressure.py</code>.</p>
 <table>
@@ -20020,7 +20060,7 @@ over 548 rows scattered by the spread column. Generated by <code>scripts/pressur
 </tbody>
 </table>
 <p>Reading the gate costs 0.12x to 1.58x what the Switch term costs at the same weight, so the two are pushed comparably; the paper's form is 10x to 134x weaker, which is the <code>1/E^2</code> factor. The low ratios all sit at the tightest spread, where a router whose mean is already skewed gives the Switch term more to pull on.</p>
-<h2 id="交付核验">交付核验<a class="headerlink" href="#交付核验" title="Permanent link">&para;</a></h2>
+<h2 id="发布核验">发布核验<a class="headerlink" href="#发布核验" title="Permanent link">&para;</a></h2>
 <p>下表由 <code>scripts/closure.py</code> 从记录、git 历史与已发布的产物逐条推出，可重跑复核。</p>
 <p>Generated by <code>scripts/closure.py</code>; every row is derived from this repository.</p>
 <table>
@@ -20201,12 +20241,10 @@ over 548 rows scattered by the spread column. Generated by <code>scripts/pressur
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../javascripts/data.js"></script>
       
@@ -20214,11 +20252,9 @@ over 548 rows scattered by the spread column. Generated by <code>scripts/pressur
       
         <script src="../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../javascripts/diagrams.js"></script>
+      
+        <script src="../javascripts/loader.js"></script>
       
     
   </body>

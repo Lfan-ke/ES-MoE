@@ -571,10 +571,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#嫁接时必须重编号" class="md-nav__link">
+  <a href="#嫁接与重编号" class="md-nav__link">
     <span class="md-ellipsis">
       
-        嫁接时必须重编号
+        嫁接与重编号
       
     </span>
   </a>
@@ -582,10 +582,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#怎么证明辅助损失确实生效" class="md-nav__link">
+  <a href="#确认辅助损失生效" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么证明辅助损失确实生效
+        确认辅助损失生效
       
     </span>
   </a>
@@ -593,10 +593,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#对照实验怎么做" class="md-nav__link">
+  <a href="#对照实验" class="md-nav__link">
     <span class="md-ellipsis">
       
-        对照实验怎么做
+        对照实验
       
     </span>
   </a>
@@ -616,10 +616,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#四个内置的平衡目标" class="md-nav__link">
+  <a href="#内置平衡目标" class="md-nav__link">
     <span class="md-ellipsis">
       
-        四个内置的平衡目标
+        内置平衡目标
       
     </span>
   </a>
@@ -627,10 +627,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#对齐上游的完整配置" class="md-nav__link">
+  <a href="#对齐上游" class="md-nav__link">
     <span class="md-ellipsis">
       
-        对齐上游的完整配置
+        对齐上游
       
     </span>
   </a>
@@ -1059,10 +1059,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#嫁接时必须重编号" class="md-nav__link">
+  <a href="#嫁接与重编号" class="md-nav__link">
     <span class="md-ellipsis">
       
-        嫁接时必须重编号
+        嫁接与重编号
       
     </span>
   </a>
@@ -1070,10 +1070,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#怎么证明辅助损失确实生效" class="md-nav__link">
+  <a href="#确认辅助损失生效" class="md-nav__link">
     <span class="md-ellipsis">
       
-        怎么证明辅助损失确实生效
+        确认辅助损失生效
       
     </span>
   </a>
@@ -1081,10 +1081,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#对照实验怎么做" class="md-nav__link">
+  <a href="#对照实验" class="md-nav__link">
     <span class="md-ellipsis">
       
-        对照实验怎么做
+        对照实验
       
     </span>
   </a>
@@ -1104,10 +1104,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#四个内置的平衡目标" class="md-nav__link">
+  <a href="#内置平衡目标" class="md-nav__link">
     <span class="md-ellipsis">
       
-        四个内置的平衡目标
+        内置平衡目标
       
     </span>
   </a>
@@ -1115,10 +1115,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#对齐上游的完整配置" class="md-nav__link">
+  <a href="#对齐上游" class="md-nav__link">
     <span class="md-ellipsis">
       
-        对齐上游的完整配置
+        对齐上游
       
     </span>
   </a>
@@ -1181,16 +1181,16 @@
     E3 --&gt; S
     E4 --&gt; S
     S --&gt; Y["输出&lt;br/&gt;(n, c, h, w)"]
-    P -.-&gt; A["负载均衡损失"]
+    P -.-&gt; A["辅助损失"]
     T -.-&gt; A
     A -.-&gt; L["训练总损失"]</code></pre>
-<p>辅助损失是 Switch-Transformer 的负载均衡损失：</p>
+<p>默认的平衡目标取 Switch-Transformer 的负载均衡形式，乘上权重就是辅助损失：</p>
 <div class="arithmatex">\[
 \mathcal{L}_{\text{aux}} = E \sum_{i=1}^{E} \bar{p}_i \cdot f_i ,
 \]</div>
 <p>其中 <span class="arithmatex">\(E\)</span> 是专家数，<span class="arithmatex">\(\bar{p}_i\)</span> 是专家 <span class="arithmatex">\(i\)</span> 在该批次上的平均路由概率，<span class="arithmatex">\(f_i\)</span> 是实际激活它的样本比例。路由质量与实际负载都摊平时该项最小。实测它防住的是专家死掉，防不住分派集中（<a href="../JUDGMENT/">判读线</a>第六轮）。</p>
 <h2 id="三个调用">三个调用<a class="headerlink" href="#三个调用" title="Permanent link">&para;</a></h2>
-<p><code>inject_esmoe</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把路由损失接进训练。<code>equip</code> 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。</p>
+<p><code>inject_esmoe</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把辅助损失接进训练。<code>equip</code> 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。</p>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
@@ -1208,7 +1208,7 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>手写配置时，嫁接后的层就是一行：</p>
 <pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
 </code></pre>
-<h2 id="嫁接时必须重编号">嫁接时必须重编号<a class="headerlink" href="#嫁接时必须重编号" title="Permanent link">&para;</a></h2>
+<h2 id="嫁接与重编号">嫁接与重编号<a class="headerlink" href="#嫁接与重编号" title="Permanent link">&para;</a></h2>
 <p>YOLO 配置用<strong>绝对层号</strong>引用前面的层：</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
 </code></pre>
@@ -1216,8 +1216,8 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <p>重编号只移动引用，不改变引用对象。于是 head 里按序号点名旧主干末层的分支——YOLOv8 的 P5 侧向 <code>[-1, 9] Concat</code> 就是——插入之后仍读 SPPF 的输出，块只经自顶向下路径间接影响 P5。要让块接管主干末层的全部下游，加 <code>rewire=True</code>（命令行 <code>--rewire</code>）：</p>
 <pre><code>esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", rewire=True)
 </code></pre>
-<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，大目标受损主要来自绕过了 P5 侧向。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；<code>rewire</code> 在 12n、26n 把默认接法的一致损失拉回持平，仅在 11n 略低于默认接法。七代判定见<a href="../JUDGMENT/">判读线</a>。</p>
-<h2 id="怎么证明辅助损失确实生效">怎么证明辅助损失确实生效<a class="headerlink" href="#怎么证明辅助损失确实生效" title="Permanent link">&para;</a></h2>
+<p>默认关闭，为的是与已有实验记录保持可比。同预算对照（YOLOv8n、imgsz 800、120 epoch、三 seed）：默认接法 mAP50 +0.0025（2/3 胜）、大目标 APl −0.0104（0/3）；<code>rewire</code> 后 mAP50 +0.0036（3/3 胜）、APl +0.0063（2/3）——在 v8n 上，大目标受损主要来自绕过了 P5 侧向。这一机制不随主干代际固定：26n 上默认接法一致受损的是小目标（APs −0.0045，0/3），12n 上方向不稳；<code>rewire</code> 在 12n、26n 把默认接法的一致损失拉回持平，在 v5n、v9t、v10n、11n 上低于默认接法。七代判定见<a href="../JUDGMENT/">判读线</a>。</p>
+<h2 id="确认辅助损失生效">确认辅助损失生效<a class="headerlink" href="#确认辅助损失生效" title="Permanent link">&para;</a></h2>
 <p>配置里有个叫 <code>aux_loss</code> 的键什么都证明不了。能证明的是：</p>
 <ol>
 <li><code>results.csv</code> 里多出 <code>esmoe_aux</code> 列，非零且在变化；</li>
@@ -1225,19 +1225,21 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <li>同一个测试断言路由器确实拿到梯度。</li>
 </ol>
 <p>在自定义训练循环里取这个值：</p>
-<pre><code>aux = esmoe.collect_aux_loss(model)
+<pre><code>esmoe.clear_aux_loss()
+task_loss = criterion(model(images), targets)
+aux = esmoe.collect_aux_loss(model)
 (task_loss + 0.01 * aux).backward()
 </code></pre>
-<p><code>collect_aux_loss</code> 只汇总最近一次前向发布的值，所以连着调用两次不会把陈旧的计算图重复计入。</p>
-<h2 id="对照实验怎么做">对照实验怎么做<a class="headerlink" href="#对照实验怎么做" title="Permanent link">&para;</a></h2>
+<p><code>collect_aux_loss</code> 只读不清，汇总的是各块在注册表里最近一次发布的值。每步前向之前先调 <code>clear_aux_loss()</code>，某个块这一步没有跑到时才不会留下上一步的值；<code>attach_aux_loss</code> 装上的损失补丁会自己做这一步。</p>
+<h2 id="对照实验">对照实验<a class="headerlink" href="#对照实验" title="Permanent link">&para;</a></h2>
 <pre><code>uv run python scripts/capture_env.py             # 把版本与硬件冻进 results/env/
 EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" uv run bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>
 <p>每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。<code>report.py</code> 按主干、块配置与<strong>预算</strong>三者共同分组，两个不同预算不会被平均进同一行；随后对同 seed 的基线打印逐 seed 的配对差值。</p>
-<p>要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，但其中一个 seed 几乎打平；这是一个方向一致而幅度很小的效应，单次运行并不可靠。完整的测量见<a href="../experiments/">实验</a>。</p>
+<p>要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在选型预算下（全量 VisDrone、640 像素、20 epoch），默认配置以 +0.0021 mAP50 赢下 3/3 seed，其中一个 seed 几乎打平；到协议预算（800 像素、120 epoch），YOLOv8n 上是 +0.0025、2/3。这是一个方向一致而幅度很小的效应，单次运行并不可靠。完整的测量见<a href="../experiments/">实验</a>。</p>
 <h2 id="扩展">扩展<a class="headerlink" href="#扩展" title="Permanent link">&para;</a></h2>
-<p>专家与平衡目标都是普通的 callable：</p>
+<p>专家与平衡目标都是可调用对象：</p>
 <pre><code>class ThinExpert(nn.Sequential):
     def __init__(self, c1, c2, k):
         super().__init__(nn.Conv2d(c1, c2, k, 1, k // 2, groups=c1), nn.SiLU())
@@ -1248,8 +1250,8 @@ def entropy_balance(probs, gate):
 block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
 </code></pre>
 <p><code>esmoe.blocks(model)</code> 遍历模型中的每一个块，汇总器与测试都靠它定位。</p>
-<h3 id="四个内置的平衡目标">四个内置的平衡目标<a class="headerlink" href="#四个内置的平衡目标" title="Permanent link">&para;</a></h3>
-<p><strong>默认是 Switch</strong>（<code>switch_balance</code>），与 0.1.4 一致，也是 <code>results/</code> 里默认臂用的目标：</p>
+<h3 id="内置平衡目标">内置平衡目标<a class="headerlink" href="#内置平衡目标" title="Permanent link">&para;</a></h3>
+<p><strong>默认是 Switch</strong>（<code>switch_balance</code>），与此前各版本一致，也是 <code>results/</code> 里默认臂用的目标：</p>
 <table>
 <thead>
 <tr>
@@ -1281,17 +1283,17 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tr>
 </tbody>
 </table>
-<p>差别不在系数而在读什么。平均概率均匀、而 top-k 分派塌到单个专家时——本包七代实测都是这个形态——读概率的两个（<code>switch</code>、<code>gshard_probs</code>）取到同一个值，分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。</p>
+<p>差别不在系数而在读什么。平均概率接近均匀、而 top-k 分派集中在少数专家时，读概率的两个停在固定值（<code>switch</code> 为 k，<code>gshard_probs</code> 为 1），分辨不出；读门控的两个（<code>gshard</code>、<code>master</code>）能分辨。实测的检查点接近这个形态：路由概率的熵是最大值的 90% 到 100%，主导专家的 top-1 份额却在 0.47 到 1.00 之间。上游代码与论文在这一点上一致，只差一个仿射变换（<code>L_论文 = (L_上游 − 1)/E²</code>）。</p>
 <p>分辨得出不等于推得动。门控只含 top-k 子集里的分数，读门控的目标对没进 top-k 的专家梯度恒为零：一个专家一旦在所有图上都掉出 top-k，这一项再也够不着它。实测读门控的目标 6 个检查点里 5 个出现死专家，同配置对照里按上游配方训的 6 个 B 检查点全部有，Switch 在 66 个里一个没有，默认值因此是 Switch（<a href="../JUDGMENT/">判读线</a>第六至八轮）。换成上游的目标：</p>
 <pre><code>esmoe.equip("yolo11n.yaml", balance="gshard")
 </code></pre>
 <p>自定义目标也能写进配置：把函数定义在可导入模块的顶层，传给 <code>equip</code> 或 <code>graft</code>，配置里存的是 <code>模块:限定名</code>，训练器与每个 DDP 子进程重建模型时都从这个名字导入回同一个函数。lambda、嵌套函数、<code>__main__</code> 里定义的函数按名导入不回来，嫁接时就被拒绝。自定义专家同理（<code>expert=MyExpert</code>）。实测见<a href="../experiments/">实验</a>与<a href="../JUDGMENT/">判读线</a>。</p>
-<h3 id="对齐上游的完整配置">对齐上游的完整配置<a class="headerlink" href="#对齐上游的完整配置" title="Permanent link">&para;</a></h3>
+<h3 id="对齐上游">对齐上游<a class="headerlink" href="#对齐上游" title="Permanent link">&para;</a></h3>
 <p>上游 <code>ES_MOE</code> 与本包默认的差别在下表前五行：四项影响训练，剪枝只影响推理。<strong>都从 <code>equip</code> 传进去</strong>；与上游同配置对比时，再加上训练方式 <code>recipe="upstream"</code>（见 <a href="../API/">API</a>）：</p>
 <pre><code>model = esmoe.equip(
     "yolo11n.yaml",
     at="backbone_stages",     # 每个 stage 后一块，共四块
-    balance="gshard",         # 读门控的平衡项
+    balance="gshard",         # 读门控的平衡目标
     out_norm=True,            # 加权求和后的 BatchNorm + SiLU
     dense_training=True,      # 训练期跑满专家
     dynamic_threshold=0.4,    # 推理期剪枝
@@ -1309,7 +1311,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">平衡项</td>
+<td style="text-align: center;">平衡目标</td>
 <td style="text-align: center;"><code>N·Σu²</code> 读门控</td>
 <td style="text-align: center;">Switch（<code>switch_balance</code>）</td>
 <td style="text-align: center;"><code>balance="gshard"</code></td>
@@ -1451,12 +1453,10 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "content.code.copy", "content.tooltips", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"alias": true, "default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
       
         <script src="../javascripts/data.js"></script>
       
@@ -1464,11 +1464,9 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
       
         <script src="../javascripts/figures.js"></script>
       
-        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
-      
         <script src="../javascripts/diagrams.js"></script>
+      
+        <script src="../javascripts/loader.js"></script>
       
     
   </body>
