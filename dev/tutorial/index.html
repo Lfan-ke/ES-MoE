@@ -909,7 +909,7 @@ EPOCHS=20 FRACTION=1.0 SEEDS="0 1 2" bash scripts/sweep.sh
 uv run python scripts/report.py                  # results/summary.md
 </code></pre>
 <p>每次实验写一条 JSON 记录：模型配置、数据集与采样比例、硬件、预算、seed、指标、产物路径、状态、局限。<code>report.py</code> 按主干、块配置与<strong>预算</strong>三者共同分组，两个不同预算不会被平均进同一行；随后对同 seed 的基线打印逐 seed 的配对差值。</p>
-<p>要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，但其中一个 seed 几乎打平；这是一个方向一致而幅度很小的效应，单次运行并不可靠。其余边界写在 <code>limitations.md</code>。</p>
+<p>要看的是配对表，不是两组均值。这类实验里两臂的标准差通常重叠；真正撑住结论的是：同一 seed、同一数据、同一 schedule 下，三次都朝同一方向移动。在全量 VisDrone 上，出厂配置以 +0.0021 mAP50 赢下 3/3 seed，但其中一个 seed 几乎打平；这是一个方向一致而幅度很小的效应，单次运行并不可靠。其余边界写在<a href="../limitations/">已知局限</a>。</p>
 <h2 id="_7">扩展<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>专家与平衡目标都是普通的 callable：</p>
 <pre><code>class ThinExpert(nn.Sequential):
