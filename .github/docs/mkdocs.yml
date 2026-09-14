@@ -30,6 +30,7 @@ theme:
 
 hooks:
   - urls.py
+  - tables.py
 
 extra_css:
   - stylesheets/extra.css
@@ -82,7 +83,7 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - tables
-  - toc: { permalink: true }
+  - toc: { permalink: true, toc_depth: 3 }
   - pymdownx.snippets:
       base_path: ['.']
   - pymdownx.arithmatex:

@@ -5,6 +5,7 @@ language links relative to the current page and the theme fetches the sitemap th
 import gzip
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 # Four point-release notes were merged into one page; their old addresses keep answering.
 MOVED = {f"RELEASE_v0.1.{patch}": "RELEASE" for patch in range(4)}
@@ -33,6 +34,29 @@ def _sitemap(base: str, pages: list[tuple[str, ...]]) -> str:
     return SITEMAP.format(entries="\n".join(entries))
 
 
+def relink(page: Path, links: dict[str, str], base: str | None = None) -> None:
+    """Point a page's language links, and optionally the theme's base, where they should go."""
+    if not page.exists():
+        return
+    html = page.read_text(encoding="utf-8")
+    for language, href in links.items():
+        html = re.sub(rf'href="[^"]*" hreflang="{language}"', f'href="{href}" hreflang="{language}"', html)
+    if base:
+        html = re.sub(r'"base": *"[^"]*"', f'"base": "{base}"', html)
+    page.write_text(html, encoding="utf-8")
+
+
+def fix_entries(site: Path, path: str) -> None:
+    """The two home pages and the 404 page, for a version whose address path is `path`."""
+    # i18n writes the home pages' language links as absolute paths into this version, which a copied
+    # alias such as `latest` then points at the wrong version; subpages already get relative ones.
+    relink(site / "index.html", {"zh": "./", "en": "en/"})
+    relink(site / "en" / "index.html", {"zh": "../", "en": "./"})
+    # One 404 page answers missing addresses at any depth: search and the version list resolve against
+    # its base, which mike leaves without the trailing slash.
+    relink(site / "404.html", {"zh": f"{path}/", "en": f"{path}/en/"}, base=f"{path}/")
+
+
 def on_post_build(config) -> None:
     # i18n runs post_build once per language, the English pass with site_dir at site/en; both write
     # from the site root, and the last pass completes it.
@@ -40,6 +64,7 @@ def on_post_build(config) -> None:
     site = site.parent if site.name == "en" else site
     base = config["site_url"].rstrip("/")
     pages = sorted(page.relative_to(site).parts[:-1] for page in site.rglob("index.html"))
+    pages = [parts for parts in pages if not set(parts) & MOVED.keys()]
     chinese = [parts for parts in pages if parts[:1] != ("en",) and parts[:1] != ("zh",)]
     english = [parts for parts in pages if parts[:1] == ("en",)]
 
@@ -71,3 +96,5 @@ def on_post_build(config) -> None:
         root.write_text(text, encoding="utf-8")
         with gzip.open(root.with_suffix(".xml.gz"), "wb") as packed:
             packed.write(text.encode("utf-8"))
+
+    fix_entries(site, urlsplit(base).path)
