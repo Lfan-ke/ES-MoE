@@ -473,3 +473,15 @@ Round eight keeps a noise floor measured under mixed precision. This addendum ad
 **Predictions**:
 1. **Both block pairs differ by more than the mean of the three baseline pairs**, on the grounds of round seven's step-by-step check: with router scores nearly tied, a rounding-sized difference flips the top-2. If the block gaps are no larger than the baseline ones, those grounds do not carry over to the full protocol.
 2. **The FP32 mean gap stays within 0.0090**, the same order as mixed precision's 0.0045. If it exceeds that, precision changes how far repeats drift, and every round's use of one shared yardstick needs revisiting.
+
+### Addendum: seed 2's A0 resumed from its checkpoint (2026-09-14, before resuming)
+
+Seed 2's A0 was stopped three times on gpu2 by the same device fault (`Xnack Error/ATU Fault`, each time in the convolution kernel `MckFlexgemm256x64Tf32Gl__fwd_cross_tfround_a_nhwc_b_nhwc_c_nhwc`), in epochs 43, 115 and 73. The three attempts trained about 10.6 hours between them and faulted three times; at that rate a full A0 of 5.5 hours is unlikely to finish from scratch. Neither A, B nor C on the same card, nor A0 on the other two cards, has hit this fault. The three failed records stay in `results/` and their run directories in `runs/_failed/`.
+
+**Procedure**: instead of a fourth start from scratch, the attempt that got furthest (114 epochs done) finishes its last 6 epochs from its `last.pt`, on the same card (`scripts/train.py --resume`). The checkpoint carries the optimizer, the EMA and the step count; mosaic is off for the last 10 epochs anyway, and the trainer keeps it off on resuming. It carries no random-number state, so these 6 epochs see the data in a different order than an uninterrupted run would. A start from scratch changes the whole 120-epoch trajectory; resuming changes the last 6.
+
+**Record**: a new `resumed` field holds the checkpoint, its hash, the epochs done and the seconds they took; `gpu_hours` is the sum of both stretches. If the resumed run is interrupted again, it resumes again from the newest `last.pt` rather than starting over.
+
+**Known at the time of writing**: at 114 epochs the trainer measured 0.3574 mAP50. The other eleven round-eight runs are done, at mAP50 as their trainers measured it: A 0.3682 / 0.3674 / 0.3686, A0 0.3568 / 0.3580 (seeds 0 and 1), B 0.3627 / 0.3613 / 0.3699, C 0.3600 / 0.3508 / 0.3564. None has been re-measured by `scripts/measure.py` yet.
+
+**The lines, the use of the two noise floors and the predictions are unchanged.**
