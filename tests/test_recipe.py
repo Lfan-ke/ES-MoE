@@ -24,7 +24,7 @@ import esmoe  # noqa: E402
 from esmoe import inject, upstream  # noqa: E402
 from esmoe.inject import AUX_NAME  # noqa: E402
 
-DEFAULTS = (1.0, 0.1, 0.1, 0.1)  # running-mean starts for moe, mot, moa, latent
+DEFAULTS = (1.0, 0.1, 0.1, 0.1)  # upstream's running-mean starts, in its order: moe, mot, moa, latent
 GAINS = (1.0, 1.0, 1.0, 0.1)
 
 
