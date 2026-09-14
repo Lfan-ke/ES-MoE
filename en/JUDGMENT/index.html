@@ -979,6 +979,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#addendum-seed-2s-a0-resumed-from-its-checkpoint-2026-09-14-before-resuming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: seed 2's A0 resumed from its checkpoint (2026-09-14, before resuming)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1478,6 +1489,17 @@
     <span class="md-ellipsis">
       
         Addendum: the same-card noise floor in FP32 (2026-09-13, before the repeats start)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addendum-seed-2s-a0-resumed-from-its-checkpoint-2026-09-14-before-resuming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addendum: seed 2's A0 resumed from its checkpoint (2026-09-14, before resuming)
       
     </span>
   </a>
@@ -2278,6 +2300,12 @@
 <p><strong>Predictions</strong>:
 1. <strong>Both block pairs differ by more than the mean of the three baseline pairs</strong>, on the grounds of round seven's step-by-step check: with router scores nearly tied, a rounding-sized difference flips the top-2. If the block gaps are no larger than the baseline ones, those grounds do not carry over to the full protocol.
 2. <strong>The FP32 mean gap stays within 0.0090</strong>, the same order as mixed precision's 0.0045. If it exceeds that, precision changes how far repeats drift, and every round's use of one shared yardstick needs revisiting.</p>
+<h3 id="addendum-seed-2s-a0-resumed-from-its-checkpoint-2026-09-14-before-resuming">Addendum: seed 2's A0 resumed from its checkpoint (2026-09-14, before resuming)<a class="headerlink" href="#addendum-seed-2s-a0-resumed-from-its-checkpoint-2026-09-14-before-resuming" title="Permanent link">&para;</a></h3>
+<p>Seed 2's A0 was stopped three times on gpu2 by the same device fault (<code>Xnack Error/ATU Fault</code>, each time in the convolution kernel <code>MckFlexgemm256x64Tf32Gl__fwd_cross_tfround_a_nhwc_b_nhwc_c_nhwc</code>), in epochs 43, 115 and 73. The three attempts trained about 10.6 hours between them and faulted three times; at that rate a full A0 of 5.5 hours is unlikely to finish from scratch. Neither A, B nor C on the same card, nor A0 on the other two cards, has hit this fault. The three failed records stay in <code>results/</code> and their run directories in <code>runs/_failed/</code>.</p>
+<p><strong>Procedure</strong>: instead of a fourth start from scratch, the attempt that got furthest (114 epochs done) finishes its last 6 epochs from its <code>last.pt</code>, on the same card (<code>scripts/train.py --resume</code>). The checkpoint carries the optimizer, the EMA and the step count; mosaic is off for the last 10 epochs anyway, and the trainer keeps it off on resuming. It carries no random-number state, so these 6 epochs see the data in a different order than an uninterrupted run would. A start from scratch changes the whole 120-epoch trajectory; resuming changes the last 6.</p>
+<p><strong>Record</strong>: a new <code>resumed</code> field holds the checkpoint, its hash, the epochs done and the seconds they took; <code>gpu_hours</code> is the sum of both stretches. If the resumed run is interrupted again, it resumes again from the newest <code>last.pt</code> rather than starting over.</p>
+<p><strong>Known at the time of writing</strong>: at 114 epochs the trainer measured 0.3574 mAP50. The other eleven round-eight runs are done, at mAP50 as their trainers measured it: A 0.3682 / 0.3674 / 0.3686, A0 0.3568 / 0.3580 (seeds 0 and 1), B 0.3627 / 0.3613 / 0.3699, C 0.3600 / 0.3508 / 0.3564. None has been re-measured by <code>scripts/measure.py</code> yet.</p>
+<p><strong>The lines, the use of the two noise floors and the predictions are unchanged.</strong></p>
 
 
 

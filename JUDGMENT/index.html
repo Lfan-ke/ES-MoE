@@ -979,6 +979,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#seed-2-a0-2026-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充：seed 2 的 A0 从检查点续跑（2026-09-14，续跑之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1478,6 +1489,17 @@
     <span class="md-ellipsis">
       
         补充：FP32 下的同卡噪声底（2026-09-13，重复运行开跑之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seed-2-a0-2026-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补充：seed 2 的 A0 从检查点续跑（2026-09-14，续跑之前）
       
     </span>
   </a>
@@ -2278,6 +2300,12 @@
 <p><strong>预测</strong>：
 1. <strong>带块两对的差都大于基线三对的均值</strong>。依据是第七轮补充的逐步核对：路由分数近乎打平时，舍入级差异会翻转 top-2。若带块的差不大于基线，这条依据在满协议上不成立。
 2. <strong>FP32 的均值差在 0.0090 以内</strong>，即与混合精度的 0.0045 同一量级。若超过，说明精度改变了重复运行的离散度，此前各轮共用同一把尺子的做法要重新审视。</p>
+<h3 id="seed-2-a0-2026-09-14">补充：seed 2 的 A0 从检查点续跑（2026-09-14，续跑之前）<a class="headerlink" href="#seed-2-a0-2026-09-14" title="Permanent link">&para;</a></h3>
+<p>seed 2 的 A0 在 gpu2 上三次被同一个设备故障打断（<code>Xnack Error/ATU Fault</code>，三次都出在卷积算子 <code>MckFlexgemm256x64Tf32Gl__fwd_cross_tfround_a_nhwc_b_nhwc_c_nhwc</code>），分别停在第 43、115、73 轮。三次合计训练约 10.6 小时、故障三次，按这个频率，从头跑满一条 A0（5.5 小时）难以完成。同卡的 A、B、C 与另两张卡上的 A0 都没有出现过这个故障。三条失败记录留在 <code>results/</code>，运行目录留在 <code>runs/_failed/</code>。</p>
+<p><strong>做法</strong>：不再从头重跑，改为从走得最远的一次（已完成 114 轮）的 <code>last.pt</code>，在同一张卡上续跑余下 6 轮（<code>scripts/train.py --resume</code>）。检查点带优化器、EMA 与步数；最后 10 轮本就关闭 mosaic，续跑时训练器照此处理。检查点里没有随机数状态，所以这 6 轮的数据顺序与不中断时不同。从头重跑换掉的是整条 120 轮的轨迹，续跑只换最后 6 轮。</p>
+<p><strong>记录</strong>：新增 <code>resumed</code> 字段，写检查点、哈希、已完成轮数与这些轮的用时；<code>gpu_hours</code> 是两段之和。续跑若再被打断，从最新的 <code>last.pt</code> 接着续，不改用从头重跑。</p>
+<p><strong>声明时已知</strong>：完成 114 轮时训练器测得 mAP50 0.3574。第八轮其余 11 条已跑完，训练器测得的 mAP50：A 0.3682 / 0.3674 / 0.3686，A0 0.3568 / 0.3580（seed 0、1），B 0.3627 / 0.3613 / 0.3699，C 0.3600 / 0.3508 / 0.3564。这些都还没有经 <code>scripts/measure.py</code> 重测。</p>
+<p><strong>判读线、两套噪声底的用法与预测都不变。</strong></p>
 
 
 
