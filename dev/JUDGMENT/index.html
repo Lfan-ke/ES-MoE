@@ -994,6 +994,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#2026-09-14-seed-fp32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第八轮判定（2026-09-14，三个 seed 齐全；FP32 噪声底待重复运行跑完）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1504,6 +1515,17 @@
     <span class="md-ellipsis">
       
         补充：seed 2 的 A0 从检查点续跑（2026-09-14，续跑之前）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2026-09-14-seed-fp32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第八轮判定（2026-09-14，三个 seed 齐全；FP32 噪声底待重复运行跑完）
       
     </span>
   </a>
@@ -2310,6 +2332,59 @@
 <p><strong>记录</strong>：新增 <code>resumed</code> 字段，写检查点、哈希、已完成轮数与这些轮的用时；<code>gpu_hours</code> 是两段之和。续跑若再被打断，从最新的 <code>last.pt</code> 接着续，不改用从头重跑。</p>
 <p><strong>声明时已知</strong>：完成 114 轮时训练器测得 mAP50 0.3574。第八轮其余 11 条已跑完，训练器测得的 mAP50：A 0.3682 / 0.3674 / 0.3686，A0 0.3568 / 0.3580（seed 0、1），B 0.3627 / 0.3613 / 0.3699，C 0.3600 / 0.3508 / 0.3564。这些都还没有经 <code>scripts/measure.py</code> 重测。</p>
 <p><strong>判读线、两套噪声底的用法与预测都不变。</strong></p>
+<h3 id="2026-09-14-seed-fp32">第八轮判定（2026-09-14，三个 seed 齐全；FP32 噪声底待重复运行跑完）<a class="headerlink" href="#2026-09-14-seed-fp32" title="Permanent link">&para;</a></h3>
+<p>指标为 <code>scripts/measure.py</code> 统一重测的值，四臂全程 FP32，配对差在卡内求（卡 f 的三张 C500，一张卡一个 seed）。seed 2 的 A0 由完成 114 轮的检查点续跑完成，见上一节补充。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">差（mAP50）</th>
+<th style="text-align: center;">均值</th>
+<th style="text-align: center;">95% 置信区间</th>
+<th style="text-align: center;">为正</th>
+<th style="text-align: center;">判定（混合精度噪声底）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">+0.0046</td>
+<td style="text-align: center;">[−0.0071, +0.0164]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;"><strong>无法判定</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0104</td>
+<td style="text-align: center;">[+0.0015, +0.0193]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0095</td>
+<td style="text-align: center;">[−0.0047, +0.0237]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;"><strong>无法判定</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">+0.0009</td>
+<td style="text-align: center;">[−0.0221, +0.0239]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;">等效</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>预测 1（A − B 等效）未获证实。</strong> 均值 +0.00462，比等效线 0.0045 高 0.0001；三个 seed 不同号、区间跨零，按预登记记「无法判定」。第七轮在混合精度下是 −0.0069、三个 seed 同为负，这一轮 FP32 下符号翻转，第七轮的负值没有重现。两轮不同机，只比方向。</li>
+<li><strong>预测 2（差之差等效，且 A − A0 与 B − C 同号为正）成立。</strong></li>
+<li><strong>预测 3（A − A0 与 B − C 都仍判「有效」）未获证实。</strong> A − A0 仍为有效。B − C 三个 seed 都为正，但 seed 0 只有 +0.0042，区间跨零，记「无法判定」。预登记的推翻条件是任一变成「无效」，没有触发。</li>
+<li><strong>预测 4（B 的三个 checkpoint 仍都有死专家的块）成立。</strong> 格局与第七轮相同：每个 checkpoint 四个块里有三个出现死专家，块 3 三次都没有；出现死专家的九个块里八个 top-2 组合恒定，十二个块的路由概率平均熵为最大值的 98.8%。</li>
+</ul>
+<p><strong>另记两项</strong>：
+- 训练成本。B 在 FP32 下每条 10.6 小时，与 A 相同；第七轮 A 与 B 的耗时差（10.8 对 4.7 小时）来自精度，不来自实现。
+- 面积分档（<code>results/buckets.md</code>）。两个框架里加块后都是大目标涨得最多，但都只有 2/3 为正。上游一侧小目标增益仍最小（+0.0086，中目标 +0.0106）；本包一侧小目标与中目标相当（+0.0069 与 +0.0063）。第七轮两侧都是小目标最小（+0.0049、+0.0080）。</p>
+<p><strong>FP32 噪声底</strong>：五对重复运行跑完并重测后，按预登记用 FP32 量出的均值 / 最大值把上表再判一遍，档位不同时两个都报。</p>
 
 
 

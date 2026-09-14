@@ -5163,7 +5163,7 @@ so every difference is paired inside one.</p>
 <p>The metrics are re-measured by <code>scripts/measure.py</code>: each run's model rebuilt from the config it
 trained, loaded with the EMA weights in its <code>last.pt</code>, and evaluated with one set of validation
 settings, so neither framework's own validation enters the comparison; what each trainer measured
-stays in its record as <code>metrics_by_trainer</code>. Verdicts follow round seven of the
+stays in its record as <code>metrics_by_trainer</code>. Verdicts follow rounds seven (mixed precision) and eight (FP32) of the
 <a href="../JUDGMENT/">judgment lines</a>.</p>
 <h1 id="same-configuration-yolo-masters-fork-against-official-ultralytics-esmoe">Same configuration: YOLO-Master's fork against official ultralytics + esmoe<a class="headerlink" href="#same-configuration-yolo-masters-fork-against-official-ultralytics-esmoe" title="Permanent link">&para;</a></h1>
 <h2 id="metricsmap50b">metrics/mAP50(B)<a class="headerlink" href="#metricsmap50b" title="Permanent link">&para;</a></h2>

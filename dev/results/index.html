@@ -5150,7 +5150,7 @@
 </table>
 <h2 id="yolo-master">与 YOLO-Master 同配置对照<a class="headerlink" href="#yolo-master" title="Permanent link">&para;</a></h2>
 <p>同一个模型、同一份协议，在上游分支与官方 ultralytics 加本包上各训一遍，四臂按 seed 分卡：A 是上游分支跑它自己的 <code>yolo-master-n</code>（四个 <code>ES_MOE</code>），A0 是同一分支去掉四个块，B 是官方 8.4.101 加本包四个 <code>ESMoE</code> 并按 <code>recipe="upstream"</code> 训练，C 是官方去块。每个 seed 的四臂在同一张卡上，配对差都在卡内求。</p>
-<p>指标由 <code>scripts/measure.py</code> 统一重测：按各 run 自己的配置重建模型、装回 <code>last.pt</code> 的 EMA 权重、同一套验证参数各测一遍，不让两个框架各自的验证口径混进比较；训练器当时测到的值保留在记录的 <code>metrics_by_trainer</code> 里。判读按<a href="../JUDGMENT/">判读线</a>第七轮。</p>
+<p>指标由 <code>scripts/measure.py</code> 统一重测：按各 run 自己的配置重建模型、装回 <code>last.pt</code> 的 EMA 权重、同一套验证参数各测一遍，不让两个框架各自的验证口径混进比较；训练器当时测到的值保留在记录的 <code>metrics_by_trainer</code> 里。判读按<a href="../JUDGMENT/">判读线</a>第七轮（混合精度）与第八轮（FP32）。</p>
 <h1 id="same-configuration-yolo-masters-fork-against-official-ultralytics-esmoe">Same configuration: YOLO-Master's fork against official ultralytics + esmoe<a class="headerlink" href="#same-configuration-yolo-masters-fork-against-official-ultralytics-esmoe" title="Permanent link">&para;</a></h1>
 <h2 id="metricsmap50b">metrics/mAP50(B)<a class="headerlink" href="#metricsmap50b" title="Permanent link">&para;</a></h2>
 <table>

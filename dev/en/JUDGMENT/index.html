@@ -994,6 +994,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#round-eights-verdict-2026-09-14-three-seeds-the-fp32-floor-waits-on-the-repeats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round eight's verdict (2026-09-14, three seeds; the FP32 floor waits on the repeats)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1504,6 +1515,17 @@
     <span class="md-ellipsis">
       
         Addendum: seed 2's A0 resumed from its checkpoint (2026-09-14, before resuming)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round-eights-verdict-2026-09-14-three-seeds-the-fp32-floor-waits-on-the-repeats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Round eight's verdict (2026-09-14, three seeds; the FP32 floor waits on the repeats)
       
     </span>
   </a>
@@ -2310,6 +2332,59 @@
 <p><strong>Record</strong>: a new <code>resumed</code> field holds the checkpoint, its hash, the epochs done and the seconds they took; <code>gpu_hours</code> is the sum of both stretches. If the resumed run is interrupted again, it resumes again from the newest <code>last.pt</code> rather than starting over.</p>
 <p><strong>Known at the time of writing</strong>: at 114 epochs the trainer measured 0.3574 mAP50. The other eleven round-eight runs are done, at mAP50 as their trainers measured it: A 0.3682 / 0.3674 / 0.3686, A0 0.3568 / 0.3580 (seeds 0 and 1), B 0.3627 / 0.3613 / 0.3699, C 0.3600 / 0.3508 / 0.3564. None has been re-measured by <code>scripts/measure.py</code> yet.</p>
 <p><strong>The lines, the use of the two noise floors and the predictions are unchanged.</strong></p>
+<h3 id="round-eights-verdict-2026-09-14-three-seeds-the-fp32-floor-waits-on-the-repeats">Round eight's verdict (2026-09-14, three seeds; the FP32 floor waits on the repeats)<a class="headerlink" href="#round-eights-verdict-2026-09-14-three-seeds-the-fp32-floor-waits-on-the-repeats" title="Permanent link">&para;</a></h3>
+<p>Metrics are <code>scripts/measure.py</code>'s re-measurements, all four arms in FP32 throughout, with paired deltas taken within a card (machine f's three C500s, one seed per card). Seed 2's A0 finished from its 114-epoch checkpoint; see the addendum above.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">delta (mAP50)</th>
+<th style="text-align: center;">mean</th>
+<th style="text-align: center;">95% CI</th>
+<th style="text-align: center;">positive</th>
+<th style="text-align: center;">verdict (mixed-precision floor)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">+0.0046</td>
+<td style="text-align: center;">[−0.0071, +0.0164]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;"><strong>undetermined</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0104</td>
+<td style="text-align: center;">[+0.0015, +0.0193]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;">effective</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0095</td>
+<td style="text-align: center;">[−0.0047, +0.0237]</td>
+<td style="text-align: center;">3/3</td>
+<td style="text-align: center;"><strong>undetermined</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">+0.0009</td>
+<td style="text-align: center;">[−0.0221, +0.0239]</td>
+<td style="text-align: center;">2/3</td>
+<td style="text-align: center;">equivalent</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Prediction 1 (A − B is equivalent) is not confirmed.</strong> The mean is +0.00462, 0.0001 above the equivalence line of 0.0045; the seeds disagree in sign and the interval straddles zero, so the pre-registered reading is "undetermined". Round seven, under mixed precision, had −0.0069 with all three seeds negative; in FP32 the sign flips and round seven's negative gap does not recur. The two rounds ran on different machines and are compared in direction only.</li>
+<li><strong>Prediction 2 (the difference of differences is equivalent, with A − A0 and B − C positive together) holds.</strong></li>
+<li><strong>Prediction 3 (A − A0 and B − C both still effective) is not confirmed.</strong> A − A0 is still effective. B − C is positive on all three seeds, but seed 0 gives only +0.0042 and the interval straddles zero, so it is undetermined. The pre-registered refutation, either one turning ineffective, did not happen.</li>
+<li><strong>Prediction 4 (every one of B's three checkpoints still has a block with a dead expert) holds.</strong> The pattern is round seven's: in each checkpoint three of the four blocks have a dead expert and block 3 never does; eight of the nine blocks with a dead expert always pick the same top-2, and the mean routing entropy over all twelve blocks is 98.8% of the maximum.</li>
+</ul>
+<p><strong>Two more observations</strong>:
+- Training cost. B takes 10.6 hours a run in FP32, the same as A; round seven's gap between A and B (10.8 against 4.7 hours) came from precision, not from the implementation.
+- Area buckets (<code>results/buckets.md</code>). In both frameworks the blocks lift large objects most, in each case on two seeds of three. On upstream's side small objects still gain least (+0.0086 against +0.0106 for medium); on this package's side small and medium gain about the same (+0.0069 and +0.0063). In round seven small objects gained least on both sides (+0.0049, +0.0080).</p>
+<p><strong>FP32 noise floor</strong>: once the five repeats have run and been re-measured, the table above is judged again against the mean / largest gap measured in FP32, as pre-registered, and both verdicts are reported where the bands differ.</p>
 
 
 
