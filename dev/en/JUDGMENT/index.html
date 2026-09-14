@@ -1005,6 +1005,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rejudged-against-the-fp32-noise-floor-2026-09-14-after-the-five-repeats-were-re-measured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejudged against the FP32 noise floor (2026-09-14, after the five repeats were re-measured)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1526,6 +1537,17 @@
     <span class="md-ellipsis">
       
         Round eight's verdict (2026-09-14, three seeds; the FP32 floor waits on the repeats)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rejudged-against-the-fp32-noise-floor-2026-09-14-after-the-five-repeats-were-re-measured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rejudged against the FP32 noise floor (2026-09-14, after the five repeats were re-measured)
       
     </span>
   </a>
@@ -2378,13 +2400,110 @@
 <ul>
 <li><strong>Prediction 1 (A − B is equivalent) is not confirmed.</strong> The mean is +0.00462, 0.0001 above the equivalence line of 0.0045; the seeds disagree in sign and the interval straddles zero, so the pre-registered reading is "undetermined". Round seven, under mixed precision, had −0.0069 with all three seeds negative; in FP32 the sign flips and round seven's negative gap does not recur. The two rounds ran on different machines and are compared in direction only.</li>
 <li><strong>Prediction 2 (the difference of differences is equivalent, with A − A0 and B − C positive together) holds.</strong></li>
-<li><strong>Prediction 3 (A − A0 and B − C both still effective) is not confirmed.</strong> A − A0 is still effective. B − C is positive on all three seeds, but seed 0 gives only +0.0042 and the interval straddles zero, so it is undetermined. The pre-registered refutation, either one turning ineffective, did not happen.</li>
+<li><strong>Prediction 3 (A − A0 and B − C both still effective) holds.</strong> It was registered against the judgment lines at the top of this page (effective = mean paired mAP50 &gt; 0, at least two seeds of three positive, mean paired mAP50-95 ≥ 0): A − A0 has +0.0104, 3/3 and +0.0076 in mAP50-95, B − C has +0.0095, 3/3 and +0.0066, so both are effective. The verdict column above uses the noise-floor bands, under which B − C straddles zero and is undetermined; the two answer different questions and both stand as reported. The first draft of this bullet read the prediction against the bands and called it unconfirmed, which is not the line it was registered against; corrected on 2026-09-14 with the FP32 floor.</li>
 <li><strong>Prediction 4 (every one of B's three checkpoints still has a block with a dead expert) holds.</strong> The pattern is round seven's: in each checkpoint three of the four blocks have a dead expert and block 3 never does; eight of the nine blocks with a dead expert always pick the same top-2, and the mean routing entropy over all twelve blocks is 98.8% of the maximum.</li>
 </ul>
 <p><strong>Two more observations</strong>:
 - Training cost. B takes 10.6 hours a run in FP32, the same as A; round seven's gap between A and B (10.8 against 4.7 hours) came from precision, not from the implementation.
 - Area buckets (<code>results/buckets.md</code>). In both frameworks the blocks lift large objects most, in each case on two seeds of three. On upstream's side small objects still gain least (+0.0086 against +0.0106 for medium); on this package's side small and medium gain about the same (+0.0069 and +0.0063). In round seven small objects gained least on both sides (+0.0049, +0.0080).</p>
-<p><strong>FP32 noise floor</strong>: once the five repeats have run and been re-measured, the table above is judged again against the mean / largest gap measured in FP32, as pre-registered, and both verdicts are reported where the bands differ.</p>
+<h3 id="rejudged-against-the-fp32-noise-floor-2026-09-14-after-the-five-repeats-were-re-measured">Rejudged against the FP32 noise floor (2026-09-14, after the five repeats were re-measured)<a class="headerlink" href="#rejudged-against-the-fp32-noise-floor-2026-09-14-after-the-five-repeats-were-re-measured" title="Permanent link">&para;</a></h3>
+<p>All five repeats ran the full 120 epochs in FP32, and both runs of each pair were re-measured by <code>scripts/measure.py</code> from <code>last.pt</code>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">pair</th>
+<th style="text-align: center;">kind</th>
+<th style="text-align: center;">original</th>
+<th style="text-align: center;">repeat</th>
+<th style="text-align: center;">absolute gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">B, seed 0</td>
+<td style="text-align: center;">blocks</td>
+<td style="text-align: center;">0.3601</td>
+<td style="text-align: center;">0.3636</td>
+<td style="text-align: center;">0.0035</td>
+</tr>
+<tr>
+<td style="text-align: center;">A, seed 1</td>
+<td style="text-align: center;">blocks</td>
+<td style="text-align: center;">0.3651</td>
+<td style="text-align: center;">0.3634</td>
+<td style="text-align: center;">0.0018</td>
+</tr>
+<tr>
+<td style="text-align: center;">C, seed 0</td>
+<td style="text-align: center;">baseline</td>
+<td style="text-align: center;">0.3559</td>
+<td style="text-align: center;">0.3560</td>
+<td style="text-align: center;">0.0001</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0, seed 1</td>
+<td style="text-align: center;">baseline</td>
+<td style="text-align: center;">0.3552</td>
+<td style="text-align: center;">0.3519</td>
+<td style="text-align: center;">0.0033</td>
+</tr>
+<tr>
+<td style="text-align: center;">C, seed 2</td>
+<td style="text-align: center;">baseline</td>
+<td style="text-align: center;">0.3521</td>
+<td style="text-align: center;">0.3625</td>
+<td style="text-align: center;">0.0103</td>
+</tr>
+</tbody>
+</table>
+<p>The five pairs give a mean gap of 0.0038 and a largest gap of 0.0103. <code>results/summary.md</code> lists them by hardware stack, 0.0046 / 0.0103 over three pairs on the official stack and 0.0025 / 0.0033 over two on the fork; the verdicts use the pooled five, as pre-registered. The repeat of C at seed 2 logged a nan validation loss at epoch 28, with its training losses and that epoch's mAP50 normal and climbing afterwards; the re-measurement reads <code>last.pt</code> and is unaffected.</p>
+<ul>
+<li><strong>Prediction 1 (both block pairs differ by more than the mean of the three baseline pairs) does not hold.</strong> The block pairs differ by 0.0035 and 0.0018 against a baseline mean of 0.0046, and the largest gap is a baseline's. As pre-registered, the reason given, that rounding flips the top-2 when router scores nearly tie, does not show at full protocol.</li>
+<li><strong>Prediction 2 (the FP32 mean gap stays within 0.0090) holds.</strong> At 0.0038 it is on the scale of mixed precision's 0.0045, so the earlier rounds' sharing of one yardstick needs no second look.</li>
+</ul>
+<p>Round eight judged against both floors:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">delta (mAP50)</th>
+<th style="text-align: center;">mean</th>
+<th style="text-align: center;">mixed-precision floor 0.0045 / 0.0130</th>
+<th style="text-align: center;">FP32 floor 0.0038 / 0.0103</th>
+<th style="text-align: center;">lines at the top of this page</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">+0.0046</td>
+<td style="text-align: center;">undetermined</td>
+<td style="text-align: center;">undetermined</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0104</td>
+<td style="text-align: center;">effective</td>
+<td style="text-align: center;">effective</td>
+<td style="text-align: center;">effective</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0095</td>
+<td style="text-align: center;">undetermined</td>
+<td style="text-align: center;">undetermined</td>
+<td style="text-align: center;">effective</td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">+0.0009</td>
+<td style="text-align: center;">equivalent</td>
+<td style="text-align: center;">equivalent</td>
+<td style="text-align: center;">—</td>
+</tr>
+</tbody>
+</table>
+<p>Both floors put every delta in the same band. A − B is equivalent under neither: its mean of +0.0046 sits above both lower lines (0.0045, 0.0038) and meets neither condition for non-equivalence.</p>
 
 
 

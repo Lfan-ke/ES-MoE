@@ -1005,6 +1005,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#fp32-2026-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补判：FP32 噪声底（2026-09-14，五对重复运行重测后）
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1526,6 +1537,17 @@
     <span class="md-ellipsis">
       
         第八轮判定（2026-09-14，三个 seed 齐全；FP32 噪声底待重复运行跑完）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fp32-2026-09-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        补判：FP32 噪声底（2026-09-14，五对重复运行重测后）
       
     </span>
   </a>
@@ -2378,13 +2400,110 @@
 <ul>
 <li><strong>预测 1（A − B 等效）未获证实。</strong> 均值 +0.00462，比等效线 0.0045 高 0.0001；三个 seed 不同号、区间跨零，按预登记记「无法判定」。第七轮在混合精度下是 −0.0069、三个 seed 同为负，这一轮 FP32 下符号翻转，第七轮的负值没有重现。两轮不同机，只比方向。</li>
 <li><strong>预测 2（差之差等效，且 A − A0 与 B − C 同号为正）成立。</strong></li>
-<li><strong>预测 3（A − A0 与 B − C 都仍判「有效」）未获证实。</strong> A − A0 仍为有效。B − C 三个 seed 都为正，但 seed 0 只有 +0.0042，区间跨零，记「无法判定」。预登记的推翻条件是任一变成「无效」，没有触发。</li>
+<li><strong>预测 3（A − A0 与 B − C 都仍判「有效」）成立。</strong> 这条预测登记的是本页开头的判读线（有效 = 配对 mAP50 均值 &gt; 0、≥ 2/3 seed 为正、配对 mAP50-95 均值 ≥ 0）：A − A0 为 +0.0104、3/3、mAP50-95 +0.0076，B − C 为 +0.0095、3/3、mAP50-95 +0.0066，两者都判「有效」。上表判定列用的是噪声底三档，按那一套 B − C 区间跨零，记「无法判定」；两套回答的问题不同，各自照报。本条初稿按噪声底三档写成「未获证实」，套错了预登记的判读线，2026-09-14 补判时改正。</li>
 <li><strong>预测 4（B 的三个 checkpoint 仍都有死专家的块）成立。</strong> 格局与第七轮相同：每个 checkpoint 四个块里有三个出现死专家，块 3 三次都没有；出现死专家的九个块里八个 top-2 组合恒定，十二个块的路由概率平均熵为最大值的 98.8%。</li>
 </ul>
 <p><strong>另记两项</strong>：
 - 训练成本。B 在 FP32 下每条 10.6 小时，与 A 相同；第七轮 A 与 B 的耗时差（10.8 对 4.7 小时）来自精度，不来自实现。
 - 面积分档（<code>results/buckets.md</code>）。两个框架里加块后都是大目标涨得最多，但都只有 2/3 为正。上游一侧小目标增益仍最小（+0.0086，中目标 +0.0106）；本包一侧小目标与中目标相当（+0.0069 与 +0.0063）。第七轮两侧都是小目标最小（+0.0049、+0.0080）。</p>
-<p><strong>FP32 噪声底</strong>：五对重复运行跑完并重测后，按预登记用 FP32 量出的均值 / 最大值把上表再判一遍，档位不同时两个都报。</p>
+<h3 id="fp32-2026-09-14">补判：FP32 噪声底（2026-09-14，五对重复运行重测后）<a class="headerlink" href="#fp32-2026-09-14" title="Permanent link">&para;</a></h3>
+<p>五对重复运行都跑满 120 个 epoch、全程 FP32，两条都由 <code>scripts/measure.py</code> 从 <code>last.pt</code> 重测：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">对</th>
+<th style="text-align: center;">类别</th>
+<th style="text-align: center;">原运行</th>
+<th style="text-align: center;">重复运行</th>
+<th style="text-align: center;">差的绝对值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">B，seed 0</td>
+<td style="text-align: center;">带块</td>
+<td style="text-align: center;">0.3601</td>
+<td style="text-align: center;">0.3636</td>
+<td style="text-align: center;">0.0035</td>
+</tr>
+<tr>
+<td style="text-align: center;">A，seed 1</td>
+<td style="text-align: center;">带块</td>
+<td style="text-align: center;">0.3651</td>
+<td style="text-align: center;">0.3634</td>
+<td style="text-align: center;">0.0018</td>
+</tr>
+<tr>
+<td style="text-align: center;">C，seed 0</td>
+<td style="text-align: center;">基线</td>
+<td style="text-align: center;">0.3559</td>
+<td style="text-align: center;">0.3560</td>
+<td style="text-align: center;">0.0001</td>
+</tr>
+<tr>
+<td style="text-align: center;">A0，seed 1</td>
+<td style="text-align: center;">基线</td>
+<td style="text-align: center;">0.3552</td>
+<td style="text-align: center;">0.3519</td>
+<td style="text-align: center;">0.0033</td>
+</tr>
+<tr>
+<td style="text-align: center;">C，seed 2</td>
+<td style="text-align: center;">基线</td>
+<td style="text-align: center;">0.3521</td>
+<td style="text-align: center;">0.3625</td>
+<td style="text-align: center;">0.0103</td>
+</tr>
+</tbody>
+</table>
+<p>五对的均值 0.0038、最大 0.0103。<code>results/summary.md</code> 按硬件栈分组列出：官方栈三对 0.0046 / 0.0103，分支栈两对 0.0025 / 0.0033；判定按预登记用五对合并的值。C 的 seed 2 那条重复运行，第 28 个 epoch 的验证损失记为 nan，训练损失与该 epoch 的 mAP50 正常，此后逐轮回升；重测取的是 <code>last.pt</code>，不受影响。</p>
+<ul>
+<li><strong>预测 1（带块两对的差都大于基线三对的均值）不成立。</strong> 带块两对是 0.0035、0.0018，基线三对的均值是 0.0046，最大的差出在基线。按预登记，「路由分数近乎打平时舍入级差异会翻转 top-2」这条依据在满协议上不成立。</li>
+<li><strong>预测 2（FP32 的均值差在 0.0090 以内）成立。</strong> 0.0038，与混合精度的 0.0045 同一量级，此前各轮共用同一把尺子的做法不需要重新审视。</li>
+</ul>
+<p>按两套噪声底再判第八轮：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">差（mAP50）</th>
+<th style="text-align: center;">均值</th>
+<th style="text-align: center;">混合精度底 0.0045 / 0.0130</th>
+<th style="text-align: center;">FP32 底 0.0038 / 0.0103</th>
+<th style="text-align: center;">本页开头的判读线</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">A − B</td>
+<td style="text-align: center;">+0.0046</td>
+<td style="text-align: center;">无法判定</td>
+<td style="text-align: center;">无法判定</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: center;">A − A0</td>
+<td style="text-align: center;">+0.0104</td>
+<td style="text-align: center;">有效</td>
+<td style="text-align: center;">有效</td>
+<td style="text-align: center;">有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">B − C</td>
+<td style="text-align: center;">+0.0095</td>
+<td style="text-align: center;">无法判定</td>
+<td style="text-align: center;">无法判定</td>
+<td style="text-align: center;">有效</td>
+</tr>
+<tr>
+<td style="text-align: center;">(A − A0) − (B − C)</td>
+<td style="text-align: center;">+0.0009</td>
+<td style="text-align: center;">等效</td>
+<td style="text-align: center;">等效</td>
+<td style="text-align: center;">—</td>
+</tr>
+</tbody>
+</table>
+<p>两套噪声底给出的档位相同。A − B 在两套底下都记不了「等效」：均值 +0.0046 高于两条低线（0.0045、0.0038），也没到不等效的条件。</p>
 
 
 
