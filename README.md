@@ -102,8 +102,8 @@ block is holding.
 The fork row has no protocol runs of this package: the same-configuration comparison trains upstream's own blocks on
 the fork and this package's blocks on official ultralytics.
 
-Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and 8.4.132, which report loss items
-in two different shapes; both are handled. The training column is backed by real 1-epoch VisDrone
+Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and on the latest release, the two versions in the CI
+matrix; they report loss items in different shapes, and both are handled. The training column is backed by real 1-epoch VisDrone
 runs on four generations (`results/*-compat-*.json`) and by the 120-epoch protocol runs on all seven,
 each logging a non-zero `train/esmoe_aux`.
 
@@ -122,29 +122,30 @@ trains the way its trainer trains a routed model. The auxiliary term is normalis
 capped at 3.0, routers get half the learning rate outside Muon, and experts stay frozen for three epochs.
 `scripts/train.py --upstream` runs the same protocol on the fork itself, and `scripts/same_config.py` pairs the two.
 
-## Selected default
+## Default configuration
 
 `ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
 2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms × three seeds and more, 142 runs, the last twenty-nine of them the same-configuration comparison against YOLO-Master's own fork: twelve in each of two rounds, and five FP32 repeats that measure the noise floor. What separates a positive
+the matrix runs to seven backbone generations × three arms, three seeds or more per cell (one cross-host replication cell has a single seed), 142 runs, the last twenty-nine of them the same-configuration comparison against YOLO-Master's own fork: twelve in each of two rounds, and five FP32 repeats that measure the noise floor. What separates a positive
 cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
 SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
 v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
-costs +10.4% parameters and about 9% more wall-clock per epoch.
+adds 4.5% to 12.5% parameters depending on the backbone (+10.4% on YOLOv8n) and 4% to 10% card-hours per run.
 
 <p align="center"><img alt="Paired mAP50 delta by backbone generation" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/effect.svg" width="720"></p>
 
-Each dot is one seed, each bar the mean of three. The seeds routinely straddle zero even where the mean does
+Each dot is one seed, each bar the mean of the seeds (three, five on v10n). The seeds routinely straddle zero even where the mean does
 not, which is as far as a three-seed protocol can read: an
 [interactive version](https://lfan-ke.github.io/ES-MoE/en/charts/) carries the per-seed values and the second
 metric. Where the damage lands depends
 on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
 direction-unstable.
 
-Further arms ask what upstream's own settings are worth. Two of them are internal to the block and both
-help; upstream's layout of four blocks per backbone is negative on both metrics at 0/3 on both backbones it ran
-on, and stays negative with each block's weight cut to a quarter so the auxiliary total matches one block —
-the count is what costs, not the pressure. That holds under this package's recipe: with upstream's whole recipe the
+Further arms ask what upstream's own settings are worth. Two of them are internal to the block: on v5n both
+help (output norm +0.0038, dense training +0.0031, 3/3 each), while dense training is flat on v10n (+0.0001, 1/3).
+Upstream's layout of four blocks per backbone is negative on both metrics at 0/3 on both backbones it ran on, and on
+v10n it stays negative with each block's weight cut to a quarter so the auxiliary total matches one block (−0.0113,
+0/3) — the count is what costs, not the pressure. That holds under this package's recipe: with upstream's whole recipe the
 same four blocks are positive on every seed in both frameworks (same-configuration rounds seven and eight).
 
 <p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/alignment.svg" width="720"></p>
@@ -158,9 +159,9 @@ same-configuration B checkpoints, trained with upstream's recipe.
 
 The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
 reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n
-(+0.0036) and pulls 12n and 26n back to near parity (+0.0001 and −0.0005); only on 11n does it trail the default.
+(+0.0036) and pulls 12n and 26n back to near parity (+0.0001 and −0.0005); it trails the default on v5n, v9t, v10n and 11n.
 Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `docs/SELECTION.en.md`,
-`results/buckets.md`, `results/routing.md`, `results/report.md`.
+`results/summary.md`, `results/buckets.md`, `results/routing.md`.
 
 ## Develop and reproduce
 
