@@ -125,7 +125,8 @@ def aux_reaches_the_loss(runs) -> tuple[bool, str]:
 def deliverables() -> list[tuple[str, bool, str]]:
     """What ships: the plugin, the compatibility evidence, the ablation, the docs, the notes."""
     runs = records()
-    backbones = sorted({variant(r).split("-")[0] for r in runs})
+    # From the config file, not the variant label: yolo-master-n carries hyphens of its own.
+    backbones = sorted({Path(r["config"]["model_yaml"]).stem.split("-esmoe")[0] for r in runs})
     workflows = sorted(p.name for p in (ROOT / ".github" / "workflows").glob("*.yml"))
     return [
         (
@@ -136,7 +137,7 @@ def deliverables() -> list[tuple[str, bool, str]]:
         (
             "compatibility",
             len(backbones) >= 3,
-            f"{len(backbones)} generations measured: {', '.join(backbones)}; CI workflows: {', '.join(workflows)}",
+            f"{len(backbones)} backbones measured: {', '.join(backbones)}; CI workflows: {', '.join(workflows)}",
         ),
         (
             "multi-seed ablation",
