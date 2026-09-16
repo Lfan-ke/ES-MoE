@@ -1,10 +1,9 @@
 // The models run in the reader's browser: the checkpoints are public, the pictures they drop in are not.
 (function () {
   const ORT = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/ort.all.min.js";
-  const VIEWERS = [
-    ["Netron", "https://netron.app/?url="],
-    ["Wetron", "https://wetron.app/?url="],
-  ];
+  // Netron opens a model straight from its address; viewers that only read local files, Wetron among
+  // them, take the file itself.
+  const NETRON = "https://netron.app/?url=";
   const SAMPLES = { coco: ["bus.jpg", "zidane.jpg"], drone: ["aerial.jpg"] };
   const COLOURS = ["#e8a33d", "#3e7c8c", "#b3574d", "#6c8a3e", "#6c5ce0", "#2f8f83"];
   // One colour per block, so a reader tells the blocks apart at a glance; inside a block the top-k
@@ -29,6 +28,7 @@
       hint: "图片只在你的浏览器里处理，不会上传。推理也是使用你浏览器运行环境的本地计算能力进行推理。",
       found: (count) => `${count} 个目标`,
       two: "最多同时比较三个模型。",
+      file: "模型文件",
     },
     en: {
       group: "Group",
@@ -47,6 +47,7 @@
       hint: "Pictures stay in your browser and are never uploaded, and the inference runs on your own machine, inside the browser.",
       found: (count) => `${count} objects`,
       two: "Three models at a time.",
+      file: "Model file",
     },
   };
 
@@ -247,9 +248,9 @@
       .filter((model) => state.chosen.includes(model.id))
       .map((model) => {
         const address = new URL(state.base + model.file, location.href).href;
-        const viewers = VIEWERS.map(
-          ([name, prefix]) => `<a href="${prefix}${address}" target="_blank" rel="noopener">${name}</a>`,
-        ).join(" · ");
+        const viewers =
+          `<a href="${NETRON}${address}" target="_blank" rel="noopener">Netron</a> · ` +
+          `<a href="${address}" download>${words.file}</a>`;
         return `<section class="es-demo__panel" data-model="${model.id}">
           <header><strong>${model.label[state.lang]}</strong><span class="es-demo__cost"></span></header>
           <canvas></canvas>

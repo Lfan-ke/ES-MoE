@@ -1108,7 +1108,7 @@
 <li>模型由 <code>scripts/demo_export.py</code> 从 <code>checkpoints</code> 分支的权重导出成 ONNX，导出时把每个块的路由概率一并作为输出，并逐项核对与 PyTorch 前向一致。</li>
 <li>首次运行要下载模型，每个约 10 到 12 MB，之后留在浏览器缓存里。</li>
 <li>浏览器支持 WebGPU 时用它，否则回落到 WASM，两者数值一致。</li>
-<li>每块面板底部的 Netron 与 Wetron 链接可以直接打开这份模型的结构图。</li>
+<li>每块面板底部的 Netron 链接直接打开这份模型的结构图；旁边的模型文件可以下载后拖进任何本地查看器，例如 Wetron。</li>
 <li>样例图：<code>bus.jpg</code>、<code>zidane.jpg</code> 取自 <a href="https://github.com/ultralytics/ultralytics">ultralytics</a> 仓库（AGPL-3.0）；航拍那张取自 Wikimedia Commons 的 <a href="https://commons.wikimedia.org/wiki/File:Buses_is_depot_at_Bishan,_Singapore_(Unsplash).jpg">Buses is depot at Bishan, Singapore</a>（CC0）。</li>
 </ul>
 
