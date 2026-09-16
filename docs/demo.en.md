@@ -1,6 +1,6 @@
 # Try it
 
-Drop in an image and see what two models make of it. A model with ES-MoE blocks also lists, block by block, what each expert scored and which ones were chosen. Everything runs in your own browser.
+Drop in an image and see what up to three models make of it. A model with ES-MoE blocks also lists, block by block, what each expert scored and which ones were chosen. Everything runs in your own browser.
 
 <div id="esmoe-demo" data-models="../../models/" data-assets="../../assets/demo/"></div>
 

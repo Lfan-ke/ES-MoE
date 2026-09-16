@@ -28,7 +28,7 @@
       absent: "站点上还没有模型文件，本地预览时属正常。",
       hint: "图片只在你的浏览器里处理，不会上传。推理也是使用你浏览器运行环境的本地计算能力进行推理。",
       found: (count) => `${count} 个目标`,
-      two: "最多同时比较两个模型。",
+      two: "最多同时比较三个模型。",
     },
     en: {
       group: "Group",
@@ -46,10 +46,12 @@
       absent: "The site has no model files yet, which is normal in a local preview.",
       hint: "Pictures stay in your browser and are never uploaded, and the inference runs on your own machine, inside the browser.",
       found: (count) => `${count} objects`,
-      two: "Two models at a time.",
+      two: "Three models at a time.",
     },
   };
 
+  // Three panels still fit the content column side by side; a fourth would be a scroll bar.
+  const LIMIT = 3;
   const state = { index: [], group: "coco", chosen: [], image: null, base: "", assets: "", lang: "en" };
   let words = TEXT.en;
   let pending = null;
@@ -247,7 +249,11 @@
           <header><strong>${model.label[state.lang]}</strong><span class="es-demo__cost"></span></header>
           <canvas></canvas>
           <div class="es-demo__gates"></div>
-          <footer><span class="es-demo__meta">${model.source} · ${model.imgsz}px · ${(model.parameters / 1e6).toFixed(2)}M</span><span class="es-demo__viewers">${viewers}</span></footer>
+          <footer>
+            <span class="es-demo__meta" title="${model.source}">${model.source}</span>
+            <span class="es-demo__note">${model.imgsz}px · ${(model.parameters / 1e6).toFixed(2)}M</span>
+            <span class="es-demo__viewers">${viewers}</span>
+          </footer>
         </section>`;
       })
       .join("");
@@ -317,8 +323,8 @@
     host.addEventListener("change", (event) => {
       if (event.target.type === "checkbox") {
         const picked = chosen(host);
-        state.chosen = picked.slice(0, 2);
-        if (picked.length > 2) {
+        state.chosen = picked.slice(0, LIMIT);
+        if (picked.length > LIMIT) {
           controls(host);
           host.querySelector(".es-demo__hint").textContent = words.two;
         }

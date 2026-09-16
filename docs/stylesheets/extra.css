@@ -684,14 +684,14 @@ html {
   pointer-events: none;
 }
 
+/* The logo is the mark: four bars with two lit, which is what choosing a model does here. */
 .es-demo__choice::before {
-  width: 0.72rem;
-  height: 0.72rem;
+  width: 0.78rem;
+  height: 0.78rem;
   content: "";
-  background: currentcolor;
-  opacity: 0.4;
-  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16"/></svg>')
-    center / contain no-repeat;
+  background: url("../assets/logo.svg") center / contain no-repeat;
+  filter: grayscale(1);
+  opacity: 0.45;
 }
 
 .es-demo__choice:has(input:checked) {
@@ -701,9 +701,8 @@ html {
 }
 
 .es-demo__choice:has(input:checked)::before {
-  background: var(--es-route);
+  filter: none;
   opacity: 1;
-  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
 }
 
 .es-demo__run {
@@ -734,7 +733,7 @@ html {
 
 .es-demo__panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
   gap: 1rem;
   margin-top: 0.9rem;
 }
@@ -776,20 +775,25 @@ html {
 .es-demo__panel footer {
   display: flex;
   gap: 0.5rem;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: baseline;
   margin-top: 0.6rem;
   font-size: 0.58rem;
   color: var(--md-default-fg-color--light);
 }
 
-.es-demo__viewers {
-  flex: none;
+/* One line, whatever the checkpoint is called: the name gives way, the viewers never do. */
+.es-demo__meta {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.7;
 }
 
-.es-demo__meta {
-  overflow-wrap: anywhere;
-  opacity: 0.75;
+.es-demo__note,
+.es-demo__viewers {
+  flex: none;
 }
 
 .md-typeset .es-demo__block {
