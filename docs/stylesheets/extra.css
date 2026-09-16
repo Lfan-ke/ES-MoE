@@ -628,3 +628,173 @@ html {
 .md-typeset figure.es-fig figcaption {
   font-style: normal;
 }
+
+/* The try-it page: the controls read as one row each, and a gate bar stands for one expert. */
+.es-demo__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  margin: 0.45rem 0;
+}
+
+.es-demo__row > b {
+  min-width: 4.2rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
+}
+
+.es-demo__tab {
+  padding: 0.18rem 0.7rem;
+  font-size: 0.68rem;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--es-edge);
+  border-radius: 1rem;
+}
+
+.es-demo__tab--on {
+  background: color-mix(in srgb, var(--es-signal) 22%, transparent);
+  border-color: color-mix(in srgb, var(--es-signal) 55%, transparent);
+}
+
+.es-demo__choice {
+  display: inline-flex;
+  gap: 0.28rem;
+  align-items: center;
+  font-size: 0.68rem;
+}
+
+.es-demo__sample {
+  width: 3.6rem;
+  height: 2.4rem;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid var(--es-edge);
+  border-radius: 0.2rem;
+}
+
+.es-demo__upload,
+.es-demo__run {
+  padding: 0.15rem 0.7rem;
+  font-size: 0.64rem;
+  cursor: pointer;
+}
+
+.es-demo__hint,
+.es-demo__none {
+  font-size: 0.64rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.es-demo__panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+  margin-top: 0.9rem;
+}
+
+.es-demo__panel {
+  padding: 0.6rem;
+  border: 1px solid var(--es-edge);
+  border-radius: 0.3rem;
+}
+
+.es-demo__panel header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.72rem;
+}
+
+.es-demo__cost {
+  font-size: 0.64rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.es-demo__panel canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0.45rem 0;
+  border-radius: 0.2rem;
+}
+
+.es-demo__panel footer {
+  font-size: 0.58rem;
+  color: var(--md-default-fg-color--light);
+  word-break: break-all;
+}
+
+.md-typeset .es-demo__block {
+  display: block;
+  width: auto;
+  max-width: none;
+  margin: 0.55rem 0 0;
+  text-align: left;
+}
+
+.md-typeset .es-demo__block figcaption {
+  margin-bottom: 0.15rem;
+  font-size: 0.6rem;
+  font-style: normal;
+  color: var(--md-default-fg-color--light);
+}
+
+/* A gate row carries three readings at once: which expert (hue), how much it scored (length and
+   depth of that hue), and whether top-k took it (solid against washed out). */
+.es-gate {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr 2.5rem;
+  gap: 0.35rem;
+  align-items: center;
+  margin: 0.14rem 0;
+  font-size: 0.6rem;
+}
+
+.es-gate span {
+  padding: 0.02rem 0.26rem;
+  font-weight: 600;
+  color: var(--gate);
+  text-align: center;
+  border: 1px solid color-mix(in srgb, var(--gate) 45%, transparent);
+  border-radius: 0.6rem;
+}
+
+.es-gate__track {
+  height: 0.44rem;
+  background: color-mix(in srgb, var(--md-default-fg-color) 7%, transparent);
+  border-radius: 0.22rem;
+}
+
+.es-gate i {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--gate) calc(42% + 58% * var(--share)), transparent);
+  border-radius: 0.22rem;
+}
+
+.es-gate em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--md-default-fg-color--light);
+}
+
+.es-gate--on em {
+  font-weight: 600;
+  color: var(--md-default-fg-color);
+}
+
+.es-gate--off span {
+  color: var(--md-default-fg-color--light);
+  border-color: var(--es-edge);
+}
+
+.es-gate--off i {
+  background: color-mix(in srgb, var(--gate) 20%, transparent);
+}
+

@@ -65,6 +65,7 @@ plugins:
           build: true
           nav_translations:
             概览: Overview
+            试玩: Try it
             教程: Tutorial
             选型: Selection
             实验结果: Results
@@ -79,6 +80,7 @@ plugins:
 
 nav:
   - 概览: index.md
+  - 试玩: demo.md
   - 使用:
       - 教程: tutorial.md
       - API: API.md
@@ -118,4 +120,5 @@ extra_javascript:
   - javascripts/charts.js
   - javascripts/figures.js
   - javascripts/diagrams.js
+  - javascripts/demo.js
   - javascripts/loader.js
