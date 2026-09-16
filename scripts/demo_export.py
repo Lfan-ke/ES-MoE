@@ -1,7 +1,11 @@
 """Export the models the docs site runs in the browser: a detector plus, for a routed model, each
 block's router probabilities.
 
-    uv run --with onnx --with onnxruntime python scripts/demo_export.py --out <pages>/models --weights <dir>
+A checkpoint trained on YOLO-Master's fork needs the fork's classes to unpickle, so it comes over in
+two steps:
+
+    PYTHONPATH=<fork> uv run python scripts/demo_export.py transfer --weights <fork.pt> --out <fork.state.pt>
+    uv run --with onnx --with onnxruntime python scripts/demo_export.py export --out <pages>/models --weights <dir>
 
 Every model comes from a checkpoint that already exists; nothing here trains.
 """
@@ -17,6 +21,8 @@ from ultralytics import YOLO
 
 import esmoe
 
+ROOT = Path(__file__).resolve().parents[1]
+
 MODELS = {
     "coco-yolo11n": {
         "group": "coco",
@@ -27,6 +33,7 @@ MODELS = {
         "group": "coco",
         "label": {"zh": "YOLO-Master-EsMoE-N", "en": "YOLO-Master-EsMoE-N"},
         "imgsz": 640,
+        "config": "configs/yolo-master-n-e3k3-esmoe.yaml",
     },
     "drone-baseline": {
         "group": "drone",
@@ -42,15 +49,16 @@ MODELS = {
         "group": "drone",
         "label": {"zh": "四块，上游配方", "en": "Four blocks, upstream recipe"},
         "imgsz": 800,
+        "config": "configs/yolo-master-n-esmoe.yaml",
     },
 }
 
 SOURCES = {
     "coco-yolo11n": "yolo11n.pt",
-    "coco-esmoe-n": "YOLO-Master-EsMoE-N.pt",
+    "coco-esmoe-n": "YOLO-Master-EsMoE-N.state.pt",
     "drone-baseline": "yolo-master-n-baseline-e120-s0-p800f-fp32-last.pt",
     "drone-esmoe": "yolo-master-n-esmoe-upstream-w1-e120-s0-p800f-fp32-last.pt",
-    "drone-upstream": "yolo-master-n-upstream-e120-s0-p800f-fp32-fork-last.pt",
+    "drone-upstream": "yolo-master-n-upstream-e120-s0-p800f-fp32-fork-last.state.pt",
 }
 
 
@@ -62,14 +70,14 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
-def entry(model_id: str, spec: dict, blocks: list, names: dict, source: Path) -> dict:
+def entry(model_id: str, spec: dict, blocks: list, names: dict, source: Path, origin: str | None = None) -> dict:
     return {
         "id": model_id,
         "group": spec["group"],
         "label": spec["label"],
         "imgsz": spec["imgsz"],
         "classes": [names[index] for index in sorted(names)],
-        "source": source.name,
+        "source": origin or source.name,
         "sha256": digest(source),
         "blocks": [{"experts": block.num_experts, "top_k": block.top_k, "kernels": kernels(block)} for block in blocks],
     }
@@ -136,20 +144,42 @@ def check(target: Path, images: torch.Tensor, reference: tuple, names: list[str]
     session = ort.InferenceSession(str(target), providers=["CPUExecutionProvider"])
     outputs = session.run(None, {"images": images.numpy()})
     for name, got, want in zip(names, outputs, reference, strict=True):
-        gap = float(np.abs(got - want.numpy()).max())
-        limit = 1e-5 if name.startswith("probs") else 1e-2
-        if gap > limit:
+        want = want.numpy()
+        gap = float(np.abs(got - want).max())
+        # Probabilities live in [0, 1] and are compared as they are; decoded boxes carry the image's
+        # scale, so a pixel-level difference there is relative to it.
+        scale = 1.0 if name.startswith("probs") else max(1.0, float(np.abs(want).max()))
+        if gap / scale > 1e-4:
             raise SystemExit(f"{target.name}: {name} differs from the checkpoint by {gap:.2e}")
+
+
+def load(model_id: str, weights: Path) -> tuple[torch.nn.Module, str]:
+    esmoe.inject_esmoe()
+    if weights.name.endswith(".state.pt"):
+        from recipe_parity import renamed
+        from ultralytics.nn.tasks import DetectionModel
+
+        saved = torch.load(weights, map_location="cpu", weights_only=False)
+        net = DetectionModel(str(ROOT / MODELS[model_id]["config"]), ch=3, nc=len(saved["names"]), verbose=False)
+        # The fork keeps the auxiliary term's running magnitude in the checkpoint; it belongs to its
+        # trainer, not to the blocks, and inference never reads it.
+        state = {key: value for key, value in renamed(saved["state"]).items() if "_mixture_loss_ema" not in key}
+        missing, unexpected = net.load_state_dict(state, strict=False)
+        if missing or unexpected:
+            raise SystemExit(f"{model_id}: missing {missing[:3]}, unexpected {unexpected[:3]}")
+        net.names = saved["names"]
+        return net.float().eval(), saved["source"]
+    return YOLO(str(weights)).model.float().eval(), weights.name
 
 
 def export(model_id: str, weights: Path, out: Path) -> dict:
     spec = MODELS[model_id]
-    esmoe.inject_esmoe()
-    net = YOLO(str(weights)).model.float().eval()
+    net, origin = load(model_id, weights)
     blocks = list(esmoe.blocks(net))
     wrapper = Gated(net, blocks).eval()
     images = torch.rand(1, 3, spec["imgsz"], spec["imgsz"])
-    with torch.inference_mode():
+    # Not inference_mode: the head caches anchors, and a tensor made there cannot be traced later.
+    with torch.no_grad():
         reference = wrapper(images)
     names = ["pred", *[f"probs{index}" for index in range(len(blocks))]]
     out.mkdir(parents=True, exist_ok=True)
@@ -165,15 +195,20 @@ def export(model_id: str, weights: Path, out: Path) -> dict:
     )
     slim(target)
     check(target, images, reference, names)
-    return entry(model_id, spec, blocks, net.names, weights) | {"file": target.name, "bytes": target.stat().st_size}
+    names: dict = net.names
+    record = entry(model_id, spec, blocks, names, weights, origin)
+    parameters = sum(p.numel() for p in net.parameters())
+    return record | {"file": target.name, "bytes": target.stat().st_size, "parameters": parameters}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, required=True, help="directory the site serves as /models")
-    parser.add_argument("--weights", type=Path, required=True, help="directory holding the checkpoints")
-    parser.add_argument("--only", nargs="*", default=list(MODELS), help="model ids to export")
-    args = parser.parse_args()
+def transfer(args) -> None:
+    """Carry a fork-trained checkpoint over as plain tensors, which official ultralytics can open."""
+    net = YOLO(str(args.weights)).model.float().eval()
+    torch.save({"state": net.state_dict(), "names": net.names, "source": args.weights.name}, args.out)
+    print(f"{args.out.name}: {sum(p.numel() for p in net.parameters())} parameters, {len(net.names)} classes")
+
+
+def publish(args) -> None:
     listing = args.out / "index.json"
     index = json.loads(listing.read_text(encoding="utf-8")) if listing.exists() else []
     index = [record for record in index if record["id"] not in args.only]
@@ -182,8 +217,25 @@ def main() -> None:
         index.append(record)
         size = record["bytes"] / 1e6
         print(f"{model_id}: {size:.1f} MB, {len(record['blocks'])} blocks, {len(record['classes'])} classes")
-    index.sort(key=lambda record: list(MODELS).index(record["id"]))
-    listing.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
+        # Written per model: a later export failing should not take the finished ones with it.
+        index.sort(key=lambda record: list(MODELS).index(record["id"]))
+        listing.write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    one = commands.add_parser("transfer", help="save a fork checkpoint's tensors")
+    one.add_argument("--weights", type=Path, required=True)
+    one.add_argument("--out", type=Path, required=True)
+    one.set_defaults(run=transfer)
+    every = commands.add_parser("export", help="export the models the site serves")
+    every.add_argument("--out", type=Path, required=True, help="directory the site serves as /models")
+    every.add_argument("--weights", type=Path, required=True, help="directory holding the checkpoints")
+    every.add_argument("--only", nargs="*", default=list(MODELS), help="model ids to export")
+    every.set_defaults(run=publish)
+    args = parser.parse_args()
+    args.run(args)
 
 
 if __name__ == "__main__":
