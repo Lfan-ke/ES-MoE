@@ -16,12 +16,12 @@
 </p>
 
 <div align=center>
-  <sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it.</sub>
+  <sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it. <a href="https://lfan-ke.github.io/ES-MoE/demo/">Try it.</a></sub>
 </div>
 
 ---
 
-<sub>Try it in your browser: [`试玩 / Try it`](https://lfan-ke.github.io/ES-MoE/demo/) · Docs: [`English`](https://lfan-ke.github.io/ES-MoE/en/) · [`中文`](https://lfan-ke.github.io/ES-MoE/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
+<sub>Docs: [`English`](https://lfan-ke.github.io/ES-MoE/en/) · [`中文`](https://lfan-ke.github.io/ES-MoE/) · Quick start in Colab: [`notebooks/quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb) · Ask questions about the code: [`DeepWiki`](https://deepwiki.com/Lfan-ke/ES-MoE).</sub>
 
 <br />
 
