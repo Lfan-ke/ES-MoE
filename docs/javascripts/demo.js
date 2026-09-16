@@ -238,7 +238,10 @@
   }
 
   function panels(host) {
-    host.querySelector(".es-demo__panels").innerHTML = state.index
+    const shown = host.querySelector(".es-demo__panels");
+    // The chosen models share one row and the pictures shrink to fit, so they stay comparable.
+    shown.style.setProperty("--panels", String(state.chosen.length || 1));
+    shown.innerHTML = state.index
       .filter((model) => state.chosen.includes(model.id))
       .map((model) => {
         const address = new URL(state.base + model.file, location.href).href;
