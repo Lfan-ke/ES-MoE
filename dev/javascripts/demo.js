@@ -86,6 +86,16 @@
   const providers = new Map();
   let hardware;
 
+  // A vendor string arrives in lower case; anything that already carries capitals is left as written.
+  function titled(text) {
+    return /[A-Z]/.test(text)
+      ? text
+      : text
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+  }
+
   // WebGPU tells a page its adapter's vendor and architecture and nothing about the backend behind it,
   // so the label carries what can be known and stays quiet about the rest.
   async function machine() {
@@ -139,22 +149,61 @@
     return pending;
   }
 
-  async function session(model) {
+  // Sizes read best with two decimals until they run to four digits, where one is plenty.
+  function size(bytes, unit) {
+    const value = bytes / (unit === "MB" ? 1e6 : 1e3);
+    return value.toFixed(value >= 1000 ? 1 : 2);
+  }
+
+  // Fetched by hand rather than by url, so the button can say how far the download has got — and so
+  // the file is read once however many runtimes are tried on it.
+  async function download(url, expected, report) {
+    const answer = await fetch(url);
+    if (!answer.ok) throw new Error(`${answer.status} ${url}`);
+    const total = Number(answer.headers.get("content-length")) || expected || 0;
+    const unit = total >= 1e6 ? "MB" : "KB";
+    if (!answer.body || !answer.body.getReader) return new Uint8Array(await answer.arrayBuffer());
+    const reader = answer.body.getReader();
+    const parts = [];
+    let done = 0;
+    for (;;) {
+      const { value, done: finished } = await reader.read();
+      if (finished) break;
+      parts.push(value);
+      done += value.length;
+      if (total) report(`${size(done, unit)}/${size(total, unit)} ${unit}`);
+    }
+    const bytes = new Uint8Array(done);
+    let at = 0;
+    for (const part of parts) {
+      bytes.set(part, at);
+      at += part.length;
+    }
+    return bytes;
+  }
+
+  async function session(model, report) {
     if (!sessions.has(model.id)) {
       await library();
-      const url = state.base + model.file;
+      const source = await download(state.base + model.file, model.bytes, report);
       // An NPU first where the browser offers one, then the GPU, then the processor.
       const create = async () => {
         const tries = [];
-        if (navigator.ml) tries.push([[{ name: "webnn", deviceType: "npu" }], () => "WebNN(npu)"]);
+        if (navigator.ml) tries.push([[{ name: "webnn", deviceType: "npu" }], () => `WebNN(${titled("npu")})`]);
         if (navigator.gpu) {
-          tries.push([["webgpu"], async () => { const found = await machine(); return found ? `WebGPU(${found})` : "WebGPU"; }]);
+          tries.push([
+            ["webgpu"],
+            async () => {
+              const found = await machine();
+              return found ? `WebGPU(${titled(found)})` : "WebGPU";
+            },
+          ]);
         }
-        tries.push([["wasm"], () => (processor() ? `WASM(${processor()})` : "WASM")]);
+        tries.push([["wasm"], () => (processor() ? `WASM(${titled(processor())})` : "WASM")]);
         let last;
         for (const [wanted, name] of tries) {
           try {
-            const ready = await ort.InferenceSession.create(url, { executionProviders: wanted });
+            const ready = await ort.InferenceSession.create(source, { executionProviders: wanted });
             providers.set(model.id, await name());
             return ready;
           } catch (error) {
@@ -327,7 +376,7 @@
     const name = model.label[state.lang];
     status.textContent = words.loading;
     working(host, `${words.loading} · ${name}`);
-    const active = await session(model);
+    const active = await session(model, (progress) => working(host, `${words.loading} · ${name} (${progress})`));
     const provider = providers.get(model.id);
     status.textContent = words.running;
     working(host, [`${words.running} · ${name}`, provider].filter(Boolean).join(" · "));
