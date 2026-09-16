@@ -15,7 +15,8 @@ from pathlib import Path
 from urls import ALIAS as STUB
 
 CONFIG = Path(__file__).with_name("mkdocs.yml")
-KEEP = {".git", ".nojekyll", "index.html", "versions.json"}
+# `models` holds the ONNX files the try-it page runs; they are deployed by hand, not by mike.
+KEEP = {".git", ".nojekyll", "index.html", "versions.json", "models"}
 
 
 def site_url() -> str:
