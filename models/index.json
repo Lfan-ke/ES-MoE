@@ -90,10 +90,11 @@
    "toothbrush"
   ],
   "source": "yolo11n.pt",
-  "sha256": "0ebbc80d4a7680d1",
+  "checkpoint_sha256": "0ebbc80d4a7680d1",
   "blocks": [],
   "file": "coco-yolo11n.onnx",
   "bytes": 10713542,
+  "sha256": "dd76c6ecc3763f49",
   "parameters": 2624080
  },
  {
@@ -187,7 +188,7 @@
    "toothbrush"
   ],
   "source": "YOLO-Master-EsMoE-N.pt",
-  "sha256": "cf8cb958eea43e4e",
+  "checkpoint_sha256": "cf8cb958eea43e4e",
   "blocks": [
    {
     "experts": 3,
@@ -196,7 +197,8 @@
      3,
      5,
      7
-    ]
+    ],
+    "threshold": 0.0
    },
    {
     "experts": 3,
@@ -205,7 +207,8 @@
      3,
      5,
      7
-    ]
+    ],
+    "threshold": 0.0
    },
    {
     "experts": 3,
@@ -214,7 +217,8 @@
      3,
      5,
      7
-    ]
+    ],
+    "threshold": 0.0
    },
    {
     "experts": 3,
@@ -223,11 +227,13 @@
      3,
      5,
      7
-    ]
+    ],
+    "threshold": 0.0
    }
   ],
   "file": "coco-esmoe-n.onnx",
-  "bytes": 11074663,
+  "bytes": 11074521,
+  "sha256": "75ae1eba52614556",
   "parameters": 2694364
  },
  {
@@ -251,10 +257,11 @@
    "motor"
   ],
   "source": "yolo-master-n-baseline-e120-s0-p800f-fp32-last.pt",
-  "sha256": "17ef0383a52e0106",
+  "checkpoint_sha256": "17ef0383a52e0106",
   "blocks": [],
   "file": "drone-baseline.onnx",
   "bytes": 9518994,
+  "sha256": "ad140619a88b689a",
   "parameters": 2291406
  },
  {
@@ -278,7 +285,7 @@
    "motor"
   ],
   "source": "yolo-master-n-esmoe-upstream-w1-e120-s0-p800f-fp32-last.pt",
-  "sha256": "258064e7fc912001",
+  "checkpoint_sha256": "258064e7fc912001",
   "blocks": [
    {
     "experts": 4,
@@ -288,7 +295,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -298,7 +306,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -308,7 +317,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -318,11 +328,13 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    }
   ],
   "file": "drone-esmoe.onnx",
-  "bytes": 11660871,
+  "bytes": 11660721,
+  "sha256": "d573c87512555883",
   "parameters": 2814406
  },
  {
@@ -346,7 +358,7 @@
    "motor"
   ],
   "source": "yolo-master-n-upstream-e120-s0-p800f-fp32-fork-last.pt",
-  "sha256": "485eb00cb73af65c",
+  "checkpoint_sha256": "485eb00cb73af65c",
   "blocks": [
    {
     "experts": 4,
@@ -356,7 +368,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -366,7 +379,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -376,7 +390,8 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    },
    {
     "experts": 4,
@@ -386,11 +401,13 @@
      5,
      7,
      9
-    ]
+    ],
+    "threshold": 0.4
    }
   ],
   "file": "drone-upstream.onnx",
-  "bytes": 11660871,
+  "bytes": 11660721,
+  "sha256": "7a6f2f35ec7a3318",
   "parameters": 2814406
  }
 ]
