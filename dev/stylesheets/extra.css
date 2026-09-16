@@ -684,14 +684,12 @@ html {
   pointer-events: none;
 }
 
-/* The logo is the mark: four bars with two lit, which is what choosing a model does here. */
 .es-demo__choice::before {
-  width: 0.78rem;
-  height: 0.78rem;
+  width: 0.6rem;
+  height: 0.6rem;
   content: "";
-  background: url("../assets/logo.svg") center / contain no-repeat;
-  filter: grayscale(1);
-  opacity: 0.45;
+  background: color-mix(in srgb, var(--md-default-fg-color) 20%, transparent);
+  border-radius: 0.16rem;
 }
 
 .es-demo__choice:has(input:checked) {
@@ -701,8 +699,7 @@ html {
 }
 
 .es-demo__choice:has(input:checked)::before {
-  filter: none;
-  opacity: 1;
+  background: var(--es-route);
 }
 
 .es-demo__run {
@@ -733,9 +730,15 @@ html {
 
 .es-demo__panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
+  grid-template-columns: repeat(var(--panels, 1), minmax(0, 1fr));
   gap: 1rem;
   margin-top: 0.9rem;
+}
+
+@media (width <= 60rem) {
+  .es-demo__panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .es-demo__panel {
