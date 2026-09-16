@@ -26,7 +26,7 @@ VisDrone 的三个模型只认无人机视角的 10 类，日常照片在这一�
 
 - 模型由 `scripts/demo_export.py` 从 `checkpoints` 分支的权重导出成 ONNX，导出时把每个块的路由概率一并作为输出，并逐项核对与 PyTorch 前向一致。
 - 首次运行要下载模型，每个约 10 到 12 MB，之后留在浏览器缓存里。
-- 浏览器支持 WebGPU 时用它，否则回落到 WASM，两者数值一致。
+- 浏览器支持 WebNN / WebGPU 时用它，否则回落到 WASM，两者数值一致。
 - 每块面板底部的 Netron 链接直接打开这份模型的结构图；Wetron 只读本地文件，把旁边的模型文件下载后拖进去即可。
 - 样例图：`bus.jpg`、`zidane.jpg` 取自 [ultralytics](https://github.com/ultralytics/ultralytics) 仓库（AGPL-3.0）；航拍那张取自 Wikimedia Commons 的 [Buses is depot at Bishan, Singapore](https://commons.wikimedia.org/wiki/File:Buses_is_depot_at_Bishan,_Singapore_(Unsplash).jpg)（CC0）。
 
