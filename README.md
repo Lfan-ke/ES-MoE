@@ -17,7 +17,7 @@
 
 <div align=center>
 
-<sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it. [Try It.](https://lfan-ke.github.io/ES-MoE/demo/)</sub>
+<sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it. <code>[Try It](https://lfan-ke.github.io/ES-MoE/demo/).</code></sub>
 
 </div>
 
