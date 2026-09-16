@@ -52,7 +52,9 @@
 
   // Three panels still fit the content column side by side; a fourth would be a scroll bar.
   const LIMIT = 3;
-  const state = { index: [], group: "coco", chosen: [], image: null, base: "", assets: "", lang: "en" };
+  // The strip keeps the samples and the reader's own pictures, the oldest dropping off the front.
+  const STRIP = 5;
+  const state = { index: [], group: "coco", chosen: [], image: null, base: "", assets: "", lang: "en", uploads: [] };
   let words = TEXT.en;
   let pending = null;
   let queue = Promise.resolve();
@@ -276,8 +278,13 @@
           `<label class="es-demo__choice"><input type="checkbox" value="${model.id}"${state.chosen.includes(model.id) ? " checked" : ""}>${model.label[state.lang]}</label>`,
       )
       .join("");
-    const samples = SAMPLES[state.group]
-      .map((name) => `<img class="es-demo__sample" src="${state.assets}${name}" alt="${name}" loading="lazy">`)
+    const shots = [...SAMPLES[state.group].map((name) => state.assets + name), ...state.uploads];
+    const samples = shots
+      .slice(Math.max(0, shots.length - STRIP))
+      .map((src) => {
+        const here = state.image && state.image.src === src ? " es-demo__sample--on" : "";
+        return `<img class="es-demo__sample${here}" src="${src}" alt="" loading="lazy">`;
+      })
       .join("");
     host.querySelector(".es-demo__controls").innerHTML = `
       <div class="es-demo__row"><b>${words.group}</b>${groups}</div>
@@ -293,6 +300,7 @@
     const image = new Image();
     image.onload = () => {
       state.image = image;
+      controls(host);
       panels(host);
       host.querySelectorAll(".es-demo__panel").forEach((panel) => {
         const model = state.index.find((item) => item.id === panel.dataset.model);
@@ -333,7 +341,9 @@
         }
         if (state.image) show(host, state.image.src);
       } else if (event.target.files && event.target.files[0]) {
-        show(host, URL.createObjectURL(event.target.files[0]));
+        const source = URL.createObjectURL(event.target.files[0]);
+        state.uploads.push(source);
+        show(host, source);
       }
     });
   }
