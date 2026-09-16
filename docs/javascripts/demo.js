@@ -7,8 +7,9 @@
   ];
   const SAMPLES = { coco: ["bus.jpg", "zidane.jpg"], drone: ["aerial.jpg"] };
   const COLOURS = ["#e8a33d", "#3e7c8c", "#b3574d", "#6c8a3e", "#6c5ce0", "#2f8f83"];
-  // One colour per kernel across the whole project, so a reader recognises an expert by its hue.
-  const EXPERTS = { 3: "#e4572e", 5: "#e8a33d", 7: "#1f8a80", 9: "#6c5ce0" };
+  // One colour per block, so a reader tells the blocks apart at a glance; inside a block the top-k
+  // experts keep that colour and the rest go grey.
+  const BLOCKS = ["#e4572e", "#e8a33d", "#1f8a80", "#6c5ce0", "#b3574d", "#3e7c8c"];
 
   const TEXT = {
     zh: {
@@ -196,11 +197,9 @@
         const chosen = new Set(order.slice(0, block.top_k));
         const rows = values
           .map((value, expert) => {
-            const kernel = block.kernels[expert];
-            const hue = EXPERTS[kernel] || COLOURS[expert % COLOURS.length];
             return `
-            <div class="es-gate ${chosen.has(expert) ? "es-gate--on" : "es-gate--off"}" style="--gate:${hue};--share:${value.toFixed(3)}">
-              <span>k${kernel}</span>
+            <div class="es-gate ${chosen.has(expert) ? "es-gate--on" : "es-gate--off"}" style="--share:${value.toFixed(3)}">
+              <span>k${block.kernels[expert]}</span>
               <div class="es-gate__track"><i style="width:${(value * 100).toFixed(1)}%"></i></div>
               <em>${value.toFixed(3)}</em>
             </div>`;
@@ -210,7 +209,7 @@
           .slice(0, block.top_k)
           .map((expert) => `k${block.kernels[expert]}`)
           .join(" + ");
-        return `<figure class="es-demo__block">
+        return `<figure class="es-demo__block" style="--gate:${BLOCKS[index % BLOCKS.length]}">
           <figcaption>${words.block} ${index + 1} · top-${block.top_k} · ${words.chosen} ${picked}</figcaption>
           ${rows}
         </figure>`;
@@ -248,7 +247,7 @@
           <header><strong>${model.label[state.lang]}</strong><span class="es-demo__cost"></span></header>
           <canvas></canvas>
           <div class="es-demo__gates"></div>
-          <footer>${model.source} · ${model.imgsz}px · ${(model.parameters / 1e6).toFixed(2)}M · ${viewers}</footer>
+          <footer><span class="es-demo__meta">${model.source} · ${model.imgsz}px · ${(model.parameters / 1e6).toFixed(2)}M</span><span class="es-demo__viewers">${viewers}</span></footer>
         </section>`;
       })
       .join("");
@@ -275,8 +274,8 @@
       <div class="es-demo__row"><b>${words.group}</b>${groups}</div>
       <div class="es-demo__row"><b>${words.pick}</b>${models}</div>
       <div class="es-demo__row"><b>${words.sample}</b>${samples}
-        <label class="es-demo__upload md-button">${words.upload}<input type="file" accept="image/*" hidden></label>
-        <button type="button" class="es-demo__run md-button md-button--primary">${words.run}</button>
+        <label class="es-demo__upload">${words.upload}<input type="file" accept="image/*" hidden></label>
+        <button type="button" class="es-demo__run">${words.run}</button>
       </div>
       <p class="es-demo__hint">${words.hint}</p>`;
   }

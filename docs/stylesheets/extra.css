@@ -645,26 +645,71 @@ html {
   color: var(--md-default-fg-color--light);
 }
 
-.es-demo__tab {
-  padding: 0.18rem 0.7rem;
+/* One pill for every control on the page: the group, the models, the file picker and the run button. */
+.es-demo__tab,
+.es-demo__choice,
+.es-demo__upload,
+.es-demo__run {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.16rem 0.72rem;
   font-size: 0.68rem;
   color: inherit;
   cursor: pointer;
   background: transparent;
   border: 1px solid var(--es-edge);
   border-radius: 1rem;
+  transition:
+    background 120ms,
+    border-color 120ms;
 }
 
-.es-demo__tab--on {
-  background: color-mix(in srgb, var(--es-signal) 22%, transparent);
+.es-demo__tab:hover,
+.es-demo__choice:hover,
+.es-demo__upload:hover,
+.es-demo__run:hover {
   border-color: color-mix(in srgb, var(--es-signal) 55%, transparent);
 }
 
-.es-demo__choice {
-  display: inline-flex;
-  gap: 0.28rem;
-  align-items: center;
-  font-size: 0.68rem;
+.es-demo__tab--on {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--es-signal) 20%, transparent);
+  border-color: color-mix(in srgb, var(--es-signal) 55%, transparent);
+}
+
+.es-demo__choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.es-demo__choice::before {
+  width: 0.72rem;
+  height: 0.72rem;
+  content: "";
+  background: currentcolor;
+  opacity: 0.4;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16"/></svg>')
+    center / contain no-repeat;
+}
+
+.es-demo__choice:has(input:checked) {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--es-route) 18%, transparent);
+  border-color: color-mix(in srgb, var(--es-route) 55%, transparent);
+}
+
+.es-demo__choice:has(input:checked)::before {
+  background: var(--es-route);
+  opacity: 1;
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+}
+
+.es-demo__run {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--es-signal) 26%, transparent);
+  border-color: color-mix(in srgb, var(--es-signal) 60%, transparent);
 }
 
 .es-demo__sample {
@@ -673,14 +718,12 @@ html {
   object-fit: cover;
   cursor: pointer;
   border: 1px solid var(--es-edge);
-  border-radius: 0.2rem;
+  border-radius: 0.3rem;
+  transition: border-color 120ms;
 }
 
-.es-demo__upload,
-.es-demo__run {
-  padding: 0.15rem 0.7rem;
-  font-size: 0.64rem;
-  cursor: pointer;
+.es-demo__sample:hover {
+  border-color: color-mix(in srgb, var(--es-signal) 60%, transparent);
 }
 
 .es-demo__hint,
@@ -697,9 +740,15 @@ html {
 }
 
 .es-demo__panel {
+  display: flex;
+  flex-direction: column;
   padding: 0.6rem;
   border: 1px solid var(--es-edge);
   border-radius: 0.3rem;
+}
+
+.es-demo__gates {
+  flex: 1;
 }
 
 .es-demo__panel header {
@@ -723,10 +772,24 @@ html {
   border-radius: 0.2rem;
 }
 
+/* The provenance runs along the card's bottom edge and the two viewers sit at its right. */
 .es-demo__panel footer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 0.6rem;
   font-size: 0.58rem;
   color: var(--md-default-fg-color--light);
-  word-break: break-all;
+}
+
+.es-demo__viewers {
+  flex: none;
+}
+
+.es-demo__meta {
+  overflow-wrap: anywhere;
+  opacity: 0.75;
 }
 
 .md-typeset .es-demo__block {
@@ -744,8 +807,8 @@ html {
   color: var(--md-default-fg-color--light);
 }
 
-/* A gate row carries three readings at once: which expert (hue), how much it scored (length and
-   depth of that hue), and whether top-k took it (solid against washed out). */
+/* A gate row carries three readings at once: which block it belongs to (hue), how much the expert
+   scored (length and depth), and whether top-k took it (the block's colour against grey). */
 .es-gate {
   display: grid;
   grid-template-columns: 2.1rem 1fr 2.5rem;
@@ -773,7 +836,7 @@ html {
 .es-gate i {
   display: block;
   height: 100%;
-  background: color-mix(in srgb, var(--gate) calc(42% + 58% * var(--share)), transparent);
+  background: color-mix(in srgb, var(--gate) calc(55% + 45% * var(--share)), transparent);
   border-radius: 0.22rem;
 }
 
@@ -789,12 +852,21 @@ html {
   color: var(--md-default-fg-color);
 }
 
+.es-gate--off {
+  opacity: 0.78;
+}
+
 .es-gate--off span {
   color: var(--md-default-fg-color--light);
   border-color: var(--es-edge);
 }
 
 .es-gate--off i {
-  background: color-mix(in srgb, var(--gate) 20%, transparent);
+  background: color-mix(in srgb, var(--md-default-fg-color) calc(16% + 22% * var(--share)), transparent);
+}
+
+.md-typeset .es-demo__block figcaption b,
+.es-demo__block figcaption {
+  color: var(--md-default-fg-color--light);
 }
 
