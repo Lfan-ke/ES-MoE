@@ -756,7 +756,7 @@ html {
   width: 1.05rem;
   height: 1.05rem;
   /* The draft lines live to the train's left; this is the room they need. */
-  margin-left: 0.27rem;
+  margin-left: 0.22rem;
 }
 
 .es-demo__train svg {
