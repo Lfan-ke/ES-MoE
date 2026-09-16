@@ -722,6 +722,11 @@ html {
   border-color: color-mix(in srgb, var(--es-signal) 60%, transparent);
 }
 
+.es-demo__sample--on {
+  border-color: var(--es-signal);
+  box-shadow: 0 0 0 1px var(--es-signal);
+}
+
 .es-demo__hint,
 .es-demo__none {
   font-size: 0.64rem;
