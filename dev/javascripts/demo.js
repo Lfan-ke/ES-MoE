@@ -1,9 +1,10 @@
 // The models run in the reader's browser: the checkpoints are public, the pictures they drop in are not.
 (function () {
   const ORT = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/ort.all.min.js";
-  // Netron opens a model straight from its address; viewers that only read local files, Wetron among
-  // them, take the file itself.
+  // Netron opens a model straight from its address; Wetron reads local files only, so it gets the
+  // plain address and the file beside it.
   const NETRON = "https://netron.app/?url=";
+  const WETRON = "https://wetron.app/";
   const SAMPLES = { coco: ["bus.jpg", "zidane.jpg"], drone: ["aerial.jpg"] };
   const COLOURS = ["#e8a33d", "#3e7c8c", "#b3574d", "#6c8a3e", "#6c5ce0", "#2f8f83"];
   // One colour per block, so a reader tells the blocks apart at a glance; inside a block the top-k
@@ -27,8 +28,9 @@
       absent: "站点上还没有模型文件，本地预览时属正常。",
       hint: "图片只在你的浏览器里处理，不会上传。推理也是使用你浏览器运行环境的本地计算能力进行推理。",
       found: (count) => `${count} 个目标`,
-      two: "最多同时比较三个模型。",
+      limit: "最多同时比较三个模型。",
       file: "模型文件",
+      broken: "这张图片打不开，换一张试试。",
     },
     en: {
       group: "Group",
@@ -46,16 +48,29 @@
       absent: "The site has no model files yet, which is normal in a local preview.",
       hint: "Pictures stay in your browser and are never uploaded, and the inference runs on your own machine, inside the browser.",
       found: (count) => `${count} objects`,
-      two: "Three models at a time.",
+      limit: "Three models at a time.",
       file: "Model file",
+      broken: "That picture would not open; try another.",
     },
   };
 
   // Three panels still fit the content column side by side; a fourth would be a scroll bar.
   const LIMIT = 3;
+  const START = 2;
   // The strip keeps the samples and the reader's own pictures, the oldest dropping off the front.
   const STRIP = 5;
-  const state = { index: [], group: "coco", chosen: [], image: null, base: "", assets: "", lang: "en", uploads: [] };
+  const state = {
+    index: [],
+    group: "coco",
+    chosen: [],
+    image: null,
+    base: "",
+    assets: "",
+    lang: "en",
+    uploads: [],
+    notice: "",
+    run: 0,
+  };
   let words = TEXT.en;
   let pending = null;
   let queue = Promise.resolve();
@@ -97,7 +112,14 @@
           return ort.InferenceSession.create(url, { executionProviders: ["wasm"] });
         }
       };
-      sessions.set(model.id, create());
+      // A failed load must not be remembered, or running again could never recover from it.
+      sessions.set(
+        model.id,
+        create().catch((error) => {
+          sessions.delete(model.id);
+          throw error;
+        }),
+      );
     }
     return sessions.get(model.id);
   }
@@ -154,7 +176,8 @@
       const cy = output.data[anchors + anchor];
       const width = output.data[2 * anchors + anchor];
       const height = output.data[3 * anchors + anchor];
-      found.push({ box: [cx - width / 2, cy - height / 2, width, height], score, label: classes[best], index: best });
+      const label = classes[best] ?? String(best);
+      found.push({ box: [cx - width / 2, cy - height / 2, width, height], score, label, index: best });
     }
     found.sort((left, right) => right.score - left.score);
     const kept = [];
@@ -193,29 +216,36 @@
     }
   }
 
+  // Top-k picks the experts, then inference drops any whose renormalised share falls under the
+  // block's threshold, the leading one excepted. The panel marks what actually ran.
+  function picked(values, block) {
+    const order = [...values.keys()].sort((left, right) => values[right] - values[left]);
+    const top = order.slice(0, block.top_k);
+    const total = top.reduce((sum, expert) => sum + values[expert], 0) || 1;
+    const threshold = block.threshold || 0;
+    return top.filter((expert, place) => place === 0 || values[expert] / total >= threshold);
+  }
+
   function gates(probabilities, blocks) {
     if (!blocks.length) return `<p class="es-demo__none">${words.none}</p>`;
     return blocks
       .map((block, index) => {
         const values = Array.from(probabilities[index]);
-        const order = [...values.keys()].sort((left, right) => values[right] - values[left]);
-        const chosen = new Set(order.slice(0, block.top_k));
+        const order = picked(values, block);
+        const chosen = new Set(order);
         const rows = values
           .map((value, expert) => {
             return `
             <div class="es-gate ${chosen.has(expert) ? "es-gate--on" : "es-gate--off"}" style="--share:${value.toFixed(3)}">
-              <span>k${block.kernels[expert]}</span>
+              <span>k${block.kernels[expert] ?? expert + 1}</span>
               <div class="es-gate__track"><i style="width:${(value * 100).toFixed(1)}%"></i></div>
               <em>${value.toFixed(3)}</em>
             </div>`;
           })
           .join("");
-        const picked = order
-          .slice(0, block.top_k)
-          .map((expert) => `k${block.kernels[expert]}`)
-          .join(" + ");
+        const names = order.map((expert) => `k${block.kernels[expert] ?? expert + 1}`).join(" + ");
         return `<figure class="es-demo__block" style="--gate:${BLOCKS[index % BLOCKS.length]}">
-          <figcaption>${words.block} ${index + 1} · top-${block.top_k} · ${words.chosen} ${picked}</figcaption>
+          <figcaption>${words.block} ${index + 1} · top-${block.top_k} · ${words.chosen} ${names}</figcaption>
           ${rows}
         </figure>`;
       })
@@ -250,6 +280,7 @@
         const address = new URL(state.base + model.file, location.href).href;
         const viewers =
           `<a href="${NETRON}${address}" target="_blank" rel="noopener">Netron</a> · ` +
+          `<a href="${WETRON}" target="_blank" rel="noopener">Wetron</a> · ` +
           `<a href="${address}" download>${words.file}</a>`;
         return `<section class="es-demo__panel" data-model="${model.id}">
           <header><strong>${model.label[state.lang]}</strong><span class="es-demo__cost"></span></header>
@@ -279,7 +310,10 @@
           `<label class="es-demo__choice"><input type="checkbox" value="${model.id}"${state.chosen.includes(model.id) ? " checked" : ""}>${model.label[state.lang]}</label>`,
       )
       .join("");
-    const shots = [...SAMPLES[state.group].map((name) => state.assets + name), ...state.uploads];
+    const shots = [
+      ...SAMPLES[state.group].map((name) => new URL(state.assets + name, location.href).href),
+      ...state.uploads,
+    ];
     const samples = shots
       .slice(Math.max(0, shots.length - STRIP))
       .map((src) => {
@@ -294,18 +328,26 @@
         <label class="es-demo__upload">${words.upload}<input type="file" accept="image/*" hidden></label>
         <button type="button" class="es-demo__run">${words.run}</button>
       </div>
-      <p class="es-demo__hint">${words.hint}</p>`;
+      <p class="es-demo__hint">${state.notice || words.hint}</p>`;
+    state.notice = "";
   }
 
   function show(host, source) {
+    // Switching picture or models mid-queue: the older run has nothing left to draw into.
+    const generation = (state.run += 1);
     const image = new Image();
+    image.onerror = () => {
+      state.notice = words.broken;
+      controls(host);
+    };
     image.onload = () => {
+      if (generation !== state.run) return;
       state.image = image;
       controls(host);
       panels(host);
       host.querySelectorAll(".es-demo__panel").forEach((panel) => {
         const model = state.index.find((item) => item.id === panel.dataset.model);
-        serial(() => run(model, panel)).catch((error) => {
+        serial(() => (generation === state.run ? run(model, panel) : null)).catch((error) => {
           panel.querySelector(".es-demo__cost").textContent = String(error).slice(0, 90);
         });
       });
@@ -314,16 +356,15 @@
     image.src = source;
   }
 
-  function chosen(host) {
-    return [...host.querySelectorAll(".es-demo__choice input:checked")].map((box) => box.value);
-  }
-
   function wire(host) {
     host.addEventListener("click", (event) => {
       const tab = event.target.closest(".es-demo__tab");
       if (tab) {
         state.group = tab.dataset.group;
-        state.chosen = state.index.filter((model) => model.group === state.group).map((model) => model.id).slice(0, 2);
+        state.chosen = state.index
+          .filter((model) => model.group === state.group)
+          .map((model) => model.id)
+          .slice(0, START);
         controls(host);
         host.querySelector(".es-demo__panels").innerHTML = "";
         return;
@@ -334,16 +375,17 @@
     });
     host.addEventListener("change", (event) => {
       if (event.target.type === "checkbox") {
-        const picked = chosen(host);
-        state.chosen = picked.slice(0, LIMIT);
-        if (picked.length > LIMIT) {
-          controls(host);
-          host.querySelector(".es-demo__hint").textContent = words.two;
-        }
+        // Kept in the order they were ticked, so the oldest gives way once the row is full.
+        const id = event.target.value;
+        const wanted = event.target.checked ? [...state.chosen, id] : state.chosen.filter((other) => other !== id);
+        if (wanted.length > LIMIT) state.notice = words.limit;
+        state.chosen = wanted.length ? wanted.slice(-LIMIT) : [id];
+        controls(host);
         if (state.image) show(host, state.image.src);
       } else if (event.target.files && event.target.files[0]) {
         const source = URL.createObjectURL(event.target.files[0]);
         state.uploads.push(source);
+        while (state.uploads.length > STRIP) URL.revokeObjectURL(state.uploads.shift());
         show(host, source);
       }
     });
@@ -372,7 +414,10 @@
       host.innerHTML = `<p class="es-demo__none">${words.absent}</p>`;
       return;
     }
-    state.chosen = state.index.filter((model) => model.group === state.group).map((model) => model.id).slice(0, 2);
+    state.chosen = state.index
+      .filter((model) => model.group === state.group)
+      .map((model) => model.id)
+      .slice(0, START);
     controls(host);
     wire(host);
   }
