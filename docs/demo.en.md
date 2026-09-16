@@ -27,6 +27,6 @@ What the block is made of, and how training differs from inference, is on [ES-Mo
 - `scripts/demo_export.py` exports each model from a checkpoint on the `checkpoints` branch, carrying every block's router probabilities out as extra outputs and checking them against the PyTorch forward.
 - The first run downloads the model, 10 to 12 MB each, and the browser caches it afterwards.
 - WebGPU is used where the browser has it and WASM otherwise; the numbers agree either way.
-- The Netron and Wetron links under each panel open that model's graph.
+- The Netron link under each panel opens that model's graph; the file beside it downloads the model for a local viewer such as Wetron.
 - Sample images: `bus.jpg` and `zidane.jpg` come from the [ultralytics](https://github.com/ultralytics/ultralytics) repository (AGPL-3.0); the aerial one is [Buses is depot at Bishan, Singapore](https://commons.wikimedia.org/wiki/File:Buses_is_depot_at_Bishan,_Singapore_(Unsplash).jpg) from Wikimedia Commons (CC0).
 
