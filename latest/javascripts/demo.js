@@ -5,6 +5,8 @@
   // plain address and the file beside it.
   const NETRON = "https://netron.app/?url=";
   const WETRON = "https://wetron.app/";
+  // The run button is a train: it rocks under the pointer and pulls away while a model is working.
+  const TRAIN = '<svg viewBox="0 0 1024 1024" aria-hidden="true" focusable="false"><path d="M128 170.666667a42.666667 42.666667 0 1 0 0 85.333333h95.317333l15.36 122.709333q2.389333 19.114667-10.368 33.536-12.714667 14.421333-32 14.421334H128a42.666667 42.666667 0 0 0 0 85.333333h68.352a128 128 0 0 0 126.976-143.872L309.333333 256H362.666667q9.685333 0 22.357333 2.389333A277.333333 277.333333 0 0 0 661.333333 512h128c7.04 0 14.08-0.256 21.034667-0.810667Q853.333333 557.44 853.333333 576q0 26.496-18.773333 45.226667-18.730667 18.773333-45.226667 18.773333H128a42.666667 42.666667 0 1 0 0 85.333333h661.333333a149.333333 149.333333 0 0 0 149.333334-149.333333c0-44.245333-37.461333-97.877333-94.08-151.381333a338.432 338.432 0 0 0-3.370667-4.608l-1.152 0.341333C704.810667 294.613333 466.56 170.666667 362.666667 170.666667H128zm397.568 199.765333q-35.882667-35.882667-48.896-81.28l5.162667 2.176q88.106667 38.058667 177.834666 97.237333q29.141333 19.2 54.528 38.101334H661.333333q-79.530667 0-135.765333-56.234667zM128 768a42.666667 42.666667 0 1 0 0 85.333333h682.666667a42.666667 42.666667 0 1 0 0-85.333333H128z"/></svg>';
   const SAMPLES = { coco: ["bus.jpg", "zidane.jpg"], drone: ["aerial.jpg"] };
   const COLOURS = ["#e8a33d", "#3e7c8c", "#b3574d", "#6c8a3e", "#6c5ce0", "#2f8f83"];
   // One colour per block, so a reader tells the blocks apart at a glance; inside a block the top-k
@@ -22,6 +24,9 @@
       run: "重跑",
       running: "推理中",
       loading: "加载模型",
+      ready: "跑一遍",
+      empty: "请选择一个模型",
+      waiting: "点一张样例图，或上传自己的图片",
       block: "块",
       none: "这个模型没有 ES-MoE 块。",
       chosen: "选中",
@@ -42,6 +47,9 @@
       run: "Run again",
       running: "Running",
       loading: "Loading",
+      ready: "Run",
+      empty: "Pick a model",
+      waiting: "Pick a sample or upload a picture",
       block: "Block",
       none: "This model has no ES-MoE block.",
       chosen: "chosen",
@@ -75,6 +83,36 @@
   let pending = null;
   let queue = Promise.resolve();
   const sessions = new Map();
+  const providers = new Map();
+  let hardware;
+
+  // WebGPU tells a page its adapter's vendor and architecture and nothing about the backend behind it,
+  // so the label carries what can be known and stays quiet about the rest.
+  async function machine() {
+    if (hardware !== undefined) return hardware;
+    hardware = "";
+    try {
+      const adapter = navigator.gpu && (await navigator.gpu.requestAdapter());
+      const info = adapter && adapter.info;
+      hardware = [info && info.vendor, info && info.architecture].filter(Boolean).join(" ");
+    } catch {
+      hardware = "";
+    }
+    return hardware;
+  }
+
+  // WebAssembly answers for itself: SIMD by validating a module that needs it, threads by the shared
+  // memory only a cross-origin-isolated page is given.
+  function processor() {
+    const simd = WebAssembly.validate(
+      new Uint8Array([
+        0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 8, 0, 65, 0, 253, 15, 253, 98,
+        11,
+      ]),
+    );
+    const threads = typeof SharedArrayBuffer !== "undefined" && self.crossOriginIsolated;
+    return [simd && "SIMD", threads && "threads"].filter(Boolean).join(", ");
+  }
 
   // The wasm runtime is one runtime: two panels building or running sessions at the same time break
   // each other, so every model waits its turn.
@@ -105,12 +143,25 @@
     if (!sessions.has(model.id)) {
       await library();
       const url = state.base + model.file;
+      // An NPU first where the browser offers one, then the GPU, then the processor.
       const create = async () => {
-        try {
-          return await ort.InferenceSession.create(url, { executionProviders: ["webgpu", "wasm"] });
-        } catch {
-          return ort.InferenceSession.create(url, { executionProviders: ["wasm"] });
+        const tries = [];
+        if (navigator.ml) tries.push([[{ name: "webnn", deviceType: "npu" }], () => "WebNN(npu)"]);
+        if (navigator.gpu) {
+          tries.push([["webgpu"], async () => { const found = await machine(); return found ? `WebGPU(${found})` : "WebGPU"; }]);
         }
+        tries.push([["wasm"], () => (processor() ? `WASM(${processor()})` : "WASM")]);
+        let last;
+        for (const [wanted, name] of tries) {
+          try {
+            const ready = await ort.InferenceSession.create(url, { executionProviders: wanted });
+            providers.set(model.id, await name());
+            return ready;
+          } catch (error) {
+            last = error;
+          }
+        }
+        throw last;
       };
       // A failed load must not be remembered, or running again could never recover from it.
       sessions.set(
@@ -252,11 +303,34 @@
       .join("");
   }
 
-  async function run(model, panel) {
+  // Three draft lines behind the train, each on its own beat so they never move in lockstep.
+  function drafts() {
+    return [0, 1, 2]
+      .map(() => {
+        const beat = (0.9 + Math.random() * 0.9).toFixed(2);
+        const wait = (Math.random() * 0.8).toFixed(2);
+        return `<i style="--beat:${beat}s;--wait:${wait}s"></i>`;
+      })
+      .join("");
+  }
+
+  // A first run fetches about ten megabytes and starts a runtime, so the button says where it is.
+  function working(host, text) {
+    const button = host.querySelector(".es-demo__run");
+    if (!button) return;
+    button.toggleAttribute("data-busy", Boolean(text));
+    button.querySelector(".es-demo__state").textContent = text || "";
+  }
+
+  async function run(model, panel, host) {
     const status = panel.querySelector(".es-demo__cost");
+    const name = model.label[state.lang];
     status.textContent = words.loading;
+    working(host, `${words.loading} · ${name}`);
     const active = await session(model);
+    const provider = providers.get(model.id);
     status.textContent = words.running;
+    working(host, [`${words.running} · ${name}`, provider].filter(Boolean).join(" · "));
     const pad = letterbox(state.image, model.imgsz);
     const started = performance.now();
     const outputs = await active.run({ images: tensor(pad.canvas, model.imgsz) });
@@ -274,6 +348,10 @@
     const shown = host.querySelector(".es-demo__panels");
     // The chosen models share one row and the pictures shrink to fit, so they stay comparable.
     shown.style.setProperty("--panels", String(state.chosen.length || 1));
+    if (!state.chosen.length || !state.image) {
+      shown.innerHTML = `<p class="es-demo__empty">${state.chosen.length ? words.waiting : words.empty}</p>`;
+      return;
+    }
     shown.innerHTML = state.index
       .filter((model) => state.chosen.includes(model.id))
       .map((model) => {
@@ -326,7 +404,7 @@
       <div class="es-demo__row"><b>${words.pick}</b>${models}</div>
       <div class="es-demo__row"><b>${words.sample}</b>${samples}
         <label class="es-demo__upload">${words.upload}<input type="file" accept="image/*" hidden></label>
-        <button type="button" class="es-demo__run">${words.run}</button>
+        <button type="button" class="es-demo__run" title="${words.ready}" aria-label="${words.ready}"><span class="es-demo__train">${TRAIN}${drafts()}</span><span class="es-demo__spin"></span><span class="es-demo__state"></span></button>
       </div>
       <p class="es-demo__hint">${state.notice || words.hint}</p>`;
     state.notice = "";
@@ -335,6 +413,7 @@
   function show(host, source) {
     // Switching picture or models mid-queue: the older run has nothing left to draw into.
     const generation = (state.run += 1);
+    working(host, words.loading);
     const image = new Image();
     image.onerror = () => {
       state.notice = words.broken;
@@ -347,10 +426,12 @@
       panels(host);
       host.querySelectorAll(".es-demo__panel").forEach((panel) => {
         const model = state.index.find((item) => item.id === panel.dataset.model);
-        serial(() => (generation === state.run ? run(model, panel) : null)).catch((error) => {
+        serial(() => (generation === state.run ? run(model, panel, host) : null)).catch((error) => {
           panel.querySelector(".es-demo__cost").textContent = String(error).slice(0, 90);
+          working(host, "");
         });
       });
+      serial(() => working(host, ""));
     };
     image.crossOrigin = "anonymous";
     image.src = source;
@@ -379,9 +460,11 @@
         const id = event.target.value;
         const wanted = event.target.checked ? [...state.chosen, id] : state.chosen.filter((other) => other !== id);
         if (wanted.length > LIMIT) state.notice = words.limit;
-        state.chosen = wanted.length ? wanted.slice(-LIMIT) : [id];
+        state.chosen = wanted.slice(-LIMIT);
         controls(host);
-        if (state.image) show(host, state.image.src);
+        // The row always says where it stands: which model is missing, or which picture.
+        if (!state.chosen.length || !state.image) panels(host);
+        else show(host, state.image.src);
       } else if (event.target.files && event.target.files[0]) {
         const source = URL.createObjectURL(event.target.files[0]);
         state.uploads.push(source);
@@ -419,6 +502,7 @@
       .map((model) => model.id)
       .slice(0, START);
     controls(host);
+    panels(host);
     wire(host);
   }
 

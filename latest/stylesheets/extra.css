@@ -702,10 +702,150 @@ html {
   background: var(--es-route);
 }
 
+/* At rest the button is quiet and grey; the pointer gives it the project's colours, and a run gives
+   it a turning ring until the last model is done. */
 .es-demo__run {
+  gap: 0.4rem;
   font-weight: 600;
-  background: color-mix(in srgb, var(--es-signal) 26%, transparent);
-  border-color: color-mix(in srgb, var(--es-signal) 60%, transparent);
+  color: var(--md-default-fg-color--light);
+}
+
+.es-demo__run:hover {
+  color: var(--es-route);
+  background: color-mix(in srgb, var(--es-signal) 12%, transparent);
+  border-color: color-mix(in srgb, var(--es-route) 55%, transparent);
+}
+
+.es-demo__run:hover .es-demo__train i {
+  background: var(--es-signal);
+}
+
+.es-demo__run[data-busy] {
+  color: var(--es-route);
+  border-color: color-mix(in srgb, var(--es-route) 45%, transparent);
+}
+
+.es-demo__spin {
+  display: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0.14rem solid color-mix(in srgb, var(--es-route) 28%, transparent);
+  border-top-color: var(--es-signal);
+  border-radius: 50%;
+}
+
+.es-demo__run[data-busy] .es-demo__spin {
+  display: inline-block;
+  animation: es-spin 0.8s linear infinite;
+}
+
+.es-demo__run[data-busy] .es-demo__train {
+  display: none;
+}
+
+@keyframes es-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The train reads as the run control: it rocks under the pointer and pulls away while a model works. */
+.es-demo__train {
+  position: relative;
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  /* The draft lines live to the train's left; this is the room they need. */
+  margin-left: 0.27rem;
+}
+
+.es-demo__train svg {
+  width: 100%;
+  height: 100%;
+  fill: currentcolor;
+}
+
+.es-demo__train i {
+  position: absolute;
+  right: 105%;
+  height: 0.09rem;
+  background: currentcolor;
+  border-radius: 0.09rem;
+  opacity: 0;
+}
+
+.es-demo__train i:nth-child(2) {
+  top: 30%;
+  width: 0.5rem;
+}
+
+.es-demo__train i:nth-child(3) {
+  top: 52%;
+  width: 0.34rem;
+}
+
+.es-demo__train i:nth-child(4) {
+  top: 74%;
+  width: 0.42rem;
+}
+
+@keyframes es-rock {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateX(0.06rem) rotate(-3deg);
+  }
+}
+
+/* A line sweeps past in the first third of its cycle and waits out the rest, so the three of them
+   come and go at their own pace rather than in step. */
+@keyframes es-draft {
+  0% {
+    opacity: 0.7;
+    transform: translateX(0.25rem);
+  }
+
+  32% {
+    opacity: 0;
+    transform: translateX(-0.55rem);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-0.55rem);
+  }
+}
+
+.es-demo__run:hover .es-demo__train svg {
+  animation: es-rock 0.7s ease-in-out infinite;
+}
+
+.es-demo__run:hover .es-demo__train i {
+  animation: es-draft var(--beat, 0.7s) linear var(--wait, 0s) infinite;
+}
+
+.es-demo__run[data-busy] {
+  cursor: progress;
+}
+
+.es-demo__state:empty {
+  display: none;
+}
+
+.es-demo__state:not(:empty) {
+  font-weight: 400;
+  color: var(--md-default-fg-color--light);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .es-demo__run:hover .es-demo__train svg,
+  .es-demo__run:hover .es-demo__train i,
+  .es-demo__run[data-busy] .es-demo__spin {
+    animation: none;
+  }
 }
 
 .es-demo__sample {
@@ -731,6 +871,17 @@ html {
 .es-demo__none {
   font-size: 0.64rem;
   color: var(--md-default-fg-color--light);
+}
+
+/* Nothing chosen is a state of its own: the row keeps its place and says what it wants. */
+.es-demo__empty {
+  padding: 2.4rem 1rem;
+  margin: 0;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+  text-align: center;
+  border: 1px dashed var(--es-edge);
+  border-radius: 0.3rem;
 }
 
 .es-demo__panels {
