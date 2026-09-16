@@ -160,7 +160,9 @@
   async function download(url, expected, report) {
     const answer = await fetch(url);
     if (!answer.ok) throw new Error(`${answer.status} ${url}`);
-    const total = Number(answer.headers.get("content-length")) || expected || 0;
+    // The reader hands over decompressed bytes, so the index's size is the honest denominator; the
+    // header would be the gzipped length and the count would sail past it.
+    const total = expected || Number(answer.headers.get("content-length")) || 0;
     const unit = total >= 1e6 ? "MB" : "KB";
     if (!answer.body || !answer.body.getReader) return new Uint8Array(await answer.arrayBuffer());
     const reader = answer.body.getReader();
@@ -171,7 +173,7 @@
       if (finished) break;
       parts.push(value);
       done += value.length;
-      if (total) report(`${size(done, unit)}/${size(total, unit)} ${unit}`);
+      if (total) report(`${size(Math.min(done, total), unit)}/${size(total, unit)} ${unit}`);
     }
     const bytes = new Uint8Array(done);
     let at = 0;
