@@ -78,8 +78,18 @@ def entry(model_id: str, spec: dict, blocks: list, names: dict, source: Path, or
         "imgsz": spec["imgsz"],
         "classes": [names[index] for index in sorted(names)],
         "source": origin or source.name,
-        "sha256": digest(source),
-        "blocks": [{"experts": block.num_experts, "top_k": block.top_k, "kernels": kernels(block)} for block in blocks],
+        "checkpoint_sha256": digest(source),
+        "blocks": [
+            {
+                "experts": block.num_experts,
+                "top_k": block.top_k,
+                "kernels": kernels(block),
+                # Inference prunes a chosen expert whose renormalised share falls under this, the
+                # leading one excepted, so the page cannot read top-k as the answer on its own.
+                "threshold": float(block.dynamic_threshold) if block.top_k < block.num_experts else 0.0,
+            }
+            for block in blocks
+        ],
     }
 
 
@@ -126,7 +136,7 @@ def slim(target: Path) -> int:
         tensor = node.attribute[0].t
         if tensor.ByteSize() < 100_000 or not (numpy_helper.to_array(tensor) == 0).all():
             continue
-        shape = numpy_helper.from_array(np.array(tensor.dims, dtype=np.int64), f"{node.name}/shape")
+        shape = numpy_helper.from_array(np.array(tensor.dims, dtype=np.int64), f"zeros{replaced}/shape")
         model.graph.initializer.append(shape)
         zero = numpy_helper.from_array(np.zeros(1, dtype=numpy_helper.to_array(tensor).dtype))
         node.CopyFrom(helper.make_node("ConstantOfShape", [shape.name], list(node.output), name=node.name, value=zero))
@@ -145,12 +155,20 @@ def check(target: Path, images: torch.Tensor, reference: tuple, names: list[str]
     outputs = session.run(None, {"images": images.numpy()})
     for name, got, want in zip(names, outputs, reference, strict=True):
         want = want.numpy()
-        gap = float(np.abs(got - want).max())
-        # Probabilities live in [0, 1] and are compared as they are; decoded boxes carry the image's
-        # scale, so a pixel-level difference there is relative to it.
-        scale = 1.0 if name.startswith("probs") else max(1.0, float(np.abs(want).max()))
-        if gap / scale > 1e-4:
-            raise SystemExit(f"{target.name}: {name} differs from the checkpoint by {gap:.2e}")
+        # Probabilities and class scores live in [0, 1] and are compared as they are; the four box
+        # rows carry the image's scale, so a pixel-level difference there is relative to it.
+        parts = (
+            [(got, want, 1.0)]
+            if name.startswith("probs")
+            else [
+                (got[:, :4], want[:, :4], max(1.0, float(np.abs(want[:, :4]).max()))),
+                (got[:, 4:], want[:, 4:], 1.0),
+            ]
+        )
+        for mine, theirs, scale in parts:
+            gap = float(np.abs(mine - theirs).max())
+            if gap / scale > 1e-4:
+                raise SystemExit(f"{target.name}: {name} differs from the checkpoint by {gap:.2e}")
 
 
 def load(model_id: str, weights: Path) -> tuple[torch.nn.Module, str]:
@@ -195,10 +213,15 @@ def export(model_id: str, weights: Path, out: Path) -> dict:
     )
     slim(target)
     check(target, images, reference, names)
-    names: dict = net.names
-    record = entry(model_id, spec, blocks, names, weights, origin)
+    record = entry(model_id, spec, blocks, dict(net.names), weights, origin)
     parameters = sum(p.numel() for p in net.parameters())
-    return record | {"file": target.name, "bytes": target.stat().st_size, "parameters": parameters}
+    # The served file gets the plain name: a reader who checks a hash is checking what they downloaded.
+    return record | {
+        "file": target.name,
+        "bytes": target.stat().st_size,
+        "sha256": digest(target),
+        "parameters": parameters,
+    }
 
 
 def transfer(args) -> None:
@@ -232,7 +255,7 @@ def main() -> None:
     every = commands.add_parser("export", help="export the models the site serves")
     every.add_argument("--out", type=Path, required=True, help="directory the site serves as /models")
     every.add_argument("--weights", type=Path, required=True, help="directory holding the checkpoints")
-    every.add_argument("--only", nargs="*", default=list(MODELS), help="model ids to export")
+    every.add_argument("--only", nargs="+", choices=list(MODELS), default=list(MODELS), help="model ids")
     every.set_defaults(run=publish)
     args = parser.parse_args()
     args.run(args)
