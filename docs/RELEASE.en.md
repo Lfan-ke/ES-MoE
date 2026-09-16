@@ -1,15 +1,23 @@
 # Release notes
 
-Current version **1.0.1**: every experimental result on the docs site gets a figure, the comparison with upstream and the paper is checked item by item against their sources, and the package metadata and release checks are completed. The public interface is the same as in 1.0.0.
+Current version **1.1.0**: the documentation site now runs these models. Drop in a picture, put up to three models side by side on it, and read, block by block, what each expert scored and which of them the routing used. Everything runs in the reader's own browser. The public interface is the same as in 1.0.
 
-## Fixed
+## Added
+
+- **A page that runs the models.** [Try it](demo.md) carries two groups: official YOLO11n and YOLO-Master's released EsMoE-N on COCO, and the three arms of the same-configuration comparison on VisDrone. Click a sample or upload a picture — the strip keeps the last five — and each model answers with its boxes, its time and its count; a routed model adds one bar per expert, marking the ones the routing actually ran. WebGPU where the browser has it, WASM otherwise.
+- **An export script.** `scripts/demo_export.py` exports a checkpoint from the `checkpoints` branch to ONNX with every block's router probabilities as extra outputs, checks the exported file against the PyTorch forward (probabilities and class scores absolutely, boxes against their own scale), replaces the zero tensors the tracer bakes in with shape constants (about 17 MB across four blocks at 800 px), and writes `models/index.json` with the classes, the input size, each block's experts, top-k, kernels and pruning threshold, and the hashes of the checkpoint and the served file.
+- **Carrying upstream weights over.** `scripts/demo_export.py transfer` saves a fork-trained checkpoint as plain tensors inside the fork's environment, and official ultralytics rebuilds it from this package's config.
+
+## Earlier: 1.0.1
+
+### Fixed
 
 - **The delivery audit accepts only exact declarations.** `scripts/closure.py` decided whether a cell short of three seeds had been declared by substring, so a longer arm name made a shorter one count as declared; it now requires the full arm name in backticks on both language versions of the experiments page.
 - **Dataset statistics hold up.** `scripts/dataset.py` no longer stops on a box that runs slightly past the image edge, reads class names given as a list or a mapping, closes the archive when done, matches `.txt` and `.zip` in any case, and gains `--out`.
 - **Figures read only registered runs.** `scripts/charts.py` draws the same-configuration routing figure from each seed's registered B arm, so a repeat of that seed cannot add a row, and it stops when a result table it reads is missing or parses to nothing.
 - **Several things on the docs site.** The root 404 page was in English; old addresses under `latest/` redirected to the numbered copy; flowcharts stayed light in the dark scheme; charts were cramped on phones; pages of versions other than the latest gave no sign of it.
 
-## Documentation
+### Documentation
 
 - **Every result has a figure.** The 25 interactive figures on the experiments page cover the dataset, the training protocol, selection, the seven backbone generations, area buckets, the alignment arms, the same-configuration comparison, the step-for-step trace, the released model, repeated runs, routing and balancing, and training cost; the selection, results and effect-chart pages embed the matching figures. Charts follow the dark scheme and tighten on narrow screens.
 - **Against upstream and the paper.** The "ES-MoE and YOLO" page was rewritten after checking every row against YOLO-Master `acce839c` and the paper: over ten corrections, including the block-analysis count, how closely the released model was reproduced, and whether the balance term counts in validation, plus comparisons for multi-GPU balancing, the precision fallback, pruning before export and the paper's loss setup.
@@ -17,7 +25,7 @@ Current version **1.0.1**: every experimental result on the docs site gets a fig
 - **Figure data comes from scripts.** `scripts/dataset.py` counts the dataset archive into `results/dataset.json`, and `scripts/charts.py` writes the data every figure draws.
 - **Artifacts rerun on 1.0.1.** `results/verify.json` passes all ten checks, and the quick-start notebook's outputs come from a Linux run of the published 1.0.1.
 
-## Repository
+### Repository
 
 - **Package metadata.** The license is the SPDX expression `AGPL-3.0-only`, which PyPI now shows, and Python 3.10 to 3.12 classifiers are added.
 - **Release and CI checks.** A release fails when its tag disagrees with `esmoe.__version__`, and CI builds the docs site in strict mode.
