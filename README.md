@@ -12,6 +12,8 @@
   <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-006DE0?logo=materialformkdocs&logoColor=white"></a>
   <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-F9AB00?logo=googlecolab&logoColor=white"></a>
   <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
+  <a href="https://gitingest.com/Lfan-ke/ES-MoE"><img alt="GitIngest" src="https://img.shields.io/badge/Ingest-2E8B57?logo=modelcontextprotocol&logoColor=white"></a>
+  <a href="https://gitdiagram.com/Lfan-ke/ES-MoE"><img alt="GitDiagram" src="https://img.shields.io/badge/Diagram-6A5ACD?logo=diagramsdotnet&logoColor=white"></a>
   <a href="https://github.com/Lfan-ke/ES-MoE/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
 </p>
 
