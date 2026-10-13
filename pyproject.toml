@@ -78,5 +78,5 @@ target-version = "py310"
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-# A marimo cell displays its last expression; that is the cell's output, not a stray statement.
+# A marimo cell's last expression is the cell's output.
 "notebooks/*.py" = ["B018"]

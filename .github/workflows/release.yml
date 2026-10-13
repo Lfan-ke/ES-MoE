@@ -38,8 +38,6 @@ jobs:
           enable-cache: true
           python-version: "3.12"
       - name: Check the asked version names the package version
-        # Publishing one version under another's name cannot be undone, so the run says which
-        # version it means and the code has to agree.
         run: |
           version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' esmoe/__init__.py)
           asked="${{ inputs.version }}"
