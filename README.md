@@ -7,19 +7,19 @@
 <br />
 
 <p align="center">
-  <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/Python-3.10+-131A2B?logo=python&logoColor=FFD43B"></a>
-  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=FFD43B&label=PyPI&color=131A2B"></a>
-  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-131A2B?logo=materialformkdocs&logoColor=3E7C8C"></a>
-  <a href="https://github.com/Lfan-ke/ES-MoE/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-131A2B?logo=gnu&logoColor=E8A33D"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="Python" src="https://img.shields.io/badge/3.10+-3776AB?logo=python&logoColor=white"></a>
+  <a href="https://pypi.org/project/esmoe/"><img alt="PyPI" src="https://img.shields.io/pypi/v/esmoe?logo=pypi&logoColor=3776AB&label=&color=FFD43B"></a>
+  <a href="https://lfan-ke.github.io/ES-MoE/"><img alt="Docs" src="https://img.shields.io/badge/Docs-006DE0?logo=materialformkdocs&logoColor=white"></a>
+  <a href="https://lfan-ke.github.io/ES-MoE/demo/"><img alt="Demo" src="https://img.shields.io/badge/Try%20it-3E7C8C?logo=onnx&logoColor=white"></a>
+  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-F9AB00?logo=googlecolab&logoColor=white"></a>
+  <a href="https://molab.marimo.io/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.py"><img alt="molab" src="https://img.shields.io/badge/molab-3E7C8C?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAwQzUuMzczIDAgMCA1LjM3MyAwIDEyczUuMzczIDEyIDEyIDEyIDEyLTUuMzczIDEyLTEyUzE4LjYyNyAwIDEyIDB6bTAgMi40YTkuNiA5LjYgMCAxMTAgMTkuMiA5LjYgOS42IDAgMDEwLTE5LjJ6TTYuNiA4LjR2Ny4yaDIuNHYtNC4yYTEuMiAxLjIgMCAxMTIuNCAwdjQuMmgyLjR2LTQuMmExLjIgMS4yIDAgMTEyLjQgMHY0LjJoMi40di00LjVhMy4zIDMuMyAwIDAwLTUuNC0yLjU1QTMuMyAzLjMgMCAwMDYuNiA4LjR6Ii8+PC9zdmc+"></a>
+  <a href="https://github.com/Lfan-ke/ES-MoE/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/AGPL--3.0-A42E2B?logo=gnu&logoColor=white"></a>
 </p>
 
 <p align="center">
-  <a href="https://lfan-ke.github.io/ES-MoE/demo/"><img alt="Demo" src="https://img.shields.io/badge/Try%20it-E8A33D?logo=onnx&logoColor=white"></a>
-  <a href="https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb"><img alt="Colab" src="https://img.shields.io/badge/Colab-3E7C8C?logo=googlecolab&logoColor=white"></a>
-  <a href="https://molab.marimo.io/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.py"><img alt="molab" src="https://img.shields.io/badge/molab-3E7C8C?logo=marimo&logoColor=white"></a>
-  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-3E7C8C?logo=bookstack&logoColor=white"></a>
-  <a href="https://gitingest.com/Lfan-ke/ES-MoE"><img alt="Ingest" src="https://img.shields.io/badge/Ingest-3E7C8C?logo=modelcontextprotocol&logoColor=white"></a>
-  <a href="https://gitdiagram.com/Lfan-ke/ES-MoE"><img alt="Diagram" src="https://img.shields.io/badge/Diagram-3E7C8C?logo=diagramsdotnet&logoColor=white"></a>
+  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
+  <a href="https://gitingest.com/Lfan-ke/ES-MoE"><img alt="Ingest" src="https://img.shields.io/badge/Ingest-2E8B57?logo=modelcontextprotocol&logoColor=white"></a>
+  <a href="https://gitdiagram.com/Lfan-ke/ES-MoE"><img alt="Diagram" src="https://img.shields.io/badge/Diagram-6A5ACD?logo=diagramsdotnet&logoColor=white"></a>
 </p>
 
 <div align=center>
