@@ -1,9 +1,11 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: The version to publish; must match esmoe/__init__.py
+        required: true
 
 permissions:
   contents: read
@@ -35,12 +37,13 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
-      - name: Check the tag names the package version
-        # A tag that disagrees with the code would publish one version under another's name.
-        if: github.ref_type == 'tag'
+      - name: Check the asked version names the package version
+        # Publishing one version under another's name cannot be undone, so the run says which
+        # version it means and the code has to agree.
         run: |
           version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' esmoe/__init__.py)
-          [ "${GITHUB_REF_NAME#v}" = "$version" ] || { echo "tag $GITHUB_REF_NAME, esmoe $version"; exit 1; }
+          asked="${{ inputs.version }}"
+          [ "${asked#v}" = "$version" ] || { echo "asked $asked, esmoe $version"; exit 1; }
       - run: uv build
       - uses: actions/upload-artifact@v7
         with:
