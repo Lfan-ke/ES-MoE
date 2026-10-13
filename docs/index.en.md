@@ -16,7 +16,7 @@
 <div><strong>142</strong><span>full-protocol runs, 600 card-hours</span></div>
 <div><strong>7</strong><span>official generations, plus yolo-master-n</span></div>
 <div><strong>335</strong><span>tests, including numerical parity with upstream and the paper</span></div>
-<div><strong>11</strong><span>pre-registrations committed before their results</span></div>
+<div><strong>3</strong><span>seeds or more, paired seed by seed</span></div>
 </div>
 
 <div class="es-cards">

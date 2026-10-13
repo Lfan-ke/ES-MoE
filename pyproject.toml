@@ -42,6 +42,7 @@ dev = [
     "mike>=2",
     "nbclient>=0.10",
     "ipykernel>=6",
+    "marimo[recommended]>=0.17",
     "pandas>=2",
     # ultralytics pulls torchvision transitively, but only a direct entry lets the CPU index below
     # apply to it - a PyPI torchvision against a CPU torch loses torchvision::nms on Linux.
@@ -75,3 +76,7 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# A marimo cell displays its last expression; that is the cell's output, not a stray statement.
+"notebooks/*.py" = ["B018"]

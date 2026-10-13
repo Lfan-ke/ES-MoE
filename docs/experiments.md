@@ -6,7 +6,7 @@
 <div><strong>142</strong><span>次满协议训练</span></div>
 <div><strong>600</strong><span>卡时</span></div>
 <div><strong>8</strong><span>个主干</span></div>
-<div><strong>11</strong><span>次预登记</span></div>
+<div><strong>3</strong><span>每格最少的 seed 数</span></div>
 </div>
 
 ## 数据集

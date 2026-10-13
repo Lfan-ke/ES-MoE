@@ -6,7 +6,7 @@ Every experiment in the repository is on this page: the data, the protocol, the 
 <div><strong>142</strong><span>full-protocol runs</span></div>
 <div><strong>600</strong><span>card-hours</span></div>
 <div><strong>8</strong><span>backbones</span></div>
-<div><strong>11</strong><span>pre-registrations</span></div>
+<div><strong>3</strong><span>seeds per cell, at least</span></div>
 </div>
 
 ## Dataset
