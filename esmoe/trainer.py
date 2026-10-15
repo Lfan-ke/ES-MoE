@@ -7,6 +7,7 @@ auxiliary-loss weight and recipe the parent process chose.
 """
 
 import importlib
+import inspect
 import os
 
 from . import inject, upstream
@@ -52,10 +53,21 @@ def _init_for(base: type):
 
 
 def _build_optimizer_for(base: type):
-    def build_optimizer(self, model, name="auto", lr=0.001, momentum=0.9, decay=1e-5, iterations=1e5):
-        optimizer = base.build_optimizer(self, model, name, lr, momentum, decay, iterations)
+    """Wrap the base trainer's ``build_optimizer`` whatever arguments it takes.
+
+    The official trainer and YOLO-Master's differ here, and both keep adding keywords (the fork
+    now passes ``router_decay``). Forwarding the call untouched and reading `model` and `decay`
+    off the base's own signature keeps the wrapper working across those changes.
+    """
+    signature = inspect.signature(base.build_optimizer)
+
+    def build_optimizer(self, *args, **kwargs):
+        optimizer = base.build_optimizer(self, *args, **kwargs)
         if inject.armed_recipe() == "upstream":
-            self._esmoe_routers = upstream.split_routers(optimizer, model, decay)
+            bound = signature.bind(self, *args, **kwargs)
+            bound.apply_defaults()
+            model = bound.arguments.get("model", args[0] if args else None)
+            self._esmoe_routers = upstream.split_routers(optimizer, model, bound.arguments.get("decay", 1e-5))
         return optimizer
 
     return build_optimizer
