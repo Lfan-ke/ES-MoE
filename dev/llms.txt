@@ -1,0 +1,38 @@
+# ES-MoE
+
+> An expert-sparse mixture-of-experts block for convolutional models. A softmax router scores the
+> whole image, picks the top-k of several experts whose kernels differ, and mixes their outputs;
+> the router's load-balancing term reaches the optimised loss. Native implementations for PyTorch,
+> TensorFlow, Jax and Flax, a Keras 3 layer that runs on any of its backends, and a one-call
+> integration for Ultralytics YOLO.
+
+Install with `uv add esmoe` for the block, or `uv add esmoe[yolo]`, `esmoe[tensorflow]`,
+`esmoe[jax]`, `esmoe[flax]`, `esmoe[keras]` for a framework. Python 3.12 and up, AGPL-3.0-only.
+
+The arguments are the same on every framework: `kernels` gives each expert its receptive field and
+sets how many there are, `expert` gives a branch its structure, `top_k` says how many run per
+sample.
+
+## Integrations
+
+- [Torch](https://lfan-ke.github.io/ES-MoE/en/torch/): `nn.Module`, sizes itself on the first
+  forward pass, grafts into a model that already exists by submodule name.
+- [Ultralytics YOLO](https://lfan-ke.github.io/ES-MoE/en/tutorial/): `esmoe.equip("yolo11n.yaml")`
+  registers the block, grafts it into the config, renumbers layer references and wires the loss.
+- [TensorFlow](https://lfan-ke.github.io/ES-MoE/en/tensorflow/): `tf.Module`, traces into
+  `tf.function`, differentiated by a `GradientTape`.
+- [Jax](https://lfan-ke.github.io/ES-MoE/en/jax/): pure `init` and `apply` over a parameter tree,
+  under `jax.jit` and `jax.grad`.
+- [Flax](https://lfan-ke.github.io/ES-MoE/en/flax/): `nnx.Module`, and a Linen variant under
+  `esmoe.flax.linen`.
+- [Keras 3](https://lfan-ke.github.io/ES-MoE/en/keras/): `keras.layers.Layer` on tensorflow, jax or
+  torch, with the balancing term through `add_loss`.
+
+## Reference
+
+- [API](https://lfan-ke.github.io/ES-MoE/en/API/): every argument and entry point.
+- [Design](https://lfan-ke.github.io/ES-MoE/en/design/): what the block computes, how the package
+  is layered, what a new backend has to write.
+- [Experiments](https://lfan-ke.github.io/ES-MoE/en/experiments/): how the defaults were chosen,
+  with per-seed figures.
+- [Source](https://github.com/Lfan-ke/ES-MoE) · [PyPI](https://pypi.org/project/esmoe/)
