@@ -16,7 +16,7 @@ from urls import ALIAS as STUB
 
 CONFIG = Path(__file__).with_name("mkdocs.yml")
 # `models` holds the ONNX files the try-it page runs; they are deployed by hand, not by mike.
-KEEP = {".git", ".nojekyll", "index.html", "versions.json", "models"}
+KEEP = {".git", ".nojekyll", "index.html", "versions.json", "models", "llms.txt"}
 
 
 def site_url() -> str:
@@ -50,6 +50,9 @@ def main(pages: Path) -> None:
             (here / "index.html").write_text(STUB.format(target=f"{base}/latest/{'/'.join(parts)}/"), encoding="utf-8")
     # GitHub Pages answers every missing address with the root 404; latest's own resolves its assets absolutely.
     shutil.copyfile(latest / "404.html", pages / "404.html")
+    # The index an LLM reads belongs at the root, where the convention puts it.
+    if (summary := latest / "llms.txt").is_file():
+        shutil.copyfile(summary, pages / "llms.txt")
     # mike's root redirect waits a second before it leaves, and carries no icon of its own.
     entry = pages / "index.html"
     html = entry.read_text(encoding="utf-8").replace('content="1; url=', 'content="0; url=')
