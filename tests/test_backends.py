@@ -14,14 +14,15 @@ BACKEND = keras.backend.backend()
 SHAPE = (2, 16, 16, 4) if keras.config.image_data_format() == "channels_last" else (2, 4, 16, 16)
 
 
-def block() -> keras.Sequential:
-    net = keras.Sequential([ESMoE(kernels=[3, 5, 7], top_k=1)])
-    net.build((None, *SHAPE[1:]))
-    return net
-
-
 def sample() -> np.ndarray:
     return np.random.rand(*SHAPE).astype("float32")
+
+
+def block() -> keras.Sequential:
+    """A built layer: Keras creates the experts and the router on the first call."""
+    net = keras.Sequential([ESMoE(kernels=[3, 5, 7], top_k=1)])
+    net(sample())
+    return net
 
 
 @pytest.mark.skipif(BACKEND != "torch", reason="needs the torch backend")
@@ -39,21 +40,27 @@ def test_tensorflow_traces_and_differentiates_the_layer():
     import tensorflow as tf
 
     net = block()
-    traced = tf.function(lambda x: net(x))
+
+    @tf.function
+    def total(inputs):
+        # The balancing term is read inside the trace: a tensor from it cannot leave the function.
+        out = net(inputs)
+        return tf.reduce_sum(out) + tf.add_n(net.losses)
+
     with tf.GradientTape() as tape:
-        total = tf.reduce_sum(traced(tf.constant(sample()))) + collect_aux_loss(net)
-    grads = tape.gradient(total, net.trainable_variables)
-    assert grads and all(g is not None for g in grads)
+        value = total(tf.constant(sample()))
+    grads = tape.gradient(value, net.trainable_variables)
+    assert float(value) != 0.0
+    assert grads and any(g is not None for g in grads)
 
 
 @pytest.mark.skipif(BACKEND != "jax", reason="needs the jax backend")
 def test_jax_jits_and_differentiates_the_layer():
     import jax
 
-    net = block()
-    layer = net.layers[0]
-    trainable = [v.value for v in layer.trainable_variables]
-    other = [v.value for v in layer.non_trainable_variables]
+    layer = block().layers[0]
+    trainable = [variable.value for variable in layer.trainable_variables]
+    other = [variable.value for variable in layer.non_trainable_variables]
 
     def total(weights, x):
         out, _ = layer.stateless_call(weights, other, x)
