@@ -115,9 +115,9 @@ Each framework gets its own implementation, written the way that framework is wr
 `tf.Module` on TensorFlow, pure functions on Jax, a `keras.layers.Layer` on Keras 3. They read
 their arguments through the same code, so they take the same ones.
 
-    from esmoe.tensorflow import ESMoE, Sequential      # tf.Module, no Keras
-    from esmoe.jax import ESMoE                          # init/apply, no Flax
-    from esmoe.keras import ESMoE                        # keras.layers.Layer, any Keras backend
+    from esmoe.tensorflow import ESMoE, Sequential  # tf.Module, no Keras
+    from esmoe.jax import ESMoE                     # init/apply, no Flax
+    from esmoe.keras import ESMoE                   # keras.layers.Layer, any Keras backend
 
 One difference holds for all three: they evaluate every expert and weight them by the gate.
 Skipping an unrouted expert depends on the data, which a traced graph cannot express, so the
@@ -241,7 +241,7 @@ branch (Git LFS, orphan — `main` stays small), flat-named to match the run rec
 ## Linked projects
 
 - [ultralytics](https://github.com/ultralytics/ultralytics) - the official YOLO framework this plugs into.
-- [keras](https://github.com/keras-team/keras) - the multi-backend framework the second implementation runs on.
+- [keras3](https://github.com/keras-team/keras) - the multi-backend framework one of the four implementations runs on.
 - [Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master) - where ES-MoE comes from ([paper](https://arxiv.org/abs/2512.23273)).
 
 ## License

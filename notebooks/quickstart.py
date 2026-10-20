@@ -200,6 +200,57 @@ def _():
 def _(mo):
     mo.md(
         """
+        ## Native TensorFlow and native Jax
+
+        Keras is one of four implementations, not the way the other frameworks are reached:
+        TensorFlow has a `tf.Module` of its own, Jax a pair of pure functions, and neither imports
+        Keras.
+        """
+    )
+    return
+
+
+@app.cell
+def _():
+    try:
+        import tensorflow as tf
+
+        from esmoe.tensorflow import ESMoE as TFESMoE
+        from esmoe.tensorflow import Sequential as TFSequential
+        from esmoe.tensorflow import collect_aux_loss as tf_aux
+
+        tf_net = TFSequential([TFESMoE(kernels=[3, 5, 7], top_k=1)])
+        tf_out = tf_net(tf.random.normal([2, 16, 16, 8]), training=True)
+        native_tf = {"output": tuple(tf_out.shape), "router loss": round(float(tf_aux(tf_net)), 4)}
+    except ModuleNotFoundError:
+        native_tf = "tensorflow not installed here"
+
+    native_tf
+    return
+
+
+@app.cell
+def _():
+    try:
+        import jax
+
+        from esmoe.jax import ESMoE as JaxESMoE
+
+        jax_block = JaxESMoE(kernels=[3, 5, 7], top_k=1)
+        jax_params = jax_block.init(jax.random.PRNGKey(0), channels=8)
+        jax_out, jax_aux = jax_block.apply(jax_params, jax.numpy.zeros((2, 16, 16, 8)) + 0.5)
+        native_jax = {"output": tuple(jax_out.shape), "router loss": round(float(jax_aux), 4)}
+    except ModuleNotFoundError:
+        native_jax = "jax not installed here"
+
+    native_jax
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        """
         ## Where to go next
 
         - [Documentation](https://lfan-ke.github.io/ES-MoE/en/) — tutorial and API.
