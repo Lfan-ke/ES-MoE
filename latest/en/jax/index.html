@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/en/jax/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.1/en/jax/">
       
       
         <link rel="prev" href="../tensorflow/">
@@ -679,10 +679,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#as-a-pure-function" class="md-nav__link">
+  <a href="#training" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As a pure function
+        Training
       
     </span>
   </a>
@@ -690,10 +690,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#training" class="md-nav__link">
+  <a href="#the-parameter-tree" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Training
+        The parameter tree
       
     </span>
   </a>
@@ -1123,10 +1123,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#as-a-pure-function" class="md-nav__link">
+  <a href="#training" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As a pure function
+        Training
       
     </span>
   </a>
@@ -1134,10 +1134,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#training" class="md-nav__link">
+  <a href="#the-parameter-tree" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Training
+        The parameter tree
       
     </span>
   </a>
@@ -1178,43 +1178,39 @@
 <h1 id="jax-integration">Jax integration<a class="headerlink" href="#jax-integration" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>jax<span class="o">]</span>
 </code></pre></div>
-<p>On Jax the block is a Keras 3 layer. Install the extra, set <code>KERAS_BACKEND</code> to <code>jax</code>, and every
-forward pass runs on Jax.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">KERAS_BACKEND</span><span class="o">=</span>jax<span class="w"> </span>python<span class="w"> </span>train.py
-</code></pre></div>
-<h2 id="as-a-pure-function">As a pure function<a class="headerlink" href="#as-a-pure-function" title="Permanent link">&para;</a></h2>
-<p>On Jax a Keras layer presents itself as a pure function: <code>stateless_call</code> takes the variables in
-and hands the outputs and the updated variables back, so it goes straight under <code>jax.jit</code> and
-<code>jax.grad</code> with no state hidden anywhere.</p>
+<p><code>esmoe.jax.ESMoE</code> is a set of pure functions. It needs Jax and nothing else, Keras and Flax
+included. <code>init</code> builds the parameter tree, <code>apply</code> returns the output and the balancing term.
+Inputs are NHWC.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
 
-<span class="n">net</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span><span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
-<span class="n">net</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>  <span class="c1"># the first pass builds the experts and the router</span>
-<span class="n">layer</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">trainable</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">]</span>
-<span class="n">other</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">non_trainable_variables</span><span class="p">]</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="n">out</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">stateless_call</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-
-
-<span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">total</span><span class="p">)(</span><span class="n">trainable</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
-<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">total</span><span class="p">)(</span><span class="n">trainable</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+<span class="n">block</span> <span class="o">=</span> <span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">channels</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">out</span><span class="p">,</span> <span class="n">aux</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 </code></pre></div>
-<p>That is what <code>tests/test_backends.py</code> runs on the Jax leg of CI: the jitted value matches the eager
-one, and the gradients are non-zero.</p>
+<p><code>kernels</code> gives each expert a receptive field, an <code>int</code> or an <code>(h, w)</code> pair, and sets how many
+there are; <code>top_k</code> says how many run per sample.</p>
 <h2 id="training">Training<a class="headerlink" href="#training" title="Permanent link">&para;</a></h2>
-<p>Through Keras it is like any other backend: <code>compile</code>, then <code>fit</code>, with the balancing term counted
-by <code>add_loss</code>.</p>
+<p><code>apply</code> hands the balancing term back, so the gradient is yours to take:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">aux</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">task_loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">aux</span>
+
+
+<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+<p>All of it goes under <code>jax.jit</code>: no hidden state, and no registry to clear.</p>
+<h2 id="the-parameter-tree">The parameter tree<a class="headerlink" href="#the-parameter-tree" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>{"router": {"first", "first_bias", "second", "second_bias"},
+ "experts": [{"depthwise", "pointwise", "scale", "offset"}, ...],
+ "norm": {"scale", "offset"}}        # only when out_norm is on
+</code></pre></div>
+<p>Plain dictionaries and arrays, which <code>optax</code> and <code>jax.tree</code> take as they are.</p>
 <h2 id="boundaries">Boundaries<a class="headerlink" href="#boundaries" title="Permanent link">&para;</a></h2>
 <p>Every expert is evaluated. Skipping an unrouted one depends on the batch, which a jitted graph
-cannot express; the routing and the balancing term match the torch block bit for bit.</p>
-<p>Grafting takes a <code>keras.Sequential</code>; a functional model has to be rebuilt by hand.</p>
+cannot express.</p>
+<p>Normalisation uses the batch's own statistics and keeps no moving average: in a functional
+interface the state is either carried by the caller or absent, and this one makes it absent.</p>
 
 
 

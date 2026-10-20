@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/en/tensorflow/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.1/en/tensorflow/">
       
       
         <link rel="prev" href="../tutorial/">
@@ -651,10 +651,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#as-an-ordinary-layer" class="md-nav__link">
+  <a href="#the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As an ordinary layer
+        The auxiliary loss
       
     </span>
   </a>
@@ -662,10 +662,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#in-a-graph-and-under-a-tape" class="md-nav__link">
+  <a href="#into-a-model-that-already-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        In a graph, and under a tape
+        Into a model that already exists
       
     </span>
   </a>
@@ -1123,10 +1123,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#as-an-ordinary-layer" class="md-nav__link">
+  <a href="#the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
-        As an ordinary layer
+        The auxiliary loss
       
     </span>
   </a>
@@ -1134,10 +1134,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#in-a-graph-and-under-a-tape" class="md-nav__link">
+  <a href="#into-a-model-that-already-exists" class="md-nav__link">
     <span class="md-ellipsis">
       
-        In a graph, and under a tape
+        Into a model that already exists
       
     </span>
   </a>
@@ -1178,47 +1178,39 @@
 <h1 id="tensorflow-integration">TensorFlow integration<a class="headerlink" href="#tensorflow-integration" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>tensorflow<span class="o">]</span>
 </code></pre></div>
-<p>On TensorFlow the block is a Keras 3 layer. Install the extra, set <code>KERAS_BACKEND</code> to
-<code>tensorflow</code>, and <code>esmoe.keras.ESMoE</code> is an ordinary TensorFlow layer.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">KERAS_BACKEND</span><span class="o">=</span>tensorflow<span class="w"> </span>python<span class="w"> </span>train.py
-</code></pre></div>
-<h2 id="as-an-ordinary-layer">As an ordinary layer<a class="headerlink" href="#as-an-ordinary-layer" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
-
-<span class="n">net</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">"same"</span><span class="p">),</span>
-        <span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="s2">"adam"</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">"mse"</span><span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</code></pre></div>
-<p>The balancing term goes through Keras' <code>add_loss</code>, so <code>fit</code> counts it.</p>
-<h2 id="in-a-graph-and-under-a-tape">In a graph, and under a tape<a class="headerlink" href="#in-a-graph-and-under-a-tape" title="Permanent link">&para;</a></h2>
-<p>The layer traces into a <code>tf.function</code>, and gradients come from a <code>GradientTape</code> as usual. Read the
-balancing term inside the same trace: a tensor created there cannot be used outside the function.</p>
+<p><code>esmoe.tensorflow.ESMoE</code> is a <code>tf.Module</code>. It needs TensorFlow and nothing else, Keras included.
+Inputs are NHWC.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span><span class="p">,</span> <span class="n">Sequential</span>
 
-
-<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">add_n</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">losses</span><span class="p">)</span>
-
-
-<span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">total</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
-<span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">]),</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<p>That is what <code>tests/test_backends.py</code> runs on the TensorFlow leg of CI.</p>
+<p><code>kernels</code> gives each expert a receptive field, an <code>int</code> or an <code>(h, w)</code> pair, and sets how many
+there are; <code>top_k</code> says how many run per sample. Channels come from the first call.</p>
+<h2 id="the-auxiliary-loss">The auxiliary loss<a class="headerlink" href="#the-auxiliary-loss" title="Permanent link">&para;</a></h2>
+<p>The balancing term joins the total loss yourself:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">routing</span>
+
+<span class="k">with</span> <span class="n">routing</span><span class="p">(</span><span class="n">net</span><span class="p">)</span> <span class="k">as</span> <span class="n">route</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">route</span><span class="o">.</span><span class="n">loss</span><span class="p">()</span>
+<span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">)</span>
+</code></pre></div>
+<p><code>routing</code> clears the registry on the way in, so a block that did not run this step cannot report
+the step before. Without the context manager, pair <code>clear_aux_loss</code> with <code>collect_aux_loss</code>.</p>
+<h2 id="into-a-model-that-already-exists">Into a model that already exists<a class="headerlink" href="#into-a-model-that-already-exists" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">graft</span>
+
+<span class="n">graft</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="s2">"stem"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">,</span> <span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p><code>at</code> takes an attribute name, several names, or a <code>(name, module) -&gt; bool</code> test; layers inside a
+<code>Sequential</code> are addressed by position. <code>mode</code> is <code>after</code>, <code>before</code> or <code>replace</code>, applied in place.</p>
 <h2 id="boundaries">Boundaries<a class="headerlink" href="#boundaries" title="Permanent link">&para;</a></h2>
 <p>Every expert is evaluated. Skipping an unrouted one depends on the batch, which a static graph
-cannot express; the routing and the balancing term match the torch block bit for bit, and only the
-inference-time saving is torch's alone.</p>
-<p>Grafting takes a <code>keras.Sequential</code>; a functional model has to be rebuilt by hand. The channel axis
-follows <code>keras.config.image_data_format()</code>.</p>
+cannot express.</p>
+<p>Batch normalisation keeps its moving statistics in untrained variables, updated when
+<code>training=True</code>.</p>
 
 
 

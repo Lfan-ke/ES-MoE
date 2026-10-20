@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/en/RELEASE/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.1/en/RELEASE/">
       
       
         <link rel="prev" href="../JUDGMENT/">
@@ -1049,10 +1049,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#changes" class="md-nav__link">
+  <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changes
+        2.1.0
       
     </span>
   </a>
@@ -1060,6 +1060,29 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-200-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What 2.0.0 changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#moving-from-1x" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1069,12 +1092,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#before-that-1x" class="md-nav__link">
+  <a href="#1x" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before that, 1.x
+        1.x
       
     </span>
   </a>
@@ -1138,10 +1166,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#changes" class="md-nav__link">
+  <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changes
+        2.1.0
       
     </span>
   </a>
@@ -1149,6 +1177,29 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-200-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What 2.0.0 changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#moving-from-1x" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1158,12 +1209,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#before-that-1x" class="md-nav__link">
+  <a href="#1x" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before that, 1.x
+        1.x
       
     </span>
   </a>
@@ -1213,11 +1269,30 @@
 
 
 <h1 id="release-notes">Release notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
-<p>Current version <strong>2.0.0</strong>: the block is no longer tied to Ultralytics. <code>uv add esmoe</code> installs torch
+<p>Current version <strong>2.1.0</strong>: TensorFlow and Jax each have a native implementation now, rather than
+reaching them through Keras.</p>
+<h2 id="210">2.1.0<a class="headerlink" href="#210" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>A native TensorFlow backend.</strong> <code>esmoe.tensorflow.ESMoE</code> is a <code>tf.Module</code> that needs TensorFlow
+  and nothing else: its own batch normalisation keeps the moving statistics in untrained variables,
+  the auxiliary loss goes through the same weak registry the torch block uses, and <code>graft</code> places
+  blocks by attribute name or by position in a <code>Sequential</code>.</li>
+<li><strong>A native Jax backend.</strong> <code>esmoe.jax.ESMoE</code> is a set of pure functions: <code>init</code> builds the
+  parameter tree, <code>apply</code> returns the output and the balancing term, and all of it goes under
+  <code>jax.jit</code> and <code>jax.grad</code> with neither Keras nor Flax involved. The tree is plain dictionaries and
+  arrays, which <code>optax</code> takes as they are.</li>
+<li><strong>Aliases for the extras.</strong> <code>esmoe[pytorch]</code>, <code>esmoe[tf]</code>, <code>esmoe[keras3]</code> and
+  <code>esmoe[ultralytics]</code> mean <code>esmoe[torch]</code>, <code>esmoe[tensorflow]</code>, <code>esmoe[keras]</code> and <code>esmoe[yolo]</code>;
+  <code>esmoe[all]</code> is the five formal names together.</li>
+<li><strong>Two more CI legs.</strong> One for tensorflow and one for jax, each asserting that neither keras nor
+  ultralytics is installed before running that backend's own tests.</li>
+</ul>
+<h2 id="200">2.0.0<a class="headerlink" href="#200" title="Permanent link">&para;</a></h2>
+<p>The block is no longer tied to Ultralytics. <code>uv add esmoe</code> installs torch
 and nothing else, and the block drops into any torch model; the Ultralytics integration is
 <code>uv add esmoe[yolo]</code> and works as it did in 1.x. A second implementation on Keras 3 runs the same
 block on tensorflow, jax and torch.</p>
-<h2 id="changes">Changes<a class="headerlink" href="#changes" title="Permanent link">&para;</a></h2>
+<h3 id="what-200-changed">What 2.0.0 changed<a class="headerlink" href="#what-200-changed" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Torch and YOLO as equals.</strong> The core needs torch alone and an <code>nn.Sequential</code> takes the block
   as written; it sizes itself on the first forward pass, so no width has to be declared. The
@@ -1228,8 +1303,7 @@ block on tensorflow, jax and torch.</p>
   factory for all or one each. One of three, five experts, strip convolutions, repeated kernels --
   each is one line.</li>
 <li><strong>A Keras 3 backend.</strong> <code>esmoe.keras</code> holds the same block as a Keras layer, taking the same
-  arguments, with the auxiliary loss going through Keras' own <code>add_loss</code>. <code>esmoe[tensorflow]</code> and
-  <code>esmoe[jax]</code> bring the backend with them. It evaluates every expert: skipping an unrouted one
+  arguments, with the auxiliary loss going through Keras' own <code>add_loss</code>. It evaluates every expert: skipping an unrouted one
   depends on the data, which a static graph cannot express.</li>
 <li><strong>Grafting into a model that exists.</strong> <code>esmoe.graft(model, at="layer3", mode="after", ...)</code> finds
   submodules by name, by several names or by a test, and puts the block <code>after</code>, <code>before</code> or in
@@ -1243,7 +1317,7 @@ block on tensorflow, jax and torch.</p>
   all of them -- neither costs a run at construction any more. A bad value still raises.</li>
 <li><strong>Python 3.12 and up</strong>, which buys spellings like <code>type</code> aliases today.</li>
 </ul>
-<h2 id="moving-from-1x">Moving from 1.x<a class="headerlink" href="#moving-from-1x" title="Permanent link">&para;</a></h2>
+<h3 id="moving-from-1x">Moving from 1.x<a class="headerlink" href="#moving-from-1x" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1279,7 +1353,7 @@ block on tensorflow, jax and torch.</p>
 </tbody>
 </table>
 <p>Checkpoints written by 1.x still load.</p>
-<h2 id="before-that-1x">Before that, 1.x<a class="headerlink" href="#before-that-1x" title="Permanent link">&para;</a></h2>
+<h2 id="1x">1.x<a class="headerlink" href="#1x" title="Permanent link">&para;</a></h2>
 <p>1.0.0 was the first stable release: the compatibility matrix across seven backbone generations, the
 full-protocol experiments and judgment lines, and a bilingual documentation site. 1.0.1 fixed the
 closure audit's substring matching, the dataset statistics on out-of-bounds boxes, charts reading

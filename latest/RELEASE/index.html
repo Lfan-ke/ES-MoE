@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/RELEASE/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.1/RELEASE/">
       
       
         <link rel="prev" href="../JUDGMENT/">
@@ -1049,10 +1049,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#变化" class="md-nav__link">
+  <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
-        变化
+        2.1.0
       
     </span>
   </a>
@@ -1060,6 +1060,29 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#200-的变化" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0 的变化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#从-1x-过来" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1069,12 +1092,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#此前的-1x" class="md-nav__link">
+  <a href="#1x" class="md-nav__link">
     <span class="md-ellipsis">
       
-        此前的 1.x
+        1.x
       
     </span>
   </a>
@@ -1138,10 +1166,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#变化" class="md-nav__link">
+  <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
-        变化
+        2.1.0
       
     </span>
   </a>
@@ -1149,6 +1177,29 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#200" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.0.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#200-的变化" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.0.0 的变化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#从-1x-过来" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1158,12 +1209,17 @@
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#此前的-1x" class="md-nav__link">
+  <a href="#1x" class="md-nav__link">
     <span class="md-ellipsis">
       
-        此前的 1.x
+        1.x
       
     </span>
   </a>
@@ -1213,18 +1269,27 @@
 
 
 <h1 id="发布说明">发布说明<a class="headerlink" href="#发布说明" title="Permanent link">&para;</a></h1>
-<p>当前版本 <strong>2.0.0</strong>：块不再绑在 Ultralytics 上。<code>uv add esmoe</code> 只装 torch，块可以直接拼进任何 torch 模型；Ultralytics 集成变成 <code>uv add esmoe[yolo]</code>，用法与 1.x 相同。另有一份 Keras 3 实现，同一个块在 tensorflow、jax、torch 上都能跑。</p>
-<h2 id="变化">变化<a class="headerlink" href="#变化" title="Permanent link">&para;</a></h2>
+<p>当前版本 <strong>2.1.0</strong>：TensorFlow 与 Jax 各有自己的原生实现，不再借道 Keras。</p>
+<h2 id="210">2.1.0<a class="headerlink" href="#210" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>TensorFlow 原生后端。</strong> <code>esmoe.tensorflow.ESMoE</code> 是一个 <code>tf.Module</code>，只依赖 TensorFlow：自带的批归一化把滑动统计量存成不训练的变量，辅助损失走与 torch 同一套弱引用注册表，<code>graft</code> 按属性名或 <code>Sequential</code> 下标插块。</li>
+<li><strong>Jax 原生后端。</strong> <code>esmoe.jax.ESMoE</code> 是一组纯函数，<code>init</code> 建参数树、<code>apply</code> 返回输出与平衡项，整段进 <code>jax.jit</code> 与 <code>jax.grad</code>，不依赖 Keras 也不依赖 Flax。参数树是普通字典与数组，<code>optax</code> 直接能用。</li>
+<li><strong>extras 补齐别名。</strong> <code>esmoe[pytorch]</code>、<code>esmoe[tf]</code>、<code>esmoe[keras3]</code>、<code>esmoe[ultralytics]</code> 分别等同于 <code>esmoe[torch]</code>、<code>esmoe[tensorflow]</code>、<code>esmoe[keras]</code>、<code>esmoe[yolo]</code>；<code>esmoe[all]</code> 是五个正式名字的合集。</li>
+<li><strong>CI 加两条腿。</strong> tensorflow 与 jax 各跑一条，先断言 keras 与 ultralytics 都没装，再跑该后端自己的测试。</li>
+</ul>
+<h2 id="200">2.0.0<a class="headerlink" href="#200" title="Permanent link">&para;</a></h2>
+<p>块不再绑在 Ultralytics 上。<code>uv add esmoe</code> 只装 torch，块可以直接拼进任何 torch 模型；Ultralytics 集成变成 <code>uv add esmoe[yolo]</code>，用法与 1.x 相同。另有一份 Keras 3 实现，同一个块在 tensorflow、jax、torch 上都能跑。</p>
+<h3 id="200-的变化">2.0.0 的变化<a class="headerlink" href="#200-的变化" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>torch 与 YOLO 平级。</strong> 核心只依赖 torch，<code>nn.Sequential</code> 里直接放得下；通道在首次前向推断，所以不用写宽度。辅助损失用 <code>with esmoe.routing(net) as route:</code> 读，进入时清一次注册表，这一步没跑到的块不会把上一步的值报上来。</li>
 <li><strong>两个旋钮定专家。</strong> <code>kernels</code> 给每个专家一个感受野，<code>int</code> 或 <code>(h, w)</code>，给了它专家数就由它定；<code>expert</code> 给分支结构，一个工厂管全部，或逐分支一个。三选一、五个专家、条带卷积、核重复都是一行的事。</li>
-<li><strong>Keras 3 后端。</strong> <code>esmoe.keras</code> 下是同一个块的 Keras 实现，构造参数与 torch 那份完全一致，辅助损失走 Keras 自己的 <code>add_loss</code>。<code>esmoe[tensorflow]</code>、<code>esmoe[jax]</code> 连后端一起装。它每个专家都算——跳过未路由的专家取决于数据，静态图表达不了。</li>
+<li><strong>Keras 3 后端。</strong> <code>esmoe.keras</code> 下是同一个块的 Keras 实现，构造参数与 torch 那份完全一致，辅助损失走 Keras 自己的 <code>add_loss</code>。它每个专家都算——跳过未路由的专家取决于数据，静态图表达不了。</li>
 <li><strong>往现成的模型里插块。</strong> <code>esmoe.graft(model, at="layer3", mode="after", ...)</code> 按子模块名、若干名字或判断函数定位，<code>after</code> / <code>before</code> / <code>replace</code> 三种改法，原地生效。同名的 <code>esmoe.graft("yolo11n.yaml", ...)</code> 仍然改配置，按第一个参数分派。</li>
 <li><strong>配置里的块认三个名字。</strong> <code>ESMoE</code>、<code>ES_MoE</code>、<code>ES_MOE</code> 都解析到它。配置里已经写了块，<code>equip</code> 就按原样用，不再插入。</li>
 <li><strong>参数怎么写都认。</strong> 位置参数里的映射当作 <code>options</code>，<code>c</code>/<code>c1</code>/<code>ch</code>/<code>c2</code>/<code>e</code>/<code>k</code> 这些别名都认，<code>experts</code> 按值的样子归位。认不出的键警告一次后忽略，<code>top_k</code> 超过专家数时降到全选——都不再让一次训练在构造时就失败。取值不合法照旧报错。</li>
 <li><strong>Python 下限 3.12。</strong> 换来 <code>type</code> 别名这类现在就能用的写法。</li>
 </ul>
-<h2 id="从-1x-过来">从 1.x 过来<a class="headerlink" href="#从-1x-过来" title="Permanent link">&para;</a></h2>
+<h3 id="从-1x-过来">从 1.x 过来<a class="headerlink" href="#从-1x-过来" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1260,7 +1325,7 @@
 </tbody>
 </table>
 <p>1.x 存下的检查点照常加载。</p>
-<h2 id="此前的-1x">此前的 1.x<a class="headerlink" href="#此前的-1x" title="Permanent link">&para;</a></h2>
+<h2 id="1x">1.x<a class="headerlink" href="#1x" title="Permanent link">&para;</a></h2>
 <p>1.0.0 是第一个稳定版：七代主干的兼容矩阵、满协议实验与判读线、中英双语文档站。1.0.1 修了交付审计的子串匹配、数据集统计的边界框、图表只取登记过的运行，以及文档站的几处显示。1.1.0 加了文档站的<a href="../demo/">试玩</a>页——最多三个模型在同一张图上并排跑，带块的逐块列出专家分值，推理在读者自己的浏览器里完成——以及导出脚本 <code>scripts/demo_export.py</code>。</p>
 <h2 id="更早的小版本">更早的小版本<a class="headerlink" href="#更早的小版本" title="Permanent link">&para;</a></h2>
 <p>0.1 系列给出 <code>inject_esmoe</code>、<code>graft</code>、<code>attach_aux_loss</code>、<code>collect_aux_loss</code> 四个入口与三 seed 证据，随后修好不带 <code>out</code> 时的配置传递、8.4.13x 的训练日志表头，并把包从 <code>src/</code> 移到仓库根目录。</p>
