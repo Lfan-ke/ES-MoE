@@ -1,8 +1,10 @@
 # Keras3 集成
 
 ```bash
-uv add esmoe[keras]         # 或 esmoe[tensorflow] / esmoe[jax]
+uv add esmoe[keras]
 ```
+
+后端由 Keras 决定，`esmoe[tensorflow]` 与 `esmoe[jax]` 连后端一起装。
 
 块写了两份：一份原生 torch，一份 Keras 3。Keras 3 自己跑在 tensorflow、jax、torch 三种后端上，所以这一份就覆盖了另外三家。两份的构造参数完全一样，因为解析参数的代码是同一份。
 

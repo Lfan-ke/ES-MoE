@@ -1,8 +1,10 @@
 # Keras 3 integration
 
 ```bash
-uv add esmoe[keras]         # or esmoe[tensorflow] / esmoe[jax]
+uv add esmoe[keras]
 ```
+
+Keras picks the backend; `esmoe[tensorflow]` and `esmoe[jax]` bring one with them.
 
 The block is written twice: once in native torch, once in Keras 3. Keras 3 runs on tensorflow, jax
 and torch, so that second implementation covers the other three. Both take the same arguments,
