@@ -119,7 +119,7 @@ class ESMoE:
                 "second_bias": jnp.zeros((self.num_experts,)),
             },
             "experts": [
-                make[0](keys[i + 2], width, out, k)
+                make.init(keys[i + 2], width, out, k)
                 for i, (make, k) in enumerate(zip(self.expert, self.kernels, strict=True))
             ],
         }
@@ -147,7 +147,7 @@ class ESMoE:
             gate = gate * ((gate >= self.dynamic_threshold) | leader).astype(gate.dtype)
             gate = gate / jnp.maximum(gate.sum(axis=1, keepdims=True), 1e-9)
         out = sum(
-            gate[:, index].reshape(-1, 1, 1, 1) * make[1](held, x)
+            gate[:, index].reshape(-1, 1, 1, 1) * make.apply(held, x)
             for index, (make, held) in enumerate(zip(self.expert, params["experts"], strict=True))
         )
         if self.out_norm:

@@ -68,8 +68,9 @@ jobs:
           enable-cache: true
           python-version: "3.13"
       - run: uv sync --group check --no-group dev --extra ${{ matrix.backend }}
-      - name: No other framework installed
-        run: uv run --no-sync python -c "import importlib.util, sys; sys.exit(any(importlib.util.find_spec(n) for n in ('keras', 'ultralytics')))"
+      - name: The backend names no other framework
+        # tensorflow imports keras on its own; what matters is that this backend does not reach for it.
+        run: uv run --no-sync python -c "import pathlib, sys; src = ''.join(p.read_text() for p in pathlib.Path('esmoe/${{ matrix.backend }}').glob('*.py')); sys.exit('keras' in src or 'ultralytics' in src)"
       - name: Test
         run: uv run --no-sync pytest tests/test_${{ matrix.backend }}.py -q
 

@@ -27,9 +27,12 @@ def test_the_backend_table_points_here():
 
 
 def test_it_owes_nothing_to_keras():
-    import esmoe.tensorflow.block as block
+    import pathlib
 
-    assert all("keras" not in str(value) for value in vars(block).values() if isinstance(value, str))
+    import esmoe.tensorflow
+
+    source = "".join(p.read_text(encoding="utf-8") for p in pathlib.Path(esmoe.tensorflow.__path__[0]).glob("*.py"))
+    assert "keras" not in source
     assert ESMoE.__mro__[1] is tf.Module
 
 

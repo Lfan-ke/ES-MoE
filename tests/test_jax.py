@@ -27,9 +27,12 @@ def test_the_backend_table_points_here():
 
 
 def test_it_owes_nothing_to_keras_or_flax():
-    import esmoe.jax.block as block
+    import pathlib
 
-    assert "keras" not in block.__doc__.lower() and "flax" not in block.__doc__.lower()
+    import esmoe.jax
+
+    source = "".join(p.read_text(encoding="utf-8") for p in pathlib.Path(esmoe.jax.__path__[0]).glob("*.py"))
+    assert "keras" not in source and "flax" not in source
 
 
 def test_kernels_decide_the_experts():
