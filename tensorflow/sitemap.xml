@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/API/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/JUDGMENT/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/RELEASE/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/SELECTION/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/charts/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/demo/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/design/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/experiments/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/jax/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/keras/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/results/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/tensorflow/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/torch/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/tutorial/</loc></url>
+</urlset>

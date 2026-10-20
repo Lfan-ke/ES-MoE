@@ -9,8 +9,10 @@
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/demo/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/design/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/experiments/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/jax/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/keras/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/results/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/tensorflow/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/torch/</loc></url>
   <url><loc>https://lfan-ke.github.io/ES-MoE/2.0/en/tutorial/</loc></url>
 </urlset>
