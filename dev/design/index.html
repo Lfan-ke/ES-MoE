@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+        <meta name="description" content="Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser.">
       
       
       
@@ -300,7 +300,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../tutorial/" class="md-tabs__link">
+        <a href="../torch/" class="md-tabs__link">
           
   
   
@@ -530,6 +530,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../torch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 torch 模型里
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../tutorial/" class="md-nav__link">
         
   
@@ -537,7 +565,35 @@
   <span class="md-ellipsis">
     
   
-    教程
+    在 YOLO 里
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keras/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Keras 里
   
 
     
@@ -725,6 +781,17 @@
     <span class="md-ellipsis">
       
         块的内部
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#包的分层" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        包的分层
       
     </span>
   </a>
@@ -1055,6 +1122,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#包的分层" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        包的分层
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#训练与推理" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1180,6 +1258,16 @@
 </figure>
 
 <p>路由按整张图选，不按像素或区域选。每个专家是深度可分离卷积：k×k 逐通道卷积处理空间，1×1 逐点卷积混合通道。门控只在被选中的 k 个专家上非零，并重归一为和 1。</p>
+<h2 id="包的分层">包的分层<a class="headerlink" href="#包的分层" title="Permanent link">&para;</a></h2>
+<p>要兼容的东西分两类，各占一层。<strong>后端</strong>是块用哪套张量库写成，<strong>集成</strong>是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。</p>
+<div class="highlight"><pre><span></span><code>esmoe/
+  spec.py kernels.py naming.py registry.py   与后端无关的共享核
+  torch/    后端：原生 torch
+  keras/    后端：Keras 3，覆盖 tensorflow / jax / torch
+  yolo/     集成：Ultralytics
+</code></pre></div>
+<p>每个后端包导出同一组名字：<code>ESMoE</code>、<code>DWExpert</code>、<code>EXPERTS</code>、<code>BALANCES</code>、<code>blocks</code>、<code>routing</code>、<code>collect_aux_loss</code>、<code>clear_aux_loss</code>、<code>graft</code>。每个集成包导出 <code>graft</code> 与 <code>equip</code>，能把辅助损失接进该栈优化器的再导出 <code>attach_aux_loss</code>，按名字解析层的再导出 <code>register</code>。顶层直接导出 torch 后端，集成的名字按需加载，所以没装 ultralytics 时 <code>import esmoe</code> 照常。</p>
+<p>Keras 那份与 torch 那份的差别只有一处：它每个专家都算。跳过未被路由到的专家取决于当批数据，jax 与 tensorflow 的静态图表达不了；路由与平衡项两边逐位一致。</p>
 <h2 id="训练与推理">训练与推理<a class="headerlink" href="#训练与推理" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1231,7 +1319,7 @@
 <tr>
 <td style="text-align: center;">安装</td>
 <td style="text-align: center;">使用 YOLO-Master 维护的 ultralytics 分支</td>
-<td style="text-align: center;"><code>pip install esmoe</code>，装在官方 ultralytics 上</td>
+<td style="text-align: center;"><code>uv add esmoe[yolo]</code>，装在官方 ultralytics 上</td>
 </tr>
 <tr>
 <td style="text-align: center;">主干</td>
