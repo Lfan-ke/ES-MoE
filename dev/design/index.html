@@ -1343,12 +1343,15 @@
 
 <p>路由按整张图选，不按像素或区域选。每个专家是深度可分离卷积：k×k 逐通道卷积处理空间，1×1 逐点卷积混合通道。门控只在被选中的 k 个专家上非零，并重归一为和 1。</p>
 <h2 id="包的分层">包的分层<a class="headerlink" href="#包的分层" title="Permanent link">&para;</a></h2>
-<p>要兼容的东西分两类，各占一层。<strong>后端</strong>是块用哪套张量库写成，<strong>集成</strong>是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。</p>
+<p>要兼容的东西分两类，各占一层。<strong>后端</strong>是块用哪套张量库写成（Flax 自己有两套 API，<code>nnx</code> 与 <code>linen</code>，各占一个子包），<strong>集成</strong>是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。</p>
 <div class="highlight"><pre><span></span><code>esmoe/
-  spec.py kernels.py naming.py registry.py   与后端无关的共享核
-  torch/    后端：原生 torch
-  keras/    后端：Keras 3，覆盖 tensorflow / jax / torch
-  yolo/     集成：Ultralytics
+  core/         与后端无关：spec 参数解析、kernels 核尺寸、naming 命名、registry 注册表
+  torch/        后端：block experts balance loss graft
+  tensorflow/   后端：同上，写在 tf.Module 上
+  jax/          后端：纯函数 init / apply
+  flax/         后端：balance 共用，nnx/ 与 linen/ 各一套 API
+  keras/        后端：keras.layers.Layer，跨 tf / jax / torch
+  yolo/         集成：inject graft trainer upstream
 </code></pre></div>
 <p>每个后端包导出同一组名字：<code>ESMoE</code>、<code>DWExpert</code>、<code>EXPERTS</code>、<code>BALANCES</code>、<code>blocks</code>、<code>routing</code>、<code>collect_aux_loss</code>、<code>clear_aux_loss</code>、<code>graft</code>。每个集成包导出 <code>graft</code> 与 <code>equip</code>，能把辅助损失接进该栈优化器的再导出 <code>attach_aux_loss</code>，按名字解析层的再导出 <code>register</code>。顶层直接导出 torch 后端，集成的名字按需加载，所以没装 ultralytics 时 <code>import esmoe</code> 照常。</p>
 <p>Keras 那份与 torch 那份的差别只有一处：它每个专家都算。跳过未被路由到的专家取决于当批数据，jax 与 tensorflow 的静态图表达不了；路由与平衡项两边逐位一致。</p>

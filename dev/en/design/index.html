@@ -1344,15 +1344,18 @@
 <p>The router picks per image, not per pixel or region. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The gate is non-zero only on the k chosen experts and renormalised to sum to one.</p>
 <h2 id="how-the-package-is-layered">How the package is layered<a class="headerlink" href="#how-the-package-is-layered" title="Permanent link">&para;</a></h2>
 <p>What has to be compatible falls into two kinds, each with a layer. A <strong>backend</strong> is the tensor
-library the block is written in; an <strong>integration</strong> is a training stack built on one of them.
+library the block is written in (Flax ships two APIs, <code>nnx</code> and <code>linen</code>, one subpackage each); an <strong>integration</strong> is a training stack built on one of them.
 Between them sits a backend-free core: how the arguments are spelled, how kernels are computed,
 how a config names a callable, where the auxiliary loss is left. All of it is plain Python, so a
 new backend adds only the tensor work.</p>
 <div class="highlight"><pre><span></span><code>esmoe/
-  spec.py kernels.py naming.py registry.py   the backend-free core
-  torch/    backend: native torch
-  keras/    backend: Keras 3, covering tensorflow / jax / torch
-  yolo/     integration: Ultralytics
+  core/         backend-free: spec, kernels, naming, registry
+  torch/        backend: block experts balance loss graft
+  tensorflow/   backend: the same, on tf.Module
+  jax/          backend: pure init / apply
+  flax/         backend: a shared balance, with nnx/ and linen/ for the two APIs
+  keras/        backend: keras.layers.Layer, across tf / jax / torch
+  yolo/         integration: inject graft trainer upstream
 </code></pre></div>
 <p>Every backend package exports the same names: <code>ESMoE</code>, <code>DWExpert</code>, <code>EXPERTS</code>, <code>BALANCES</code>,
 <code>blocks</code>, <code>routing</code>, <code>collect_aux_loss</code>, <code>clear_aux_loss</code>, <code>graft</code>. Every integration exports

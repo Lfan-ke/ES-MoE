@@ -707,10 +707,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#nnx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nnx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
         The auxiliary loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        linen
       
     </span>
   </a>
@@ -1151,10 +1173,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#nnx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nnx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-auxiliary-loss" class="md-nav__link">
     <span class="md-ellipsis">
       
         The auxiliary loss
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        linen
       
     </span>
   </a>
@@ -1206,8 +1250,10 @@
 <h1 id="flax-integration">Flax integration<a class="headerlink" href="#flax-integration" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>flax<span class="o">]</span>
 </code></pre></div>
-<p><code>esmoe.flax.ESMoE</code> is an <code>nnx.Module</code>, written the way Flax is written now: state lives on the
-object, and <code>nnx.split</code> hands it to a pure function when one is wanted. Inputs are NHWC.</p>
+<p>Flax ships two APIs side by side and both are supported: <code>esmoe.flax</code> is <code>nnx</code>, the one Flax
+recommends now, and <code>esmoe.flax.linen</code> is Linen. Inputs are NHWC either way.</p>
+<h2 id="nnx">nnx<a class="headerlink" href="#nnx" title="Permanent link">&para;</a></h2>
+<p>State lives on the object, and <code>nnx.split</code> hands it to a pure function when one is wanted.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">nnx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
 
@@ -1233,6 +1279,20 @@ parameters at construction, so there is no first forward pass to infer a width f
     <span class="k">return</span> <span class="n">nnx</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">objective</span><span class="p">)(</span><span class="n">net</span><span class="p">)</span>
 </code></pre></div>
 <p><code>nnx.jit</code> and <code>nnx.grad</code> work as they are, with nnx threading the state through the transform.</p>
+<h2 id="linen">linen<a class="headerlink" href="#linen" title="Permanent link">&para;</a></h2>
+<p>Parameters live outside the module: declare once, run with <code>apply</code>, and the balancing term is sown
+into <code>intermediates</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">linen</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.flax.linen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span><span class="p">,</span> <span class="n">collect_aux_loss</span>
+
+<span class="n">block</span> <span class="o">=</span> <span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">variables</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">out</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mutable</span><span class="o">=</span><span class="p">[</span><span class="s2">"intermediates"</span><span class="p">,</span> <span class="s2">"batch_stats"</span><span class="p">])</span>
+<span class="n">aux</span> <span class="o">=</span> <span class="n">collect_aux_loss</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+</code></pre></div>
+<p>Linen takes no <code>**kwargs</code>, so settings arrive in <code>options</code>:
+<code>ESMoE(kernels=[3, 5], options={"out_norm": True})</code>. Channels come from the input <code>init</code> sees, so
+they need not be stated.</p>
 <h2 id="against-the-other-two-ways-onto-jax">Against the other two ways onto jax<a class="headerlink" href="#against-the-other-two-ways-onto-jax" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1246,7 +1306,12 @@ parameters at construction, so there is no first forward pass to infer a width f
 <tr>
 <td style="text-align: center;"><code>esmoe.flax</code></td>
 <td style="text-align: center;"><code>nnx.Module</code>, state on the object</td>
-<td style="text-align: center;">the project already uses Flax</td>
+<td style="text-align: center;">the project uses Flax's current API</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>esmoe.flax.linen</code></td>
+<td style="text-align: center;"><code>linen.Module</code>, parameters outside</td>
+<td style="text-align: center;">the project uses Linen</td>
 </tr>
 <tr>
 <td style="text-align: center;"><code>esmoe.jax</code></td>
