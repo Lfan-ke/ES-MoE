@@ -1,7 +1,18 @@
 # Release notes
 
-Current version **2.1.0**: TensorFlow and Jax each have a native implementation now, rather than
-reaching them through Keras.
+Current version **2.2.0**: a Flax backend written against the current `flax.nnx`, which gives jax
+three routes.
+
+## 2.2.0
+
+- **A Flax backend.** `esmoe.flax.ESMoE` is an `nnx.Module`: parameters are built at construction,
+  the balancing term lives in an `nnx.Intermediate` variable, and `nnx.jit` and `nnx.grad` work as
+  they are.
+- **Three routes onto jax**, chosen by the project: `esmoe.flax` when it already uses Flax,
+  `esmoe.jax` when the parameter tree should stay yours, `esmoe.keras` with `KERAS_BACKEND=jax`
+  when it uses Keras across backends. The routing, the balancing term and the arguments are the
+  same on all three.
+- `esmoe[flax]` installs it, with `esmoe[nnx]` as the alias. CI gains a flax leg.
 
 ## 2.1.0
 

@@ -200,11 +200,11 @@ def _():
 def _(mo):
     mo.md(
         """
-        ## Native TensorFlow and native Jax
+        ## Native TensorFlow, Jax and Flax
 
-        Keras is one of four implementations, not the way the other frameworks are reached:
-        TensorFlow has a `tf.Module` of its own, Jax a pair of pure functions, and neither imports
-        Keras.
+        Keras is one of five implementations, not the way the other frameworks are reached:
+        TensorFlow has a `tf.Module` of its own, Jax a pair of pure functions, Flax an
+        `nnx.Module`, and none of them imports Keras.
         """
     )
     return
@@ -238,12 +238,31 @@ def _():
 
         jax_block = JaxESMoE(kernels=[3, 5, 7], top_k=1)
         jax_params = jax_block.init(jax.random.PRNGKey(0), channels=8)
-        jax_out, jax_aux = jax_block.apply(jax_params, jax.numpy.zeros((2, 16, 16, 8)) + 0.5)
+        jax_batch = jax.numpy.zeros((2, 16, 16, 8)) + 0.5
+        jax_out, jax_aux = jax_block.apply(jax_params, jax_batch)
         native_jax = {"output": tuple(jax_out.shape), "router loss": round(float(jax_aux), 4)}
     except ModuleNotFoundError:
         native_jax = "jax not installed here"
 
     native_jax
+    return
+
+
+@app.cell
+def _():
+    try:
+        import numpy
+        from flax import nnx
+
+        from esmoe.flax import ESMoE as FlaxESMoE
+
+        flax_block = FlaxESMoE(kernels=[3, 5, 7], top_k=1, channels=8, rngs=nnx.Rngs(0))
+        flax_out = flax_block(numpy.full((2, 16, 16, 8), 0.5, dtype="float32"))
+        native_flax = {"output": tuple(flax_out.shape), "router loss": round(float(flax_block.aux[...]), 4)}
+    except ModuleNotFoundError:
+        native_flax = "flax not installed here"
+
+    native_flax
     return
 
 

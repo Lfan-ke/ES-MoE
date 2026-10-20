@@ -39,8 +39,8 @@
     uv add esmoe            # the block, for any torch model
     uv add esmoe[yolo]      # ... and the Ultralytics integration
 
-`esmoe[ultralytics]` is that extra under its other name, `esmoe[keras]` adds the Keras 3 backend,
-and `esmoe[tensorflow]` or `esmoe[jax]` bring Keras with that backend behind it. The distribution,
+`esmoe[ultralytics]` is that extra under its other name, and `esmoe[tensorflow]`, `esmoe[jax]`,
+`esmoe[flax]` and `esmoe[keras]` each bring one backend. The distribution,
 the import and the command line are all `esmoe`; the project is written ES-MoE in prose.
 
 ## In a torch model
@@ -112,18 +112,19 @@ beforehand.
 ## On tensorflow, jax and keras
 
 Each framework gets its own implementation, written the way that framework is written: a
-`tf.Module` on TensorFlow, pure functions on Jax, a `keras.layers.Layer` on Keras 3. They read
-their arguments through the same code, so they take the same ones.
+`tf.Module` on TensorFlow, pure functions on Jax, an `nnx.Module` on Flax, a
+`keras.layers.Layer` on Keras 3. They read their arguments through the same code, so they take
+the same ones.
 
     from esmoe.tensorflow import ESMoE, Sequential  # tf.Module, no Keras
     from esmoe.jax import ESMoE                     # init/apply, no Flax
+    from esmoe.flax import ESMoE                    # nnx.Module, the current Flax API
     from esmoe.keras import ESMoE                   # keras.layers.Layer, any Keras backend
 
 One difference holds for all three: they evaluate every expert and weight them by the gate.
 Skipping an unrouted expert depends on the data, which a traced graph cannot express, so the
 inference-time saving is torch's alone. The routing and the balancing term are the same
-everywhere. `esmoe.backend(name)` returns the package for `torch`, `tensorflow`, `jax` or
-`keras`.
+everywhere. `esmoe.backend(name)` returns the package for `torch`, `tensorflow`, `jax`, `flax` or `keras`.
 
 ## Extend
 
@@ -146,6 +147,7 @@ block is holding.
 | torch | `nn.Module` | a weak registry | any `nn.Module` | every CI leg, and one with ultralytics absent |
 | tensorflow | `tf.Module` | a weak registry | attribute or position | a leg with keras and ultralytics absent |
 | jax | pure functions | returned by `apply` | not applicable | a leg with keras and ultralytics absent |
+| flax | `nnx.Module` | an `nnx.Intermediate` | `nnx.Sequential` | a leg with keras and ultralytics absent |
 | Keras 3 | `keras.layers.Layer` | `add_loss` | `Sequential` | one leg per Keras backend: tensorflow, jax, torch |
 
 The Ultralytics integration runs on the torch block:
@@ -241,7 +243,8 @@ branch (Git LFS, orphan — `main` stays small), flat-named to match the run rec
 ## Linked projects
 
 - [ultralytics](https://github.com/ultralytics/ultralytics) - the official YOLO framework this plugs into.
-- [keras3](https://github.com/keras-team/keras) - the multi-backend framework one of the four implementations runs on.
+- [flax](https://github.com/google/flax) - the Jax library one of the implementations is written against.
+- [keras3](https://github.com/keras-team/keras) - the multi-backend framework one of the implementations runs on.
 - [Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master) - where ES-MoE comes from ([paper](https://arxiv.org/abs/2512.23273)).
 
 ## License

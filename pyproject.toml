@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmoe"
-version = "2.1.0"
+version = "2.2.0"
 description = "Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [{ name = "Leo Cheng" }]
-keywords = ["torch", "keras", "yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
+keywords = ["torch", "tensorflow", "jax", "flax", "keras", "yolo", "ultralytics", "mixture-of-experts", "moe"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
@@ -26,12 +26,14 @@ dependencies = ["torch>=2.0"]
 torch = ["torch>=2.0"]
 tensorflow = ["tensorflow>=2.17"]
 jax = ["jax>=0.4.35"]
+flax = ["flax>=0.10", "jax>=0.4.35"]
 keras = ["keras>=3.5"]
 yolo = ["ultralytics>=8.3"]
-all = ["esmoe[torch]", "esmoe[tensorflow]", "esmoe[jax]", "esmoe[keras]", "esmoe[yolo]"]
+all = ["esmoe[torch]", "esmoe[tensorflow]", "esmoe[jax]", "esmoe[flax]", "esmoe[keras]", "esmoe[yolo]"]
 pytorch = ["esmoe[torch]"]
 tf = ["esmoe[tensorflow]"]
 keras3 = ["esmoe[keras]"]
+nnx = ["esmoe[flax]"]
 ultralytics = ["esmoe[yolo]"]
 
 [project.scripts]

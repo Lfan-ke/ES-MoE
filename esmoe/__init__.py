@@ -14,9 +14,9 @@ from .spec import *
 from .torch import *
 from .torch.graft import graft as __into_model
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
-BACKENDS = {"torch": "torch", "tensorflow": "tensorflow", "jax": "jax", "keras": "keras"}
+BACKENDS = {"torch": "torch", "tensorflow": "tensorflow", "jax": "jax", "flax": "flax", "keras": "keras"}
 INTEGRATIONS = {"yolo": "yolo", "ultralytics": "yolo"}
 
 # Reached through __getattr__ rather than imported, so a torch-only install never loads them.

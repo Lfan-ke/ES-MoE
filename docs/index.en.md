@@ -15,7 +15,7 @@
 <div class="es-stats">
 <div><strong>142</strong><span>full-protocol runs, 600 card-hours</span></div>
 <div><strong>7</strong><span>official generations, plus yolo-master-n</span></div>
-<div><strong>417</strong><span>tests, including numerical parity with upstream and the paper</span></div>
+<div><strong>439</strong><span>tests, including numerical parity with upstream and the paper</span></div>
 <div><strong>3</strong><span>seeds or more, paired seed by seed</span></div>
 </div>
 
@@ -23,7 +23,8 @@
 <a href="torch/"><strong>Torch</strong><span>the two knobs, the auxiliary loss, grafting into a model that exists</span></a>
 <a href="tutorial/"><strong>Ultralytics YOLO</strong><span>install, the three calls, grafting and renumbering, a comparison you can defend</span></a>
 <a href="tensorflow/"><strong>TensorFlow</strong><span>inside tf.function, differentiated by a GradientTape</span></a>
-<a href="jax/"><strong>Jax</strong><span>stateless_call under jax.jit and jax.grad</span></a>
+<a href="jax/"><strong>Jax</strong><span>pure init and apply, under jax.jit and jax.grad</span></a>
+<a href="flax/"><strong>Flax</strong><span>an nnx.Module, under nnx.jit and nnx.grad</span></a>
 <a href="keras/"><strong>Keras 3</strong><span>one implementation on tensorflow, jax and torch</span></a>
 <a href="API/"><strong>API</strong><span>every argument of equip, graft, attach_aux_loss and ESMoE</span></a>
 <a href="design/"><strong>ES-MoE and YOLO</strong><span>what the block adds, how it computes in training and inference, and YOLO-Master item by item</span></a>
@@ -39,7 +40,7 @@
     uv add esmoe            # the block, for any torch model
     uv add esmoe[yolo]      # ... and the Ultralytics integration
 
-`esmoe[ultralytics]` is that extra under its other name, `esmoe[keras]` adds Keras 3, and `esmoe[tensorflow]` or `esmoe[jax]` bring the backend with it. The distribution, the import and the command line are all `esmoe`.
+`esmoe[ultralytics]` is that extra under its other name; `esmoe[tensorflow]`, `esmoe[jax]`, `esmoe[flax]` and `esmoe[keras]` each bring one backend. The distribution, the import and the command line are all `esmoe`.
 
 ## Use
 

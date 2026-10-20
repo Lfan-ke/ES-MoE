@@ -4,7 +4,7 @@
 uv add esmoe[jax]
 ```
 
-`esmoe.jax.ESMoE` 是一组纯函数，只依赖 Jax，不经 Keras 也不经 Flax。`init` 建参数树，`apply` 返回输出与平衡项。输入按 NHWC。
+`esmoe.jax.ESMoE` 是一组纯函数，只依赖 Jax。项目本来就用 Flax 的话看 [Flax 集成](flax.md)。`init` 建参数树，`apply` 返回输出与平衡项。输入按 NHWC。
 
 ```python
 import jax

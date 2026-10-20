@@ -4,8 +4,8 @@
 uv add esmoe[jax]
 ```
 
-`esmoe.jax.ESMoE` is a set of pure functions. It needs Jax and nothing else, Keras and Flax
-included. `init` builds the parameter tree, `apply` returns the output and the balancing term.
+`esmoe.jax.ESMoE` is a set of pure functions, needing Jax and nothing else. A project already on
+Flax wants [Flax integration](flax.md) instead. `init` builds the parameter tree, `apply` returns the output and the balancing term.
 Inputs are NHWC.
 
 ```python

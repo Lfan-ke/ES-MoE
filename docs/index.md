@@ -15,7 +15,7 @@
 <div class="es-stats">
 <div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
 <div><strong>7</strong><span>代官方主干，另有 yolo-master-n</span></div>
-<div><strong>417</strong><span>项测试，含与上游、论文的数值对照</span></div>
+<div><strong>439</strong><span>项测试，含与上游、论文的数值对照</span></div>
 <div><strong>3</strong><span>个 seed 起的逐 seed 配对</span></div>
 </div>
 
@@ -23,7 +23,8 @@
 <a href="torch/"><strong>Torch 集成</strong><span>两个旋钮、辅助损失、往现成模型里插块</span></a>
 <a href="tutorial/"><strong>YOLO 集成</strong><span>安装、三个调用、嫁接与重编号、对照实验怎么做</span></a>
 <a href="tensorflow/"><strong>TensorFlow 集成</strong><span>进 tf.function、用 GradientTape 求梯度</span></a>
-<a href="jax/"><strong>Jax 集成</strong><span>stateless_call 配 jax.jit 与 jax.grad</span></a>
+<a href="jax/"><strong>Jax 集成</strong><span>init 与 apply 的纯函数，配 jax.jit 与 jax.grad</span></a>
+<a href="flax/"><strong>Flax 集成</strong><span>nnx.Module，配 nnx.jit 与 nnx.grad</span></a>
 <a href="keras/"><strong>Keras3 集成</strong><span>一份实现跑在 tensorflow、jax、torch 上</span></a>
 <a href="API/"><strong>API</strong><span>equip、graft、attach_aux_loss 与 ESMoE 的全部参数</span></a>
 <a href="design/"><strong>ES-MoE 与 YOLO</strong><span>块比普通 YOLO 多了什么，训练与推理怎么算，与 YOLO-Master 逐项对照</span></a>
@@ -39,7 +40,7 @@
     uv add esmoe            # 块本身，只依赖 torch
     uv add esmoe[yolo]      # 再加 Ultralytics 集成
 
-`esmoe[ultralytics]` 是同一个 extra 的另一个名字，`esmoe[keras]` 加 Keras 3，`esmoe[tensorflow]` 与 `esmoe[jax]` 连后端一起装。分发名、导入名与命令行名都是 `esmoe`。
+`esmoe[ultralytics]` 是同一个 extra 的另一个名字；`esmoe[tensorflow]`、`esmoe[jax]`、`esmoe[flax]`、`esmoe[keras]` 各带一个后端。分发名、导入名与命令行名都是 `esmoe`。
 
 ## 使用
 

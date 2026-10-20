@@ -71,6 +71,7 @@ plugins:
             YOLO 集成: Ultralytics YOLO
             TensorFlow 集成: TensorFlow
             Jax 集成: Jax
+            Flax 集成: Flax
             Keras3 集成: Keras 3
             选型: Selection
             实验结果: Results
@@ -90,6 +91,7 @@ nav:
       - YOLO 集成: tutorial.md
       - TensorFlow 集成: tensorflow.md
       - Jax 集成: jax.md
+      - Flax 集成: flax.md
       - Keras3 集成: keras.md
       - API: API.md
   - 设计:

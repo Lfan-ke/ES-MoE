@@ -1,6 +1,12 @@
 # 发布说明
 
-当前版本 **2.1.0**：TensorFlow 与 Jax 各有自己的原生实现，不再借道 Keras。
+当前版本 **2.2.0**：Flax 后端按现行的 `flax.nnx` 写成，jax 由此有三条路。
+
+## 2.2.0
+
+- **Flax 后端。** `esmoe.flax.ESMoE` 是一个 `nnx.Module`，参数在构造时建好，平衡项存在 `nnx.Intermediate` 变量上，`nnx.jit` 与 `nnx.grad` 直接可用。
+- **jax 现在有三条路**，按项目选：本来就用 Flax 选 `esmoe.flax`；不想引入 Flax、自己管参数树选 `esmoe.jax`；用 Keras 跨后端选 `esmoe.keras` 配 `KERAS_BACKEND=jax`。三条路的路由、平衡项与构造参数一致。
+- `esmoe[flax]` 装它，`esmoe[nnx]` 是同一个 extra 的别名。CI 多一条 flax 腿。
 
 ## 2.1.0
 
