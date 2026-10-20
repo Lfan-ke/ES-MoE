@@ -109,29 +109,25 @@ class ESMoE(nn.Module):
         if self.channels is None:
             self.build(x.shape[1])
             self.to(x.device)  # never x.dtype: autocast feeds half here, parameters must stay fp32
-        # Clamped before the softmax, as upstream does: a router logit that runs away under mixed
-        # precision reaches softmax as inf and takes the whole gate to NaN.
+        # Unclamped, a runaway logit reaches softmax as inf under mixed precision and NaNs the gate.
         probs = F.softmax(self.router(x).float().clamp(-30.0, 30.0), dim=1).type_as(x)
         weights, chosen = probs.topk(self.top_k, dim=1)
         gate = torch.zeros_like(probs).scatter(1, chosen, weights)
         gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         if self.dynamic_threshold and not self.training and self.sparse_inference and self.top_k < self.num_experts:
-            # The share read here is the weight after renormalisation, never the raw probability:
-            # read before, 0.4 would drop the runner-up of a top-2 on nearly every input.
+            # The share is the weight after renormalisation; read before, 0.4 drops most runners-up.
             leader = F.one_hot(chosen[:, 0], probs.shape[1]).to(torch.bool)
             gate = gate * ((gate >= self.dynamic_threshold) | leader)
             gate = gate / gate.sum(dim=1, keepdim=True).clamp_min(1e-9)
         out = x.new_zeros(x.shape[0], self.out_channels or x.shape[1], *x.shape[2:])
-        # Skipping an unrouted expert depends on the data, so a tracer would bake this batch's
-        # routing into the exported graph; under tracing every expert runs.
+        # Skipping depends on the data, which a tracer would bake into the exported graph.
         every = (
             torch.jit.is_tracing()
             or torch.onnx.is_in_onnx_export()
             or (self.dense_training and self.training)
             or not (self.sparse_inference or self.training)
         )
-        # DDP needs every parameter in the graph on every rank, and ultralytics drops
-        # find_unused_parameters once compile is on; an unrouted expert joins at zero instead.
+        # DDP needs every parameter on every rank once find_unused_parameters is off.
         joined = self.training and not every and dist.is_available() and dist.is_initialized()
         for index, expert in enumerate(self.experts):
             share = gate[:, index].view(-1, 1, 1, 1)

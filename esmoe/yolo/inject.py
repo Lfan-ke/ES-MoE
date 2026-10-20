@@ -55,10 +55,10 @@ def equip(base: str = "yolov8n.yaml", *, weight: float = 0.01, recipe: str = "es
 
     from ultralytics import YOLO
 
-    from .graft import graft
+    from .graft import OPTIONS, graft
 
     register()
-    wanted = inspect.signature(graft).parameters
+    wanted = set(inspect.signature(graft).parameters) | OPTIONS
     settings = {key: value for key, value in kwargs.items() if key in wanted}
     source = str(base)
     if settings.get("at", "backbone_end") is not None and not holds_block(base):
@@ -84,8 +84,7 @@ def attach_aux_loss(model, weight: float = 0.01, recipe: str = "esmoe"):
     __patch(__owner(type(core)))
     core._esmoe_aux_weight, core._esmoe_recipe = float(weight), recipe
     if hasattr(model, "add_callback"):
-        # The trainer rebuilds the model from its config, so the settings have to reach the
-        # instance it actually trains, not only the one handed to us here.
+        # The trainer rebuilds the model, so the settings must reach the instance it trains.
         for event, callback in trainer_callbacks(weight, recipe):
             model.add_callback(event, callback)
     if hasattr(model, "_smart_load"):
@@ -151,8 +150,7 @@ def __route_trainer(model) -> None:
 
 
 def __core(model) -> nn.Module:
-    # A YOLO wrapper hides the task model under .model, but a bare task model's .model is its layer
-    # Sequential; pick whichever level owns loss().
+    # A bare task model's .model is its layer Sequential, so pick whichever level owns loss().
     for candidate in (getattr(model, "model", None), model):
         if callable(getattr(candidate, "loss", None)):
             return candidate
@@ -187,13 +185,11 @@ def __loss_with_aux(self, batch, preds=None):
     if not torch.isfinite(aux):
         aux = torch.zeros_like(aux)
     if (getattr(self, "_esmoe_recipe", None) or __RECIPE) == "upstream":
-        # Upstream adds the term to the native loss as it comes, a vector already scaled by the
-        # batch, so every entry carries it once. Outside training it adds nothing.
+        # Upstream adds the term to a loss vector already scaled by the batch, once per entry.
         aux = upstream.normalise(self, aux, weight) if self.training else torch.zeros_like(aux)
         total = total + aux
     else:
-        # Task criteria scale the optimised loss by batch size but log the per-image value, so the
-        # aux term follows both conventions rather than showing up 'batch' times too large.
+        # Task criteria optimise a batch-scaled loss but log the per-image value; follow both.
         aux = aux * weight
         scaled = (aux * batch["img"].shape[0]).view(1)
         total = total + scaled.squeeze() if total.ndim == 0 else torch.cat([total.reshape(-1), scaled])
@@ -221,9 +217,7 @@ def arm_trainer(weight: float, recipe: str = "esmoe") -> Callable:
                 "recipe 'upstream' sets the router learning rate in build_optimizer, which only the trainer "
                 "attach_aux_loss routes model.train() to overrides; this trainer never split the routers"
             )
-        # Older releases fix the loss names before training and need the extra one appended; newer
-        # ones derive them from the loss dict, and appending to an empty tuple would leave the
-        # progress header claiming the run has a single loss term.
+        # Older releases fix the loss names up front; newer ones derive them from the loss dict.
         names = tuple(getattr(trainer, "loss_names", ()) or ())
         if names and AUX_NAME not in names:
             trainer.loss_names = (*names, AUX_NAME)
@@ -234,7 +228,7 @@ def arm_trainer(weight: float, recipe: str = "esmoe") -> Callable:
 def warm_experts(trainer) -> None:
     held = getattr(trainer, "_esmoe_experts", None)
     if held is None:
-        # Collected once, from what the trainer left trainable, so a layer the run froze stays frozen.
+        # Collected once, so a layer the run froze stays frozen.
         held = trainer._esmoe_experts = upstream.experts(__unwrap(trainer.model))
     upstream.warm(held, trainer.epoch)
 

@@ -90,8 +90,7 @@ class ESMoE(layers.Layer):
         super().build(input_shape)
 
     def call(self, x, training=False):
-        # Clamped before the softmax: a router logit that runs away under mixed precision reaches
-        # softmax as inf and takes the whole gate to NaN.
+        # Unclamped, a runaway logit reaches softmax as inf under mixed precision and NaNs the gate.
         logits = ops.clip(ops.cast(self.router(x, training=training), "float32"), -30.0, 30.0)
         probs = ops.cast(ops.softmax(logits, axis=-1), x.dtype)
         weights, chosen = ops.top_k(probs, self.top_k)

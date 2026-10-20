@@ -71,7 +71,7 @@ jobs:
           python-version: "3.13"
       - run: uv sync --group check --no-group dev --extra keras --extra ${{ matrix.backend }}
       - name: Test
-        run: uv run --no-sync pytest tests/test_keras.py -q
+        run: uv run --no-sync pytest tests/test_keras.py tests/test_backends.py -q
 
   verify:
     runs-on: ubuntu-26.04

@@ -4,11 +4,14 @@ import copy
 from collections.abc import Iterable, Sequence
 
 from ..kernels import Kernel
+from ..spec import SETTINGS
 
 type Spot = int | str | Iterable[int]
 
-# Every backbone downsamples, but not with a stride-2 Conv everywhere: v9 uses AConv/ADown and v10
-# uses SCDown. Naming them keeps the stage split right across generations.
+# Block settings a grafted layer can carry, beyond the arguments graft names itself.
+OPTIONS = frozenset(SETTINGS) | {"expert", "reduction", "max_kernel"}
+
+# v9 downsamples with AConv/ADown and v10 with SCDown, not with a stride-2 Conv.
 DOWNSAMPLERS = {"AConv", "ADown", "SCDown"}
 
 
@@ -92,13 +95,11 @@ def graft(
     from ultralytics.nn.tasks import yaml_model_load
 
     from ..naming import reference
-    from ..spec import SETTINGS
     from ..torch.balance import BALANCES
     from ..torch.experts import EXPERTS
 
-    allowed = set(SETTINGS) | {"expert", "reduction", "max_kernel"}
-    if unknown := set(options) - allowed:
-        raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(allowed)}")
+    if unknown := set(options) - OPTIONS:
+        raise ValueError(f"unknown ESMoE options {sorted(unknown)}; expected {sorted(OPTIONS)}")
     options = dict(options)
     if callable(balance := options.get("balance")):
         options["balance"] = reference(balance, BALANCES)
@@ -130,8 +131,7 @@ def graft(
         moved[index] = len(grafted)
         grafted.append(list(layer))
         if index in spots:
-            # A copy per insertion: rows sharing one mapping come out of the yaml dump as anchors
-            # and aliases, which reload but no longer read as the layer they describe.
+            # Rows sharing one mapping dump as yaml anchors, which reload as aliases.
             grafted.extend(copy.deepcopy(layers))
             backbone_len += len(layers) * (index < len(backbone))
 
@@ -147,6 +147,7 @@ def graft(
 
 __all__ = [
     "DOWNSAMPLERS",
+    "OPTIONS",
     "Spot",
     "graft",
 ]

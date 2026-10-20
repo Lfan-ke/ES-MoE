@@ -265,6 +265,13 @@ def test_a_fresh_interpreter_can_import_the_worker_trainer():
     assert done.stdout.strip().endswith("Trainer")
 
 
+def test_equip_sends_block_settings_to_the_graft_not_to_yolo():
+    """A setting the block understands must not reach the YOLO wrapper as a stray keyword."""
+    model = equip("yolo11n.yaml", at="backbone_stages", balance="gshard", out_norm=True, weight=0.01)
+    held = next(blocks(model.model)).spec()
+    assert held["balance"] == "gshard" and held["out_norm"] is True
+
+
 def _grafted_yaml():
     import tempfile
     from pathlib import Path

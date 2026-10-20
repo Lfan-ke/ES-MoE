@@ -11,12 +11,10 @@ from types import MappingProxyType
 
 from .kernels import Kernel, fit, odd_kernels
 
-# What a config can carry. A trainer rebuilds the model from its config, so a setting applied to
-# the instance afterwards is discarded; upstream's own defaults are noted where they differ.
+# A trainer rebuilds the model from its config, so a setting put on the instance is lost.
 SETTINGS = MappingProxyType(
     {
-        # Switch reads the full softmax; gshard reads the gate, which carries no gradient for an
-        # expert outside the top-k and let experts die (docs/JUDGMENT, round six).
+        # gshard reads the gate, which has no gradient outside the top-k and let experts die.
         "balance": "switch",
         "out_norm": False,  # upstream: always on
         "dense_training": False,  # upstream: always on
@@ -27,8 +25,7 @@ SETTINGS = MappingProxyType(
 
 ARGUMENTS = ("num_experts", "top_k", "channels", "out_channels", "kernels", "expert", "reduction", "max_kernel")
 
-# What other callers name the same thing. Anything else is ignored with a warning rather than
-# refused, so a stray framework argument never costs a run.
+# What other callers name the same thing; anything else warns rather than ending a run.
 ALIASES = {
     "c": "channels",
     "c1": "channels",
@@ -121,8 +118,7 @@ def settle(local: Mapping, options: Mapping | None = None, settings: Mapping | N
         expert=branches if branches else [expert] * count,
         reduction=int(asked["reduction"]),
         max_kernel=cap,
-        # A widened block hands a one-element list to the official Index layer that follows it,
-        # which only a yaml asks for; set directly, out_channels just returns a wider tensor.
+        # Only a config asks for a list, to feed the Index layer that declares the width.
         listed=carried.get("out_channels") is not None,
         settings=chosen,
     )

@@ -12,12 +12,13 @@ def _():
         """
         # ES-MoE in a marimo notebook
 
-        [esmoe](https://github.com/Lfan-ke/ES-MoE) adds an expert-sparse Mixture-of-Experts block to
-        Ultralytics YOLO. It installs beside the official `ultralytics` package, and it wires the
-        router's load-balancing term into the loss the optimiser sees.
+        [esmoe](https://github.com/Lfan-ke/ES-MoE) is an expert-sparse mixture-of-experts block. It
+        drops into any torch model, it adds itself to Ultralytics YOLO in one call, and a second
+        implementation on Keras 3 runs it on tensorflow, jax and torch. The router's
+        load-balancing term reaches the loss the optimiser sees either way.
 
-        This notebook needs no dataset and no GPU: it builds a model, reads the block back, and
-        shows what the router does with one batch. The training walk-through is in
+        This notebook needs no dataset and no GPU: it builds the block three ways, reads it back,
+        and shows what the router does with one batch. The training walk-through is in
         [`quickstart.ipynb`](https://colab.research.google.com/github/Lfan-ke/ES-MoE/blob/main/notebooks/quickstart.ipynb).
         """
     )
@@ -44,7 +45,41 @@ def _():
 def _(mo):
     mo.md(
         """
-        ## One call puts the block in
+        ## A plain torch model
+
+        `kernels` gives each expert its receptive field and, with it, how many experts there are;
+        `top_k` says how many run per sample. The block takes its width from the first forward
+        pass, so nothing has to declare it, and `routing` hands you the balancing term for your
+        own training step.
+        """
+    )
+    return
+
+
+@app.cell
+def _(esmoe, torch):
+    from torch import nn
+
+    net = nn.Sequential(
+        nn.Conv2d(3, 32, 3, 2, 1),
+        esmoe.ESMoE(kernels=[3, 5, 7], top_k=1),
+        esmoe.ESMoE(kernels=[(1, 9), (9, 1)], top_k=2),
+    )
+
+    with esmoe.routing(net) as route:
+        plain = net(torch.randn(4, 3, 64, 64))
+        step = plain.square().mean() + 0.01 * route.loss()
+    step.backward()
+
+    {"output": tuple(plain.shape), "router loss": round(float(route.loss()), 4)}
+    return (nn,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        """
+        ## One call puts the block in a YOLO
 
         `equip` registers `ESMoE`, grafts it onto the backbone, renumbers every head reference the
         insertion would break, builds the model, and attaches the auxiliary loss.
@@ -113,9 +148,7 @@ def _(mo):
 
 
 @app.cell
-def _(esmoe, torch):
-    from torch import nn
-
+def _(esmoe, nn, torch):
     class ThinExpert(nn.Sequential):
         def __init__(self, c1, c2, k):
             super().__init__(nn.Conv2d(c1, c2, k, 1, k // 2, groups=c1), nn.SiLU())
@@ -123,8 +156,43 @@ def _(esmoe, torch):
     def entropy_balance(probs, gate):
         return -(probs * probs.clamp_min(1e-9).log()).sum(dim=1).mean()
 
-    custom = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_balance)
+    custom = esmoe.ESMoE(kernels=[3, 5, 7], top_k=2, expert=ThinExpert, balance=entropy_balance)
     custom(torch.randn(2, 32, 16, 16)).shape
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        """
+        ## The same block on Keras
+
+        `esmoe.keras.ESMoE` is the same block written against `keras.ops`, so it runs on whichever
+        backend Keras is configured for: tensorflow, jax or torch. The arguments are the torch
+        block's, and the balancing term goes through Keras' own `add_loss`, so `fit` counts it.
+        """
+    )
+    return
+
+
+@app.cell
+def _():
+    import os
+
+    os.environ.setdefault("KERAS_BACKEND", "torch")
+
+    import keras
+    import numpy as np
+
+    from esmoe.keras import ESMoE as KerasESMoE
+    from esmoe.keras import collect_aux_loss
+
+    layered = keras.Sequential(
+        [keras.layers.Conv2D(16, 3, strides=2, padding="same"), KerasESMoE(kernels=[3, 5, 7], top_k=1)]
+    )
+    layered(np.random.rand(2, 32, 32, 3).astype("float32"))
+
+    {"backend": keras.backend.backend(), "router loss": round(float(collect_aux_loss(layered)), 4)}
     return
 
 
