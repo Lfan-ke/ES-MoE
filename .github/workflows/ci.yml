@@ -54,6 +54,25 @@ jobs:
       - name: Test
         run: uv run --no-sync pytest tests/test_torch.py -q
 
+  native:
+    name: ${{ matrix.backend }} alone
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [tensorflow, jax]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.13"
+      - run: uv sync --group check --no-group dev --extra ${{ matrix.backend }}
+      - name: No other framework installed
+        run: uv run --no-sync python -c "import importlib.util, sys; sys.exit(any(importlib.util.find_spec(n) for n in ('keras', 'ultralytics')))"
+      - name: Test
+        run: uv run --no-sync pytest tests/test_${{ matrix.backend }}.py -q
+
   keras:
     name: keras on ${{ matrix.backend }}
     runs-on: ubuntu-26.04

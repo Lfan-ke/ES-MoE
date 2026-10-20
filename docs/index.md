@@ -15,7 +15,7 @@
 <div class="es-stats">
 <div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
 <div><strong>7</strong><span>代官方主干，另有 yolo-master-n</span></div>
-<div><strong>409</strong><span>项测试，含与上游、论文的数值对照</span></div>
+<div><strong>417</strong><span>项测试，含与上游、论文的数值对照</span></div>
 <div><strong>3</strong><span>个 seed 起的逐 seed 配对</span></div>
 </div>
 

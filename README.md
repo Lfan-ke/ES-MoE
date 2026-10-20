@@ -111,19 +111,19 @@ beforehand.
 
 ## On tensorflow, jax and keras
 
-The block is written twice: once in torch, once in Keras 3, which runs it on tensorflow, jax or
-torch. Both read their arguments through the same code, so they take the same ones.
+Each framework gets its own implementation, written the way that framework is written: a
+`tf.Module` on TensorFlow, pure functions on Jax, a `keras.layers.Layer` on Keras 3. They read
+their arguments through the same code, so they take the same ones.
 
-    from esmoe.keras import ESMoE
+    from esmoe.tensorflow import ESMoE, Sequential      # tf.Module, no Keras
+    from esmoe.jax import ESMoE                          # init/apply, no Flax
+    from esmoe.keras import ESMoE                        # keras.layers.Layer, any Keras backend
 
-    net = keras.Sequential([keras.layers.Conv2D(16, 3, padding="same"), ESMoE(kernels=[3, 5, 7], top_k=1)])
-    net.compile(optimizer="adam", loss="mse")
-    net.fit(x, y)            # the balancing term rides along through Keras' own add_loss
-
-One difference: the Keras layer evaluates every expert and weights them by the gate. Skipping an
-unrouted expert depends on the data, which a traced jax or tensorflow graph cannot express. The
-routing and the balancing term are the torch backend's; only the inference-time saving is torch's
-alone. `esmoe.backend("jax")` and `esmoe.backend("tensorflow")` both lead here.
+One difference holds for all three: they evaluate every expert and weight them by the gate.
+Skipping an unrouted expert depends on the data, which a traced graph cannot express, so the
+inference-time saving is torch's alone. The routing and the balancing term are the same
+everywhere. `esmoe.backend(name)` returns the package for `torch`, `tensorflow`, `jax` or
+`keras`.
 
 ## Extend
 
@@ -141,12 +141,12 @@ block is holding.
 
 ## Compatibility
 
-| backend | block | router loss | graft | tested on |
+| backend | written against | router loss | graft | tested on |
 |:--:|:--:|:--:|:--:|:--:|
-| torch | yes | yes | any `nn.Module` | every CI leg, and one with ultralytics absent |
-| Keras 3 on tensorflow | yes | through `add_loss` | `Sequential` | its own CI leg |
-| Keras 3 on jax | yes | through `add_loss` | `Sequential` | its own CI leg |
-| Keras 3 on torch | yes | through `add_loss` | `Sequential` | its own CI leg |
+| torch | `nn.Module` | a weak registry | any `nn.Module` | every CI leg, and one with ultralytics absent |
+| tensorflow | `tf.Module` | a weak registry | attribute or position | a leg with keras and ultralytics absent |
+| jax | pure functions | returned by `apply` | not applicable | a leg with keras and ultralytics absent |
+| Keras 3 | `keras.layers.Layer` | `add_loss` | `Sequential` | one leg per Keras backend: tensorflow, jax, torch |
 
 The Ultralytics integration runs on the torch block:
 

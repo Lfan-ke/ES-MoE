@@ -4,58 +4,51 @@
 uv add esmoe[tensorflow]
 ```
 
-On TensorFlow the block is a Keras 3 layer. Install the extra, set `KERAS_BACKEND` to
-`tensorflow`, and `esmoe.keras.ESMoE` is an ordinary TensorFlow layer.
-
-```bash
-KERAS_BACKEND=tensorflow python train.py
-```
-
-## As an ordinary layer
-
-```python
-import keras
-from esmoe.keras import ESMoE
-
-net = keras.Sequential(
-    [
-        keras.layers.Conv2D(16, 3, strides=2, padding="same"),
-        ESMoE(kernels=[3, 5, 7], top_k=1),
-    ]
-)
-net.compile(optimizer="adam", loss="mse")
-net.fit(x, y)
-```
-
-The balancing term goes through Keras' `add_loss`, so `fit` counts it.
-
-## In a graph, and under a tape
-
-The layer traces into a `tf.function`, and gradients come from a `GradientTape` as usual. Read the
-balancing term inside the same trace: a tensor created there cannot be used outside the function.
+`esmoe.tensorflow.ESMoE` is a `tf.Module`. It needs TensorFlow and nothing else, Keras included.
+Inputs are NHWC.
 
 ```python
 import tensorflow as tf
+from esmoe.tensorflow import ESMoE, Sequential
 
-
-@tf.function
-def total(inputs):
-    out = net(inputs)
-    return tf.reduce_sum(out) + tf.add_n(net.losses)
-
-
-with tf.GradientTape() as tape:
-    value = total(tf.constant(batch))
-grads = tape.gradient(value, net.trainable_variables)
+net = Sequential([ESMoE(kernels=[3, 5, 7], top_k=1)])
+out = net(tf.random.normal([2, 16, 16, 8]), training=True)
 ```
 
-That is what `tests/test_backends.py` runs on the TensorFlow leg of CI.
+`kernels` gives each expert a receptive field, an `int` or an `(h, w)` pair, and sets how many
+there are; `top_k` says how many run per sample. Channels come from the first call.
+
+## The auxiliary loss
+
+The balancing term joins the total loss yourself:
+
+```python
+from esmoe.tensorflow import routing
+
+with routing(net) as route:
+    with tf.GradientTape() as tape:
+        total = tf.reduce_sum(net(x, training=True)) + 0.01 * route.loss()
+grads = tape.gradient(total, net.trainable_variables)
+```
+
+`routing` clears the registry on the way in, so a block that did not run this step cannot report
+the step before. Without the context manager, pair `clear_aux_loss` with `collect_aux_loss`.
+
+## Into a model that already exists
+
+```python
+from esmoe.tensorflow import graft
+
+graft(model, at="stem", mode="after", kernels=[3, 5, 7], top_k=1)
+```
+
+`at` takes an attribute name, several names, or a `(name, module) -> bool` test; layers inside a
+`Sequential` are addressed by position. `mode` is `after`, `before` or `replace`, applied in place.
 
 ## Boundaries
 
 Every expert is evaluated. Skipping an unrouted one depends on the batch, which a static graph
-cannot express; the routing and the balancing term match the torch block bit for bit, and only the
-inference-time saving is torch's alone.
+cannot express.
 
-Grafting takes a `keras.Sequential`; a functional model has to be rebuilt by hand. The channel axis
-follows `keras.config.image_data_format()`.
+Batch normalisation keeps its moving statistics in untrained variables, updated when
+`training=True`.

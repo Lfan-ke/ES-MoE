@@ -1,11 +1,32 @@
 # Release notes
 
-Current version **2.0.0**: the block is no longer tied to Ultralytics. `uv add esmoe` installs torch
+Current version **2.1.0**: TensorFlow and Jax each have a native implementation now, rather than
+reaching them through Keras.
+
+## 2.1.0
+
+- **A native TensorFlow backend.** `esmoe.tensorflow.ESMoE` is a `tf.Module` that needs TensorFlow
+  and nothing else: its own batch normalisation keeps the moving statistics in untrained variables,
+  the auxiliary loss goes through the same weak registry the torch block uses, and `graft` places
+  blocks by attribute name or by position in a `Sequential`.
+- **A native Jax backend.** `esmoe.jax.ESMoE` is a set of pure functions: `init` builds the
+  parameter tree, `apply` returns the output and the balancing term, and all of it goes under
+  `jax.jit` and `jax.grad` with neither Keras nor Flax involved. The tree is plain dictionaries and
+  arrays, which `optax` takes as they are.
+- **Aliases for the extras.** `esmoe[pytorch]`, `esmoe[tf]`, `esmoe[keras3]` and
+  `esmoe[ultralytics]` mean `esmoe[torch]`, `esmoe[tensorflow]`, `esmoe[keras]` and `esmoe[yolo]`;
+  `esmoe[all]` is the five formal names together.
+- **Two more CI legs.** One for tensorflow and one for jax, each asserting that neither keras nor
+  ultralytics is installed before running that backend's own tests.
+
+## 2.0.0
+
+The block is no longer tied to Ultralytics. `uv add esmoe` installs torch
 and nothing else, and the block drops into any torch model; the Ultralytics integration is
 `uv add esmoe[yolo]` and works as it did in 1.x. A second implementation on Keras 3 runs the same
 block on tensorflow, jax and torch.
 
-## Changes
+### What 2.0.0 changed
 
 - **Torch and YOLO as equals.** The core needs torch alone and an `nn.Sequential` takes the block
   as written; it sizes itself on the first forward pass, so no width has to be declared. The
@@ -16,8 +37,7 @@ block on tensorflow, jax and torch.
   factory for all or one each. One of three, five experts, strip convolutions, repeated kernels --
   each is one line.
 - **A Keras 3 backend.** `esmoe.keras` holds the same block as a Keras layer, taking the same
-  arguments, with the auxiliary loss going through Keras' own `add_loss`. `esmoe[tensorflow]` and
-  `esmoe[jax]` bring the backend with them. It evaluates every expert: skipping an unrouted one
+  arguments, with the auxiliary loss going through Keras' own `add_loss`. It evaluates every expert: skipping an unrouted one
   depends on the data, which a static graph cannot express.
 - **Grafting into a model that exists.** `esmoe.graft(model, at="layer3", mode="after", ...)` finds
   submodules by name, by several names or by a test, and puts the block `after`, `before` or in
@@ -31,7 +51,7 @@ block on tensorflow, jax and torch.
   all of them -- neither costs a run at construction any more. A bad value still raises.
 - **Python 3.12 and up**, which buys spellings like `type` aliases today.
 
-## Moving from 1.x
+### Moving from 1.x
 
 | 1.x | 2.0 |
 |:--:|:--:|
@@ -44,7 +64,7 @@ block on tensorflow, jax and torch.
 
 Checkpoints written by 1.x still load.
 
-## Before that, 1.x
+## 1.x
 
 1.0.0 was the first stable release: the compatibility matrix across seven backbone generations, the
 full-protocol experiments and judgment lines, and a bilingual documentation site. 1.0.1 fixed the

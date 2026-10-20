@@ -20,8 +20,6 @@ def stack(*layers) -> keras.Sequential:
 
 def test_the_backend_table_points_here():
     assert esmoe.backend("keras").ESMoE is ESMoE
-    assert esmoe.backend("jax").ESMoE is ESMoE
-    assert esmoe.backend("tensorflow").ESMoE is ESMoE
 
 
 def test_it_drops_into_a_sequential():

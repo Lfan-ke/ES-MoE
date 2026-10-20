@@ -1,10 +1,10 @@
 """How a config names a callable, and how that name leads back to it."""
 
 import importlib
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 
 
-def reference(obj: Callable, shipped: Mapping[str, Callable]) -> str:
+def reference(obj: object, shipped: Mapping[str, object]) -> str:
     """A shipped callable by its short name, any other by ``module:qualname``.
 
     A config holds text, and the trainer rebuilds the model from that text in this process and in
@@ -26,7 +26,7 @@ def reference(obj: Callable, shipped: Mapping[str, Callable]) -> str:
     return name
 
 
-def resolve(name: str, shipped: Mapping[str, Callable]) -> Callable:
+def resolve(name: str, shipped: Mapping[str, object]) -> object:
     """The callable a config names: a key of ``shipped``, or ``module:qualname``."""
     if name in shipped:
         return shipped[name]
@@ -36,12 +36,12 @@ def resolve(name: str, shipped: Mapping[str, Callable]) -> Callable:
     target = importlib.import_module(module)
     for part in qualname.split(".") if qualname else ():
         target = getattr(target, part)
-    if not callable(target):
-        raise ValueError(f"{name} names {type(target).__name__}, not a callable")
+    if not callable(target) and not isinstance(target, tuple):
+        raise ValueError(f"{name} names {type(target).__name__}, which cannot build anything")
     return target
 
 
-def named(obj: Callable, shipped: Mapping[str, Callable]) -> str:
+def named(obj: object, shipped: Mapping[str, object]) -> str:
     """`reference`, falling back to a readable repr for a callable no config has to carry."""
     try:
         return reference(obj, shipped)

@@ -4,11 +4,8 @@
 uv add esmoe[keras]
 ```
 
-Keras picks the backend; `esmoe[tensorflow]` and `esmoe[jax]` bring one with them.
-
-The block is written twice: once in native torch, once in Keras 3. Keras 3 runs on tensorflow, jax
-and torch, so that second implementation covers the other three. Both take the same arguments,
-because the code that reads them is the same code.
+`esmoe.keras.ESMoE` is a `keras.layers.Layer` written against `keras.ops`, so it runs on whichever
+backend Keras is configured for: tensorflow, jax or torch.
 
 ```python
 import keras
@@ -27,11 +24,10 @@ net.fit(x, y)
 The auxiliary loss goes through Keras' own `add_loss`, so `fit` already counts it. A custom loop
 reads it with `esmoe.keras.collect_aux_loss(model)`, which is `model.losses` summed.
 
-## Where it differs from the torch block
+## Boundaries
 
-**Every expert is evaluated.** Skipping an unrouted one depends on the batch, which a static jax or
-tensorflow graph cannot express. Routing and the balancing term match the torch block bit for bit;
-the inference-time saving is torch's alone.
+**Every expert is evaluated.** Skipping an unrouted one depends on the batch, which a static graph
+cannot express.
 
 **The channel axis follows Keras.** It reads `keras.config.image_data_format()`, which defaults to
 `channels_last`.
@@ -49,3 +45,5 @@ KERAS_BACKEND=jax python train.py
 
 `esmoe.backend("jax")`, `esmoe.backend("tensorflow")` and `esmoe.backend("keras")` all lead here.
 CI runs this layer's tests once on each of the three.
+
+The arguments are the ones [Torch integration](torch.md) takes: the code that reads them is shared.

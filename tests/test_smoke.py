@@ -342,7 +342,7 @@ def test_an_even_kernel_cap_is_lowered_not_raised():
         ({"max_kernel": 0}, "max_kernel"),
         ({"top_k": 0}, "top_k"),
         ({"balance": "nonexistent"}, "unknown name"),
-        ({"balance": "math:pi"}, "not a callable"),
+        ({"balance": "math:pi"}, "cannot build anything"),
     ],
 )
 def test_invalid_settings_are_refused_with_a_reason(kwargs, message):
