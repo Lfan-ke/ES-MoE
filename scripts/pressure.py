@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from routing import normalise  # noqa: E402
 
-from esmoe.module import gshard_balance, gshard_probs_balance, master_balance, switch_balance  # noqa: E402
+from esmoe import gshard_balance, gshard_probs_balance, master_balance, switch_balance  # noqa: E402
 
 TERMS = (
     ("switch", switch_balance),

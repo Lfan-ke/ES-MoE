@@ -55,7 +55,7 @@ def behaviour(block, logits: torch.Tensor, scales: torch.Tensor, counts: torch.T
 
     return {
         "channels": block.channels,
-        "kernels": block.expert_kernel_sizes,
+        "kernels": block.kernels,
         "top_k": block.top_k,
         "usage": [round(float(u), 4) for u in usage],
         "top1_share": [round(float(u), 4) for u in torch.bincount(chosen[:, 0], minlength=e).float() / n],
@@ -75,7 +75,7 @@ def route(weights: Path, data: Path, args) -> dict:
 
     import esmoe
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     model = YOLO(str(weights))
     # Every block, not just the first: the upstream layout puts one after each backbone stage, and
     # they see different resolutions, so one block's usage says nothing about the others'.

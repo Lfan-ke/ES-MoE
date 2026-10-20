@@ -53,6 +53,33 @@ flowchart TB
 
 The router picks per image, not per pixel or region. Each expert is a depthwise-separable convolution: the k×k depthwise convolution handles space and the 1×1 pointwise convolution mixes channels. The gate is non-zero only on the k chosen experts and renormalised to sum to one.
 
+## How the package is layered
+
+What has to be compatible falls into two kinds, each with a layer. A **backend** is the tensor
+library the block is written in; an **integration** is a training stack built on one of them.
+Between them sits a backend-free core: how the arguments are spelled, how kernels are computed,
+how a config names a callable, where the auxiliary loss is left. All of it is plain Python, so a
+new backend adds only the tensor work.
+
+```
+esmoe/
+  spec.py kernels.py naming.py registry.py   the backend-free core
+  torch/    backend: native torch
+  keras/    backend: Keras 3, covering tensorflow / jax / torch
+  yolo/     integration: Ultralytics
+```
+
+Every backend package exports the same names: `ESMoE`, `DWExpert`, `EXPERTS`, `BALANCES`,
+`blocks`, `routing`, `collect_aux_loss`, `clear_aux_loss`, `graft`. Every integration exports
+`graft` and `equip`, plus `attach_aux_loss` where the loss can reach that stack's optimiser and
+`register` where the stack resolves layers by name. The top level exports the torch backend
+directly and loads the integration names on demand, so `import esmoe` works with no ultralytics
+installed.
+
+The Keras implementation differs in one place: it evaluates every expert. Skipping an unrouted one
+depends on the batch, which a static jax or tensorflow graph cannot express; the routing and the
+balancing term match bit for bit.
+
 ## Training and inference
 
 | | training | validation and inference |
@@ -73,7 +100,7 @@ The balance term therefore has to read the full softmax probabilities for unchos
 
 | item | YOLO-Master `ES_MOE` | esmoe `ESMoE` |
 |:--:|:--:|:--:|
-| installation | the ultralytics fork YOLO-Master maintains | `pip install esmoe`, on official ultralytics |
+| installation | the ultralytics fork YOLO-Master maintains | `uv add esmoe[yolo]`, on official ultralytics |
 | backbones | the fork's own configs such as `yolo-master-n` | official YOLOv5n to YOLO26n, seven generations, plus `yolo-master-n` on the fork |
 | adding it | write the model config by hand | `equip` registers, grafts, builds and wires the loss in one call; `graft` renumbers layer references; `esmoe graft` on the command line |
 | placement | `yolo-master-n` puts one block after the C3k2 at P2 and P3 and after the A2C2f at P4 and P5 | one at the end of the backbone by default; `at="backbone_stages"` puts one after every downsampling stage, which on `yolo-master-n` matches upstream's positions |

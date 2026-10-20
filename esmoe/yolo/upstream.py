@@ -10,7 +10,7 @@ B arms trained with it.
 import torch
 from torch import Tensor, nn
 
-from .module import blocks
+from ..torch.block import blocks
 
 DECAY, FLOOR, CEILING, BUDGET = 0.99, 1e-4, 1e4, 3.0
 ROUTER_LR, EXPERT_WARMUP = 0.5, 3
@@ -65,3 +65,11 @@ def warm(params: list[nn.Parameter], epoch: int) -> None:
     """No expert trains before epoch `EXPERT_WARMUP`; routers, the output norm and the rest train throughout."""
     for p in params:
         p.requires_grad = epoch >= EXPERT_WARMUP
+
+
+__all__ = [
+    "experts",
+    "normalise",
+    "split_routers",
+    "warm",
+]

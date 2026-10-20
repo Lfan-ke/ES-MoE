@@ -1,139 +1,70 @@
 # Release notes
 
-Current version **1.1.0**: the documentation site now runs these models. Drop in a picture, put up to three models side by side on it, and read, block by block, what each expert scored and which of them the routing used. Everything runs in the reader's own browser. The public interface is the same as in 1.0.
+Current version **2.0.0**: the block is no longer tied to Ultralytics. `uv add esmoe` installs torch
+and nothing else, and the block drops into any torch model; the Ultralytics integration is
+`uv add esmoe[yolo]` and works as it did in 1.x. A second implementation on Keras 3 runs the same
+block on tensorflow, jax and torch.
 
-## Added
+## Changes
 
-- **A page that runs the models.** [Try it](demo.md) carries two groups: official YOLO11n and YOLO-Master's released EsMoE-N on COCO, and the three arms of the same-configuration comparison on VisDrone. Click a sample or upload a picture — the strip keeps the last five — and each model answers with its boxes, its time and its count; a routed model adds one bar per expert, marking the ones the routing actually ran. WebGPU where the browser has it, WASM otherwise.
-- **An export script.** `scripts/demo_export.py` exports a checkpoint from the `checkpoints` branch to ONNX with every block's router probabilities as extra outputs, checks the exported file against the PyTorch forward (probabilities and class scores absolutely, boxes against their own scale), replaces the zero tensors the tracer bakes in with shape constants (about 17 MB across four blocks at 800 px), and writes `models/index.json` with the classes, the input size, each block's experts, top-k, kernels and pruning threshold, and the hashes of the checkpoint and the served file.
-- **Carrying upstream weights over.** `scripts/demo_export.py transfer` saves a fork-trained checkpoint as plain tensors inside the fork's environment, and official ultralytics rebuilds it from this package's config.
+- **Torch and YOLO as equals.** The core needs torch alone and an `nn.Sequential` takes the block
+  as written; it sizes itself on the first forward pass, so no width has to be declared. The
+  auxiliary loss is read with `with esmoe.routing(net) as route:`, which clears the registry on the
+  way in, so a block that did not run this step cannot report the step before.
+- **Two knobs decide the experts.** `kernels` gives each expert a receptive field, an `int` or an
+  `(h, w)` pair, and with it how many experts there are; `expert` gives a branch its structure, one
+  factory for all or one each. One of three, five experts, strip convolutions, repeated kernels --
+  each is one line.
+- **A Keras 3 backend.** `esmoe.keras` holds the same block as a Keras layer, taking the same
+  arguments, with the auxiliary loss going through Keras' own `add_loss`. `esmoe[tensorflow]` and
+  `esmoe[jax]` bring the backend with them. It evaluates every expert: skipping an unrouted one
+  depends on the data, which a static graph cannot express.
+- **Grafting into a model that exists.** `esmoe.graft(model, at="layer3", mode="after", ...)` finds
+  submodules by name, by several names or by a test, and puts the block `after`, `before` or in
+  place of each. The same name still rewrites a config, `esmoe.graft("yolo11n.yaml", ...)`,
+  dispatching on the first argument.
+- **Three spellings in a config.** `ESMoE`, `ES_MoE` and `ES_MOE` all resolve to the block, and a
+  config that already names one is taken as written: `equip` grafts nothing into it.
+- **However the arguments are spelled.** A mapping among the positional arguments is read as
+  `options`; `c`/`c1`/`ch`/`c2`/`e`/`k` are understood, and `experts` lands where its value fits.
+  An unrecognised key warns once and is ignored, and a `top_k` above the expert count falls back to
+  all of them -- neither costs a run at construction any more. A bad value still raises.
+- **Python 3.12 and up**, which buys spellings like `type` aliases today.
 
-## Earlier: 1.0.1
+## Moving from 1.x
 
-### Fixed
+| 1.x | 2.0 |
+|:--:|:--:|
+| `pip install esmoe` | `uv add esmoe` for the block, `uv add esmoe[yolo]` with the integration |
+| `esmoe.inject_esmoe()` | `esmoe.register()`, the old name still works |
+| `expert_kernel_sizes=` | `kernels=`, the old name is still accepted |
+| `max_kernel_size=` | `max_kernel=`, the old name is still accepted |
+| `from esmoe.inject import X` | `from esmoe.yolo.inject import X` |
+| an unrecognised argument raised | it warns and is ignored |
 
-- **The delivery audit accepts only exact declarations.** `scripts/closure.py` decided whether a cell short of three seeds had been declared by substring, so a longer arm name made a shorter one count as declared; it now requires the full arm name in backticks on both language versions of the experiments page.
-- **Dataset statistics hold up.** `scripts/dataset.py` no longer stops on a box that runs slightly past the image edge, reads class names given as a list or a mapping, closes the archive when done, matches `.txt` and `.zip` in any case, and gains `--out`.
-- **Figures read only registered runs.** `scripts/charts.py` draws the same-configuration routing figure from each seed's registered B arm, so a repeat of that seed cannot add a row, and it stops when a result table it reads is missing or parses to nothing.
-- **Several things on the docs site.** The root 404 page was in English; old addresses under `latest/` redirected to the numbered copy; flowcharts stayed light in the dark scheme; charts were cramped on phones; pages of versions other than the latest gave no sign of it.
+Checkpoints written by 1.x still load.
 
-### Documentation
+## Before that, 1.x
 
-- **Every result has a figure.** The 25 interactive figures on the experiments page cover the dataset, the training protocol, selection, the seven backbone generations, area buckets, the alignment arms, the same-configuration comparison, the step-for-step trace, the released model, repeated runs, routing and balancing, and training cost; the selection, results and effect-chart pages embed the matching figures. Charts follow the dark scheme and tighten on narrow screens.
-- **Against upstream and the paper.** The "ES-MoE and YOLO" page was rewritten after checking every row against YOLO-Master `acce839c` and the paper: over ten corrections, including the block-analysis count, how closely the released model was reproduced, and whether the balance term counts in validation, plus comparisons for multi-GPU balancing, the precision fallback, pruning before export and the paper's loss setup.
-- **API and tutorial.** The API page adds the four balancing objectives, `DWExpert`, `blocks()` and the command line; the tutorial's custom training loop calls `clear_aux_loss()`; README gives the parameter and card-hour overhead as ranges across backbones.
-- **Figure data comes from scripts.** `scripts/dataset.py` counts the dataset archive into `results/dataset.json`, and `scripts/charts.py` writes the data every figure draws.
-- **Artifacts rerun on 1.0.1.** `results/verify.json` passes all ten checks, and the quick-start notebook's outputs come from a Linux run of the published 1.0.1.
-
-### Repository
-
-- **Package metadata.** The license is the SPDX expression `AGPL-3.0-only`, which PyPI now shows, and Python 3.10 to 3.12 classifiers are added.
-- **Release and CI checks.** A release fails when its tag disagrees with `esmoe.__version__`, and CI builds the docs site in strict mode.
-- **Docs versions per x.y.** An x.y.0 release deploys `x.y` and moves `latest` when it is the newest; an x.y.z patch release adds no version, its changes staying on `dev`. The two existing versions are renamed `1.0` and `0.1`.
-- **Tests.** New tests for the chart data, dataset statistics, audit declarations and version consistency, 335 in all.
-- **Checkpoints.** The `checkpoints` branch adds `last.pt` for 43 earlier protocol runs, 72 in all; each was added only after the same run's `best.pt` matched both its record and the hash already on the branch.
-- **Older docs.** The 0.1 docs stay online without their retired pages and superseded claims, and every page says it is not the latest.
-
-## Earlier: 1.0.0
-
-The first stable release. The public interface in `esmoe.__all__` now follows semantic versioning: incompatible changes come only with a major version.
-
-### Added
-
-- **An interrupted run can finish.** `scripts/train.py --resume <last.pt>` continues from the run's own checkpoint instead of starting over, and accepts only a checkpoint that run saved in its own directory. Records gain `resumed`, with the checkpoint's path and hash, the epochs done and the seconds they took; `budget.gpu_hours` sums both stretches, and `budget.epochs_replayed` counts against the epochs that were left.
-- **Versioned documentation.** Each release has its own copy of the docs, `latest` points at the newest release and `dev` follows main; the old unversioned addresses redirect to `latest`.
-
-### Fixed
-
-- **`scripts/measure.py` could not rebuild a resumed run.** Resuming rewrites `model` in the run's arguments to the checkpoint, which no model can be built from. The rebuild now uses the config the checkpoint records.
-- **A failed run was logged as done.** `scripts/train.py` exits non-zero after writing a failed record, and `scripts/queue.sh` logs it as FAILED.
-- **Running a configuration again replaced the original experiment.** `scripts/report.py` and `scripts/same_config.py` keep the earliest-started record of a configuration and seed as the experiment and send later ones to the noise floor only; the floor is grouped by hardware stack and budget, precision included, so FP32 and mixed precision are computed apart.
-- **Entry points of the documentation site.** The Chinese charts page showed the English figure; the results page's contents broke at the embedded tables; the language switch on the `latest` home page went to an older version; the 404 page could not load search or the version list; the language links in each version's sitemap lacked a slash.
-- **The delivery audit and the balancing-pressure table.** `scripts/closure.py` counts registrations by section, so prose that mentions a pre-registration no longer counts again; `scripts/pressure.py` keeps `yolo-master-n` whole when grouping by backbone, and the table is regenerated from every routing record.
-- **The quick start's "Match upstream" missed two settings.** It now sets `balance="gshard"` and `recipe="upstream", weight=1.0`, and installs pandas when it is missing.
-
-### Data
-
-- Both rounds of the same-configuration comparison with YOLO-Master are in: round seven at each framework's default precision, round eight with all four arms in FP32, and the noise floor measured by repeating FP32 runs on the same cards. Verdicts are on the [judgment lines](JUDGMENT.md).
-
-### Repository
-
-- The root holds only the package and what GitHub needs: `uv.lock` is no longer tracked and CI tests what resolves on the day; the docs config lives in `.github/docs/`, the contributing guide and code of conduct in `.github/`, and environment snapshots in `results/env/`.
-- The selection page has a Chinese edition (English at `SELECTION.en.md`); the issue and PR templates say what is required and end with a checklist; README uses absolute image and licence links, so the PyPI page shows them; README and the tutorial call `scripts/sweep.sh` through `uv run bash`, so its `python3` is the project's environment; CITATION names the author `Cheng, Leo`, which is how GitHub's APA and BibTeX citations read.
-
-## Earlier: 0.1.6
-
-### Fixed
-
-- **`dynamic_threshold` pruned the wrong experts.** The threshold was compared against the raw probabilities, before the top-k renormalisation; upstream compares it against the share after (`_soft_top_k` normalises, `_sparse_forward` then prunes). With a top-2 of four, four probabilities summing to one rarely leave 0.4 on the runner-up, so nearly every image was pruned to a single expert while training mixed two. Measured on one trained VisDrone model with four blocks, same weights: mAP50 0.0427 pruned the wrong way, 0.3741 in upstream's order, 0.3748 unpruned. The default `dynamic_threshold=0.0` prunes nothing, so the records in `results/` are unaffected.
-
-### Added
-
-- **`recipe="upstream"`.** A new argument of `attach_aux_loss` and `equip` that trains the way YOLO-Master's trainer trains any model with a routed module, for runs compared against it. Three things:
-  - the term is divided by a running mean of its magnitude (decay 0.99, starting at 1.0), multiplied by `weight`, capped at 3.0 and added once to each of box, cls and dfl;
-  - router parameters get a group of their own at half the learning rate, outside Muon;
-  - expert parameters stay frozen for the first 3 epochs.
-
-  Constants and sources are in `esmoe.upstream`, with a step-by-step numerical test against upstream's source in `tests/test_recipe.py`. The default `"esmoe"` is unchanged, so existing records still reproduce.
-- **One protocol on YOLO-Master's fork.**
-  - `scripts/train.py` gains `--upstream` (train upstream's own blocks), `--grafted` (a config that already holds `ESMoE`) and `--recipe`.
-  - Records gain `git_ref.framework`, plus `budget.amp_at_end`, `budget.batch_at_end` and `budget.epochs_replayed`. Upstream's trainer turns mixed precision off and replays the epoch after the first non-finite gradient, and both trainers halve the batch on a first-epoch out-of-memory; none of this shows in the training arguments.
-  - `scripts/report.py` keys on the framework.
-  - `scripts/same_config.py` tabulates the comparison.
-  - `configs/yolo-master-n.yaml` is upstream's model without its four blocks; `configs/yolo-master-n-esmoe.yaml` matches upstream's model layer for layer.
-
-## Earlier: 0.1.5
-
-### Added
-
-- **Parameter parity with upstream's `ES_MOE`.** The block now takes everything upstream's constructor does: `out_channels`, `top_k=None` for every expert, `sparse_inference` (upstream's `use_sparse_inference`), and `dynamic_threshold` (0.4 upstream, 0.0 here so nothing is pruned -- every record in `results/` was measured that way). Even kernel sizes step down to odd and cap at `max_kernel_size`, so a pruned checkpoint's kernels reload, and `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel_size` are validated at construction against the same bounds.
-- **Four balancing objectives, Switch still the default.** `switch_balance` (the default, as in 0.1.4 and every record under `results/`), `gshard_balance` (matching upstream: it reads the gate, after the top-k mask and renormalisation), `master_balance` (the paper's eq. 13, an affine map `(L-1)/E^2` of `gshard`), and `gshard_probs_balance`, which reads the raw probabilities and exists to isolate that one variable. The default is settled by data: an objective that reads the gate has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert while Switch lost none in 66 (judgment lines, round six). On the command line: `--balance {switch,gshard,master,gshard_probs}`.
-- **Multi-GPU training with `compile=True`.** Inside a process group an expert no image routed to joins the graph at zero weight, so DDP no longer needs `find_unused_parameters`. The settings ultralytics uses under `compile=True`, `find_unused_parameters=False` and `static_graph=True`, are verified with two gloo ranks, and the block compiles under TorchDynamo and agrees with eager (`tests/test_distributed.py`). A single process behaves as before.
-- **Custom objectives and experts in the config.** `graft(balance=fn, expert=cls)` writes a custom function or class as `module:qualname`, and the trainer and every DDP worker import the same object back from that name when they rebuild the model; anything that cannot be imported back by name (a lambda, a nested function, anything defined in `__main__`) is refused when grafting. The shipped expert has the short name `dw`, and `esmoe.EXPERTS` sits next to `esmoe.BALANCES`.
-- **Widened blocks graft into a stock yaml.** `graft(out_channels=N)` writes the official `Index` layer after the block, which hands it a one-element list; stock `parse_model` reads that layer's declared width, so everything downstream is built at the real width. `N` is literal, not scaled by the width multiple.
-- **The command line catches up.** `esmoe graft` gains `--out-channels`, `--balance`, `--expert`, `--out-norm` and `--dense-training`.
-- **Upstream's block layout and block internals.** `graft(at="backbone_stages")` places one block after each backbone stage, four on all seven generations, with the stage boundaries derived from the downsampling layers. `out_norm` adds the `BatchNorm + SiLU` after the weighted sum (the paper's eq. 2 `Norm`). `dense_training` runs every expert while training, weighting unrouted ones by zero so their normalisation statistics keep moving. All three are off by default so the runs already in `results/` still reproduce.
-- **`scripts/blockspec.py`** reads back the block settings in force from any checkpoint. **`scripts/backfill.py`** fills and audits a record's config hash, dataset split sizes, GPU-hours and artifact checksum; `--settings` rewrites a record to match its checkpoint and names the change inside the record. **`scripts/queue.sh`** is in the repository, with a test holding it and `scripts/train.py` to the same run names.
-- `scripts/report.py` puts a 95% confidence interval on each paired delta; `scripts/routing.py` analyses every block rather than only the first.
-
-### Fixed
-
-- **Block settings never reached the model that trained.** The trainer rebuilds the model from `model.yaml`, so an objective or a switch set on the blocks after `YOLO(cfg)` returns disappears with the discarded instance -- no error, no trace. `--balance`, `--out-norm` and `--dense-training` were all inert while the record repeated the command line. `graft()` and `equip()` now write the settings into the config, `ESMoE` takes them as an options mapping and resolves an objective by name, and `scripts/train.py` records the block settings read off the trained model, refusing to start when they disagree with the request. **If you set these through `equip()` + `configure()` on 0.1.4, what trained was the constructor default; check with `scripts/blockspec.py`.**
-- **`dynamic_threshold` would not trace.** The mask used `scatter_` with a Python bool, for which a tracer has no op, breaking `torch.jit.trace` and every export built on it. It is tensor arithmetic now, recomputed per input.
-- **The routing statistics counted a warmup forward.** On an accelerator ultralytics runs one dummy forward before the first real batch, and the router hook captured that row too: 549 rows against 548 images. It never fired on CPU, which is why it went unseen.
-- **Two runs of one arm truncated each other's config.** The grafted `configs/*.yaml` carried no seed, so two lanes training the same arm wrote one file; one truncated it while the other was reading, and the reader died on `KeyError: 'backbone'`.
-- **`report.py` folded hardware together.** The grouping key ignored hardware, so the same configuration measured on two machines counted as repeats of one cell. Hardware stack and block configuration are both part of the key now.
-- **`buckets.py` could not evaluate on some accelerators.** `val()` fuses conv+bn inside an inference-mode context and some builds refuse to view an inference tensor. Fusing beforehand leaves that path nothing to do; the arithmetic is unchanged.
-- **Router logits were not clamped.** Under mixed precision a runaway logit reaches the softmax as inf and takes the whole gate to NaN. They are clamped to `[-30, 30]` before an fp32 softmax, as upstream does.
-
-## Earlier: 0.1.4
-
-### Feedback and iteration
-
-Most of 0.1.4 answers the first round of user feedback: the evaluation caliber moves to COCO-style 32²/96² buckets at maxDets 500 (`scripts/buckets.py`, source credited in the docs); `--patience` and `IMGSZ` exist to match the repository reproduction protocol (imgsz 800, 120 epochs, patience 0); the half-precision tests check that losses and gradients stay finite and consistent under FP32/AMP. The upstream loop closed as well: the `OptimizedMOE` tracing guard fix was merged into YOLO-Master (#241).
-
-### Fixed
-
-- `scripts/report.py` now keys groups by image size as well. Records of the same schedule at different resolutions used to be averaged into one row, which is exactly what the documentation promised would not happen.
-
-## Earlier: 0.1.3
-
-- **Exported models no longer ignore routing.** The block skips experts whose gate is zero, which is a data-dependent decision: a tracer records the routing of the example input, and the exported graph then uses those same experts for every later input. On a block whose routing follows its input, an ONNX export taken on one input differed from PyTorch by 0.2 on an input that routes elsewhere; it now differs by 1e-7. The block runs all experts while tracing and keeps the shortcut at run time, so nothing outside export gets slower.
-
-    Anyone who exported a model with 0.1.0 through 0.1.2 should re-export.
-
-### Added
-
-- `scripts/verify.py`: correctness checks that unit tests cannot make — a real training run logging a positive auxiliary term, `weight=0` leaving the loss table untouched, checkpoint round trip, resume, several blocks training together, `val` and `predict`, and ONNX export.
-- A regression test that exports a block whose routing follows the sign of its input and compares both branches against PyTorch.
+1.0.0 was the first stable release: the compatibility matrix across seven backbone generations, the
+full-protocol experiments and judgment lines, and a bilingual documentation site. 1.0.1 fixed the
+closure audit's substring matching, the dataset statistics on out-of-bounds boxes, charts reading
+runs that were never registered, and several display issues on the site. 1.1.0 added the
+[try it](demo.md) page -- up to three models on one image side by side, per-block expert scores for
+the ones that carry a block, inference in the reader's own browser -- and the export script
+`scripts/demo_export.py`.
 
 ## Earlier point releases
 
-0.1.0 was the first release, with the four entry points `inject_esmoe`, `graft`, `attach_aux_loss` and `collect_aux_loss`, plus the selection argument and three-seed evidence. 0.1.1 fixed `equip()` handing the grafted config to `YOLO()` as a dict when no `out` path was given, and added the Colab quick start. 0.1.2 fixed the training log header on releases from 8.4.13x, where `loss_names` is empty at `on_train_start`, and moved the package from `src/` to the repository root.
+The 0.1 series introduced the four entry points `inject_esmoe`, `graft`, `attach_aux_loss` and
+`collect_aux_loss` with three-seed evidence, then fixed the config handed to `YOLO()` without an
+`out` path, the training-log header on 8.4.13x, and moved the package from `src/` to the repository
+root.
 
 ## Install
 
 ```bash
-pip install esmoe  # or use
-uv add esmoe
+uv add esmoe              # the block, for any torch model
+uv add esmoe[yolo]        # ... and the Ultralytics integration
+pip install esmoe         # if you insist
 ```

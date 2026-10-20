@@ -172,7 +172,7 @@ def check(target: Path, images: torch.Tensor, reference: tuple, names: list[str]
 
 
 def load(model_id: str, weights: Path) -> tuple[torch.nn.Module, str]:
-    esmoe.inject_esmoe()
+    esmoe.register()
     if weights.name.endswith(".state.pt"):
         from recipe_parity import renamed
         from ultralytics.nn.tasks import DetectionModel

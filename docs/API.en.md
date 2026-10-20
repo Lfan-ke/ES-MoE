@@ -4,20 +4,32 @@ Every entry point below imports from the top-level `esmoe`; the package ships `p
 
 ## equip
 
-    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **graft_kwargs) -> YOLO
+    esmoe.equip(base="yolov8n.yaml", *, weight=0.01, recipe="esmoe", out=None, **kwargs) -> YOLO
 
-Register, graft, build and wire in one call. `out` names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). `weight` and `recipe` go to `attach_aux_loss`, `graft_kwargs` pass through to `graft`.
+Register, graft, build and wire in one call. `out` names the grafted config to keep; without it the config goes to a temporary directory (a YOLO wrapper loads models by path). `weight` and `recipe` go to `attach_aux_loss`, the arguments `graft` knows go to it, and the rest to `YOLO(...)`. **A config that already names a block is taken as written** and nothing is grafted in; `at=None` forces the same.
 
-## inject_esmoe
+## register
 
-    esmoe.inject_esmoe() -> type[ESMoE]
+    esmoe.register() -> type[ESMoE]
 
 Exposes `ESMoE` where `parse_model` resolves layer names, after which any model.yaml can write `[-1, 1, ESMoE, [4, 2]]`.
 
 ## graft
 
-    esmoe.graft(base="yolov8n.yaml", out=None, *, at="backbone_end", num_experts=4, top_k=2,
-                rewire=False, out_channels=None, **settings) -> dict
+    esmoe.graft(target, *args, using="yolo", **kwargs)
+
+Dispatches on the first argument: an `nn.Module` goes to its backend, a string, path or dict to the integration that reads it. Both are reachable directly as `esmoe.torch.graft` and `esmoe.yolo.graft`.
+
+### Into a torch model
+
+    esmoe.torch.graft(model, at, *, mode="after", **block) -> nn.Module
+
+`at` takes a submodule name, several names, or a `(name, module) -> bool` test; `mode` is `after`, `before` or `replace`; the rest goes to `ESMoE`. The model is changed in place and handed back.
+
+### Into a model.yaml
+
+    esmoe.yolo.graft(base="yolov8n.yaml", out=None, *, at="backbone_end", num_experts=4, top_k=2,
+                     kernels=None, rewire=False, out_channels=None, **settings) -> dict
 
 Inserts blocks after the layers named by `at` and renumbers every later reference. `at` is `"backbone_end"`, `"backbone_stages"` (one block after each backbone stage, reproducing the upstream layout), one index or several. With `rewire=True` every later consumer of an insertion layer is pointed at the block; without it, a head branch that names the old backbone end by index (YOLOv8's P5 lateral) keeps reading the pre-block feature.
 
@@ -29,7 +41,7 @@ Inserts blocks after the layers named by `at` and renumbers every later referenc
 
     esmoe.attach_aux_loss(model, weight=0.01, recipe="esmoe") -> model
 
-Puts the auxiliary loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.trainer`, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
+Puts the auxiliary loss into the optimised training loss; training logs gain an `esmoe_aux` column. Also routes `model.train()` through `esmoe.yolo.trainer`, which is how DDP workers register the block and recover the weight and recipe on their own. Inside a process group an expert no image routed to joins the graph at zero weight, so multi-GPU training works under `compile=True` too, where ultralytics turns `find_unused_parameters` off.
 
 `recipe` decides how the block and its term train:
 
@@ -51,15 +63,15 @@ Drops every value blocks have published into the registry. The loss patch `attac
 ## odd / odd_kernels
 
     esmoe.odd(size) -> int
-    esmoe.odd_kernels(num_experts, max_kernel_size=15) -> list[int]
+    esmoe.odd_kernels(num_experts, max_kernel=15) -> list[Kernel]
 
-`odd` steps an even kernel down (4 -> 3) so the padding stays centred, which is what upstream does to both explicit kernel sizes and the cap. `odd_kernels` generates the default heterogeneous set `3, 5, 7, ...` capped at `max_kernel_size` -- the one `ESMoE` uses when `expert_kernel_sizes` is not given.
+`odd` steps an even kernel down (4 -> 3) so the padding stays centred, which is what upstream does to both explicit kernel sizes and the cap. `odd_kernels` generates the default heterogeneous set `3, 5, 7, ...` capped at `max_kernel` -- the one `ESMoE` uses when `kernels` is not given.
 
 ## ESMoE
 
     esmoe.ESMoE(num_experts=4, top_k=2, channels=None, options=None, *,
-                out_channels=None, reduction=8, max_kernel_size=15,
-                expert_kernel_sizes=None, expert=DWExpert, **settings)
+                out_channels=None, kernels=None, expert=DWExpert,
+                reduction=8, max_kernel=15, **settings)
 
 A mixture-of-experts block, channel-preserving unless `out_channels` says otherwise. `channels` is inferred on the first forward when omitted; `top_k=None` activates every expert. `expert` is a `(c1, c2, k) -> Module` factory, or its name (a short name from `esmoe.EXPERTS`, or `module:qualname`). `options` is the mapping a config carries settings in (`[-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]`); it is equivalent to `**settings` and may also carry `expert` and `out_channels`. An `out_channels` given through `options` makes the block return a one-element list for the `Index` layer after it.
 
@@ -76,6 +88,27 @@ The five settings and their defaults (`esmoe.SETTINGS`, a read-only mapping):
 The last two affect inference only, the first three affect training. The defaults for `out_norm`, `dense_training` and `dynamic_threshold` keep the runs already in `results/` reproducible; they are not a judgement against upstream. The default for `balance` is settled by data: an objective that reads the gate (upstream's `gshard`, the paper's `master`) has no gradient for an expert outside the top-k, and five of six such checkpoints lost an expert, as did all six same-configuration B checkpoints, while Switch reads the full softmax and lost none in 66 ([judgment lines](JUDGMENT.md), rounds six to eight).
 
 `block.spec()` returns the five settings a block is holding, plus `expert` when a custom one is in use, and `block.configure(**settings)` changes them on paths that never reach a trainer -- inference, export, a unit test. `esmoe.blocks(model)` walks every block in a model in module order, and `scripts/blockspec.py` reads back from any checkpoint what was actually in force.
+
+## routing
+
+    with esmoe.routing(model) as route:
+        loss = task_loss(model(x), y) + 0.01 * route.loss()
+
+Clears the registry on the way in, so a block that did not run this step cannot report the step before. `route.loss(device=None)` sums this step's balancing terms.
+
+## collect_aux_loss / clear_aux_loss
+
+    esmoe.collect_aux_loss(model, device=None) -> Tensor
+    esmoe.clear_aux_loss() -> None
+
+The two halves of `routing`, for a loop that does not use the context manager. Reading does not clear, so clear before each forward pass.
+
+## backend / integration
+
+    esmoe.backend(name="torch") -> module
+    esmoe.integration(name) -> module
+
+Fetch a backend or integration package by name. `esmoe.BACKENDS` holds `torch`, `keras`, `tensorflow` and `jax` -- the last three all lead to the Keras implementation; `esmoe.INTEGRATIONS` holds `yolo` and its alias `ultralytics`.
 
 ## blocks
 
@@ -128,4 +161,4 @@ The default expert: a `k×k` depthwise convolution (`groups=c1`, no bias), then 
 | `--out-norm` | off | `BatchNorm + SiLU` after the weighted sum |
 | `--dense-training` | off | run every expert while training |
 
-Only settings given explicitly are written into the config. `dynamic_threshold` and `sparse_inference` have no option; pass them through `equip` or the config. `esmoe info` prints the esmoe, ultralytics and torch versions.
+Only settings given explicitly are written into the config. `dynamic_threshold` and `sparse_inference` have no option; pass them through `equip` or the config. `esmoe info` prints the version, and which backends and integrations are installed.

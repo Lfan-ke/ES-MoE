@@ -12,8 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import backfill  # noqa: E402
-from report import load, published, variant  # noqa: E402
+import backfill
+from report import load, published, variant
 
 
 def _protocol():

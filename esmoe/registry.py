@@ -1,35 +1,37 @@
-# Aux losses live in a weak registry rather than on the module, so checkpointing, EMA and
-# deepcopy never drag a non-leaf graph tensor along with the model.
+"""Where a block leaves its balancing term for the loss to pick up.
+
+Not on the module itself: a non-leaf graph tensor there would follow the model through deepcopy,
+EMA and checkpointing.
+"""
+
 import threading
 import weakref
 
-import torch
-
-_REGISTRY = weakref.WeakKeyDictionary()
-_LOCK = threading.Lock()
+__REGISTRY: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+__LOCK = threading.Lock()
 
 
-def publish(module, value):
-    with _LOCK:
-        _REGISTRY[module] = value
+def publish(module: object, value: object) -> None:
+    with __LOCK:
+        __REGISTRY[module] = value
 
 
-def take(module):
-    """The value this module published on its last forward, or None.
+def take(module: object) -> object | None:
+    """What this module published on its last forward pass, or None.
 
-    Reading does not remove, which is what upstream's registry does too: a step may compute the
-    loss more than once and each computation needs the term. Upstream rejects a value from an
-    earlier step by stamping it; here the loss patch clears the registry before each forward,
-    which covers the same case as long as every block runs in that forward.
+    Reading does not remove: one step may compute the loss twice and each needs the term.
     """
-    with _LOCK:
-        return _REGISTRY.get(module)
+    with __LOCK:
+        return __REGISTRY.get(module)
 
 
-def clear():
-    with _LOCK:
-        _REGISTRY.clear()
+def clear() -> None:
+    with __LOCK:
+        __REGISTRY.clear()
 
 
-def zeros(device=None, dtype=None):
-    return torch.zeros((), device=device, dtype=dtype or torch.float32)
+__all__ = [
+    "clear",
+    "publish",
+    "take",
+]

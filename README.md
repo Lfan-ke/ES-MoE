@@ -1,6 +1,6 @@
 <h1 align="center">ES-MoE Toolkit</h1>
 
-<div align="right"><sub>Drop-in expert-sparse MoE block for Ultralytics YOLO</sub></div>
+<div align="right"><sub>Expert-sparse MoE block for torch models and Ultralytics YOLO</sub></div>
 
 ---
 
@@ -24,7 +24,7 @@
 
 <div align=center>
 
-<sub>One call adds the block, the router loss reaches the optimiser, and every number here has a run record behind it. <code>[Try It](https://lfan-ke.github.io/ES-MoE/demo/).</code></sub>
+<sub>Drop it into a torch model or add it to YOLO in one call, the router loss reaches the optimiser, and every number here has a run record behind it. <code>[Try It](https://lfan-ke.github.io/ES-MoE/demo/).</code></sub>
 
 </div>
 
@@ -36,17 +36,42 @@
 
 ## Install
 
-    pip install esmoe
+    uv add esmoe            # the block, for any torch model
+    uv add esmoe[yolo]      # ... and the Ultralytics integration
 
-The distribution, the import and the CLI are all `esmoe`; the project is written ES-MoE in prose.
+`esmoe[ultralytics]` is that extra under its other name, `esmoe[keras]` adds the Keras 3 backend,
+and `esmoe[tensorflow]` or `esmoe[jax]` bring Keras with that backend behind it. The distribution,
+the import and the command line are all `esmoe`; the project is written ES-MoE in prose.
 
-Requires `ultralytics`.
-
-## Use
-
-One call covers register, graft, build and wire:
+## In a torch model
 
     import esmoe
+    from torch import nn
+
+    net = nn.Sequential(
+        nn.Conv2d(3, 64, 3, 2, 1),
+        esmoe.ESMoE(kernels=[3, 5, 7], top_k=1),          # three experts, one per sample
+        esmoe.ESMoE(kernels=[(1, 9), (9, 1)], top_k=2),   # two strip experts, both per sample
+    )
+
+    with esmoe.routing(net) as route:
+        loss = task_loss(net(x), y) + 0.01 * route.loss()
+    loss.backward()
+
+`kernels` gives each expert its receptive field, an `int` or an `(h, w)` pair, and with it how many
+experts there are. `expert` gives a branch its structure, one factory for all of them or one each.
+`top_k` says how many run per sample. The block takes its width from the first forward pass, so
+nothing has to declare it. To put blocks into a model that already exists:
+
+    esmoe.graft(resnet, at="layer3", mode="after", kernels=[3, 5, 7], top_k=1)
+
+`at` takes a submodule name, several names, or a `(name, module) -> bool` test; `mode` is `after`,
+`before` or `replace`.
+
+## In Ultralytics YOLO
+
+One call registers the block, grafts it into the config, builds the model, and makes the router loss
+part of the optimised training loss:
 
     model = esmoe.equip("yolo11n.yaml", weight=0.01)
     model.train(data="coco8.yaml", epochs=10)
@@ -56,46 +81,74 @@ Or take the steps apart when you need control over each one:
     from ultralytics import YOLO
     import esmoe
 
-    esmoe.inject_esmoe()                                    # make `ESMoE` resolvable in model.yaml
+    esmoe.register()                                             # resolve `ESMoE` in a model.yaml
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])  # insert blocks, renumber the head
     model = YOLO("v8-esmoe.yaml")
-    esmoe.attach_aux_loss(model, weight=0.01)               # router loss joins the training loss
+    esmoe.attach_aux_loss(model, weight=0.01)                    # the router loss joins the total
 
 From the shell:
 
-    esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at backbone_end
+    esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml --kernels 3,5,7 -k 1
 
 `attach_aux_loss` adds an `esmoe_aux` entry to the trainer's loss table, so a non-zero,
 back-propagated auxiliary term shows up in `results.csv` rather than merely in a config.
 
-Written by hand, a grafted config layer is just:
+Written by hand, a config layer is just:
 
     [-1, 1, ESMoE, [4, 2]]                              # num_experts, top_k
+    [-1, 1, ESMoE, [{kernels: [3, 5, 7], top_k: 1}]]    # or say what you mean
     [-1, 1, ESMoE, [4, 2, null, {out_norm: true}]]      # ... and settings the trainer must keep
     [-1, 1, ESMoE, [4, 2, null, {out_channels: 320}]]   # widened ...
     [-1, 1, Index, [320, 0]]                            # ... and the official layer that declares it
 
-The block is channel preserving and infers its width on the first forward, which is what lets stock
-`parse_model` size it without a patch. A widened block instead hands a one-element list to the
-official `Index` layer after it, whose declared width `parse_model` does read; `graft(out_channels=...)`
-writes both. Settings belong in the config because the trainer rebuilds the model from it, dropping
-anything set on the blocks beforehand.
+`ESMoE`, `ES_MoE` and `ES_MOE` all resolve to the block, and a config that already names one is
+taken as written: `equip` grafts nothing into it. The block is channel preserving and infers its
+width on the first forward, which is what lets stock `parse_model` size it without a patch. A
+widened block instead hands a one-element list to the official `Index` layer after it, whose
+declared width `parse_model` does read; `graft(out_channels=...)` writes both. Settings belong in
+the config because the trainer rebuilds the model from it, dropping anything set on the blocks
+beforehand.
+
+## On tensorflow, jax and keras
+
+The block is written twice: once in torch, once in Keras 3, which runs it on tensorflow, jax or
+torch. Both read their arguments through the same code, so they take the same ones.
+
+    from esmoe.keras import ESMoE
+
+    net = keras.Sequential([keras.layers.Conv2D(16, 3, padding="same"), ESMoE(kernels=[3, 5, 7], top_k=1)])
+    net.compile(optimizer="adam", loss="mse")
+    net.fit(x, y)            # the balancing term rides along through Keras' own add_loss
+
+One difference: the Keras layer evaluates every expert and weights them by the gate. Skipping an
+unrouted expert depends on the data, which a traced jax or tensorflow graph cannot express. The
+routing and the balancing term are the torch backend's; only the inference-time saving is torch's
+alone. `esmoe.backend("jax")` and `esmoe.backend("tensorflow")` both lead here.
 
 ## Extend
 
 Experts and the balancing objective are plain callables, so a variant is a few lines:
 
-    esmoe.ESMoE(num_experts=4, top_k=2, expert=MyExpert, balance=my_balance_fn)
+    esmoe.ESMoE(kernels=[3, 5], expert=[MyExpert, esmoe.DWExpert], balance=my_balance_fn)
 
-`MyExpert(c1, c2, k) -> Module`, `my_balance_fn(probs, gate) -> scalar`. To train with them, pass them
-to `graft` or `equip`: a function or class defined at module level goes into the config as
-`module:qualname`, and every rebuild of the model -- the trainer's, each DDP worker's -- imports it
-back from that name. A lambda or anything defined in `__main__` is refused when grafting.
+`MyExpert(c1, c2, k) -> Module`, `my_balance_fn(probs, gate) -> scalar`. To train with them under
+YOLO, pass them to `graft` or `equip`: a function or class defined at module level goes into the
+config as `module:qualname`, and every rebuild of the model -- the trainer's, each DDP worker's --
+imports it back from that name. A lambda or anything defined in `__main__` is refused when grafting.
 `esmoe.blocks(model)` walks every block in a model, `esmoe.collect_aux_loss(model)` returns the
 current step's router loss for custom training loops, and `block.spec()` reports the settings a
 block is holding.
 
 ## Compatibility
+
+| backend | block | router loss | graft | tested on |
+|:--:|:--:|:--:|:--:|:--:|
+| torch | yes | yes | any `nn.Module` | every CI leg, and one with ultralytics absent |
+| Keras 3 on tensorflow | yes | through `add_loss` | `Sequential` | its own CI leg |
+| Keras 3 on jax | yes | through `add_loss` | `Sequential` | its own CI leg |
+| Keras 3 on torch | yes | through `add_loss` | `Sequential` | its own CI leg |
+
+The Ultralytics integration runs on the torch block:
 
 | backbone | build + forward | grafted config | aux loss in training | protocol runs |
 |:--:|:--:|:--:|:--:|:--:|
@@ -119,7 +172,7 @@ each logging a non-zero `train/esmoe_aux`.
 Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
 "we ran the full budget-fair protocol on it". The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
 
-DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.trainer`, so the
+DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.yolo.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
 `scripts/verify.py` (the real worker file in a fresh interpreter; two gloo ranks with agreeing router gradients).
 Inside a process group an expert that no image routed to joins the graph at zero weight, so the settings
@@ -188,6 +241,7 @@ branch (Git LFS, orphan — `main` stays small), flat-named to match the run rec
 ## Linked projects
 
 - [ultralytics](https://github.com/ultralytics/ultralytics) - the official YOLO framework this plugs into.
+- [keras](https://github.com/keras-team/keras) - the multi-backend framework the second implementation runs on.
 - [Tencent/YOLO-Master](https://github.com/Tencent/YOLO-Master) - where ES-MoE comes from ([paper](https://arxiv.org/abs/2512.23273)).
 
 ## License

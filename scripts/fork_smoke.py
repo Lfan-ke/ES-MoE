@@ -13,7 +13,7 @@ import esmoe
 print(
     "fork ultralytics", ultralytics.__version__, "| esmoe", esmoe.__version__, "| torch", torch.__version__, flush=True
 )
-esmoe.inject_esmoe()
+esmoe.register()
 
 target = Path(tempfile.mkdtemp(prefix="esmoe-fork-")) / "yolo-master-n-esmoe.yaml"
 esmoe.graft("yolo-master-n.yaml", out=str(target))

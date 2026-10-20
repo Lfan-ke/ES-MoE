@@ -123,7 +123,7 @@ def map_weights(args) -> None:
 
     import esmoe
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     out = Path(args.out)
     for arm, source, yaml in (
         ("recipe", "upstream", "yolo-master-n-esmoe.yaml"),
@@ -188,7 +188,7 @@ def trace(args) -> None:
     if stack == "official":
         import esmoe
 
-        esmoe.inject_esmoe()
+        esmoe.register()
     model = YOLO(str(out / init_file))
     if args.perturb:
         with torch.no_grad():

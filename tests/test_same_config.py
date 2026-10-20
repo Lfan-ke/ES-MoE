@@ -9,8 +9,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import report  # noqa: E402
-import same_config  # noqa: E402
+import report
+import same_config
 
 
 def record(arm, seed, value, framework="ultralytics", torch="2.8.0+metax3.3.0.2", **config):

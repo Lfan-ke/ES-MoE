@@ -8,7 +8,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import recipe_parity  # noqa: E402
+import recipe_parity
 
 
 def test_upstream_block_weights_land_on_the_matching_tensors_here():

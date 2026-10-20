@@ -20,9 +20,12 @@ from torch import nn
 
 pytest.importorskip("ultralytics")
 
-import esmoe  # noqa: E402
-from esmoe import inject, upstream  # noqa: E402
-from esmoe.inject import AUX_NAME  # noqa: E402
+import esmoe
+from esmoe.yolo import (
+    inject,
+    upstream,
+)
+from esmoe.yolo.inject import AUX_NAME
 
 DEFAULTS = (1.0, 0.1, 0.1, 0.1)  # upstream's running-mean starts, in its order: moe, mot, moa, latent
 GAINS = (1.0, 1.0, 1.0, 0.1)
@@ -31,8 +34,8 @@ GAINS = (1.0, 1.0, 1.0, 0.1)
 @pytest.fixture(autouse=True)
 def _process_settings(monkeypatch):
     # attach_aux_loss arms the whole process and its environment; both go back for the next test.
-    monkeypatch.setattr(inject, "_WEIGHT", inject._WEIGHT)
-    monkeypatch.setattr(inject, "_RECIPE", inject._RECIPE)
+    monkeypatch.setattr(inject, "__WEIGHT", inject.armed_weight())
+    monkeypatch.setattr(inject, "__RECIPE", inject.armed_recipe())
     for key in (inject.ENV_WEIGHT, inject.ENV_RECIPE):
         monkeypatch.setenv(key, os.environ.get(key, ""))
         if not os.environ[key]:
@@ -86,7 +89,7 @@ def _model(**graft_kwargs):
     from ultralytics.nn.tasks import DetectionModel
     from ultralytics.utils import DEFAULT_CFG
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     cfg = esmoe.graft("yolov8n.yaml", **graft_kwargs)
     cfg["nc"] = 2
     model = DetectionModel(cfg, ch=3, nc=2, verbose=False)
@@ -181,16 +184,16 @@ def test_an_unknown_recipe_is_refused():
 def test_a_worker_process_inherits_the_recipe(tmp_path):
     from ultralytics import YOLO
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     cfg = tmp_path / "worker.yaml"
     esmoe.graft("yolov8n.yaml", out=str(cfg))
     model = esmoe.attach_aux_loss(YOLO(str(cfg)), weight=1.0, recipe="upstream")
     cls = model._smart_load("trainer")
     probe = (
         f"from {cls.__module__} import {cls.__name__} as T\n"
-        "import esmoe.inject as inject\n"
+        "import esmoe.yolo.inject as inject\n"
         "assert inject.armed_recipe() == 'upstream', inject.armed_recipe()\n"
-        "assert T.build_optimizer.__module__ == 'esmoe.trainer'\n"
+        "assert T.build_optimizer.__module__ == 'esmoe.yolo.trainer'\n"
     )
     done = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, env=os.environ.copy())
     assert done.returncode == 0, done.stderr[-800:]
@@ -199,7 +202,7 @@ def test_a_worker_process_inherits_the_recipe(tmp_path):
 def test_a_trained_model_gets_the_whole_recipe(tmp_path):
     from ultralytics import YOLO
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     cfg = tmp_path / "upstream.yaml"
     esmoe.graft("yolov8n.yaml", out=str(cfg), balance="gshard", out_norm=True, dense_training=True)
     model = esmoe.attach_aux_loss(YOLO(str(cfg)), weight=1.0, recipe="upstream")

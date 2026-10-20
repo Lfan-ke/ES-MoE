@@ -3,9 +3,9 @@ import torch
 
 pytest.importorskip("ultralytics")
 
-from esmoe import DWExpert, attach_aux_loss, blocks, equip, graft, inject_esmoe, switch_balance  # noqa: E402
-from esmoe.__main__ import main as cli  # noqa: E402
-from esmoe.inject import AUX_NAME  # noqa: E402
+from esmoe import DWExpert, attach_aux_loss, blocks, equip, graft, inject_esmoe, switch_balance
+from esmoe.cli import main as cli
+from esmoe.yolo.inject import AUX_NAME
 
 BACKBONES = ["yolov8n.yaml", "yolo11n.yaml", "yolo12n.yaml"]
 
@@ -133,7 +133,7 @@ def test_attach_refuses_a_model_without_blocks():
 
 
 def test_arm_re_attaches_to_the_rebuilt_trainer_model():
-    from esmoe.inject import arm_trainer
+    from esmoe.yolo.inject import arm_trainer
 
     class Trainer:
         loss_names = ("box_loss", "cls_loss", "dfl_loss")
@@ -148,7 +148,7 @@ def test_arm_re_attaches_to_the_rebuilt_trainer_model():
 
 
 def test_arm_leaves_empty_loss_names_to_the_trainer():
-    from esmoe.inject import arm_trainer
+    from esmoe.yolo.inject import arm_trainer
 
     class Trainer:
         loss_names = ()
@@ -236,7 +236,7 @@ def test_train_routes_to_a_trainer_that_lives_in_esmoe():
 
     model = attach_aux_loss(YOLO(str(_grafted_yaml())), weight=0.02)
     cls = model._smart_load("trainer")
-    assert cls.__module__ == "esmoe.trainer" and cls.__name__.startswith("ESMoE"), cls
+    assert cls.__module__ == "esmoe.yolo.trainer" and cls.__name__.startswith("ESMoE"), cls
     assert cls is model._smart_load("trainer"), "wrapping twice must hand back the same class"
     assert model._smart_load("validator").__module__.startswith("ultralytics"), "only the trainer is rerouted"
 
@@ -254,15 +254,22 @@ def test_a_fresh_interpreter_can_import_the_worker_trainer():
     cls = model._smart_load("trainer")
     probe = (
         f"from {cls.__module__} import {cls.__name__} as T\n"
-        "import ultralytics.nn.tasks as tasks, esmoe.inject as inject\n"
+        "import ultralytics.nn.tasks as tasks, esmoe.yolo.inject as inject\n"
         "assert tasks.ESMoE is inject.ESMoE, 'block not registered in the worker'\n"
-        "assert tasks.BaseModel.loss is inject._loss_with_aux, 'loss not patched in the worker'\n"
+        "assert tasks.BaseModel.loss is inject.__loss_with_aux, 'loss not patched in the worker'\n"
         "assert inject.armed_weight() == 0.02, inject.armed_weight()\n"
         "print(T.__mro__[1].__name__)\n"
     )
     done = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, env=os.environ.copy())
     assert done.returncode == 0, done.stderr[-800:]
     assert done.stdout.strip().endswith("Trainer")
+
+
+def test_equip_sends_block_settings_to_the_graft_not_to_yolo():
+    """A setting the block understands must not reach the YOLO wrapper as a stray keyword."""
+    model = equip("yolo11n.yaml", at="backbone_stages", balance="gshard", out_norm=True, weight=0.01)
+    held = next(blocks(model.model)).spec()
+    assert held["balance"] == "gshard" and held["out_norm"] is True
 
 
 def _grafted_yaml():

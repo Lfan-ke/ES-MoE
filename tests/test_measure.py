@@ -7,7 +7,7 @@ from types import SimpleNamespace
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import measure  # noqa: E402
+import measure
 
 
 def test_a_run_is_rebuilt_from_the_config_its_arguments_name():

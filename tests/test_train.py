@@ -10,7 +10,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import train  # noqa: E402
+import train
 
 
 def test_the_record_learns_what_the_trainer_did():

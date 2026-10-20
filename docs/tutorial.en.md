@@ -1,8 +1,8 @@
-# Tutorial
+# In Ultralytics YOLO
 
 Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.
 
-    pip install esmoe
+    uv add esmoe[yolo]
 
 ## What the block does
 
@@ -41,7 +41,7 @@ realised load are spread evenly. Measured, what it prevents is an expert dying, 
 
 ## The three calls
 
-`inject_esmoe` makes the block nameable in a config, `graft` puts it there and fixes the layer references, `attach_aux_loss` wires the auxiliary loss into training. `equip` does all four steps at once: register, graft, build, wire.
+`register` makes the block nameable in a config, `graft` puts it there and fixes the layer references, `attach_aux_loss` wires the auxiliary loss into training. `equip` does all four steps at once: register, graft, build, wire.
 
     import esmoe
 
@@ -50,7 +50,7 @@ realised load are spread evenly. Measured, what it prevents is an expert dying, 
 
 Take them apart when you need to:
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
     model = YOLO("v8-esmoe.yaml")
     esmoe.attach_aux_loss(model, weight=0.01)
@@ -61,7 +61,10 @@ or from the shell:
 
 Written by hand, the grafted layer is one line:
 
-    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+    [-1, 1, ESMoE, [4, 2]]                             # num_experts, top_k
+    [-1, 1, ES_MoE, [{kernels: [3, 5, 7], top_k: 1}]]  # or say what you mean
+
+`ESMoE`, `ES_MoE` and `ES_MOE` all resolve to the block, and a config that already names one is taken as written: `equip` grafts nothing into it.
 
 ## Grafting and renumbering
 
@@ -174,7 +177,7 @@ Upstream's `ES_MOE` differs from this package's defaults in the first five rows 
 | inference pruning | `dynamic_threshold=0.4` drops low-share experts, keeps the leader, renormalises | `0.0`, nothing dropped | `dynamic_threshold=0.4` |
 | sparse inference | `use_sparse_inference=True` | same | `sparse_inference=False` runs all |
 
-The block matches upstream's remaining parameters too: `out_channels` (the input's width by default), `top_k=None` meaning every expert, even kernels stepped down to odd and capped at `max_kernel_size` so a pruned checkpoint's kernels reload, and the same validation of `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel_size` -- refused at construction rather than halfway through a run.
+The block matches upstream's remaining parameters too: `out_channels` (the input's width by default), `top_k=None` meaning every expert, even kernels stepped down to odd and capped at `max_kernel` so a pruned checkpoint's kernels reload, and the same validation of `num_experts`, `reduction`, `dynamic_threshold` and `max_kernel` -- refused at construction rather than halfway through a run.
 
 `out_norm`, `dense_training` and `dynamic_threshold` are off by default so the runs of this package's recipe in `results/` still reproduce; the first two each have an arm on the [judgment lines](JUDGMENT.md) page. On the `esmoe graft` command line: `--at`, `--balance`, `--out-norm`, `--dense-training`; the pruning threshold goes through `equip` or the config.
 
