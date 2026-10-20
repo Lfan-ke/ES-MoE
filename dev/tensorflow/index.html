@@ -651,10 +651,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#当普通层用" class="md-nav__link">
+  <a href="#辅助损失" class="md-nav__link">
     <span class="md-ellipsis">
       
-        当普通层用
+        辅助损失
       
     </span>
   </a>
@@ -662,10 +662,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#进计算图与求梯度" class="md-nav__link">
+  <a href="#插进现成的模型" class="md-nav__link">
     <span class="md-ellipsis">
       
-        进计算图与求梯度
+        插进现成的模型
       
     </span>
   </a>
@@ -1123,10 +1123,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#当普通层用" class="md-nav__link">
+  <a href="#辅助损失" class="md-nav__link">
     <span class="md-ellipsis">
       
-        当普通层用
+        辅助损失
       
     </span>
   </a>
@@ -1134,10 +1134,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#进计算图与求梯度" class="md-nav__link">
+  <a href="#插进现成的模型" class="md-nav__link">
     <span class="md-ellipsis">
       
-        进计算图与求梯度
+        插进现成的模型
       
     </span>
   </a>
@@ -1178,42 +1178,33 @@
 <h1 id="tensorflow-集成">TensorFlow 集成<a class="headerlink" href="#tensorflow-集成" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>tensorflow<span class="o">]</span>
 </code></pre></div>
-<p>块在 TensorFlow 上以 Keras 3 层的形式提供。装上这个 extra 后把 <code>KERAS_BACKEND</code> 设为 <code>tensorflow</code>，<code>esmoe.keras.ESMoE</code> 就是一个普通的 TensorFlow 层。</p>
-<div class="highlight"><pre><span></span><code><span class="nv">KERAS_BACKEND</span><span class="o">=</span>tensorflow<span class="w"> </span>python<span class="w"> </span>train.py
-</code></pre></div>
-<h2 id="当普通层用">当普通层用<a class="headerlink" href="#当普通层用" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
-
-<span class="n">net</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">"same"</span><span class="p">),</span>
-        <span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="s2">"adam"</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="s2">"mse"</span><span class="p">)</span>
-<span class="n">net</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-</code></pre></div>
-<p>平衡项走 Keras 的 <code>add_loss</code>，<code>fit</code> 会把它算进去。</p>
-<h2 id="进计算图与求梯度">进计算图与求梯度<a class="headerlink" href="#进计算图与求梯度" title="Permanent link">&para;</a></h2>
-<p>层可以直接进 <code>tf.function</code>，梯度照常由 <code>GradientTape</code> 取。平衡项要在同一次追踪内读出来——追踪里生成的张量出了函数就不可用。</p>
+<p><code>esmoe.tensorflow.ESMoE</code> 是一个 <code>tf.Module</code>，只依赖 TensorFlow，不经 Keras。输入按 NHWC。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span><span class="p">,</span> <span class="n">Sequential</span>
 
-
-<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">add_n</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">losses</span><span class="p">)</span>
-
-
-<span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
-    <span class="n">value</span> <span class="o">=</span> <span class="n">total</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
-<span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">)</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span><span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">]),</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<p><code>tests/test_backends.py</code> 在 CI 的 TensorFlow 腿上跑的就是这段。</p>
+<p><code>kernels</code> 给每个专家一个感受野，<code>int</code> 或 <code>(h, w)</code>，专家数由它定；<code>top_k</code> 决定几选几。通道取自第一次调用。</p>
+<h2 id="辅助损失">辅助损失<a class="headerlink" href="#辅助损失" title="Permanent link">&para;</a></h2>
+<p>平衡项要自己加进总损失：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">routing</span>
+
+<span class="k">with</span> <span class="n">routing</span><span class="p">(</span><span class="n">net</span><span class="p">)</span> <span class="k">as</span> <span class="n">route</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">route</span><span class="o">.</span><span class="n">loss</span><span class="p">()</span>
+<span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="n">net</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">)</span>
+</code></pre></div>
+<p><code>routing</code> 进入时清一次注册表，这一步没跑到的块就不会把上一步的值报上来。不用上下文管理器就自己配对调用 <code>clear_aux_loss</code> 与 <code>collect_aux_loss</code>。</p>
+<h2 id="插进现成的模型">插进现成的模型<a class="headerlink" href="#插进现成的模型" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">graft</span>
+
+<span class="n">graft</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="s2">"stem"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"after"</span><span class="p">,</span> <span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p><code>at</code> 收属性名、若干名字，或 <code>(name, module) -&gt; bool</code>；<code>Sequential</code> 里的层按下标取名。<code>mode</code> 为 <code>after</code>、<code>before</code>、<code>replace</code>，原地改。</p>
 <h2 id="边界">边界<a class="headerlink" href="#边界" title="Permanent link">&para;</a></h2>
-<p>每个专家都要算。跳过未被路由到的专家取决于当批数据，静态图表达不了；路由与平衡项与 torch 那份逐位一致，省下的推理开销是 torch 独有的。</p>
-<p>嫁接只支持 <code>keras.Sequential</code>，函数式模型要自行重建。通道次序听 <code>keras.config.image_data_format()</code>。</p>
+<p>每个专家都要算。跳过未被路由到的专家取决于当批数据，静态图表达不了。</p>
+<p>批归一化的滑动统计量存成不参与训练的变量，<code>training=True</code> 时更新。</p>
 
 
 

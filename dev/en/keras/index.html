@@ -707,10 +707,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#where-it-differs-from-the-torch-block" class="md-nav__link">
+  <a href="#boundaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where it differs from the torch block
+        Boundaries
       
     </span>
   </a>
@@ -1112,10 +1112,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#where-it-differs-from-the-torch-block" class="md-nav__link">
+  <a href="#boundaries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where it differs from the torch block
+        Boundaries
       
     </span>
   </a>
@@ -1156,10 +1156,8 @@
 <h1 id="keras-3-integration">Keras 3 integration<a class="headerlink" href="#keras-3-integration" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>keras<span class="o">]</span>
 </code></pre></div>
-<p>Keras picks the backend; <code>esmoe[tensorflow]</code> and <code>esmoe[jax]</code> bring one with them.</p>
-<p>The block is written twice: once in native torch, once in Keras 3. Keras 3 runs on tensorflow, jax
-and torch, so that second implementation covers the other three. Both take the same arguments,
-because the code that reads them is the same code.</p>
+<p><code>esmoe.keras.ESMoE</code> is a <code>keras.layers.Layer</code> written against <code>keras.ops</code>, so it runs on whichever
+backend Keras is configured for: tensorflow, jax or torch.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
 
@@ -1174,10 +1172,9 @@ because the code that reads them is the same code.</p>
 </code></pre></div>
 <p>The auxiliary loss goes through Keras' own <code>add_loss</code>, so <code>fit</code> already counts it. A custom loop
 reads it with <code>esmoe.keras.collect_aux_loss(model)</code>, which is <code>model.losses</code> summed.</p>
-<h2 id="where-it-differs-from-the-torch-block">Where it differs from the torch block<a class="headerlink" href="#where-it-differs-from-the-torch-block" title="Permanent link">&para;</a></h2>
-<p><strong>Every expert is evaluated.</strong> Skipping an unrouted one depends on the batch, which a static jax or
-tensorflow graph cannot express. Routing and the balancing term match the torch block bit for bit;
-the inference-time saving is torch's alone.</p>
+<h2 id="boundaries">Boundaries<a class="headerlink" href="#boundaries" title="Permanent link">&para;</a></h2>
+<p><strong>Every expert is evaluated.</strong> Skipping an unrouted one depends on the batch, which a static graph
+cannot express.</p>
 <p><strong>The channel axis follows Keras.</strong> It reads <code>keras.config.image_data_format()</code>, which defaults to
 <code>channels_last</code>.</p>
 <p><strong>Grafting takes a <code>Sequential</code>.</strong> A functional model holds a graph rather than a list, so changing
@@ -1188,6 +1185,7 @@ it means rebuilding it. <code>esmoe.keras.graft</code> hands back a new <code>Se
 </code></pre></div>
 <p><code>esmoe.backend("jax")</code>, <code>esmoe.backend("tensorflow")</code> and <code>esmoe.backend("keras")</code> all lead here.
 CI runs this layer's tests once on each of the three.</p>
+<p>The arguments are the ones <a href="../torch/">Torch integration</a> takes: the code that reads them is shared.</p>
 
 
 

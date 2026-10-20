@@ -679,10 +679,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#纯函数的用法" class="md-nav__link">
+  <a href="#训练" class="md-nav__link">
     <span class="md-ellipsis">
       
-        纯函数的用法
+        训练
       
     </span>
   </a>
@@ -690,10 +690,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#训练" class="md-nav__link">
+  <a href="#参数树" class="md-nav__link">
     <span class="md-ellipsis">
       
-        训练
+        参数树
       
     </span>
   </a>
@@ -1123,10 +1123,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#纯函数的用法" class="md-nav__link">
+  <a href="#训练" class="md-nav__link">
     <span class="md-ellipsis">
       
-        纯函数的用法
+        训练
       
     </span>
   </a>
@@ -1134,10 +1134,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#训练" class="md-nav__link">
+  <a href="#参数树" class="md-nav__link">
     <span class="md-ellipsis">
       
-        训练
+        参数树
       
     </span>
   </a>
@@ -1178,37 +1178,34 @@
 <h1 id="jax-集成">Jax 集成<a class="headerlink" href="#jax-集成" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>jax<span class="o">]</span>
 </code></pre></div>
-<p>块在 Jax 上以 Keras 3 层的形式提供。装上这个 extra 后把 <code>KERAS_BACKEND</code> 设为 <code>jax</code>，层的每一次前向就都在 Jax 上执行。</p>
-<div class="highlight"><pre><span></span><code><span class="nv">KERAS_BACKEND</span><span class="o">=</span>jax<span class="w"> </span>python<span class="w"> </span>train.py
-</code></pre></div>
-<h2 id="纯函数的用法">纯函数的用法<a class="headerlink" href="#纯函数的用法" title="Permanent link">&para;</a></h2>
-<p>Keras 层在 Jax 上对外是纯函数：<code>stateless_call</code> 把变量作为入参、把输出与更新后的变量一起返回，所以可以直接放进 <code>jax.jit</code> 与 <code>jax.grad</code>，没有藏起来的状态。</p>
+<p><code>esmoe.jax.ESMoE</code> 是一组纯函数，只依赖 Jax，不经 Keras 也不经 Flax。<code>init</code> 建参数树，<code>apply</code> 返回输出与平衡项。输入按 NHWC。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
 
-<span class="n">net</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">Sequential</span><span class="p">([</span><span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
-<span class="n">net</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>  <span class="c1"># 首次前向建好专家与路由器</span>
-<span class="n">layer</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">trainable</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">trainable_variables</span><span class="p">]</span>
-<span class="n">other</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="o">.</span><span class="n">non_trainable_variables</span><span class="p">]</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="n">out</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">stateless_call</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-
-
-<span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">total</span><span class="p">)(</span><span class="n">trainable</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
-<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">total</span><span class="p">)(</span><span class="n">trainable</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+<span class="n">block</span> <span class="o">=</span> <span class="n">ESMoE</span><span class="p">(</span><span class="n">kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">channels</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">out</span><span class="p">,</span> <span class="n">aux</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
 </code></pre></div>
-<p><code>tests/test_backends.py</code> 在 CI 的 Jax 腿上跑的就是这段：<code>jit</code> 的结果与直算一致，梯度非零。</p>
+<p><code>kernels</code> 给每个专家一个感受野，<code>int</code> 或 <code>(h, w)</code>，专家数由它定；<code>top_k</code> 决定几选几。</p>
 <h2 id="训练">训练<a class="headerlink" href="#训练" title="Permanent link">&para;</a></h2>
-<p>走 Keras 的训练循环时与别的后端没有区别，<code>compile</code> 加 <code>fit</code> 即可，平衡项由 <code>add_loss</code> 计入。</p>
+<p>平衡项由 <code>apply</code> 直接返回，所以梯度怎么取都在你手里：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">loss</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">aux</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">task_loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">aux</span>
+
+
+<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</code></pre></div>
+<p>整段都能进 <code>jax.jit</code>：没有藏起来的状态，也没有需要清理的注册表。</p>
+<h2 id="参数树">参数树<a class="headerlink" href="#参数树" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>{"router": {"first", "first_bias", "second", "second_bias"},
+ "experts": [{"depthwise", "pointwise", "scale", "offset"}, ...],
+ "norm": {"scale", "offset"}}        # 仅在 out_norm 开启时
+</code></pre></div>
+<p>是普通的字典与数组，<code>optax</code> 与 <code>jax.tree</code> 直接能用。</p>
 <h2 id="边界">边界<a class="headerlink" href="#边界" title="Permanent link">&para;</a></h2>
-<p>每个专家都要算。跳过未被路由到的专家取决于当批数据，<code>jit</code> 之后的图是静态的，表达不了；路由与平衡项与 torch 那份逐位一致。</p>
-<p>嫁接只支持 <code>keras.Sequential</code>，函数式模型要自行重建。</p>
+<p>每个专家都要算。跳过未被路由到的专家取决于当批数据，<code>jit</code> 之后的图是静态的，表达不了。</p>
+<p>归一化按当批统计量计算，不保留滑动量：函数式接口里，状态要么由调用方携带，要么不存在，这里选后者。</p>
 
 
 
