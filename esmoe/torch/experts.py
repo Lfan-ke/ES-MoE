@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from torch import Tensor, nn
 
-from ..kernels import Kernel
+from ..core.kernels import Kernel
 
 ExpertFactory = Callable[[int, int, Kernel], nn.Module]
 

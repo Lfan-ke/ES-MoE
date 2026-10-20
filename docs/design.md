@@ -55,14 +55,17 @@ flowchart TB
 
 ## 包的分层
 
-要兼容的东西分两类，各占一层。**后端**是块用哪套张量库写成，**集成**是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。
+要兼容的东西分两类，各占一层。**后端**是块用哪套张量库写成（Flax 自己有两套 API，`nnx` 与 `linen`，各占一个子包），**集成**是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。
 
 ```
 esmoe/
-  spec.py kernels.py naming.py registry.py   与后端无关的共享核
-  torch/    后端：原生 torch
-  keras/    后端：Keras 3，覆盖 tensorflow / jax / torch
-  yolo/     集成：Ultralytics
+  core/         与后端无关：spec 参数解析、kernels 核尺寸、naming 命名、registry 注册表
+  torch/        后端：block experts balance loss graft
+  tensorflow/   后端：同上，写在 tf.Module 上
+  jax/          后端：纯函数 init / apply
+  flax/         后端：balance 共用，nnx/ 与 linen/ 各一套 API
+  keras/        后端：keras.layers.Layer，跨 tf / jax / torch
+  yolo/         集成：inject graft trainer upstream
 ```
 
 每个后端包导出同一组名字：`ESMoE`、`DWExpert`、`EXPERTS`、`BALANCES`、`blocks`、`routing`、`collect_aux_loss`、`clear_aux_loss`、`graft`。每个集成包导出 `graft` 与 `equip`，能把辅助损失接进该栈优化器的再导出 `attach_aux_loss`，按名字解析层的再导出 `register`。顶层直接导出 torch 后端，集成的名字按需加载，所以没装 ultralytics 时 `import esmoe` 照常。

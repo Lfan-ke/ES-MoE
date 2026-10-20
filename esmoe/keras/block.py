@@ -11,9 +11,9 @@ from typing import Self
 import keras
 from keras import layers, ops
 
-from ..kernels import Kernel, odd_kernels
-from ..naming import named, resolve
-from ..spec import SETTINGS, settle
+from ..core.kernels import Kernel, odd_kernels
+from ..core.naming import named, resolve
+from ..core.spec import SETTINGS, settle
 from .balance import BALANCES
 from .experts import EXPERTS, DWExpert, ExpertFactory
 

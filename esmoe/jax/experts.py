@@ -3,7 +3,7 @@
 import jax
 import jax.numpy as jnp
 
-from ..kernels import Kernel
+from ..core.kernels import Kernel
 
 type Params = dict
 

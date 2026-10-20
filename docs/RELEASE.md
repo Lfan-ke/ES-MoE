@@ -1,6 +1,11 @@
 # 发布说明
 
-当前版本 **2.2.0**：Flax 后端按现行的 `flax.nnx` 写成，jax 由此有三条路。
+当前版本 **2.2.1**：Flax 的两套 API 都支持。
+
+## 2.2.1
+
+- **Flax Linen。** `esmoe.flax.linen.ESMoE` 是一个 `linen.Module`，参数放在模块外、用 `apply` 跑，平衡项 sow 进 `intermediates`。`esmoe.flax` 仍是 `nnx`，Flax 现在推荐的那套。
+- **目录按层重排。** 与后端无关的四个模块收进 `esmoe/core/`，Flax 的两套 API 各占一个子包 `esmoe/flax/nnx` 与 `esmoe/flax/linen`，平衡目标两套共用。
 
 ## 2.2.0
 

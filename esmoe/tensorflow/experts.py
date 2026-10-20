@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import tensorflow as tf
 
-from ..kernels import Kernel
+from ..core.kernels import Kernel
 
 type ExpertFactory = Callable[[int, int, Kernel], tf.Module]
 

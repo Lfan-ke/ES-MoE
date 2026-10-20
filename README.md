@@ -163,16 +163,9 @@ The Ultralytics integration runs on the torch block:
 | YOLO26 | yes | yes | yes | yes |
 | YOLO-Master (fork) | yes | yes | yes | no |
 
-The fork row has no protocol runs of this package: the same-configuration comparison trains upstream's own blocks on
-the fork and this package's blocks on official ultralytics.
-
-Verified by `tests/test_ultralytics.py` on ultralytics 8.4.101 and on the latest release, the two versions in the CI
-matrix; they report loss items in different shapes, and both are handled. The training column is backed by real 1-epoch VisDrone
-runs on four generations (`results/*-compat-*.json`) and by the 120-epoch protocol runs on all seven,
-each logging a non-zero `train/esmoe_aux`.
-
-Graft and forward are exercised on every row in CI. The last column separates "the block builds and trains" from
-"we ran the full budget-fair protocol on it". The YOLO-Master row runs against the fork's vendored ultralytics: `scripts/fork_smoke.py` grafts their `yolo-master-n.yaml`, trains one epoch with a non-zero `esmoe_aux`, and builds their own `ES_MOE` config alongside ours.
+Every row is built, grafted and trained in CI, against both the latest ultralytics and 8.4.101,
+which report loss items in different shapes. The last column separates "builds and trains" from
+"was run under the full accuracy protocol".
 
 DDP works: `attach_aux_loss` routes `model.train()` through a trainer class that lives in `esmoe.yolo.trainer`, so the
 worker processes ultralytics spawns register the block and the auxiliary loss before they build. Verified by
@@ -181,64 +174,44 @@ Inside a process group an expert that no image routed to joins the graph at zero
 ultralytics uses under `compile=True` (`find_unused_parameters=False`, `static_graph=True`) train as well;
 `tests/test_distributed.py` checks that with two gloo ranks, and that the block compiles and agrees with eager.
 
-To compare against YOLO-Master under one configuration, `attach_aux_loss(model, weight=1.0, recipe="upstream")`
-trains the way its trainer trains a routed model. The auxiliary term is normalised by its running magnitude and
-capped at 3.0, routers get half the learning rate outside Muon, and experts stay frozen for three epochs.
-`scripts/train.py --upstream` runs the same protocol on the fork itself, and `scripts/same_config.py` pairs the two.
+`attach_aux_loss(model, weight=1.0, recipe="upstream")` trains the way YOLO-Master's own trainer
+trains a routed model, for a like-for-like comparison with it.
 
-## Default configuration
+## Defaults, and what they cost
 
-`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`, chosen under one budget over
-2/4/8-expert and top-1 variants. Under the repository protocol (VisDrone, imgsz 800, 120 epochs, three seeds)
-the matrix runs to seven backbone generations × three arms, three seeds or more per cell (one cross-host replication cell has a single seed), 142 runs, the last twenty-nine of them the same-configuration comparison against YOLO-Master's own fork: twelve in each of two rounds, and five FP32 repeats that measure the noise floor. What separates a positive
-cell from a negative one is what the backbone ends in, not how new it is: the default wiring is positive on the
-SPPF family (+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), sits on zero once the end is an attention block (−0.0002
-v10n, +0.0013 11n), and is negative on area attention and the E2E head (−0.0018 12n, −0.0034 26n). The block
-adds 4.5% to 12.5% parameters depending on the backbone (+10.4% on YOLOv8n), and the default arm takes 4% to 10% more card-hours per run.
+`ESMoE(num_experts=4, top_k=2)` with `attach_aux_loss(weight=0.01)`. The block adds 4.5% to 12.5%
+parameters depending on the backbone and 4% to 10% wall-clock per run.
 
 <p align="center"><img alt="Paired mAP50 delta by backbone generation" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/effect.svg" width="720"></p>
 
-Each dot is one seed, each bar the mean of the seeds (three, five on v10n). The seeds routinely straddle zero even where the mean does
-not, which is as far as a three-seed protocol can read: an
-[interactive version](https://lfan-ke.github.io/ES-MoE/en/charts/) carries the per-seed values and the second
-metric. Where the damage lands depends
-on the backbone: v8n loses large objects (APl −0.010, 0/3), 26n loses small ones (APs −0.0045, 0/3), 12n is
-direction-unstable.
+Accuracy depends on what the backbone ends in, not on how new it is: positive on the SPPF family
+(+0.0055 v5n, +0.0025 v8n, +0.0025 v9t), flat once the end is an attention block (-0.0002 v10n,
++0.0013 11n), negative on area attention and the E2E head (-0.0018 12n, -0.0034 26n). Three seeds
+read direction, not magnitude; the same-configuration repeats sit at the same scale as the effect.
+Default grafting leaves a head branch that names the old backbone end by index reading the
+pre-block tensor, and `graft(..., rewire=True)` retargets it, which is the only 3/3 arm on v8n.
 
-Further arms ask what upstream's own settings are worth. Two of them are internal to the block: on v5n both
-help (output norm +0.0038, dense training +0.0031, 3/3 each), while dense training is flat on v10n (+0.0001, 1/3).
-Upstream's layout of four blocks per backbone is negative on both metrics at 0/3 on both backbones it ran on, and on
-v10n it stays negative with each block's weight cut to a quarter so the auxiliary total matches one block (−0.0113,
-0/3) — the count is what costs, not the pressure. That holds under this package's recipe: with upstream's whole recipe the
-same four blocks are positive on every seed in both frameworks (same-configuration rounds seven and eight).
+What the balancing term reliably buys is that no expert dies: without it all six checkpoints lose
+two of four experts, and the Switch term at 0.01 leaves none dead in 66.
 
-<p align="center"><img alt="Paired mAP50 delta for the upstream-alignment arms" src="https://raw.githubusercontent.com/Lfan-ke/ES-MoE/main/docs/assets/alignment.svg" width="720"></p>
+The dataset, the protocol, every run record and the per-seed figures are on the
+[experiments](https://lfan-ke.github.io/ES-MoE/en/experiments/) page, with the criteria written
+before each round in [docs/JUDGMENT.md](https://lfan-ke.github.io/ES-MoE/en/JUDGMENT/).
 
-How concentrated the dispatch is does not predict accuracy: r = +0.044 over the 81 runs that have both a routing
-analysis and a paired delta. What the balancing term does secure is that no expert dies. Without it all six
-checkpoints lose two of four experts; the Switch term at 0.01 leaves none dead in 66. The paper's objective and
-upstream's read the gate, which is renormalised over the top-K and so has no gradient for an expert outside it:
-five of six such checkpoints have a dead expert, even at more pressure than Switch, and so do all six
-same-configuration B checkpoints, trained with upstream's recipe.
-
-The default graft leaves consumers that name the old backbone end by index — YOLOv8's P5 lateral among them —
-reading the pre-block tensor; `graft(..., rewire=True)` retargets them. That arm is the only 3/3 one on v8n
-(+0.0036) and pulls 12n and 26n back to near parity (+0.0001 and −0.0005); it trails the default on v5n, v9t, v10n and 11n.
-Verdicts against the pre-registered lines: `docs/JUDGMENT.md`. Full tables: `docs/SELECTION.en.md`,
-`results/summary.md`, `results/buckets.md`, `results/routing.md`.
-
-## Develop and reproduce
+## Develop
 
     uv sync --group dev
+    uv run ruff format . && uv run ruff check .
     uv run pytest -q
-    uv run python scripts/capture_env.py                  # freeze environment into results/env/
-    EPOCHS=20 FRACTION=0.25 SEEDS="0 1 2" uv run bash scripts/sweep.sh
-    uv run python scripts/report.py                       # results/summary.md
 
-Every run writes one machine-readable record to `results/` (config, dataset, hardware, budget, seed,
-metrics, artifact, status, limitation). How each number was measured is on the [experiments](https://lfan-ke.github.io/ES-MoE/en/experiments/) page. The 142
-protocol checkpoints, with each run's arguments and per-epoch curve, live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
-branch (Git LFS, orphan — `main` stays small), flat-named to match the run records.
+CI runs thirteen legs on `ubuntu-26.04`: the full suite on Python 3.12 and 3.13 against two
+ultralytics releases, one leg per backend with the other frameworks absent, the Keras layer on each
+of its three backends, ten correctness checks on real training, and the quick-start notebook.
+Contributing guidelines are in [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).
+
+Reproducing the accuracy study is a separate path: every run writes one machine-readable record to
+`results/`, and the checkpoints live on the [`checkpoints`](https://github.com/Lfan-ke/ES-MoE/tree/checkpoints)
+branch. The [experiments](https://lfan-ke.github.io/ES-MoE/en/experiments/) page has the commands.
 
 ## Linked projects
 

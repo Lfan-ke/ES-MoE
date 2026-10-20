@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: If you use esmoe in your research, please cite it as below.
 title: "esmoe: an expert-sparse MoE block for torch models and Ultralytics YOLO"
 type: software
-version: "2.2.0"
+version: "2.2.1"
 date-released: "2026-10-20"
 authors:
   - family-names: "Cheng, Leo"

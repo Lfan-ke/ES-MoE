@@ -16,6 +16,7 @@ from torch.nn import functional as F
 
 import esmoe
 from esmoe import ESMoE
+from esmoe.core import registry
 
 TOP_K, EXPERTS, CHANNELS = 2, 4, 16
 
@@ -274,7 +275,7 @@ def test_a_non_finite_balance_term_cannot_reach_the_optimised_loss():
     block = ESMoE(EXPERTS, TOP_K, channels=CHANNELS)
     esmoe.clear_aux_loss()
     block(torch.randn(4, CHANNELS, 8, 8))
-    esmoe.registry.publish(block, torch.tensor(float("nan")))
+    registry.publish(block, torch.tensor(float("nan")))
     aux = esmoe.collect_aux_loss(nn.Sequential(block))
     total = torch.tensor(1.0) + (torch.zeros_like(aux) if not torch.isfinite(aux) else aux)
     assert torch.isfinite(total).all()

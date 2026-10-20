@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import torch
 from torch import Tensor, nn
 
-from .. import registry
+from ..core import registry
 from .block import blocks
 
 

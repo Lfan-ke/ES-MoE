@@ -12,8 +12,8 @@ tensorflow, jax and torch, and the notebook on CPU.
 ## Layout
 
 A **backend** is the tensor library the block is written in, an **integration** is a training stack
-built on one. Between them sits a backend-free core -- `spec.py`, `kernels.py`, `naming.py`,
-`registry.py` -- which reads the arguments and settles them into one plan. A new backend adds only
+built on one. Between them sits a backend-free core, `esmoe/core/`, which reads the arguments and settles
+them into one plan. A new backend adds only
 the tensor work and exports the names `esmoe/torch/` exports; a new integration exports `graft` and
 `equip`. Both are one row in `BACKENDS` or `INTEGRATIONS`.
 

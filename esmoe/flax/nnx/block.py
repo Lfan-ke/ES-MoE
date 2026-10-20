@@ -14,19 +14,19 @@ import jax
 import jax.numpy as jnp
 from flax import nnx
 
-from ..kernels import (
+from ...core.kernels import (
     Kernel,
     odd_kernels,
 )
-from ..naming import (
+from ...core.naming import (
     named,
     resolve,
 )
-from ..spec import (
+from ...core.spec import (
     SETTINGS,
     settle,
 )
-from .balance import BALANCES
+from ..balance import BALANCES
 from .experts import (
     EXPERTS,
     DWExpert,

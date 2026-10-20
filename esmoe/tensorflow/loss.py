@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import tensorflow as tf
 
-from .. import registry
+from ..core import registry
 from .block import blocks
 
 

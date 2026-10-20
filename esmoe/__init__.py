@@ -9,12 +9,11 @@ from types import ModuleType
 
 from torch import nn
 
-from .kernels import *
-from .spec import *
+from .core import *
 from .torch import *
 from .torch.graft import graft as __into_model
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 BACKENDS = {"torch": "torch", "tensorflow": "tensorflow", "jax": "jax", "flax": "flax", "keras": "keras"}
 INTEGRATIONS = {"yolo": "yolo", "ultralytics": "yolo"}

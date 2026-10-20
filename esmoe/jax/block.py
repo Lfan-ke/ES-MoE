@@ -13,15 +13,15 @@ from dataclasses import dataclass
 import jax
 import jax.numpy as jnp
 
-from ..kernels import (
+from ..core.kernels import (
     Kernel,
     odd_kernels,
 )
-from ..naming import (
+from ..core.naming import (
     named,
     resolve,
 )
-from ..spec import (
+from ..core.spec import (
     SETTINGS,
     settle,
 )

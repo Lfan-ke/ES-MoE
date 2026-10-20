@@ -11,16 +11,16 @@ from typing import Self
 
 import tensorflow as tf
 
-from .. import registry
-from ..kernels import (
+from ..core import registry
+from ..core.kernels import (
     Kernel,
     odd_kernels,
 )
-from ..naming import (
+from ..core.naming import (
     named,
     resolve,
 )
-from ..spec import (
+from ..core.spec import (
     SETTINGS,
     settle,
 )

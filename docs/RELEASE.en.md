@@ -1,7 +1,15 @@
 # Release notes
 
-Current version **2.2.0**: a Flax backend written against the current `flax.nnx`, which gives jax
-three routes.
+Current version **2.2.1**: both of Flax's APIs are supported.
+
+## 2.2.1
+
+- **Flax Linen.** `esmoe.flax.linen.ESMoE` is a `linen.Module`: parameters live outside the module
+  and run through `apply`, with the balancing term sown into `intermediates`. `esmoe.flax` remains
+  `nnx`, the API Flax recommends now.
+- **The tree follows the layers.** The four backend-free modules moved into `esmoe/core/`, and
+  Flax's two APIs took a subpackage each, `esmoe/flax/nnx` and `esmoe/flax/linen`, sharing one set
+  of balancing objectives.
 
 ## 2.2.0
 

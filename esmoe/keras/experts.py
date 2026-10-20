@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from keras import layers
 
-from ..kernels import Kernel
+from ..core.kernels import Kernel
 
 type ExpertFactory = Callable[[int, int, Kernel], layers.Layer]
 

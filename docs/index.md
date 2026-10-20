@@ -1,22 +1,22 @@
 <div class="es-hero" markdown>
-<div class="es-hero__eyebrow">4 选 2 专家路由</div>
-<h1 class="es-hero__claim">一个<em>稀疏专家混合</em>块，拼进 torch 模型或 YOLO</h1>
-<p class="es-hero__lede">只依赖 torch，一个调用接进官方 ultralytics；另有一份 Keras 3 实现，tensorflow 与 jax 上同样能跑。站内每个数字都对应 <code>results/</code> 里的一条实验记录。</p>
+<div class="es-hero__eyebrow">稀疏专家混合</div>
+<h1 class="es-hero__claim">一个<em>专家混合</em>块，装进你已有的模型</h1>
+<p class="es-hero__lede">PyTorch、TensorFlow、Jax、Flax、Keras 各有原生实现，写法随各家习惯；Ultralytics YOLO 一个调用接进去。路由的平衡项真正进入反向传播，不是配置里的一个数。</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">每张图从 4 个专家里选 2 个</div>
 
 <ul class="es-proof">
-<li><strong>拼进任意 torch 模型</strong><span>通道在首次前向推断，所以 <code>nn.Sequential</code> 里直接放得下；<code>kernels</code> 定专家与感受野，<code>top_k</code> 定几选几。</span></li>
+<li><strong>装进任意模型</strong><span>通道在首次前向推断，<code>nn.Sequential</code> 里直接放得下；也可以按子模块名插进现成的模型，不碰它的源码。</span></li>
 <li><strong>一个调用接进 YOLO</strong><span><code>equip</code> 把块接进配置、重编号层引用、接好损失；YOLOv5 至 YOLO26 七代官方主干与 YOLO-Master 分支都能用。</span></li>
-<li><strong>辅助损失进入反向传播</strong><span>训练表里 <code>esmoe_aux</code> 自成一列，由单元测试与 <code>scripts/verify.py</code> 的十项真训练检查断言。</span></li>
+<li><strong>五个框架，一套参数</strong><span><code>kernels</code> 定专家与感受野，<code>top_k</code> 定几选几；五处实现读参数的是同一段代码，换框架不用改写法。</span></li>
 </ul>
 </div>
 
 <div class="es-stats">
-<div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
-<div><strong>7</strong><span>代官方主干，另有 yolo-master-n</span></div>
-<div><strong>439</strong><span>项测试，含与上游、论文的数值对照</span></div>
-<div><strong>3</strong><span>个 seed 起的逐 seed 配对</span></div>
+<div><strong>5</strong><span>个框架，PyTorch 到 Keras</span></div>
+<div><strong>7</strong><span>代 YOLO 主干，v5 到 26</span></div>
+<div><strong>1</strong><span>个调用接进训练</span></div>
+<div><strong>任意</strong><span>模型都能插块</span></div>
 </div>
 
 <div class="es-cards">
@@ -26,9 +26,9 @@
 <a href="jax/"><strong>Jax 集成</strong><span>init 与 apply 的纯函数，配 jax.jit 与 jax.grad</span></a>
 <a href="flax/"><strong>Flax 集成</strong><span>nnx.Module，配 nnx.jit 与 nnx.grad</span></a>
 <a href="keras/"><strong>Keras3 集成</strong><span>一份实现跑在 tensorflow、jax、torch 上</span></a>
-<a href="API/"><strong>API</strong><span>equip、graft、attach_aux_loss 与 ESMoE 的全部参数</span></a>
-<a href="design/"><strong>ES-MoE 与 YOLO</strong><span>块比普通 YOLO 多了什么，训练与推理怎么算，与 YOLO-Master 逐项对照</span></a>
-<a href="experiments/"><strong>实验</strong><span>数据集、协议、流程、八轮实验与同配置对照，每个结论配一张图</span></a>
+<a href="API/"><strong>API</strong><span>ESMoE 的全部参数，以及各后端与集成的入口</span></a>
+<a href="design/"><strong>设计</strong><span>块内部怎么算，包分几层，加一个后端要写什么</span></a>
+<a href="experiments/"><strong>实验</strong><span>默认配置是怎么选出来的，每个结论配一张图</span></a>
 <a href="charts/"><strong>效果图</strong><span>七代主干上逐 seed 的配对差</span></a>
 <a href="JUDGMENT/"><strong>判读线</strong><span>每一轮先写判据与预测，再写判定</span></a>
 </div>

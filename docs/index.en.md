@@ -1,22 +1,22 @@
 <div class="es-hero" markdown>
-<div class="es-hero__eyebrow">top-2 of 4 experts</div>
-<h1 class="es-hero__claim">A <em>sparse mixture of experts</em> for torch models and YOLO</h1>
-<p class="es-hero__lede">Torch is all it needs, one call adds it to official ultralytics, and a second implementation on Keras 3 runs it on tensorflow and jax. Every number on this site has a run record behind it.</p>
+<div class="es-hero__eyebrow">sparse mixture of experts</div>
+<h1 class="es-hero__claim">A <em>mixture-of-experts</em> block for the model you already have</h1>
+<p class="es-hero__lede">Native implementations on PyTorch, TensorFlow, Jax, Flax and Keras, each written the way that framework is written, and one call to add it to Ultralytics YOLO. The router's balancing term reaches backward(), rather than sitting in a config.</p>
 <div class="es-router"><span></span><span></span><span></span><span></span></div>
 <div class="es-router__label">router picks 2 of 4 per image</div>
 
 <ul class="es-proof">
-<li><strong>Drops into any torch model</strong><span>It sizes itself on the first forward pass, so an <code>nn.Sequential</code> takes it as written; <code>kernels</code> sets the experts and their receptive fields, <code>top_k</code> how many run.</span></li>
+<li><strong>Into any model</strong><span>It sizes itself on the first forward pass, so an <code>nn.Sequential</code> takes it as written, and it grafts into a model that already exists by submodule name, without touching its source.</span></li>
 <li><strong>One call to add it to YOLO</strong><span><code>equip</code> grafts the block into a config, renumbers layer references and wires the loss, on seven official generations from YOLOv5 to YOLO26 and on YOLO-Master's fork.</span></li>
-<li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in the training log, asserted by unit tests and by ten real-training checks in <code>scripts/verify.py</code>.</span></li>
+<li><strong>Five frameworks, one set of arguments</strong><span><code>kernels</code> sets the experts and their receptive fields, <code>top_k</code> how many run; the code that reads them is shared, so moving framework changes nothing you write.</span></li>
 </ul>
 </div>
 
 <div class="es-stats">
-<div><strong>142</strong><span>full-protocol runs, 600 card-hours</span></div>
-<div><strong>7</strong><span>official generations, plus yolo-master-n</span></div>
-<div><strong>439</strong><span>tests, including numerical parity with upstream and the paper</span></div>
-<div><strong>3</strong><span>seeds or more, paired seed by seed</span></div>
+<div><strong>5</strong><span>frameworks, PyTorch to Keras</span></div>
+<div><strong>7</strong><span>YOLO generations, v5 to 26</span></div>
+<div><strong>1</strong><span>call to wire it into training</span></div>
+<div><strong>any</strong><span>model takes the block</span></div>
 </div>
 
 <div class="es-cards">
@@ -26,9 +26,9 @@
 <a href="jax/"><strong>Jax</strong><span>pure init and apply, under jax.jit and jax.grad</span></a>
 <a href="flax/"><strong>Flax</strong><span>an nnx.Module, under nnx.jit and nnx.grad</span></a>
 <a href="keras/"><strong>Keras 3</strong><span>one implementation on tensorflow, jax and torch</span></a>
-<a href="API/"><strong>API</strong><span>every argument of equip, graft, attach_aux_loss and ESMoE</span></a>
-<a href="design/"><strong>ES-MoE and YOLO</strong><span>what the block adds, how it computes in training and inference, and YOLO-Master item by item</span></a>
-<a href="experiments/"><strong>Experiments</strong><span>dataset, protocol, pipeline, eight rounds and the same-configuration comparison, a figure for each finding</span></a>
+<a href="API/"><strong>API</strong><span>every argument of ESMoE, and the entry point of each backend and integration</span></a>
+<a href="design/"><strong>Design</strong><span>what the block computes, how the package is layered, what a new backend has to write</span></a>
+<a href="experiments/"><strong>Experiments</strong><span>how the defaults were chosen, with a figure behind each finding</span></a>
 <a href="charts/"><strong>Effect chart</strong><span>per-seed paired deltas across seven generations</span></a>
 <a href="JUDGMENT/"><strong>Judgment lines</strong><span>criteria and predictions first, verdicts after</span></a>
 </div>

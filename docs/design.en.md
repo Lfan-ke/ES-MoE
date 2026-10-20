@@ -56,17 +56,20 @@ The router picks per image, not per pixel or region. Each expert is a depthwise-
 ## How the package is layered
 
 What has to be compatible falls into two kinds, each with a layer. A **backend** is the tensor
-library the block is written in; an **integration** is a training stack built on one of them.
+library the block is written in (Flax ships two APIs, `nnx` and `linen`, one subpackage each); an **integration** is a training stack built on one of them.
 Between them sits a backend-free core: how the arguments are spelled, how kernels are computed,
 how a config names a callable, where the auxiliary loss is left. All of it is plain Python, so a
 new backend adds only the tensor work.
 
 ```
 esmoe/
-  spec.py kernels.py naming.py registry.py   the backend-free core
-  torch/    backend: native torch
-  keras/    backend: Keras 3, covering tensorflow / jax / torch
-  yolo/     integration: Ultralytics
+  core/         backend-free: spec, kernels, naming, registry
+  torch/        backend: block experts balance loss graft
+  tensorflow/   backend: the same, on tf.Module
+  jax/          backend: pure init / apply
+  flax/         backend: a shared balance, with nnx/ and linen/ for the two APIs
+  keras/        backend: keras.layers.Layer, across tf / jax / torch
+  yolo/         integration: inject graft trainer upstream
 ```
 
 Every backend package exports the same names: `ESMoE`, `DWExpert`, `EXPERTS`, `BALANCES`,

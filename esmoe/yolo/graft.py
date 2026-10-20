@@ -3,8 +3,8 @@
 import copy
 from collections.abc import Iterable, Sequence
 
-from ..kernels import Kernel
-from ..spec import SETTINGS
+from ..core.kernels import Kernel
+from ..core.spec import SETTINGS
 
 type Spot = int | str | Iterable[int]
 
@@ -94,7 +94,7 @@ def graft(
     """
     from ultralytics.nn.tasks import yaml_model_load
 
-    from ..naming import reference
+    from ..core.naming import reference
     from ..torch.balance import BALANCES
     from ..torch.experts import EXPERTS
 

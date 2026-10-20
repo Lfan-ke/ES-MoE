@@ -5,7 +5,7 @@ from collections.abc import Callable
 import jax
 from flax import nnx
 
-from ..kernels import Kernel
+from ...core.kernels import Kernel
 
 type ExpertFactory = Callable[..., nnx.Module]
 

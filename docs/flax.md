@@ -4,7 +4,11 @@
 uv add esmoe[flax]
 ```
 
-`esmoe.flax.ESMoE` 是一个 `nnx.Module`，按 Flax 现在的写法来：状态挂在对象上，要纯函数时用 `nnx.split`。输入按 NHWC。
+Flax 现在并行着两套 API，两套都支持：`esmoe.flax` 是 `nnx`，Flax 现在推荐的那套；`esmoe.flax.linen` 是 Linen。输入都按 NHWC。
+
+## nnx
+
+状态挂在对象上，要纯函数时用 `nnx.split`。
 
 ```python
 from flax import nnx
@@ -37,11 +41,28 @@ def step(net, x):
 
 `nnx.jit` 与 `nnx.grad` 直接可用，状态由 nnx 自己穿过变换。
 
+## linen
+
+参数放在模块外面，声明一次、用 `apply` 跑；平衡项 sow 进 `intermediates`。
+
+```python
+from flax import linen
+from esmoe.flax.linen import ESMoE, collect_aux_loss
+
+block = ESMoE(kernels=[3, 5, 7], top_k=1)
+variables = block.init(key, x, training=True)
+out, state = block.apply(variables, x, training=True, mutable=["intermediates", "batch_stats"])
+aux = collect_aux_loss(state)
+```
+
+Linen 没有 `**kwargs`，所以设置从 `options` 进：`ESMoE(kernels=[3, 5], options={"out_norm": True})`。通道由第一次 `init` 的输入决定，不必写。
+
 ## 与另外两条 jax 路线的区别
 
 | 用法 | 形态 | 何时用 |
 |:--:|:--:|:--:|
-| `esmoe.flax` | `nnx.Module`，状态在对象上 | 项目本来就用 Flax |
+| `esmoe.flax` | `nnx.Module`，状态在对象上 | 项目用 Flax 的新 API |
+| `esmoe.flax.linen` | `linen.Module`，参数在外面 | 项目用 Flax 的 Linen |
 | `esmoe.jax` | 纯函数 `init` / `apply` | 不想引入 Flax，自己管参数树 |
 | `esmoe.keras` | `keras.layers.Layer`，后端设为 jax | 项目用 Keras 跨后端 |
 

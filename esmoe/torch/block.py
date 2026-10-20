@@ -11,10 +11,10 @@ import torch.distributed as dist
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from .. import registry
-from ..kernels import Kernel, odd_kernels
-from ..naming import named, resolve
-from ..spec import SETTINGS, settle
+from ..core import registry
+from ..core.kernels import Kernel, odd_kernels
+from ..core.naming import named, resolve
+from ..core.spec import SETTINGS, settle
 from .balance import BALANCES, BalanceFn
 from .experts import EXPERTS, DWExpert, ExpertFactory
 
