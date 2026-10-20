@@ -203,8 +203,8 @@ def _(mo):
         ## Native TensorFlow, Jax and Flax
 
         Keras is one of five implementations, not the way the other frameworks are reached:
-        TensorFlow has a `tf.Module` of its own, Jax a pair of pure functions, Flax an
-        `nnx.Module`, and none of them imports Keras.
+        TensorFlow has a `tf.Module` of its own, Jax a pair of pure functions, Flax both of its
+        APIs, and none of them imports Keras.
         """
     )
     return
@@ -257,8 +257,24 @@ def _():
         from esmoe.flax import ESMoE as FlaxESMoE
 
         flax_block = FlaxESMoE(kernels=[3, 5, 7], top_k=1, channels=8, rngs=nnx.Rngs(0))
-        flax_out = flax_block(numpy.full((2, 16, 16, 8), 0.5, dtype="float32"))
-        native_flax = {"output": tuple(flax_out.shape), "router loss": round(float(flax_block.aux[...]), 4)}
+        flax_batch = numpy.full((2, 16, 16, 8), 0.5, dtype="float32")
+        flax_out = flax_block(flax_batch)
+        native_flax = {"nnx": {"output": tuple(flax_out.shape), "router loss": round(float(flax_block.aux[...]), 4)}}
+
+        import jax as _jax
+
+        from esmoe.flax.linen import ESMoE as LinenESMoE
+        from esmoe.flax.linen import collect_aux_loss as linen_aux
+
+        linen_block = LinenESMoE(kernels=[3, 5, 7], top_k=1)
+        linen_vars = linen_block.init(_jax.random.PRNGKey(0), flax_batch, training=True)
+        linen_out, linen_state = linen_block.apply(
+            linen_vars, flax_batch, training=True, mutable=["intermediates", "batch_stats"]
+        )
+        native_flax["linen"] = {
+            "output": tuple(linen_out.shape),
+            "router loss": round(float(linen_aux(linen_state)), 4),
+        }
     except ModuleNotFoundError:
         native_flax = "flax not installed here"
 

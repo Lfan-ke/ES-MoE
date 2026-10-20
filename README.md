@@ -112,13 +112,13 @@ beforehand.
 ## On tensorflow, jax and keras
 
 Each framework gets its own implementation, written the way that framework is written: a
-`tf.Module` on TensorFlow, pure functions on Jax, an `nnx.Module` on Flax, a
-`keras.layers.Layer` on Keras 3. They read their arguments through the same code, so they take
-the same ones.
+`tf.Module` on TensorFlow, pure functions on Jax, both of Flax's APIs, a `keras.layers.Layer`
+on Keras 3. They read their arguments through the same code, so they take the same ones.
 
     from esmoe.tensorflow import ESMoE, Sequential  # tf.Module, no Keras
     from esmoe.jax import ESMoE                     # init/apply, no Flax
     from esmoe.flax import ESMoE                    # nnx.Module, the current Flax API
+    from esmoe.flax.linen import ESMoE              # linen.Module, the other one
     from esmoe.keras import ESMoE                   # keras.layers.Layer, any Keras backend
 
 One difference holds for all three: they evaluate every expert and weight them by the gate.
@@ -147,7 +147,7 @@ block is holding.
 | torch | `nn.Module` | a weak registry | any `nn.Module` | every CI leg, and one with ultralytics absent |
 | tensorflow | `tf.Module` | a weak registry | attribute or position | a leg with keras and ultralytics absent |
 | jax | pure functions | returned by `apply` | not applicable | a leg with keras and ultralytics absent |
-| flax | `nnx.Module` | an `nnx.Intermediate` | `nnx.Sequential` | a leg with keras and ultralytics absent |
+| flax | `nnx.Module`, and `linen.Module` under `esmoe.flax.linen` | an `nnx.Intermediate`, or sown into `intermediates` | `nnx.Sequential` | a leg with keras and ultralytics absent |
 | Keras 3 | `keras.layers.Layer` | `add_loss` | `Sequential` | one leg per Keras backend: tensorflow, jax, torch |
 
 The Ultralytics integration runs on the torch block:
