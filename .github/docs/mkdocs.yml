@@ -66,13 +66,15 @@ plugins:
           nav_translations:
             概览: Overview
             试玩: Try it
-            在 torch 模型里: In a torch model
-            在 YOLO 里: In Ultralytics YOLO
-            在 Keras 里: In Keras
+            集成: Integration
+            Torch 集成: Torch
+            YOLO 集成: Ultralytics YOLO
+            TensorFlow 集成: TensorFlow
+            Jax 集成: Jax
+            Keras3 集成: Keras 3
             选型: Selection
             实验结果: Results
             效果图: Effect chart
-            使用: Usage
             设计: Design
             实验: Experiments
             实验总览: Overview
@@ -83,10 +85,12 @@ plugins:
 nav:
   - 概览: index.md
   - 试玩: demo.md
-  - 使用:
-      - 在 torch 模型里: torch.md
-      - 在 YOLO 里: tutorial.md
-      - 在 Keras 里: keras.md
+  - 集成:
+      - Torch 集成: torch.md
+      - YOLO 集成: tutorial.md
+      - TensorFlow 集成: tensorflow.md
+      - Jax 集成: jax.md
+      - Keras3 集成: keras.md
       - API: API.md
   - 设计:
       - ES-MoE 与 YOLO: design.md

@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="DeepWiki" src="https://img.shields.io/badge/DeepWiki-131A2B?logo=bookstack&logoColor=white"></a>
+  <a href="https://deepwiki.com/Lfan-ke/ES-MoE"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg"></a>
   <a href="https://gitingest.com/Lfan-ke/ES-MoE"><img alt="Ingest" src="https://img.shields.io/badge/Ingest-2E8B57?logo=modelcontextprotocol&logoColor=white"></a>
   <a href="https://gitdiagram.com/Lfan-ke/ES-MoE"><img alt="Diagram" src="https://img.shields.io/badge/Diagram-6A5ACD?logo=diagramsdotnet&logoColor=white"></a>
 </p>

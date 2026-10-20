@@ -50,10 +50,11 @@ def main(pages: Path) -> None:
             (here / "index.html").write_text(STUB.format(target=f"{base}/latest/{'/'.join(parts)}/"), encoding="utf-8")
     # GitHub Pages answers every missing address with the root 404; latest's own resolves its assets absolutely.
     shutil.copyfile(latest / "404.html", pages / "404.html")
-    # mike's root redirect waits a second before it leaves; nothing is gained by the wait.
+    # mike's root redirect waits a second before it leaves, and carries no icon of its own.
     entry = pages / "index.html"
-    html = entry.read_text(encoding="utf-8")
-    entry.write_text(html.replace('content="1; url=', 'content="0; url='), encoding="utf-8")
+    html = entry.read_text(encoding="utf-8").replace('content="1; url=', 'content="0; url=')
+    icon = '<head>\n  <link rel="icon" href="latest/assets/logo.svg">'
+    entry.write_text(html.replace("<head>", icon, 1), encoding="utf-8")
 
 
 if __name__ == "__main__":

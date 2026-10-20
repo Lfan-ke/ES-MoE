@@ -1,4 +1,4 @@
-# In a torch model
+# Torch integration
 
 ```bash
 uv add esmoe

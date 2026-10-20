@@ -1,4 +1,4 @@
-# In Ultralytics YOLO
+# YOLO integration
 
 Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.
 

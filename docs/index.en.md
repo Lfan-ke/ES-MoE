@@ -9,21 +9,22 @@
 <li><strong>Drops into any torch model</strong><span>It sizes itself on the first forward pass, so an <code>nn.Sequential</code> takes it as written; <code>kernels</code> sets the experts and their receptive fields, <code>top_k</code> how many run.</span></li>
 <li><strong>One call to add it to YOLO</strong><span><code>equip</code> grafts the block into a config, renumbers layer references and wires the loss, on seven official generations from YOLOv5 to YOLO26 and on YOLO-Master's fork.</span></li>
 <li><strong>The aux loss reaches backward()</strong><span>An <code>esmoe_aux</code> column in the training log, asserted by unit tests and by ten real-training checks in <code>scripts/verify.py</code>.</span></li>
-<li><strong>Acts the same as YOLO-Master's block</strong><span>One yolo-master-n, one protocol: the block adds +0.0104 on the fork and +0.0095 on official ultralytics with this package (FP32, 3/3 each), and the gap between the two is equivalent.</span></li>
 </ul>
 </div>
 
 <div class="es-stats">
 <div><strong>142</strong><span>full-protocol runs, 600 card-hours</span></div>
 <div><strong>7</strong><span>official generations, plus yolo-master-n</span></div>
-<div><strong>335</strong><span>tests, including numerical parity with upstream and the paper</span></div>
+<div><strong>409</strong><span>tests, including numerical parity with upstream and the paper</span></div>
 <div><strong>3</strong><span>seeds or more, paired seed by seed</span></div>
 </div>
 
 <div class="es-cards">
-<a href="torch/"><strong>In a torch model</strong><span>the three knobs, the auxiliary loss, grafting into a model that exists</span></a>
-<a href="tutorial/"><strong>In Ultralytics YOLO</strong><span>install, the three calls, grafting and renumbering, a comparison you can defend</span></a>
-<a href="keras/"><strong>In Keras</strong><span>one implementation on tensorflow, jax and torch, and where it differs</span></a>
+<a href="torch/"><strong>Torch</strong><span>the two knobs, the auxiliary loss, grafting into a model that exists</span></a>
+<a href="tutorial/"><strong>Ultralytics YOLO</strong><span>install, the three calls, grafting and renumbering, a comparison you can defend</span></a>
+<a href="tensorflow/"><strong>TensorFlow</strong><span>inside tf.function, differentiated by a GradientTape</span></a>
+<a href="jax/"><strong>Jax</strong><span>stateless_call under jax.jit and jax.grad</span></a>
+<a href="keras/"><strong>Keras 3</strong><span>one implementation on tensorflow, jax and torch</span></a>
 <a href="API/"><strong>API</strong><span>every argument of equip, graft, attach_aux_loss and ESMoE</span></a>
 <a href="design/"><strong>ES-MoE and YOLO</strong><span>what the block adds, how it computes in training and inference, and YOLO-Master item by item</span></a>
 <a href="experiments/"><strong>Experiments</strong><span>dataset, protocol, pipeline, eight rounds and the same-configuration comparison, a figure for each finding</span></a>

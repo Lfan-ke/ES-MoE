@@ -1,4 +1,4 @@
-# 在 Keras 里
+# Keras3 集成
 
 ```bash
 uv add esmoe[keras]         # 或 esmoe[tensorflow] / esmoe[jax]
