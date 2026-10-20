@@ -12,9 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ["3.12", "3.13"]
-        # The project claims to work across ultralytics releases that report loss items differently,
-        # so the older shape is tested on every push rather than trusted. No lock file is tracked, so
-        # `latest` is whatever resolves that day and a breaking ultralytics release fails here first.
+        # Two releases that report loss items in different shapes, both of them claimed to work.
         ultralytics: [latest, "8.4.101"]
     name: test (py${{ matrix.python }}, ultralytics ${{ matrix.ultralytics }})
     steps:
@@ -33,7 +31,6 @@ jobs:
           uv run --no-sync ruff check .
           uv run --no-sync ruff format --check .
       - name: Build the docs site
-        # A broken page or nav entry would otherwise fail only in the deploy after merge.
         if: matrix.ultralytics == 'latest' && matrix.python == '3.12'
         run: uv run --no-sync mkdocs build --strict -f .github/docs/mkdocs.yml
       - name: Test

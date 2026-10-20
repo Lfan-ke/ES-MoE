@@ -1,8 +1,6 @@
 name: Canary
 
-# Installs the published package - not this checkout - into a clean environment and runs the
-# documented quick start. It answers "does `uv add esmoe` still work today", which the CI on
-# source cannot answer, and catches an upstream ultralytics release breaking users before they do.
+# Installs the published package, not this checkout: it answers whether `uv add esmoe` still works today.
 on:
   schedule:
     - cron: "0 3 1,16 * *"

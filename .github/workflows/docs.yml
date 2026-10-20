@@ -24,8 +24,7 @@ jobs:
   deploy:
     runs-on: ubuntu-26.04
     env:
-      # main is `dev`. The site keeps one version per x.y: an x.y.0 release publishes it and a patch release
-      # adds nothing, its changes already being on `dev`. A manual run redeploys an x.y from main.
+      # main is `dev`; the site keeps one version per x.y, published by its x.y.0 release.
       VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version || 'dev' }}
     steps:
       - uses: actions/checkout@v7
@@ -37,7 +36,7 @@ jobs:
           python-version: "3.12"
       - run: uv sync --group dev
       - name: Check a manual run
-        # A manual run builds main, which carries the newest series; under any other name those pages would be mislabelled.
+        # A manual run builds main, which carries the newest series.
         if: github.event_name == 'workflow_dispatch'
         run: |
           [ "$GITHUB_REF" = refs/heads/main ] || { echo "manual runs deploy from main only, not $GITHUB_REF"; exit 1; }

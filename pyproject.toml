@@ -60,8 +60,7 @@ dev = [
     "ipykernel>=6",
     "marimo[recommended]>=0.17",
     "pandas>=2",
-    # A PyPI torchvision against a CPU torch loses torchvision::nms on Linux, and only a direct
-    # entry lets the index below apply to it.
+    # A direct entry is what lets the CPU index below apply to torchvision.
     "torchvision",
     "onnx>=1.16",
     "onnxruntime>=1.17",
