@@ -56,7 +56,7 @@ def check_checkpoint_round_trip():
     train(model, "round-trip", epochs=1)
     weights = Path(model.trainer.save_dir) / "weights" / "best.pt"
 
-    esmoe.inject_esmoe()  # a fresh process would do this before loading
+    esmoe.register()  # a fresh process would do this before loading
     reloaded = YOLO(str(weights))
     blocks = list(esmoe.blocks(reloaded.model))
     before = {name: p.detach().clone() for name, p in model.model.named_parameters() if "ESMoE" in type(p).__name__}
@@ -75,7 +75,7 @@ def check_resume_keeps_the_aux_term():
 
     from ultralytics import YOLO
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     resumed = YOLO(str(Path(model.trainer.save_dir) / "weights" / "last.pt"))
     esmoe.attach_aux_loss(resumed, weight=0.01)
     resumed.train(data="coco8.yaml", epochs=4, resume=True, project=str(RUNS), name="resume", **BUDGET)
@@ -184,11 +184,11 @@ def _rank(rank, world, port, cfg, box):
     from ultralytics.nn.tasks import DetectionModel
     from ultralytics.utils import DEFAULT_CFG
 
-    from esmoe.inject import AUX_NAME, arm_process
+    from esmoe.yolo.inject import AUX_NAME, arm_process
 
     dist.init_process_group("gloo", init_method=f"tcp://127.0.0.1:{port}", rank=rank, world_size=world)
     torch.manual_seed(0)
-    esmoe.inject_esmoe()
+    esmoe.register()
     arm_process(0.01)
     model = DetectionModel(cfg, ch=3, nc=2, verbose=False)
     model.args = get_cfg(DEFAULT_CFG)
@@ -224,7 +224,7 @@ def check_two_ranks_share_the_router_gradient():
 
     import torch.multiprocessing as mp
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     cfg = str(Path(tempfile.mkdtemp(prefix="esmoe-ddp-")) / "v8-esmoe.yaml")
     esmoe.graft("yolov8n.yaml", out=cfg)
     with socket.socket() as probe:

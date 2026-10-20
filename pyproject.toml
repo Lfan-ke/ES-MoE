@@ -4,27 +4,35 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esmoe"
-version = "1.1.0"
-description = "Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser."
+version = "2.0.0"
+description = "Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [{ name = "Leo Cheng" }]
-keywords = ["yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
+keywords = ["torch", "keras", "yolo", "ultralytics", "mixture-of-experts", "object-detection", "moe"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-dependencies = ["torch>=2.0", "ultralytics>=8.3"]
+dependencies = ["torch>=2.0"]
+
+[project.optional-dependencies]
+torch = ["torch>=2.0"]
+keras = ["keras>=3.5"]
+tensorflow = ["esmoe[keras]", "tensorflow>=2.17"]
+jax = ["esmoe[keras]", "jax>=0.4.35"]
+yolo = ["ultralytics>=8.3"]
+ultralytics = ["esmoe[yolo]"]
+all = ["esmoe[keras]", "esmoe[yolo]"]
 
 [project.scripts]
-esmoe = "esmoe.__main__:main"
+esmoe = "esmoe.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Lfan-ke/ES-MoE"
@@ -33,10 +41,13 @@ Source = "https://github.com/Lfan-ke/ES-MoE"
 Issues = "https://github.com/Lfan-ke/ES-MoE/issues"
 
 [dependency-groups]
+check = ["pytest>=8"]
 dev = [
-    "pytest>=8",
+    { include-group = "check" },
     "ruff>=0.9",
-    "mkdocs>=1.6,<2",  # MkDocs 2.0 removes the plugin system this site depends on
+    "ultralytics>=8.3",
+    "keras>=3.5",
+    "mkdocs>=1.6,<2",  # MkDocs 2.0 drops the plugin system this site is built on
     "mkdocs-material>=9,<10",
     "mkdocs-static-i18n>=1.2",
     "mike>=2",
@@ -44,17 +55,15 @@ dev = [
     "ipykernel>=6",
     "marimo[recommended]>=0.17",
     "pandas>=2",
-    # ultralytics pulls torchvision transitively, but only a direct entry lets the CPU index below
-    # apply to it - a PyPI torchvision against a CPU torch loses torchvision::nms on Linux.
+    # A PyPI torchvision against a CPU torch loses torchvision::nms on Linux, and only a direct
+    # entry lets the index below apply to it.
     "torchvision",
     "onnx>=1.16",
-    # onnxruntime dropped Python 3.10 wheels; the export test skips itself where it is absent.
-    "onnxruntime>=1.17; python_version >= '3.11'",
+    "onnxruntime>=1.17",
     "faster-coco-eval>=1.8.0",
 ]
 
-# CPU wheels for local work and CI only. uv sources are stripped from the published metadata, so
-# installing esmoe never forces anyone onto a CPU build.
+# CPU wheels for local work and CI only; uv sources are stripped from the published metadata.
 [[tool.uv.index]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
@@ -72,11 +81,16 @@ include = ["esmoe*"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
+# A package gathers its layer with star imports, against each module's own __all__.
+"esmoe/**/__init__.py" = ["F403", "F405"]
+"esmoe/module.py" = ["F403"]
+# A test skips itself on a missing extra before it imports against it.
+"tests/*.py" = ["E402"]
 # A marimo cell's last expression is the cell's output.
 "notebooks/*.py" = ["B018"]

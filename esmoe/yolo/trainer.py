@@ -16,7 +16,7 @@ ENV_WEIGHT = inject.ENV_WEIGHT
 ENV_RECIPE = inject.ENV_RECIPE
 ENV_BASE = "ESMOE_TRAINER_BASE"
 
-inject.inject_esmoe()
+inject.register()
 if weight := float(os.environ.get(ENV_WEIGHT, 0) or 0):
     inject.arm_process(weight, os.environ.get(ENV_RECIPE) or "esmoe")
 
@@ -28,8 +28,8 @@ def wrap(base: type) -> type:
         return existing
     members = {
         "__module__": __name__,
-        "__init__": _init_for(base),
-        "build_optimizer": _build_optimizer_for(base),
+        "__init__": __init_for(base),
+        "build_optimizer": __build_optimizer_for(base),
         "__doc__": base.__doc__,
     }
     cls = type(name, (base,), members)
@@ -39,7 +39,7 @@ def wrap(base: type) -> type:
     return cls
 
 
-def _init_for(base: type):
+def __init_for(base: type):
     def __init__(self, *args, **kwargs):
         base.__init__(self, *args, **kwargs)
         weight = float(os.environ.get(ENV_WEIGHT, 0) or inject.armed_weight() or 0)
@@ -52,7 +52,7 @@ def _init_for(base: type):
     return __init__
 
 
-def _build_optimizer_for(base: type):
+def __build_optimizer_for(base: type):
     """Wrap the base trainer's ``build_optimizer`` whatever arguments it takes.
 
     The official trainer and YOLO-Master's differ here, and both keep adding keywords (the fork
@@ -86,3 +86,11 @@ def __getattr__(name: str) -> type:
     if f"ESMoE{base.__name__}" != name:
         raise AttributeError(f"{name} does not match {ENV_BASE}={spec}")
     return wrap(base)
+
+
+__all__ = [
+    "ENV_BASE",
+    "ENV_RECIPE",
+    "ENV_WEIGHT",
+    "wrap",
+]

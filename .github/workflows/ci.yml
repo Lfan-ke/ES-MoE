@@ -7,11 +7,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.10", "3.12"]
+        python: ["3.12", "3.13"]
         # The project claims to work across ultralytics releases that report loss items differently,
         # so the older shape is tested on every push rather than trusted. No lock file is tracked, so
         # `latest` is whatever resolves that day and a breaking ultralytics release fails here first.
@@ -39,8 +39,42 @@ jobs:
       - name: Test
         run: uv run --no-sync pytest -q
 
+  core:
+    name: torch alone
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.13"
+      - run: uv sync --group check --no-group dev
+      - name: No integration installed
+        run: uv run --no-sync python -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('ultralytics') is not None)"
+      - name: Test
+        run: uv run --no-sync pytest tests/test_torch.py -q
+
+  keras:
+    name: keras on ${{ matrix.backend }}
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [tensorflow, jax, torch]
+    env:
+      KERAS_BACKEND: ${{ matrix.backend }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.13"
+      - run: uv sync --group check --no-group dev --extra keras --extra ${{ matrix.backend }}
+      - name: Test
+        run: uv run --no-sync pytest tests/test_keras.py -q
+
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -52,7 +86,7 @@ jobs:
         run: uv run --no-sync python scripts/verify.py
 
   notebook:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7

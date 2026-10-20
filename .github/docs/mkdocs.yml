@@ -1,6 +1,6 @@
 site_name: ES-MoE
 site_url: https://lfan-ke.github.io/ES-MoE/
-site_description: Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.
+site_description: Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser.
 repo_url: https://github.com/Lfan-ke/ES-MoE
 edit_uri: blob/main/docs/
 # Kept under .github so the root holds only the package; both paths are relative to this file.
@@ -66,7 +66,9 @@ plugins:
           nav_translations:
             概览: Overview
             试玩: Try it
-            教程: Tutorial
+            在 torch 模型里: In a torch model
+            在 YOLO 里: In Ultralytics YOLO
+            在 Keras 里: In Keras
             选型: Selection
             实验结果: Results
             效果图: Effect chart
@@ -82,7 +84,9 @@ nav:
   - 概览: index.md
   - 试玩: demo.md
   - 使用:
-      - 教程: tutorial.md
+      - 在 torch 模型里: torch.md
+      - 在 YOLO 里: tutorial.md
+      - 在 Keras 里: keras.md
       - API: API.md
   - 设计:
       - ES-MoE 与 YOLO: design.md

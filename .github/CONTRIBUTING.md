@@ -5,13 +5,23 @@
     uv run pytest -q
     uv run python scripts/check_notebook.py     # only if you touched notebooks/
 
-All four must pass before a pull request. CI runs the same commands on Python 3.10 and 3.12, against
-both the latest ultralytics and 8.4.101, plus the notebook on CPU.
+All four must pass before a pull request. CI runs the same commands on Python 3.12 and 3.13, against
+both the latest ultralytics and 8.4.101, plus a leg with ultralytics absent, the Keras layer on
+tensorflow, jax and torch, and the notebook on CPU.
+
+## Layout
+
+A **backend** is the tensor library the block is written in, an **integration** is a training stack
+built on one. Between them sits a backend-free core -- `spec.py`, `kernels.py`, `naming.py`,
+`registry.py` -- which reads the arguments and settles them into one plan. A new backend adds only
+the tensor work and exports the names `esmoe/torch/` exports; a new integration exports `graft` and
+`equip`. Both are one row in `BACKENDS` or `INTEGRATIONS`.
 
 ## Conventions
 
 - Comments explain **why**, never what; obvious things carry no comment.
 - Type hints use builtin generics and `X | None`; `typing` imports only when unavoidable.
+- Private names take a double underscore, and each module ends with an explicit `__all__`.
 - The public API is what `esmoe.__all__` lists; everything else may change without notice.
 - One commit message line, `type(scope): summary.`, in English.
 

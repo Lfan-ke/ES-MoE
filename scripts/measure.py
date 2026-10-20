@@ -106,7 +106,7 @@ def main() -> None:
 
     import esmoe
 
-    esmoe.inject_esmoe()  # only registers the block name; a run without one is unaffected
+    esmoe.register()  # only registers the block name; a run without one is unaffected
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name in args.runs:

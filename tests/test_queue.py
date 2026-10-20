@@ -14,7 +14,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import train  # noqa: E402
+import train
 
 CASE = re.compile(r'^\s*(\w+)\)\s*flag="([^"]*)";\s*arch="([^"]*)"(;\s*fork=1)?', re.MULTILINE)
 ARMS = CASE.findall((ROOT / "scripts" / "queue.sh").read_text(encoding="utf-8"))

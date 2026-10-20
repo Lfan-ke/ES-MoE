@@ -94,7 +94,7 @@ def _(block, seed, torch):
 
     {
         f"k{size}": {"share": round(float(probs[index]), 4), "chosen": index in chosen}
-        for index, size in enumerate(block.expert_kernel_sizes)
+        for index, size in enumerate(block.kernels)
     }
     return
 

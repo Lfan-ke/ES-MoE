@@ -165,7 +165,7 @@ def watch(model) -> dict:
 def build(args):
     if args.upstream or not args.esmoe:
         return YOLO(args.base), args.base
-    esmoe.inject_esmoe()
+    esmoe.register()
     if args.grafted:
         # Settings come from the config itself, as upstream's own configs carry theirs.
         return esmoe.attach_aux_loss(YOLO(args.base), weight=args.aux_weight, recipe=args.recipe), args.base
@@ -255,7 +255,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dense-training", action="store_true", help="run every expert while training")
     p.add_argument("--dense-inference", action="store_true", help="run every expert outside training too")
     p.add_argument("--dynamic-threshold", type=float, default=0.0, help="upstream's inference pruning; 0.4 there")
-    p.add_argument("--recipe", choices=esmoe.inject.RECIPES, default="esmoe", help="how the aux term and block train")
+    p.add_argument(
+        "--recipe", choices=esmoe.yolo.inject.RECIPES, default="esmoe", help="how the aux term and block train"
+    )
     p.add_argument("--aux-weight", type=float, default=0.01)
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--imgsz", type=int, default=640)

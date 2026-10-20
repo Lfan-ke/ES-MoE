@@ -1,8 +1,8 @@
-# 教程
+# 在 YOLO 里
 
 装上、把块加进模型、确认它的损失进入优化器，再把效果量准。
 
-    pip install esmoe
+    uv add esmoe[yolo]
 
 ## 块做了什么
 
@@ -38,7 +38,7 @@ $$
 
 ## 三个调用
 
-`inject_esmoe` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把辅助损失接进训练。`equip` 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。
+`register` 让配置能引用这个块，`graft` 把它放进配置并修好层引用，`attach_aux_loss` 把辅助损失接进训练。`equip` 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。
 
     import esmoe
 
@@ -47,7 +47,7 @@ $$
 
 需要控制细节时拆开：
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
     model = YOLO("v8-esmoe.yaml")
     esmoe.attach_aux_loss(model, weight=0.01)
@@ -58,7 +58,10 @@ $$
 
 手写配置时，嫁接后的层就是一行：
 
-    [-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+    [-1, 1, ESMoE, [4, 2]]                             # num_experts, top_k
+    [-1, 1, ES_MoE, [{kernels: [3, 5, 7], top_k: 1}]]  # 或者直接写清楚
+
+`ESMoE`、`ES_MoE`、`ES_MOE` 都解析到同一个块。配置里已经写了块，`equip` 就按原样用，不再插入。
 
 ## 嫁接与重编号
 
@@ -158,7 +161,7 @@ YOLO 配置用**绝对层号**引用前面的层：
 | 推理期剪枝 | `dynamic_threshold=0.4`，剪掉低置信专家、首位无条件保留、余下重归一 | `0.0`（不剪） | `dynamic_threshold=0.4` |
 | 推理期稀疏 | `use_sparse_inference=True` | 同 | `sparse_inference=False` 则跑满 |
 
-块本身还对齐了上游的其余参数：`out_channels`（默认与输入同宽）、`top_k=None`（等于用全部专家）、偶数核逐一降为奇数再按 `max_kernel_size` 截断（剪枝过的检查点才装得回去）、以及 `num_experts` / `reduction` / `dynamic_threshold` / `max_kernel_size` 的取值校验——构造时就报错，不留到训练中途。
+块本身还对齐了上游的其余参数：`out_channels`（默认与输入同宽）、`top_k=None`（等于用全部专家）、偶数核逐一降为奇数再按 `max_kernel` 截断（剪枝过的检查点才装得回去），以及 `num_experts` / `reduction` / `dynamic_threshold` / `max_kernel` 的取值校验——构造时就报错，不留到训练中途。
 
 `out_norm`、`dense_training`、`dynamic_threshold` 默认关着，是为了让 `results/` 里按本包配方跑的运行仍能原样复现；前两项各有对照臂，见[判读线](JUDGMENT.md)。命令行 `esmoe graft` 对应 `--at`、`--balance`、`--out-norm`、`--dense-training`，剪枝阈值只能从 `equip` 或配置传。
 

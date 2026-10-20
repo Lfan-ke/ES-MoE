@@ -15,10 +15,10 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import charts  # noqa: E402
-import closure  # noqa: E402
-import dataset  # noqa: E402
-import report  # noqa: E402
+import charts
+import closure
+import dataset
+import report
 
 
 def test_the_committed_chart_data_is_current():

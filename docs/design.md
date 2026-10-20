@@ -53,6 +53,22 @@ flowchart TB
 
 路由按整张图选，不按像素或区域选。每个专家是深度可分离卷积：k×k 逐通道卷积处理空间，1×1 逐点卷积混合通道。门控只在被选中的 k 个专家上非零，并重归一为和 1。
 
+## 包的分层
+
+要兼容的东西分两类，各占一层。**后端**是块用哪套张量库写成，**集成**是建立在某个后端上的训练栈。中间夹一层与后端无关的共享核：参数怎么拼写、核尺寸怎么算、配置里的 callable 怎么命名、辅助损失放哪儿。这些全是纯 Python，新后端不重写，只写张量运算本身。
+
+```
+esmoe/
+  spec.py kernels.py naming.py registry.py   与后端无关的共享核
+  torch/    后端：原生 torch
+  keras/    后端：Keras 3，覆盖 tensorflow / jax / torch
+  yolo/     集成：Ultralytics
+```
+
+每个后端包导出同一组名字：`ESMoE`、`DWExpert`、`EXPERTS`、`BALANCES`、`blocks`、`routing`、`collect_aux_loss`、`clear_aux_loss`、`graft`。每个集成包导出 `graft` 与 `equip`，能把辅助损失接进该栈优化器的再导出 `attach_aux_loss`，按名字解析层的再导出 `register`。顶层直接导出 torch 后端，集成的名字按需加载，所以没装 ultralytics 时 `import esmoe` 照常。
+
+Keras 那份与 torch 那份的差别只有一处：它每个专家都算。跳过未被路由到的专家取决于当批数据，jax 与 tensorflow 的静态图表达不了；路由与平衡项两边逐位一致。
+
 ## 训练与推理
 
 | | 训练 | 验证与推理 |
@@ -73,7 +89,7 @@ flowchart TB
 
 | 项 | YOLO-Master `ES_MOE` | esmoe `ESMoE` |
 |:--:|:--:|:--:|
-| 安装 | 使用 YOLO-Master 维护的 ultralytics 分支 | `pip install esmoe`，装在官方 ultralytics 上 |
+| 安装 | 使用 YOLO-Master 维护的 ultralytics 分支 | `uv add esmoe[yolo]`，装在官方 ultralytics 上 |
 | 主干 | 分支自带的 `yolo-master-n` 等配置 | 官方 YOLOv5n 至 YOLO26n 七代，以及分支上的 `yolo-master-n` |
 | 接入 | 手写模型配置 | `equip` 一次完成注册、嫁接、构建与接损失；`graft` 自动重编号层引用；命令行 `esmoe graft` |
 | 位置 | `yolo-master-n` 在 P2、P3 的 C3k2 与 P4、P5 的 A2C2f 之后各一块 | 默认主干末端一块；`at="backbone_stages"` 在每个下采样 stage 后各放一块，在 `yolo-master-n` 上与上游位置相同 |

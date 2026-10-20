@@ -53,8 +53,8 @@ def test_collect_reflects_latest_forward_only():
 
 def test_kernel_sizes_are_heterogeneous_and_capped():
     assert odd_kernels(4) == [3, 5, 7, 9]
-    assert odd_kernels(4, max_kernel_size=5) == [3, 5, 5, 5]
-    assert ESMoE(3, 1, 16, expert_kernel_sizes=[5, 5, 7]).expert_kernel_sizes == [5, 5, 7]
+    assert odd_kernels(4, max_kernel=5) == [3, 5, 5, 5]
+    assert ESMoE(3, 1, 16, kernels=[5, 5, 7]).kernels == [5, 5, 7]
 
 
 def test_experts_and_balance_are_replaceable():
@@ -76,11 +76,12 @@ def test_blocks_finds_every_block():
 
 
 def test_invalid_configuration_is_rejected():
-    for bad in ({"num_experts": 2, "top_k": 3}, {"num_experts": 2, "top_k": 0}):
-        with pytest.raises(ValueError):
-            ESMoE(**bad)
     with pytest.raises(ValueError):
-        ESMoE(4, 2, 16, expert_kernel_sizes=[3, 5])
+        ESMoE(num_experts=2, top_k=0)
+    with pytest.warns(UserWarning, match="activates all"):
+        assert ESMoE(num_experts=2, top_k=3).top_k == 2
+    # Kernels decide the count, whatever num_experts said.
+    assert ESMoE(4, 2, 16, kernels=[3, 5]).num_experts == 2
 
 
 def test_aux_term_survives_autocast():
@@ -325,11 +326,11 @@ def test_out_channels_changes_the_block_width():
 )
 def test_explicit_kernels_step_down_to_odd_and_cap(given, cap, expected):
     """Upstream lowers an even kernel by one and caps it, so a pruned checkpoint's kernels reload."""
-    assert ESMoE(3, 2, channels=16, expert_kernel_sizes=given, max_kernel_size=cap).expert_kernel_sizes == expected
+    assert ESMoE(3, 2, channels=16, kernels=given, max_kernel=cap).kernels == expected
 
 
 def test_an_even_kernel_cap_is_lowered_not_raised():
-    assert ESMoE(2, 1, channels=16, max_kernel_size=16).expert_kernel_sizes == [3, 5]
+    assert ESMoE(2, 1, channels=16, max_kernel=16).kernels == [3, 5]
 
 
 @pytest.mark.parametrize(
@@ -338,9 +339,8 @@ def test_an_even_kernel_cap_is_lowered_not_raised():
         ({"num_experts": 0}, "num_experts"),
         ({"reduction": 0}, "reduction"),
         ({"dynamic_threshold": 1.5}, "dynamic_threshold"),
-        ({"max_kernel_size": 2}, "max_kernel_size"),
-        ({"top_k": 9}, "top_k"),
-        ({"nonsense": True}, "unknown ESMoE options"),
+        ({"max_kernel": 0}, "max_kernel"),
+        ({"top_k": 0}, "top_k"),
         ({"balance": "nonexistent"}, "unknown name"),
         ({"balance": "math:pi"}, "not a callable"),
     ],

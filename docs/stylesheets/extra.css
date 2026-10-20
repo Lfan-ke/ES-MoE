@@ -6,15 +6,15 @@
    and in place of section rules - everywhere it means "top-2 of 4", never as decoration. */
 
 :root {
-  --es-ink: #131a2b;
-  --es-ink-soft: #223049;
-  --es-paper: #f7f8fa;
-  --es-signal: #e8a33d;
-  --es-route: #3e7c8c;
-  --es-edge: #c9cfda;
+  --es-ink: #0f1b33;
+  --es-ink-soft: #1b2a47;
+  --es-paper: #f6f9ff;
+  --es-signal: #2563eb;
+  --es-route: #1d4ed8;
+  --es-edge: #c7d5ea;
 
   --md-primary-fg-color: var(--es-ink);
-  --md-primary-fg-color--dark: #0d1320;
+  --md-primary-fg-color--dark: #0a1327;
   --md-accent-fg-color: var(--es-route);
   --md-text-font: "Source Sans 3", "Noto Sans SC", system-ui, sans-serif;
   --md-code-font: "JetBrains Mono", "Noto Sans Mono", "Noto Sans SC", ui-monospace, monospace;
@@ -22,14 +22,15 @@
 
 [data-md-color-scheme="default"] {
   --md-default-bg-color: var(--es-paper);
-  --md-typeset-a-color: #2f6a79;
+  --md-typeset-a-color: #1d4ed8;
 }
 
 [data-md-color-scheme="slate"] {
   --md-default-bg-color: var(--es-ink);
   --md-default-bg-color--light: var(--es-ink-soft);
-  --md-typeset-a-color: #7ec3d2;
-  --es-edge: #33405a;
+  --md-typeset-a-color: #93c5fd;
+  --es-route: #60a5fa;
+  --es-edge: #2b3c5c;
 }
 
 .md-header,

@@ -127,7 +127,7 @@ def test_top_k_none_is_upstreams_plain_softmax():
 @pytest.mark.parametrize("num_experts,expected", [(1, [3]), (2, [3, 5]), (3, [3, 5, 7]), (5, [3, 5, 7, 9, 11])])
 def test_default_kernels_match_upstreams_rule(num_experts, expected):
     """Upstream uses `[3, 5, 7][:E]` up to three experts and `3 + 2i` beyond."""
-    assert ESMoE(num_experts, 1, channels=CHANNELS).expert_kernel_sizes == expected
+    assert ESMoE(num_experts, 1, channels=CHANNELS).kernels == expected
 
 
 def test_the_expert_is_upstreams_depthwise_separable_block():

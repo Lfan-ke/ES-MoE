@@ -70,7 +70,7 @@ def evaluate(weights: Path, data: Path, gt_file: Path, ids: dict[str, int], args
 
     import esmoe
 
-    esmoe.inject_esmoe()
+    esmoe.register()
     model = YOLO(str(weights))
     # val() fuses conv+bn inside an inference-mode context, and some accelerator builds refuse to
     # view an inference tensor. Fusing here leaves nothing for that path to do; the arithmetic is

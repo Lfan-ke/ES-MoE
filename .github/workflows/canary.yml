@@ -1,16 +1,16 @@
 name: Canary
 
 # Installs the published package - not this checkout - into a clean environment and runs the
-# documented quick start. It answers "does `pip install esmoe` still work today", which the CI on
+# documented quick start. It answers "does `uv add esmoe` still work today", which the CI on
 # source cannot answer, and catches an upstream ultralytics release breaking users before they do.
 on:
   schedule:
-    - cron: "0 3 1,15 * *"
+    - cron: "0 3 1,16 * *"
   workflow_dispatch:
 
 jobs:
   published:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
@@ -20,14 +20,14 @@ jobs:
         run: |
           uv venv
           uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          uv pip install esmoe nbclient ipykernel nbformat pandas
+          uv pip install "esmoe[yolo]" nbclient ipykernel nbformat pandas
       - name: Report what got installed
         run: uv run --no-sync esmoe info
       - name: Run the documented quick start
         run: uv run --no-sync python scripts/check_notebook.py
 
   fork:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7

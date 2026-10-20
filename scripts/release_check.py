@@ -66,7 +66,7 @@ def package(args) -> None:
     import esmoe
 
     torch.set_num_threads(args.threads)
-    esmoe.inject_esmoe()
+    esmoe.register()
     out = Path(args.out)
     model = DetectionModel(str(ROOT / "configs" / "yolo-master-n-e3k3-esmoe.yaml"), ch=3, nc=80, verbose=False)
     state = renamed(torch.load(out / "released.state.pt", map_location="cpu"))
