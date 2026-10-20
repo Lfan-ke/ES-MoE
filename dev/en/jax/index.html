@@ -16,7 +16,7 @@
         <link rel="prev" href="../tensorflow/">
       
       
-        <link rel="next" href="../keras/">
+        <link rel="next" href="../flax/">
       
       
         
@@ -727,6 +727,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../flax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Flax
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../keras/" class="md-nav__link">
         
   
@@ -1178,8 +1206,8 @@
 <h1 id="jax-integration">Jax integration<a class="headerlink" href="#jax-integration" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>jax<span class="o">]</span>
 </code></pre></div>
-<p><code>esmoe.jax.ESMoE</code> is a set of pure functions. It needs Jax and nothing else, Keras and Flax
-included. <code>init</code> builds the parameter tree, <code>apply</code> returns the output and the balancing term.
+<p><code>esmoe.jax.ESMoE</code> is a set of pure functions, needing Jax and nothing else. A project already on
+Flax wants <a href="../flax/">Flax integration</a> instead. <code>init</code> builds the parameter tree, <code>apply</code> returns the output and the balancing term.
 Inputs are NHWC.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
@@ -1263,13 +1291,13 @@ interface the state is either carried by the caller or absent, and this one make
         
         
           
-          <a href="../keras/" class="md-footer__link md-footer__link--next" aria-label="Next: Keras 3">
+          <a href="../flax/" class="md-footer__link md-footer__link--next" aria-label="Next: Flax">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Keras 3
+                Flax
               </div>
             </div>
             <div class="md-footer__button md-icon">

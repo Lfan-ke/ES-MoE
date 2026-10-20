@@ -16,7 +16,7 @@
         <link rel="prev" href="../tensorflow/">
       
       
-        <link rel="next" href="../keras/">
+        <link rel="next" href="../flax/">
       
       
         
@@ -727,6 +727,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../flax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Flax 集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../keras/" class="md-nav__link">
         
   
@@ -1178,7 +1206,7 @@
 <h1 id="jax-集成">Jax 集成<a class="headerlink" href="#jax-集成" title="Permanent link">&para;</a></h1>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>jax<span class="o">]</span>
 </code></pre></div>
-<p><code>esmoe.jax.ESMoE</code> 是一组纯函数，只依赖 Jax，不经 Keras 也不经 Flax。<code>init</code> 建参数树，<code>apply</code> 返回输出与平衡项。输入按 NHWC。</p>
+<p><code>esmoe.jax.ESMoE</code> 是一组纯函数，只依赖 Jax。项目本来就用 Flax 的话看 <a href="../flax/">Flax 集成</a>。<code>init</code> 建参数树，<code>apply</code> 返回输出与平衡项。输入按 NHWC。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>
 
@@ -1258,13 +1286,13 @@
         
         
           
-          <a href="../keras/" class="md-footer__link md-footer__link--next" aria-label="下一页: Keras3 集成">
+          <a href="../flax/" class="md-footer__link md-footer__link--next" aria-label="下一页: Flax 集成">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 下一页
               </span>
               <div class="md-ellipsis">
-                Keras3 集成
+                Flax 集成
               </div>
             </div>
             <div class="md-footer__button md-icon">

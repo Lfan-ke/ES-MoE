@@ -64,6 +64,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/experiments/"/>
     </url>
     <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/flax/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/flax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/flax/"/>
+    </url>
+    <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/jax/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
@@ -167,6 +174,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/experiments/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/experiments/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/en/flax/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/flax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/flax/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/en/jax/</loc>

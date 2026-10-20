@@ -640,6 +640,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../flax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Flax 集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../keras/" class="md-nav__link">
         
   
@@ -1049,6 +1077,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1166,6 +1205,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.0
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1269,7 +1319,13 @@
 
 
 <h1 id="发布说明">发布说明<a class="headerlink" href="#发布说明" title="Permanent link">&para;</a></h1>
-<p>当前版本 <strong>2.1.0</strong>：TensorFlow 与 Jax 各有自己的原生实现，不再借道 Keras。</p>
+<p>当前版本 <strong>2.2.0</strong>：Flax 后端按现行的 <code>flax.nnx</code> 写成，jax 由此有三条路。</p>
+<h2 id="220">2.2.0<a class="headerlink" href="#220" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Flax 后端。</strong> <code>esmoe.flax.ESMoE</code> 是一个 <code>nnx.Module</code>，参数在构造时建好，平衡项存在 <code>nnx.Intermediate</code> 变量上，<code>nnx.jit</code> 与 <code>nnx.grad</code> 直接可用。</li>
+<li><strong>jax 现在有三条路</strong>，按项目选：本来就用 Flax 选 <code>esmoe.flax</code>；不想引入 Flax、自己管参数树选 <code>esmoe.jax</code>；用 Keras 跨后端选 <code>esmoe.keras</code> 配 <code>KERAS_BACKEND=jax</code>。三条路的路由、平衡项与构造参数一致。</li>
+<li><code>esmoe[flax]</code> 装它，<code>esmoe[nnx]</code> 是同一个 extra 的别名。CI 多一条 flax 腿。</li>
+</ul>
 <h2 id="210">2.1.0<a class="headerlink" href="#210" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>TensorFlow 原生后端。</strong> <code>esmoe.tensorflow.ESMoE</code> 是一个 <code>tf.Module</code>，只依赖 TensorFlow：自带的批归一化把滑动统计量存成不训练的变量，辅助损失走与 torch 同一套弱引用注册表，<code>graft</code> 按属性名或 <code>Sequential</code> 下标插块。</li>
