@@ -1154,8 +1154,9 @@
 
 
 <h1 id="keras3-集成">Keras3 集成<a class="headerlink" href="#keras3-集成" title="Permanent link">&para;</a></h1>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>keras<span class="o">]</span><span class="w">         </span><span class="c1"># 或 esmoe[tensorflow] / esmoe[jax]</span>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>keras<span class="o">]</span>
 </code></pre></div>
+<p>后端由 Keras 决定，<code>esmoe[tensorflow]</code> 与 <code>esmoe[jax]</code> 连后端一起装。</p>
 <p>块写了两份：一份原生 torch，一份 Keras 3。Keras 3 自己跑在 tensorflow、jax、torch 三种后端上，所以这一份就覆盖了另外三家。两份的构造参数完全一样，因为解析参数的代码是同一份。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">keras</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">esmoe.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ESMoE</span>

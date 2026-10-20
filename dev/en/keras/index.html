@@ -1154,8 +1154,9 @@
 
 
 <h1 id="keras-3-integration">Keras 3 integration<a class="headerlink" href="#keras-3-integration" title="Permanent link">&para;</a></h1>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>keras<span class="o">]</span><span class="w">         </span><span class="c1"># or esmoe[tensorflow] / esmoe[jax]</span>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>add<span class="w"> </span>esmoe<span class="o">[</span>keras<span class="o">]</span>
 </code></pre></div>
+<p>Keras picks the backend; <code>esmoe[tensorflow]</code> and <code>esmoe[jax]</code> bring one with them.</p>
 <p>The block is written twice: once in native torch, once in Keras 3. Keras 3 runs on tensorflow, jax
 and torch, so that second implementation covers the other three. Both take the same arguments,
 because the code that reads them is the same code.</p>
