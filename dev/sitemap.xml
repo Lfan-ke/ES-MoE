@@ -64,6 +64,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/experiments/"/>
     </url>
     <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/jax/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/jax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/jax/"/>
+    </url>
+    <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/keras/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
@@ -76,6 +83,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/results/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/results/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/tensorflow/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/tensorflow/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/torch/</loc>
@@ -155,6 +169,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/experiments/"/>
     </url>
     <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/en/jax/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/jax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/jax/"/>
+    </url>
+    <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/en/keras/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
@@ -167,6 +188,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/results/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/results/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/dev/en/tensorflow/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/dev/en/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/dev/tensorflow/"/>
     </url>
     <url>
         <loc>https://lfan-ke.github.io/ES-MoE/dev/en/torch/</loc>

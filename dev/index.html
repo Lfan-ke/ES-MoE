@@ -304,7 +304,7 @@
           
   
   
-  使用
+  集成
 
         </a>
       </li>
@@ -590,7 +590,7 @@
   <span class="md-ellipsis">
     
   
-    使用
+    集成
   
 
     
@@ -606,7 +606,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    使用
+    集成
   
 
           </label>
@@ -626,7 +626,7 @@
   <span class="md-ellipsis">
     
   
-    在 torch 模型里
+    Torch 集成
   
 
     
@@ -654,7 +654,63 @@
   <span class="md-ellipsis">
     
   
-    在 YOLO 里
+    YOLO 集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tensorflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TensorFlow 集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="jax/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jax 集成
   
 
     
@@ -682,7 +738,7 @@
   <span class="md-ellipsis">
     
   
-    在 Keras 里
+    Keras3 集成
   
 
     
@@ -1144,20 +1200,21 @@
 <li><strong>拼进任意 torch 模型</strong><span>通道在首次前向推断，所以 <code>nn.Sequential</code> 里直接放得下；<code>kernels</code> 定专家与感受野，<code>top_k</code> 定几选几。</span></li>
 <li><strong>一个调用接进 YOLO</strong><span><code>equip</code> 把块接进配置、重编号层引用、接好损失；YOLOv5 至 YOLO26 七代官方主干与 YOLO-Master 分支都能用。</span></li>
 <li><strong>辅助损失进入反向传播</strong><span>训练表里 <code>esmoe_aux</code> 自成一列，由单元测试与 <code>scripts/verify.py</code> 的十项真训练检查断言。</span></li>
-<li><strong>与 YOLO-Master 作用一致</strong><span>同一个 yolo-master-n、同一份协议：块在上游分支上加 +0.0104，在官方 ultralytics 加本包上加 +0.0095（FP32，各 3/3），两者之差落在等效档。</span></li>
 </ul>
 </div>
 <div class="es-stats">
 <div><strong>142</strong><span>次满协议训练，600 卡时</span></div>
 <div><strong>7</strong><span>代官方主干，另有 yolo-master-n</span></div>
-<div><strong>335</strong><span>项测试，含与上游、论文的数值对照</span></div>
+<div><strong>409</strong><span>项测试，含与上游、论文的数值对照</span></div>
 <div><strong>3</strong><span>个 seed 起的逐 seed 配对</span></div>
 </div>
 
 <div class="es-cards">
-<a href="torch/"><strong>在 torch 模型里</strong><span>三个旋钮、辅助损失、往现成模型里插块</span></a>
-<a href="tutorial/"><strong>在 YOLO 里</strong><span>安装、三个调用、嫁接与重编号、对照实验怎么做</span></a>
-<a href="keras/"><strong>在 Keras 里</strong><span>一份实现跑在 tensorflow、jax、torch 上，以及它与 torch 那份的差别</span></a>
+<a href="torch/"><strong>Torch 集成</strong><span>两个旋钮、辅助损失、往现成模型里插块</span></a>
+<a href="tutorial/"><strong>YOLO 集成</strong><span>安装、三个调用、嫁接与重编号、对照实验怎么做</span></a>
+<a href="tensorflow/"><strong>TensorFlow 集成</strong><span>进 tf.function、用 GradientTape 求梯度</span></a>
+<a href="jax/"><strong>Jax 集成</strong><span>stateless_call 配 jax.jit 与 jax.grad</span></a>
+<a href="keras/"><strong>Keras3 集成</strong><span>一份实现跑在 tensorflow、jax、torch 上</span></a>
 <a href="API/"><strong>API</strong><span>equip、graft、attach_aux_loss 与 ESMoE 的全部参数</span></a>
 <a href="design/"><strong>ES-MoE 与 YOLO</strong><span>块比普通 YOLO 多了什么，训练与推理怎么算，与 YOLO-Master 逐项对照</span></a>
 <a href="experiments/"><strong>实验</strong><span>数据集、协议、流程、八轮实验与同配置对照，每个结论配一张图</span></a>
