@@ -6,17 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+        <meta name="description" content="Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser.">
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/1.1/en/tutorial/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/en/tutorial/">
       
       
-        <link rel="prev" href="../demo/">
+        <link rel="prev" href="../torch/">
       
       
-        <link rel="next" href="../API/">
+        <link rel="next" href="../keras/">
       
       
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>Tutorial - ES-MoE</title>
+        <title>In Ultralytics YOLO - ES-MoE</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial" class="md-skip">
+        <a href="#in-ultralytics-yolo" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorial
+              In Ultralytics YOLO
             
           </span>
         </div>
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../torch/" class="md-tabs__link">
           
   
   
@@ -532,6 +532,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../torch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    In a torch model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -551,7 +579,7 @@
   <span class="md-ellipsis">
     
   
-    Tutorial
+    In Ultralytics YOLO
   
 
     
@@ -569,7 +597,7 @@
   <span class="md-ellipsis">
     
   
-    Tutorial
+    In Ultralytics YOLO
   
 
     
@@ -703,6 +731,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keras/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    In Keras
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1207,9 +1263,9 @@
   
 
 
-<h1 id="tutorial">Tutorial<a class="headerlink" href="#tutorial" title="Permanent link">&para;</a></h1>
+<h1 id="in-ultralytics-yolo">In Ultralytics YOLO<a class="headerlink" href="#in-ultralytics-yolo" title="Permanent link">&para;</a></h1>
 <p>Install it, add the block to a model, confirm its loss reaches the optimiser, then measure it properly.</p>
-<pre><code>pip install esmoe
+<pre><code>uv add esmoe[yolo]
 </code></pre>
 <h2 id="what-the-block-does">What the block does<a class="headerlink" href="#what-the-block-does" title="Permanent link">&para;</a></h2>
 <p>The block sends each image to a few of several convolutional experts and sums what they return. Each expert is a depthwise-separable convolution with its own kernel size (3, 5, 7, 9, ...), so the experts differ in receptive field rather than merely in weights. A lightweight router scores them per image, the top-k are kept and renormalised, and the block returns their weighted sum. The block preserves channel count, which is what lets a stock <code>parse_model</code> size it.</p>
@@ -1239,14 +1295,14 @@ and <span class="arithmatex">\(f_i\)</span> the fraction of samples that actuall
 realised load are spread evenly. Measured, what it prevents is an expert dying, not the dispatch concentrating
 (<a href="../JUDGMENT/">judgment lines</a>, round six).</p>
 <h2 id="the-three-calls">The three calls<a class="headerlink" href="#the-three-calls" title="Permanent link">&para;</a></h2>
-<p><code>inject_esmoe</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the auxiliary loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
+<p><code>register</code> makes the block nameable in a config, <code>graft</code> puts it there and fixes the layer references, <code>attach_aux_loss</code> wires the auxiliary loss into training. <code>equip</code> does all four steps at once: register, graft, build, wire.</p>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
 model.train(data="coco8.yaml", epochs=3, imgsz=320)
 </code></pre>
 <p>Take them apart when you need to:</p>
-<pre><code>esmoe.inject_esmoe()
+<pre><code>esmoe.register()
 esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
 model = YOLO("v8-esmoe.yaml")
 esmoe.attach_aux_loss(model, weight=0.01)
@@ -1255,8 +1311,10 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <pre><code>esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
 </code></pre>
 <p>Written by hand, the grafted layer is one line:</p>
-<pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+<pre><code>[-1, 1, ESMoE, [4, 2]]                             # num_experts, top_k
+[-1, 1, ES_MoE, [{kernels: [3, 5, 7], top_k: 1}]]  # or say what you mean
 </code></pre>
+<p><code>ESMoE</code>, <code>ES_MoE</code> and <code>ES_MOE</code> all resolve to the block, and a config that already names one is taken as written: <code>equip</code> grafts nothing into it.</p>
 <h2 id="grafting-and-renumbering">Grafting and renumbering<a class="headerlink" href="#grafting-and-renumbering" title="Permanent link">&para;</a></h2>
 <p>A YOLO config addresses earlier layers by absolute index:</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
@@ -1410,7 +1468,7 @@ them.</p>
 </tr>
 </tbody>
 </table>
-<p>The block matches upstream's remaining parameters too: <code>out_channels</code> (the input's width by default), <code>top_k=None</code> meaning every expert, even kernels stepped down to odd and capped at <code>max_kernel_size</code> so a pruned checkpoint's kernels reload, and the same validation of <code>num_experts</code>, <code>reduction</code>, <code>dynamic_threshold</code> and <code>max_kernel_size</code> -- refused at construction rather than halfway through a run.</p>
+<p>The block matches upstream's remaining parameters too: <code>out_channels</code> (the input's width by default), <code>top_k=None</code> meaning every expert, even kernels stepped down to odd and capped at <code>max_kernel</code> so a pruned checkpoint's kernels reload, and the same validation of <code>num_experts</code>, <code>reduction</code>, <code>dynamic_threshold</code> and <code>max_kernel</code> -- refused at construction rather than halfway through a run.</p>
 <p><code>out_norm</code>, <code>dense_training</code> and <code>dynamic_threshold</code> are off by default so the runs of this package's recipe in <code>results/</code> still reproduce; the first two each have an arm on the <a href="../JUDGMENT/">judgment lines</a> page. On the <code>esmoe graft</code> command line: <code>--at</code>, <code>--balance</code>, <code>--out-norm</code>, <code>--dense-training</code>; the pruning threshold goes through <code>equip</code> or the config.</p>
 <p><strong>These settings have to travel in the config; setting them on the blocks afterwards does not work.</strong> The trainer rebuilds the model from <code>model.yaml</code>, and anything set after <code>YOLO(cfg)</code> returns disappears with the instance that is discarded -- no error, no trace. <code>equip</code> and <code>graft</code> write them into the config, so a rebuild keeps them; <code>ESMoE.configure(...)</code> is for the paths that never reach a trainer -- inference, export, unit tests. To read back what was in force from any checkpoint: <code>uv run python scripts/blockspec.py</code>.</p>
 <h2 id="things-to-know">Things to know<a class="headerlink" href="#things-to-know" title="Permanent link">&para;</a></h2>
@@ -1455,7 +1513,7 @@ them.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../demo/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Try it">
+          <a href="../torch/" class="md-footer__link md-footer__link--prev" aria-label="Previous: In a torch model">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1465,20 +1523,20 @@ them.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Try it
+                In a torch model
               </div>
             </div>
           </a>
         
         
           
-          <a href="../API/" class="md-footer__link md-footer__link--next" aria-label="Next: API">
+          <a href="../keras/" class="md-footer__link md-footer__link--next" aria-label="Next: In Keras">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                API
+                In Keras
               </div>
             </div>
             <div class="md-footer__button md-icon">

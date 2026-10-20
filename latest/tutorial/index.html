@@ -6,17 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Drop-in expert-sparse MoE block for Ultralytics YOLO, with a router loss that reaches the optimiser.">
+        <meta name="description" content="Expert-sparse MoE block for torch models and Ultralytics YOLO, with a router loss that reaches the optimiser.">
       
       
       
-        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/1.1/tutorial/">
+        <link rel="canonical" href="https://lfan-ke.github.io/ES-MoE/2.0/tutorial/">
       
       
-        <link rel="prev" href="../demo/">
+        <link rel="prev" href="../torch/">
       
       
-        <link rel="next" href="../API/">
+        <link rel="next" href="../keras/">
       
       
         
@@ -31,7 +31,7 @@
     
     
       
-        <title>教程 - ES-MoE</title>
+        <title>在 YOLO 里 - ES-MoE</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#教程" class="md-skip">
+        <a href="#在-yolo-里" class="md-skip">
           跳转至
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              教程
+              在 YOLO 里
             
           </span>
         </div>
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../torch/" class="md-tabs__link">
           
   
   
@@ -532,6 +532,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../torch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 torch 模型里
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -551,7 +579,7 @@
   <span class="md-ellipsis">
     
   
-    教程
+    在 YOLO 里
   
 
     
@@ -569,7 +597,7 @@
   <span class="md-ellipsis">
     
   
-    教程
+    在 YOLO 里
   
 
     
@@ -703,6 +731,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../keras/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Keras 里
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1207,9 +1263,9 @@
   
 
 
-<h1 id="教程">教程<a class="headerlink" href="#教程" title="Permanent link">&para;</a></h1>
+<h1 id="在-yolo-里">在 YOLO 里<a class="headerlink" href="#在-yolo-里" title="Permanent link">&para;</a></h1>
 <p>装上、把块加进模型、确认它的损失进入优化器，再把效果量准。</p>
-<pre><code>pip install esmoe
+<pre><code>uv add esmoe[yolo]
 </code></pre>
 <h2 id="块做了什么">块做了什么<a class="headerlink" href="#块做了什么" title="Permanent link">&para;</a></h2>
 <p>块把每张图交给若干卷积专家里的少数几个，再把它们的输出加权求和。每个专家是一路深度可分离卷积，核大小各不相同（3、5、7、9……），所以专家之间的差别在<strong>感受野</strong>而不只是权重。由一个轻量路由器按图打分，取 top-k 后重新归一化，块返回它们的加权和。块保持通道数不变，官方 <code>parse_model</code> 才能为它定尺寸。</p>
@@ -1236,14 +1292,14 @@
 \]</div>
 <p>其中 <span class="arithmatex">\(E\)</span> 是专家数，<span class="arithmatex">\(\bar{p}_i\)</span> 是专家 <span class="arithmatex">\(i\)</span> 在该批次上的平均路由概率，<span class="arithmatex">\(f_i\)</span> 是实际激活它的样本比例。路由质量与实际负载都摊平时该项最小。实测它防住的是专家死掉，防不住分派集中（<a href="../JUDGMENT/">判读线</a>第六轮）。</p>
 <h2 id="三个调用">三个调用<a class="headerlink" href="#三个调用" title="Permanent link">&para;</a></h2>
-<p><code>inject_esmoe</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把辅助损失接进训练。<code>equip</code> 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。</p>
+<p><code>register</code> 让配置能引用这个块，<code>graft</code> 把它放进配置并修好层引用，<code>attach_aux_loss</code> 把辅助损失接进训练。<code>equip</code> 把四件事一次做完：注册、嫁接、构建模型、接上辅助损失。</p>
 <pre><code>import esmoe
 
 model = esmoe.equip("yolo11n.yaml", weight=0.01)
 model.train(data="coco8.yaml", epochs=3, imgsz=320)
 </code></pre>
 <p>需要控制细节时拆开：</p>
-<pre><code>esmoe.inject_esmoe()
+<pre><code>esmoe.register()
 esmoe.graft("yolov8n.yaml", out="v8-esmoe.yaml", at=[4, 6])
 model = YOLO("v8-esmoe.yaml")
 esmoe.attach_aux_loss(model, weight=0.01)
@@ -1252,8 +1308,10 @@ esmoe.attach_aux_loss(model, weight=0.01)
 <pre><code>esmoe graft yolo11n.yaml -o yolo11n-esmoe.yaml -e 4 -k 2 --at 4,6
 </code></pre>
 <p>手写配置时，嫁接后的层就是一行：</p>
-<pre><code>[-1, 1, ESMoE, [4, 2]]   # num_experts, top_k
+<pre><code>[-1, 1, ESMoE, [4, 2]]                             # num_experts, top_k
+[-1, 1, ES_MoE, [{kernels: [3, 5, 7], top_k: 1}]]  # 或者直接写清楚
 </code></pre>
+<p><code>ESMoE</code>、<code>ES_MoE</code>、<code>ES_MOE</code> 都解析到同一个块。配置里已经写了块，<code>equip</code> 就按原样用，不再插入。</p>
 <h2 id="嫁接与重编号">嫁接与重编号<a class="headerlink" href="#嫁接与重编号" title="Permanent link">&para;</a></h2>
 <p>YOLO 配置用<strong>绝对层号</strong>引用前面的层：</p>
 <pre><code>- [[-1, 12], 1, Concat, [1]]
@@ -1394,7 +1452,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
 </tr>
 </tbody>
 </table>
-<p>块本身还对齐了上游的其余参数：<code>out_channels</code>（默认与输入同宽）、<code>top_k=None</code>（等于用全部专家）、偶数核逐一降为奇数再按 <code>max_kernel_size</code> 截断（剪枝过的检查点才装得回去）、以及 <code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel_size</code> 的取值校验——构造时就报错，不留到训练中途。</p>
+<p>块本身还对齐了上游的其余参数：<code>out_channels</code>（默认与输入同宽）、<code>top_k=None</code>（等于用全部专家）、偶数核逐一降为奇数再按 <code>max_kernel</code> 截断（剪枝过的检查点才装得回去），以及 <code>num_experts</code> / <code>reduction</code> / <code>dynamic_threshold</code> / <code>max_kernel</code> 的取值校验——构造时就报错，不留到训练中途。</p>
 <p><code>out_norm</code>、<code>dense_training</code>、<code>dynamic_threshold</code> 默认关着，是为了让 <code>results/</code> 里按本包配方跑的运行仍能原样复现；前两项各有对照臂，见<a href="../JUDGMENT/">判读线</a>。命令行 <code>esmoe graft</code> 对应 <code>--at</code>、<code>--balance</code>、<code>--out-norm</code>、<code>--dense-training</code>，剪枝阈值只能从 <code>equip</code> 或配置传。</p>
 <p><strong>这些设置必须走配置文件，不能事后设在块上。</strong> 训练器照 <code>model.yaml</code> 重建模型，<code>YOLO(cfg)</code> 之后设到块上的东西随那个被丢弃的实例一起消失，不报错也不留痕。<code>equip</code> 与 <code>graft</code> 把它们写进配置，因此重建多少次都在；<code>ESMoE.configure(...)</code> 只适合不经训练器的场合（推理、导出、单元测试）。从任一检查点读回当时真正生效的设置：<code>uv run python scripts/blockspec.py</code>。</p>
 <h2 id="使用须知">使用须知<a class="headerlink" href="#使用须知" title="Permanent link">&para;</a></h2>
@@ -1439,7 +1497,7 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
       <nav class="md-footer__inner md-grid" aria-label="页脚" >
         
           
-          <a href="../demo/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 试玩">
+          <a href="../torch/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 在 torch 模型里">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1449,20 +1507,20 @@ block = esmoe.ESMoE(num_experts=3, top_k=2, expert=ThinExpert, balance=entropy_b
                 上一页
               </span>
               <div class="md-ellipsis">
-                试玩
+                在 torch 模型里
               </div>
             </div>
           </a>
         
         
           
-          <a href="../API/" class="md-footer__link md-footer__link--next" aria-label="下一页: API">
+          <a href="../keras/" class="md-footer__link md-footer__link--next" aria-label="下一页: 在 Keras 里">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 下一页
               </span>
               <div class="md-ellipsis">
-                API
+                在 Keras 里
               </div>
             </div>
             <div class="md-footer__button md-icon">
