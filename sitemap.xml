@@ -1,213 +1,227 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/API/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/API/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/API/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/API/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/API/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/API/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/JUDGMENT/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/JUDGMENT/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/JUDGMENT/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/JUDGMENT/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/RELEASE/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/RELEASE/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/RELEASE/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/RELEASE/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/SELECTION/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/SELECTION/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/SELECTION/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/SELECTION/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/SELECTION/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/SELECTION/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/charts/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/charts/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/charts/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/charts/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/charts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/charts/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/demo/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/demo/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/demo/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/demo/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/demo/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/demo/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/design/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/design/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/design/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/design/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/design/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/design/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/experiments/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/experiments/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/experiments/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/experiments/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/jax/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/flax/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/jax/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/jax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/flax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/flax/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/keras/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/jax/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/keras/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/keras/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/jax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/jax/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/results/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/keras/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/results/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/results/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/keras/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/keras/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/tensorflow/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/results/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/tensorflow/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/results/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/results/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/torch/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/tensorflow/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/torch/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/torch/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/tensorflow/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/tutorial/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/torch/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/tutorial/"/>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/tutorial/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/torch/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/torch/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/tutorial/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/tutorial/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/tutorial/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/API/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/API/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/API/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/JUDGMENT/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/API/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/JUDGMENT/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/API/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/API/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/RELEASE/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/JUDGMENT/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/RELEASE/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/JUDGMENT/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/JUDGMENT/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/SELECTION/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/RELEASE/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/SELECTION/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/SELECTION/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/RELEASE/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/RELEASE/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/charts/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/SELECTION/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/charts/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/charts/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/SELECTION/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/SELECTION/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/demo/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/charts/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/demo/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/demo/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/charts/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/charts/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/design/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/demo/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/design/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/design/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/demo/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/demo/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/experiments/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/design/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/experiments/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/design/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/design/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/jax/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/experiments/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/jax/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/jax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/experiments/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/experiments/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/keras/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/flax/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/keras/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/keras/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/flax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/flax/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/results/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/jax/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/results/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/results/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/jax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/jax/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/tensorflow/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/keras/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/tensorflow/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/keras/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/keras/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/torch/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/results/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/torch/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/torch/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/results/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/results/"/>
     </url>
     <url>
-        <loc>https://lfan-ke.github.io/ES-MoE/2.1/en/tutorial/</loc>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/tensorflow/</loc>
         <lastmod>2026-10-20</lastmod>
         <changefreq>daily</changefreq>
-        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.1/en/tutorial/"/>
-        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.1/tutorial/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/tensorflow/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/tensorflow/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/torch/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/torch/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/torch/"/>
+    </url>
+    <url>
+        <loc>https://lfan-ke.github.io/ES-MoE/2.2/en/tutorial/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://lfan-ke.github.io/ES-MoE/2.2/en/tutorial/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://lfan-ke.github.io/ES-MoE/2.2/tutorial/"/>
     </url>
 </urlset>

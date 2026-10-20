@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/API/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/JUDGMENT/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/RELEASE/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/SELECTION/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/charts/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/demo/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/design/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/experiments/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/jax/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/keras/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/results/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/tensorflow/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/torch/</loc></url>
-  <url><loc>https://lfan-ke.github.io/ES-MoE/2.1/en/tutorial/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/API/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/JUDGMENT/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/RELEASE/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/SELECTION/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/charts/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/demo/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/design/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/experiments/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/flax/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/jax/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/keras/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/results/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/tensorflow/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/torch/</loc></url>
+  <url><loc>https://lfan-ke.github.io/ES-MoE/2.2/en/tutorial/</loc></url>
 </urlset>
