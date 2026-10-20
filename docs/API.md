@@ -1,4 +1,4 @@
-# API
+# API 文档
 
 顶层 `esmoe` 导出的是 torch 后端，加上按需加载的 YOLO 入口——没装 ultralytics 时 `import esmoe` 照常。Keras 后端在 `esmoe.keras` 下，接口与这里一一对应。包内带 `py.typed`，类型签名对 IDE 与 mypy 可见。
 

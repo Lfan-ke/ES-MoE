@@ -1,4 +1,4 @@
-# Keras 3 integration
+# Keras integration
 
 ```bash
 uv add esmoe[keras]

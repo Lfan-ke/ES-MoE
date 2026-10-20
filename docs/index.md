@@ -26,7 +26,7 @@
 <a href="jax/"><strong>Jax 集成</strong><span>init 与 apply 的纯函数，配 jax.jit 与 jax.grad</span></a>
 <a href="flax/"><strong>Flax 集成</strong><span>nnx.Module，配 nnx.jit 与 nnx.grad</span></a>
 <a href="keras/"><strong>Keras3 集成</strong><span>一份实现跑在 tensorflow、jax、torch 上</span></a>
-<a href="API/"><strong>API</strong><span>ESMoE 的全部参数，以及各后端与集成的入口</span></a>
+<a href="API/"><strong>API 文档</strong><span>ESMoE 的全部参数，以及各后端与集成的入口</span></a>
 <a href="design/"><strong>设计</strong><span>块内部怎么算，包分几层，加一个后端要写什么</span></a>
 <a href="experiments/"><strong>实验</strong><span>默认配置是怎么选出来的，每个结论配一张图</span></a>
 <a href="charts/"><strong>效果图</strong><span>七代主干上逐 seed 的配对差</span></a>

@@ -72,7 +72,8 @@ plugins:
             TensorFlow 集成: TensorFlow
             Jax 集成: Jax
             Flax 集成: Flax
-            Keras3 集成: Keras 3
+            Keras 集成: Keras
+            API 文档: API
             选型: Selection
             实验结果: Results
             效果图: Effect chart
@@ -92,8 +93,8 @@ nav:
       - TensorFlow 集成: tensorflow.md
       - Jax 集成: jax.md
       - Flax 集成: flax.md
-      - Keras3 集成: keras.md
-      - API: API.md
+      - Keras 集成: keras.md
+      - API 文档: API.md
   - 设计:
       - ES-MoE 与 YOLO: design.md
       - 选型: SELECTION.md
